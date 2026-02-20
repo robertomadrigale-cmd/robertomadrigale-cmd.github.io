@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.robertomadrigale_cmd.twa",
+    "sha256_cert_fingerprints": ["94:43:E5:A5:8D:33:57:5D:84:D2:97:A2:45:EC:2A:9F:CC:81:F2:57:FF:11:73:D0:74:B6:2A:C2:37:CD:A2:36"]
+  }
+}]
