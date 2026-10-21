@@ -1,0 +1,24 @@
+{
+  "name": "Mástil a la Vista",
+  "short_name": "Mástil",
+  "description": "Teoría visual para guitarra con ejercicios, metrónomo, afinador, juego del mástil y pistas para improvisar.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c111c",
+  "theme_color": "#0c111c",
+  "categories": ["education", "music"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Rutina diaria", "url": "./#/practicar/rutina"},
+    {"name": "Afinador", "url": "./#/practicar/afinador"},
+    {"name": "Metrónomo", "url": "./#/practicar/metronomo"}
+  ]
+}
