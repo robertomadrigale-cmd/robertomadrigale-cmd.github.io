@@ -873,3 +873,54 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .lhero > div{min-width:0}
 .lhero h1{margin-top:4px}
 @media(max-width:400px){.lhero .acov{width:88px}}
+/* ===================== reproductor tipo app de música =====================
+   la letra es lo principal; ajustes como barra de íconos con su valor (se abren en un panel);
+   abajo el dock con avance, renglón anterior/siguiente y botón redondo; el color de la portada tiñe el fondo */
+.kplay{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:16px}
+.kamb{position:absolute;z-index:-1;left:-40px;right:-40px;top:-60px;height:420px;pointer-events:none;filter:blur(60px) saturate(1.5);opacity:.55;-webkit-mask-image:linear-gradient(#000 30%,transparent);mask-image:linear-gradient(#000 30%,transparent)}
+.kamb .sart{width:100%;height:100%;border-radius:0;box-shadow:none}
+.kamb .sart b{display:none}
+.kplay .khead{display:flex;align-items:center;gap:16px;flex-wrap:nowrap}
+.kplay .khead .sart.big{width:112px;height:112px}
+.kplay .kht h2{margin:2px 0 4px;font-size:clamp(24px,6.5vw,34px);line-height:1.08;letter-spacing:-.02em}
+.kmeta{display:block;color:var(--muted);font-size:13px;line-height:1.35}
+.kic{width:44px;height:44px;border-radius:50%;border:0;background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg);display:grid;place-items:center;cursor:pointer;flex:none;text-decoration:none}
+.kic:hover{background:color-mix(in srgb,var(--fg) 14%,transparent)}
+.kic svg{width:20px;height:20px}
+/* barra de íconos con su valor */
+.ktools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:6px;border-radius:18px;background:color-mix(in srgb,var(--surface) 80%,transparent);border:1px solid var(--hair,var(--line));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.ktool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 2px 8px;border:0;border-radius:13px;background:none;color:var(--fg);cursor:pointer;min-width:0;font:inherit}
+.ktool svg{width:22px;height:22px;color:var(--muted)}
+.ktool b{font-size:14px;font-weight:700;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.ktool small{font-size:11px;color:var(--muted);white-space:nowrap}
+.ktool:hover{background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.ktool[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.ktool[aria-pressed="true"] svg,.ktool.on svg{color:var(--accent-text,var(--accent))}
+@media(max-width:420px){.ktools{grid-template-columns:repeat(3,minmax(0,1fr))}.ktool{flex-direction:row;justify-content:flex-start;gap:8px;padding:9px 10px;text-align:left;display:grid;grid-template-columns:22px minmax(0,1fr);grid-template-rows:auto auto;column-gap:8px;row-gap:0}.ktool svg{grid-row:1/3;align-self:center}.ktool b{font-size:13px}.ktool small{font-size:11px}}
+/* panel del ajuste elegido */
+.kpanels{display:flex;flex-direction:column;gap:14px;animation:kpin .18s ease}
+.kpanels[hidden]{display:none}
+.kpanel{display:flex;flex-direction:column;gap:14px}
+.kpanel[hidden]{display:none}
+.kph{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.kph b{font-size:17px}
+.kph .kic{width:36px;height:36px}
+@keyframes kpin{from{transform:translateY(-6px)}to{transform:none}}
+/* dock de reproducción */
+.kplay .kbar{display:block;padding:0;overflow:hidden;border-radius:20px;background:color-mix(in srgb,var(--surface) 78%,transparent);border:1px solid var(--hair,var(--line));box-shadow:0 18px 40px -18px rgba(0,0,0,.8)}
+.kprog{height:3px;background:color-mix(in srgb,var(--fg) 10%,transparent)}
+.kprog i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
+.kbrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:10px 12px}
+.kbrow .tm{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ktrans{display:flex;align-items:center;gap:6px}
+.kplayb{width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 26px -10px color-mix(in srgb,var(--accent) 90%,transparent);flex:none}
+.kplayb svg{width:24px;height:24px}
+.kplayb > span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.kplayb:disabled{opacity:.85}
+.kplayb .kspin{width:22px;height:22px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:kspin .8s linear infinite}
+@keyframes kspin{to{transform:rotate(360deg)}}
+@media(max-width:380px){.kplay .khead .sart.big{width:84px;height:84px}.kplayb{width:52px;height:52px}.kbrow{gap:6px;padding:8px 10px}.kbrow .kic{width:40px;height:40px}}
+/* el tono y el tempo ya están arriba; el panel lateral queda para el rasgueo y el acorde */
+.kplay .ks-row,.kplay .ks-capo{display:none}
+.kplay .kbar{z-index:8}
+@media (max-width:899px){.kplay .kside{padding-right:86px}}
