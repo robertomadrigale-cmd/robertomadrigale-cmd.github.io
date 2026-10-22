@@ -779,3 +779,55 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .ksync{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);z-index:6;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;background:var(--surface2);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);box-shadow:0 18px 40px -16px rgba(0,0,0,.6)}
 .ksync .kswords{font-size:19px;line-height:1.3}
 .ksync #kstap{flex:1 1 auto;min-height:56px;font-size:18px;justify-content:center}
+/* ===================== cancionero como biblioteca de música =====================
+   portada, título y artista; tono y bpm en columnas (en teléfono, en una línea a la derecha) */
+.sbtop{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px}
+.sbtt{display:flex;align-items:baseline;gap:10px;flex:1 1 auto;min-width:0}
+.sbtt h1{margin:0;font-size:clamp(30px,7vw,40px)}
+.sbn{color:var(--muted);font-size:15px;white-space:nowrap}
+.sbsearch{order:3;flex:1 1 100%;display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--hair,var(--line));border-radius:12px;padding:0 14px;min-height:46px;box-sizing:border-box}
+.sbsearch svg{width:18px;height:18px;color:var(--muted);flex:none}
+.sbsearch input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--fg);font:500 16px var(--font-body);padding:10px 0}
+.sbadd{background:var(--fg);color:var(--bg);border-color:transparent;font-weight:600}
+.slist{display:flex;flex-direction:column}
+.shead{display:none}
+.srow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;padding:8px;border-radius:12px;text-decoration:none;color:var(--fg)}
+.srow:hover,.srow:focus-visible{background:var(--surface2)}
+.srow[hidden]{display:none}
+.srow .st{min-width:0;text-decoration:none;color:inherit}
+.srow .st b{display:block;font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow .st span{display:block;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow .sc{display:none;color:var(--muted);font-variant-numeric:tabular-nums}
+.srow .sx{color:var(--muted);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(min-width:760px){
+ .sbsearch{order:0;flex:0 1 340px}
+ .shead{display:grid;grid-template-columns:minmax(0,1fr) 90px 70px;gap:14px;padding:0 8px 10px 74px;border-bottom:1px solid var(--hair,var(--line));margin-bottom:6px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+ .slist.top .shead{grid-template-columns:minmax(0,1fr) 90px 70px 104px}
+ .srow{grid-template-columns:52px minmax(0,1fr) 90px 70px}
+ .slist.top .srow{grid-template-columns:52px minmax(0,1fr) 90px 70px 104px}
+ .srow .sc{display:block}.srow .sx{display:none}
+ .slist.top .srow .st span{font-size:14px}
+}
+/* portada: la del disco si se encontró; si no, una abstracta con las iniciales */
+.sart{--h:220;flex:none;width:52px;height:52px;border-radius:8px;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 28% 22%,hsl(var(--h) 75% 58% / .9),transparent 58%),radial-gradient(circle at 82% 88%,hsl(calc(var(--h) + 70) 70% 48% / .85),transparent 55%),hsl(var(--h) 28% 13%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.sart b{font:700 17px var(--font-body);color:rgba(255,255,255,.93);letter-spacing:.02em}
+.sart img{width:100%;height:100%;object-fit:cover;display:block}
+.sart.big{width:96px;height:96px;border-radius:12px;box-shadow:0 16px 36px -16px rgba(0,0,0,.75),inset 0 0 0 1px rgba(255,255,255,.07)}
+.sart.big b{font-size:30px}
+.khead{align-items:center;justify-content:flex-start;gap:16px}
+.khead .kht{flex:1;min-width:0}
+.khead .kht h2{overflow-wrap:anywhere}
+.khead > .btn{flex:none}
+@media(max-width:520px){.sart.big{width:72px;height:72px}.khead{flex-wrap:wrap}}
+/* tema Estudio: negro, azul eléctrico para lo activo (como las apps de audio profesionales) */
+:root[data-theme="estudio"] .seg button[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:none}
+:root[data-theme="estudio"] .chip[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
+:root[data-theme="estudio"] .card,:root[data-theme="estudio"] .kside{border-radius:18px}
+:root[data-theme="estudio"] .btn.pri{box-shadow:0 8px 22px -10px color-mix(in srgb,var(--accent) 80%,transparent)}
+.sbtt{flex:1 1 0}
+.sbadd{flex:none}
+@media(max-width:480px){.sbn{display:none}}
+/* géneros en una sola fila que se desliza, como en las apps de música */
+#sbg{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 24px),transparent)}
+#sbg::-webkit-scrollbar{display:none}
+#sbg .chip{flex:none}

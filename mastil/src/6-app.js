@@ -21,6 +21,7 @@ LEFTY=!!DB.lefty;
 /* ---------- temas: épocas y estilos del rock ---------- */
 // orden de c: bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue
 const THEMES=[
+ ['estudio','Estudio','Negro y azul eléctrico · como apps de audio',1,'#000000 #111114 #1b1b20 #f4f4f7 #8b8b95 #26262c #2f7bff #ffffff #5b9cff #ff4fa3 #fff #34d399 #ff453a #2f7bff','radial-gradient(ellipse at 85% -15%,rgba(47,123,255,.14),transparent 55%),radial-gradient(ellipse at 0% 0%,rgba(255,79,163,.06),transparent 45%)'],
  ['clasico','Grafito','El estándar · sobrio y oscuro',1,'#0b0b0c #161618 #1f1f22 #f5f5f7 #98989f #2c2c30 #ff9f0a #1a1000 #ffb340 #ff453a #fff #30d158 #ff453a #0a84ff','radial-gradient(ellipse at 70% -20%,rgba(255,159,10,.07),transparent 60%)'],
  ['claro','Aluminio','Claro y limpio',0,'#f5f5f7 #ffffff #ebebf0 #1d1d1f #6e6e73 #d9d9de #ff9500 #ffffff #b85f00 #d70015 #fff #248a3d #d70015 #0071e3','none'],
  ['rocknroll','Rock and Roll','Años 50 · rocola y cromo',0,'#f6efe0 #fffaf0 #f1e0c8 #1d1a24 #6b6270 #e2cfb3 #d7263d #fff #b0182c #0f8b8d #fff #2b8559 #c0392b #2f7cae','repeating-linear-gradient(45deg,rgba(215,38,61,.045) 0 16px,transparent 16px 32px)'],
@@ -43,7 +44,7 @@ document.head.insertAdjacentHTML('beforeend','<style>'+THEMES.map(([id,,,dark,c,
   return`:root[data-theme="${id}"]{${TVARS.map((k,i)=>`--${k}:${v[i]}`).join(';')};--art:${art};--artimg:${ARTURL[id]||'none'};--arto:${dark?.62:.75};--glass:color-mix(in srgb,${v[0]} 80%,transparent);color-scheme:${dark?'dark':'light'}}`;
 }).join('')+'</style>');
 function applyTheme(){
-  const id=DB.theme!=='auto'&&themeById(DB.theme)?DB.theme:matchMedia('(prefers-color-scheme: light)').matches?'claro':'clasico';
+  const id=DB.theme!=='auto'&&themeById(DB.theme)?DB.theme:matchMedia('(prefers-color-scheme: light)').matches?'claro':'estudio';
   document.documentElement.setAttribute('data-theme',id);document.documentElement.classList.toggle('arty',!!ARTURL[id]);
   if(!document.getElementById('artbg'))document.body.insertAdjacentHTML('afterbegin','<div id="artbg" aria-hidden="true"></div>');
   $$('meta[name="theme-color"]').forEach(m=>{m.removeAttribute('media');m.content=themeById(id)[4].split(' ')[0]});
@@ -58,12 +59,12 @@ function themeCards(ids){
   const cov=(id,n,era,c,art)=>{const v=c.split(' ');return`<button class="thc" data-theme-set="${id}" aria-pressed="${DB.theme===id}">
     <span class="cov" style="--cb:${v[0]};--cs:${v[1]};--cf:${v[3]};--cm:${v[4]};--ca:${v[6]};--cimg:${ARTURL[id]||art.replace(/"/g,"'")}"><span class="mock"><i></i><span><i></i><i></i></span><b></b></span><span class="ck">${ICOK}</span></span>
     <b>${n}</b><small>${era}</small></button>`};
-  return ids.map(id=>{if(id==='auto')return cov('auto','Automático','Oscuro o claro según tu teléfono',themeById('clasico')[4],'linear-gradient(115deg,#0b0b0c 50%,#f5f5f7 50%)');const t=themeById(id);return cov(t[0],t[1],t[2],t[4],t[5])}).join('');
+  return ids.map(id=>{if(id==='auto')return cov('auto','Automático','Oscuro o claro según tu teléfono',themeById('estudio')[4],'linear-gradient(115deg,#000 50%,#f5f5f7 50%)');const t=themeById(id);return cov(t[0],t[1],t[2],t[4],t[5])}).join('');
 }
 function viewLook(){
-  const eras=THEMES.map(t=>t[0]).filter(id=>id!=='clasico'&&id!=='claro');
+  const eras=THEMES.map(t=>t[0]).filter(id=>id!=='clasico'&&id!=='claro'&&id!=='estudio');
   return{title:'Apariencia',back:'#/',html:`<div class="lhead"><span class="eyebrow">Tema</span><h1>Apariencia</h1><p class="sub">Los colores y la luz de fondo de toda la app. Se aplica al instante.</p></div>
-  <section class="thsec"><p class="blockh">Básicos</p><div class="thcgrid">${themeCards(['auto','clasico','claro'])}</div></section>
+  <section class="thsec"><p class="blockh">Básicos</p><div class="thcgrid">${themeCards(['auto','estudio','clasico','claro'])}</div></section>
   <section class="thsec"><p class="blockh">Épocas del rock</p><div class="thcgrid">${themeCards(eras)}</div></section>`,
   mount(r){r.addEventListener('click',e=>{const th=e.target.closest('[data-theme-set]');if(!th)return;DB.theme=th.dataset.themeSet;DB.tried=DB.tried||{};DB.tried[DB.theme]=1;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)))})}};
 }

@@ -353,20 +353,62 @@ function sbGet(id){
   if(id.startsWith('top')){const x=TOPLIST[+id.slice(3)];return x?{id,src:topSrc(x),top:x}:null}
   const s=(DB.songs||[]).find(z=>z.id===id);return s?{id,src:s.src,mine:true}:null;
 }
-let SBTAB='trad',SBGENRE=null;
+/* ---------- portadas: se buscan en el catálogo de iTunes (título + artista) y se guardan en DB.art ----------
+   Solo para canciones reales (Mis canciones y Las 100); las tradicionales llevan una portada abstracta.
+   Se piden de una en una y solo las que se ven, para no pasar el límite del catálogo; sin conexión queda la abstracta. */
+const normTxt=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\(.*?\)|\[.*?\]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+const artKey=(t,a)=>normTxt(a)+'|'+normTxt(t);
+const COVR={q:[],busy:false,io:null,saveT:0};
+function coverHTML(t,a,big){
+  const k=artKey(t,a),u=(DB.art||{})[k];let h=0;for(const c of k)h=(h*31+c.charCodeAt(0))%360;
+  const ini=normTxt(t).split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('')||'·';
+  const real=a&&!/tradicional|popular|dominio|an[oó]nimo|·/i.test(a);
+  return`<span class="sart${big?' big':''}" style="--h:${h}" ${real?`data-ak="${esc(k)}" data-t="${esc(t)}" data-a="${esc(a)}"`:''}>${u?`<img src="${esc(u)}" alt="" loading="lazy">`:`<b>${esc(ini)}</b>`}</span>`;
+}
+function coverWatch(root){
+  const want=el=>{const k=el.dataset.ak;if((DB.art||{})[k]===undefined&&!COVR.q.some(x=>x.k===k))COVR.q.push({k,t:el.dataset.t,a:el.dataset.a});coverPump()};
+  if(COVR.io)COVR.io.disconnect();COVR.io='IntersectionObserver'in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){COVR.io.unobserve(e.target);want(e.target)}}),{rootMargin:'200px'}):null;
+  // las que ya se ven se piden de inmediato; las demás cuando aparezcan al bajar
+  setTimeout(()=>$$('.sart[data-ak]',root).forEach(el=>{if(el.querySelector('img')||el.closest('[hidden]'))return;const y=el.getBoundingClientRect().top;if(y<Math.max(innerHeight,700)+200||!COVR.io)want(el);else COVR.io.observe(el)}));
+}
+async function coverPump(){
+  if(COVR.busy||!COVR.q.length||!navigator.onLine)return;COVR.busy=true;const{k,t,a}=COVR.q.shift();
+  try{const r=await fetch('https://itunes.apple.com/search?media=music&entity=song&limit=8&country=MX&term='+encodeURIComponent(a+' '+t));
+    if(r.ok){const res=(await r.json()).results||[],nt=normTxt(t),na=normTxt(a);
+      // la que mejor coincide en título y artista; si ninguna, ninguna (mejor la abstracta que una portada equivocada)
+      const sc=x=>{const xt=normTxt(x.trackName),xa=normTxt(x.artistName);return(xt===nt?3:xt.includes(nt)||nt.includes(xt)?2:0)+(xa===na?3:xa.includes(na)||na.includes(xa)?2:0)};
+      const best=res.map(x=>[sc(x),x]).sort((p,q)=>q[0]-p[0])[0],u=best&&best[0]>=4?String(best[1].artworkUrl100||'').replace('100x100bb','300x300bb'):'';
+      DB.art=DB.art||{};DB.art[k]=u;clearTimeout(COVR.saveT);COVR.saveT=setTimeout(save,800);
+      if(u)$$(`.sart[data-ak="${CSS.escape(k)}"]`).forEach(el=>{el.innerHTML=`<img src="${esc(u)}" alt="">`})}}catch(e){}
+  setTimeout(()=>{COVR.busy=false;coverPump()},350);
+}
+let SBTAB='trad',SBGENRE=null,SBQ='';
 function viewSongbook(){
   SBGENRE=SBGENRE||Object.keys(TOP100)[0];
-  const mine=(DB.songs||[]).map(s=>({id:s.id,src:s.src})),trad=TRAD.map((src,i)=>({id:'pd'+i,src}));
-  const row=s=>{const P=songParse(s.src),sh=(DB.kt||{})[s.id]||0;return`<a class="card lrow" href="#/cancionero/ver/${s.id}"><span class="mn">${esc(chName(P.key,sh,P.key,DB.notation==='es')+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':''))}</span><span class="mt"><b>${esc(P.title)}</b><span>${esc(P.artist||'Tu canción')} · ${P.bpm} bpm${P.hasMel?' · con melodía':''}</span></span></a>`};
+  const es=DB.notation==='es',mine=(DB.songs||[]).map(s=>({id:s.id,src:s.src,mine:1})),trad=TRAD.map((src,i)=>({id:'pd'+i,src}));
+  const keyTxt=(P,sh)=>chName(P.key,sh,P.key,es)+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':'');
+  const row=s=>{const P=songParse(s.src),sh=(DB.kt||{})[s.id]||0,k=keyTxt(P,sh),b=(DB.kbpm||{})[s.id]||P.bpm;
+    return`<a class="srow" href="#/cancionero/ver/${s.id}" data-q="${esc(normTxt(P.title+' '+P.artist))}">${coverHTML(P.title,s.mine?P.artist:'')}<span class="st"><b>${esc(P.title)}</b><span>${esc(P.artist||'Tu canción')}${P.hasMel?' · con melodía':''}</span></span><span class="sc">${esc(k)}</span><span class="sc">${b}</span><span class="sx">${esc(k)} · ${b}</span></a>`};
+  const topRow=x=>{const has=(DB.songs||[]).find(s=>s.top===x.id);
+    return`<div class="srow" data-q="${esc(normTxt(x.t+' '+x.a))}">${coverHTML(x.t,x.a)}<a class="st" href="#/cancionero/ver/${has?has.id:x.id}"><b>${esc(x.t)}</b><span>${esc(x.a)} · ${x.y} · ${esc(x.k)} · ${x.bpm}</span></a><span class="sc">${esc(x.k)}</span><span class="sc">${x.bpm}</span>${has?`<a class="btn sm" href="#/cancionero/ver/${has.id}">${IC.play}Abrir</a>`:`<a class="btn sm" href="#/cancionero/editar/${x.id}">${IC.plus}Letra</a>`}</div>`};
+  const head=`<div class="shead"><span>Título</span><span>Tono</span><span>BPM</span>${SBTAB==='top'?'<span></span>':''}</div>`;
   const tabs=[['trad','Con letra'],['mine','Mis canciones'],['top','Las 100']];
-  const body=SBTAB==='trad'?`<p class="cap" style="margin:0">${TRAD.length} canciones tradicionales y de dominio público con letra y acordes completos. Las marcadas «con melodía» traen voz guía.</p><div class="list">${trad.map(row).join('')}</div>`
-   :SBTAB==='mine'?`<div class="row"><a class="btn pri" href="#/cancionero/editar/nueva">${IC.plus}Agregar canción</a></div>${mine.length?`<div class="list">${mine.map(row).join('')}</div>`:`<div class="card"><h3>Agrega cualquier canción completa</h3><p class="cap">Copia la letra con acordes de cualquier sitio (como viene: acordes arriba y letra abajo) y pégala. La app la convierte en karaoke con tu tono, banda de acompañamiento y metrónomo. Se guarda solo en este dispositivo.</p></div>`}`
-   :`<div class="card note"><b>Estas 100 no traen la letra.</b> Las letras de estas canciones tienen derechos de autor y la app no puede publicarlas. Toca <b>Agregar letra</b>, busca la canción, copia la letra con acordes y pégala: queda completa en karaoke con tono, banda y metrónomo.</div>
-     <div class="chips">${Object.keys(TOP100).map(g=>`<button class="chip" data-g="${g}" aria-pressed="${g===SBGENRE}">${g}</button>`).join('')}</div>
-     <div class="list">${TOPLIST.filter(x=>x.g===SBGENRE).map(x=>{const has=(DB.songs||[]).find(s=>s.top===x.id);return`<div class="card lrow top"><span class="mt"><b>${esc(x.t)}</b><span>${esc(x.a)} · ${x.y} · tono ${esc(x.k)} · ${x.bpm} bpm</span></span><div class="row" style="flex:none">${has?`<a class="btn sm pri" href="#/cancionero/ver/${has.id}">${IC.play}Abrir</a>`:`<a class="btn sm pri" href="#/cancionero/editar/${x.id}">${IC.plus}Agregar letra</a><a class="btn sm" href="#/cancionero/ver/${x.id}">Progresión</a>`}</div></div>`}).join('')}</div>`;
-  return{title:'Cancionero',html:`<div class="lhead"><span class="eyebrow">Karaoke con acordes</span><h1>Cancionero</h1><p class="sub">La letra se ilumina al ritmo, los acordes cambian al tono de tu voz y una banda te acompaña.</p></div>
-  <div class="seg" id="sbt">${tabs.map(([k,l])=>`<button data-tab="${k}" aria-pressed="${SBTAB===k}">${l}</button>`).join('')}</div>${body}`,
-  mount(r){r.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t){SBTAB=t.dataset.tab;route();return}const g=e.target.closest('[data-g]');if(g){SBGENRE=g.dataset.g;route()}})}};
+  const body=SBTAB==='trad'?`<p class="cap" style="margin:0">Canciones tradicionales y de dominio público con letra y acordes completos. Las marcadas «con melodía» traen voz guía.</p><div class="slist">${head}${trad.map(row).join('')}</div>`
+   :SBTAB==='mine'?(mine.length?`<div class="slist">${head}${mine.map(row).join('')}</div>`:`<div class="card"><h3>Agrega cualquier canción completa</h3><p class="cap">Copia la letra con acordes de cualquier sitio (como viene: acordes arriba y letra abajo) y pégala. La app la convierte en karaoke con tu tono, banda de acompañamiento y metrónomo. Se guarda solo en este dispositivo.</p></div>`)
+   :`<div class="card note"><b>Estas 100 no traen la letra.</b> Sus letras tienen derechos de autor. Toca <b>Letra</b>, busca la canción, copia la letra con acordes y pégala: queda completa en karaoke con tono, banda y metrónomo.</div>
+     <div class="chips" id="sbg">${Object.keys(TOP100).map(g=>`<button class="chip" data-g="${g}" aria-pressed="${g===SBGENRE}">${g}</button>`).join('')}</div>
+     <div class="slist top">${head}${TOPLIST.filter(x=>SBQ||x.g===SBGENRE).map(topRow).join('')}</div>`;
+  const n=SBTAB==='trad'?trad.length:SBTAB==='mine'?mine.length:TOPLIST.length;
+  return{title:'Cancionero',html:`<div class="sbtop"><div class="sbtt"><h1>Cancionero</h1><span class="sbn">${n} canciones</span></div>
+   <label class="sbsearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input id="sbq" type="search" placeholder="Buscar canción o artista" value="${esc(SBQ)}" autocomplete="off"></label>
+   <a class="btn sbadd" href="#/cancionero/editar/nueva">${IC.plus}Agregar</a></div>
+  <div class="seg" id="sbt">${tabs.map(([k,l])=>`<button data-tab="${k}" aria-pressed="${SBTAB===k}">${l}</button>`).join('')}</div>${body}<p class="cap sbnone" hidden>No encontré esa canción aquí. Prueba en otra pestaña o agrégala.</p>`,
+  mount(r){
+    const filt=()=>{const q=normTxt(SBQ);let any=0;$$('.srow',r).forEach(x=>{const ok=!q||x.dataset.q.includes(q);x.hidden=!ok;if(ok)any++});const g=$('#sbg',r);if(g)g.hidden=!!q;const no=$('.sbnone',r);if(no)no.hidden=!!any||!q;coverWatch(r)};
+    // en Las 100, al buscar se muestran todos los géneros
+    $('#sbq',r).oninput=e=>{const was=!!SBQ;SBQ=e.target.value;if(SBTAB==='top'&&was!==!!SBQ){route();setTimeout(()=>{const i=$('#sbq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}});return}filt()};
+    filt();
+    r.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t){SBTAB=t.dataset.tab;route();return}const g=e.target.closest('[data-g]');if(g){SBGENRE=g.dataset.g;route()}})}};
 }
 /* ---------- cancionero: editor ---------- */
 function viewSongEdit(id){
@@ -474,7 +516,7 @@ function viewSongPlay(id,slow){
   };
   const chips=()=>P.chords.map(p=>{const v=voicing(p,st.shift),n=chName(p,st.shift,P.key,es());return`<button class="kchip" data-kc="${esc(chName(p,st.shift,P.key,false))}">${chordSVG(v)}<b>${esc(n)}</b></button>`}).join('');
   return{title:P.title,back:slow?'#/practicar/lento':'#/cancionero',html:`
-  <div class="khead"><div><span class="eyebrow">${esc(P.artist)}</span><h2>${esc(P.title)}</h2></div>${s.mine?`<a class="btn sm" href="#/cancionero/editar/${id}">Editar</a>`:s.top?`<a class="btn sm pri" href="#/cancionero/editar/${id}">${IC.plus}Agregar letra</a>`:''}</div>
+  <div class="khead">${coverHTML(P.title,s.mine||s.top?P.artist:'',1)}<div class="kht"><span class="eyebrow">${esc(P.artist)}</span><h2>${esc(P.title)}</h2></div>${s.mine?`<a class="btn sm" href="#/cancionero/editar/${id}">Editar</a>`:s.top?`<a class="btn sm pri" href="#/cancionero/editar/${id}">${IC.plus}Agregar letra</a>`:''}</div>
   ${s.top?`<div class="card note">Esta es solo la <b>progresión principal</b> para practicar con la banda. Para tener la canción completa con letra, toca <b>Agregar letra</b>.</div>`:''}
   <div class="card kctl">
    <div class="krow"><div><span class="cl">Tono</span><div class="row"><button class="btn sm" data-k="-1" aria-label="Bajar medio tono">${IC.minus}</button><b class="kkey" id="kkey">${esc(keyLbl())}</b><button class="btn sm" data-k="1" aria-label="Subir medio tono">${IC.plus}</button><button class="btn sm" data-k="0">Original</button></div></div>
@@ -499,6 +541,7 @@ function viewSongPlay(id,slow){
   <aside class="kside" id="kside"></aside></div>
   <div class="ksync" id="ksync" hidden></div><div class="kbar"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${st.beats}/4 · ${BSTYLES[gid()]} · listo</span><button class="btn sm" id="kreset" aria-label="Desde el inicio">${IC.back}</button><button class="btn pri" id="kgo">${IC.play}Empezar</button></div>`,
   mount(r){
+    coverWatch(r);
     const sumK=()=>{const m=$('.kmore summary small',r);if(m)m.textContent=`${BSTYLES[gid()]} · ${st.beats}/4`};
     const O={blob:null,name:'',fname:'',type:'',el:null,url:null,use:false,playing:false,syncing:false,busy:false,prog:0,grid:null,voc:null,recK:0,raf:0,last:-1,lastBeat:null};
     let LP=null;
