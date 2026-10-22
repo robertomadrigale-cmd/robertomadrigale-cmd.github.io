@@ -542,3 +542,16 @@ select,textarea{border-color:var(--hair);background:var(--surface2);border-radiu
 }
 
 .player.upd{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 66px);z-index:40}
+
+/* narrador */
+.narr{box-shadow:0 0 0 2px var(--accent),0 0 22px color-mix(in srgb,var(--accent) 30%,transparent);border-radius:14px;transition:box-shadow .2s}
+li.narr{box-shadow:none;background:color-mix(in srgb,var(--accent) 16%,transparent);border-radius:8px}
+.goal.narr{box-shadow:0 0 0 2px var(--good)}
+.narrating .dg{opacity:.3;transition:opacity .15s}
+.narrating .dg.lit{opacity:1}
+.narrating .dg.lit circle{transform:scale(1.32);transform-box:fill-box;transform-origin:center;stroke:var(--fg);stroke-width:2.2}
+.player.narrbar{flex-wrap:wrap;gap:6px;padding:8px;z-index:35}
+.narrbar .pl{flex:1;min-width:120px;font-size:14px;font-weight:500}
+.narrbar .icon-btn{width:40px;height:40px}
+.narrbar .icon-btn.pri{background:var(--accent);color:var(--accent-ink)}
+.narrbar .seg button{padding:5px 9px;font-size:13px}

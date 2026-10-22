@@ -194,26 +194,29 @@ function viewLesson(id,exId){
   const l=LESSONS.find(x=>x.id===id);if(!l)return viewLessons();
   DB.last=id;save();
   const ws=[];
-  const body=l.blocks.map(b=>{
-    if(b.w){ws.push(b);return`<div class="widget" data-wi="${ws.length-1}"></div>`}
-    if(b.ex)return exCard(b.ex);
-    if(b.sec)return`<div class="prose"><p class="blockh">${b.sec}</p><p>${b.p}</p></div>`;
-    if(b.box)return`<div class="box"><p class="blockh">${b.box}</p>${b.ul?`<ul>${b.ul.map(t=>`<li>${t}</li>`).join('')}</ul>`:`<ol>${b.ol.map(t=>`<li>${t}</li>`).join('')}</ol>`}</div>`;
-    if(b.trick)return`<div class="box trick"><p class="blockh">Hoja de trucos</p><ul>${b.trick.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
-    if(b.p)return`<p class="prose">${b.p}</p>`;
-    return'';
-  }).join('');
+  const body=l.blocks.map((b,bi)=>blockHTML(b,ws).replace(/^(\s*<\w+)/,`$1 data-nb="${bi}"`)).join('');
   const prev=LESSONS.find(x=>x.id===id-1),next=LESSONS.find(x=>x.id===id+1),[d,t]=doneCount(id);
   return{title:'Lección '+id,back:'#/lecciones',html:`
   <div class="lhead"><span class="eyebrow">Lección ${id} · Parte ${l.part}</span><h1>${l.title}</h1><p class="lead">${l.lead}</p>
+  ${HAS_TTS?`<div><button class="btn pri" data-narr="start" data-l="${id}">${IC.voice}Escuchar la lección</button></div>`:''}
   <div><div class="bar" id="lprog" data-l="${id}"><i style="width:${d/t*100}%"></i></div><p class="cap" id="lcnt" style="margin-top:6px">${d} de ${t} ejercicios hechos</p></div></div>
   ${body}
   <div class="row" style="justify-content:space-between">${prev?`<a class="btn" href="#/leccion/${prev.id}">${IC.back}Lección ${prev.id}</a>`:'<span></span>'}${next?`<a class="btn pri" href="#/leccion/${next.id}">Lección ${next.id}</a>`:''}</div>`,
   mount(r){
     $$('.widget[data-wi]',r).forEach(w=>mountWidget(w,ws[+w.dataset.wi]));
-    paintEx(r);paintFig(r);
+    paintEx(r);paintFig(r);paintNarr();
     if(exId){const el=$('#ex-'+exId,r);if(el)setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),60)}
+    return()=>narrStop(true);
   }};
+}
+function blockHTML(b,ws){
+  if(b.w){ws.push(b);return`<div class="widget" data-wi="${ws.length-1}"></div>`}
+  if(b.ex)return exCard(b.ex);
+  if(b.sec)return`<div class="prose"><p class="blockh">${b.sec}</p><p>${b.p}</p></div>`;
+  if(b.box)return`<div class="box"><p class="blockh">${b.box}</p>${b.ul?`<ul>${b.ul.map(t=>`<li>${t}</li>`).join('')}</ul>`:`<ol>${b.ol.map(t=>`<li>${t}</li>`).join('')}</ol>`}</div>`;
+  if(b.trick)return`<div class="box trick"><p class="blockh">Hoja de trucos</p><ul>${b.trick.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+  if(b.p)return`<p class="prose">${b.p}</p>`;
+  return'<div></div>';
 }
 function viewPractice(){
   return{title:'Practicar',html:`<div class="lhead"><span class="eyebrow">Herramientas</span><h1>Practicar</h1></div>

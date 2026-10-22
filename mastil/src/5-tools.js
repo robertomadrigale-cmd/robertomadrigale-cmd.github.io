@@ -19,6 +19,7 @@ const IC={
  cal:sv('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
  next:sv('<path d="M5 5l9 7-9 7z" fill="currentColor"/><path d="M19 5v14"/>'),
  x:sv('<path d="M6 6l12 12M18 6L6 18"/>'),
+ voice:sv('<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'),
  pick:sv('<path d="M12 2.5c4 0 7.5 2 7.5 6 0 5-4 10-7.5 13-3.5-3-7.5-8-7.5-13 0-4 3.5-6 7.5-6z"/>'),
  down:sv('<path d="M12 4v12M6 11l6 6 6-6M5 20h14"/>')};
 const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
