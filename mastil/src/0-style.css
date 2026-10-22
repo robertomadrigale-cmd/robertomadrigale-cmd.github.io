@@ -540,3 +540,5 @@ select,textarea{border-color:var(--hair);background:var(--surface2);border-radiu
   .kwrap{display:grid;grid-template-columns:minmax(0,1fr) 270px;align-items:start;gap:16px}
   .kside{position:sticky;top:76px}
 }
+
+.player.upd{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 66px);z-index:40}

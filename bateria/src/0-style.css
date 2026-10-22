@@ -271,3 +271,5 @@ input[type=range]{width:100%;accent-color:var(--accent);height:32px}
 .inp{font:600 16px var(--font-body);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);min-height:44px;width:100%;max-width:100%}
 details.card summary{list-style:none}
 details.card summary::-webkit-details-marker{display:none}
+
+.player.upd{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 66px);z-index:40}

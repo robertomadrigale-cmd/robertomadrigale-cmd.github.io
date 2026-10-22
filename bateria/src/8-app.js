@@ -210,4 +210,21 @@ document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
 <nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
 window.addEventListener('hashchange',route);
 route();
-if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+/* Actualizaciones: busca versión nueva al abrir y al volver a la app; avisa cuando está lista. */
+function showUpdate(){
+  if(document.getElementById('upd'))return;
+  const d=document.createElement('div');d.id='upd';d.className='player upd';
+  d.innerHTML='<span class="dotlive"></span><span class="pl">Hay una versión nueva de la app</span><button class="btn sm pri" id="updgo">Actualizar</button>';
+  document.body.appendChild(d);d.querySelector('#updgo').onclick=()=>location.reload();
+}
+if('serviceWorker' in navigator&&location.protocol!=='file:'){
+  let hadCtl=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtl){hadCtl=true;return}showUpdate()});
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
+      const chk=()=>reg.update().catch(()=>{});
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});
+      setInterval(chk,30*60*1000);chk();
+    }).catch(()=>{});
+  });
+}
