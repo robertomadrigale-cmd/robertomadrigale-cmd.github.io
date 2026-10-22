@@ -360,6 +360,9 @@ function viewSongEdit(id){
    <div class="row"><button class="btn sm" id="sbpaste">Pegar del portapapeles</button><span class="cap" style="margin:0">o pega con el teclado dentro del cuadro</span></div>
    <textarea id="sbsrc" rows="16" spellcheck="false" placeholder="Pega aquí la canción: acordes arriba y letra abajo, o [Sol]letra con [Re]acordes">${esc(tpl)}</textarea>
    <div id="sbprev" class="cap" style="margin:0"></div>
+   <div class="sbopts" id="sbopts"><div><span class="cl">Ritmo de la banda</span><select class="inp" id="sbsty"></select></div>
+    <div><span class="cl">Compás</span><div class="seg">${[[4,'4/4'],[3,'3/4 vals']].map(([v,l])=>`<button data-eb="${v}">${l}</button>`).join('')}</div></div>
+    <div><span class="cl">Tempo (bpm)</span><div class="row"><input class="inp" id="sbbpm" type="number" inputmode="numeric" min="40" max="220" style="width:96px"><button class="btn sm" id="sbtap">Marcar</button></div></div></div>
    <div class="row"><button class="btn pri" id="sbsave">${IC.check}Guardar y abrir</button>${ex&&ex.mine?`<span id="sbdw"><button class="btn" id="sbdel">${IC.x}Borrar</button></span>`:''}</div>
    <p class="cap" id="sbmsg" style="margin:0"></p></div>
   <div class="box"><p class="blockh">Formatos que entiende</p><ul>
@@ -370,11 +373,23 @@ function viewSongEdit(id){
    <li>Opcional: <code>{bpm:96}</code> tempo, <code>{time:3/4}</code> vals o ranchera, <code>{style:balada}</code> (folk, pop, balada, rock, vals, ranchera, cumbia, son, urbano), <code>{key:Am}</code> tono. Si no los pones, la app calcula el tono con los acordes y sugiere ritmo; en el reproductor puedes cambiar ritmo, compás y marcar el tempo tocando.</li></ul></div>`,
   mount(r){
     const ta=$('#sbsrc',r);
-    const prev=()=>{const P=songParse(ta.value),n=P.lines.filter(l=>l.pieces).length,w=P.lines.filter(l=>l.pieces&&l.pieces.some(p=>p.text.trim())).length;$('#sbprev',r).innerHTML=n?`Detecté <b>${n}</b> renglones (${w} con letra) y <b>${P.chords.length}</b> acordes distintos · tono <b>${esc(chName(P.key,0,P.key,DB.notation==='es'))}${P.key.minor&&!/m/.test(P.key.suf||'')?'m':''}</b>${P.keyAuto?' (por los acordes)':''} · ${P.beats}/4 · ${P.bpm} bpm · ${BSTYLES[P.style]}${P.set.style?'':' (sugerido)'}. Todo se puede cambiar al tocarla.`:''};
+    // cómo suena: ritmo, compás y tempo; si la canción está entre las 100, se toman de ahí
+    const E={style:null,beats:4,bpm:90,touched:{}};const nrm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+    const guess=P=>{const tp=isTop?ex.top:TOPLIST.find(x=>nrm(x.t)===nrm(P.title)&&nrm(P.title).length>2);
+      if(!E.touched.beats)E.beats=P.set.time?P.beats:tp&&/\|3$/.test(TOPSONG[tp.t]||'')?3:P.beats;
+      if(!E.touched.bpm)E.bpm=P.set.bpm||P.set.tempo?P.bpm:tp?tp.bpm:P.bpm;
+      if(!E.touched.style)E.style=P.set.style?P.style:tp?topStyle(tp):P.style;E.style=grooveFor(E.style,E.beats)};
+    const paintOpts=()=>{$('#sbsty',r).innerHTML=Object.entries(GROOVES).filter(([k,g])=>g[E.beats]).map(([k,g])=>`<option value="${k}" ${k===E.style?'selected':''}>${g.n}</option>`).join('');
+      $$('[data-eb]',r).forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.eb===E.beats)));const bi=$('#sbbpm',r);if(document.activeElement!==bi)bi.value=E.bpm};
+    $('#sbsty',r).onchange=e=>{E.style=e.target.value;E.touched.style=1};
+    $$('[data-eb]',r).forEach(b=>b.onclick=()=>{E.beats=+b.dataset.eb;E.touched.beats=1;E.style=grooveFor(E.style,E.beats);paintOpts()});
+    $('#sbbpm',r).oninput=e=>{const v=+e.target.value;if(v>=40&&v<=220){E.bpm=v;E.touched.bpm=1}};
+    let taps=[];$('#sbtap',r).onclick=()=>{const now=performance.now();taps=taps.filter(x=>now-x<2500);taps.push(now);if(taps.length>=4){const b=Math.round(60000/((taps[taps.length-1]-taps[0])/(taps.length-1)));if(b>=40&&b<=220){E.bpm=b;E.touched.bpm=1;paintOpts()}}$('#sbtap',r).textContent=taps.length<4?'Toca '+(4-taps.length):'Marcar'};
+    const prev=()=>{const P=songParse(ta.value),n=P.lines.filter(l=>l.pieces).length,w=P.lines.filter(l=>l.pieces&&l.pieces.some(p=>p.text.trim())).length;guess(P);paintOpts();$('#sbopts',r).hidden=!n;$('#sbprev',r).innerHTML=n?`Detecté <b>${n}</b> renglones (${w} con letra) y <b>${P.chords.length}</b> acordes distintos · tono <b>${esc(chName(P.key,0,P.key,DB.notation==='es'))}${P.key.minor&&!/m/.test(P.key.suf||'')?'m':''}</b>${P.keyAuto?' (calculado con los acordes)':''}. Abajo elige cómo suena; se puede cambiar después.`:''};
     ta.addEventListener('input',prev);prev();
     $('#sbpaste',r).onclick=async()=>{try{const t=await navigator.clipboard.readText();if(!t){$('#sbmsg',r).textContent='El portapapeles está vacío. Copia la canción primero.';return}ta.value=(isTop?head:'')+t;prev();$('#sbmsg',r).textContent=''}catch(e){$('#sbmsg',r).textContent='Tu navegador no dejó leer el portapapeles. Mantén presionado el cuadro y elige «Pegar».';ta.focus()}};
     $('#sbsave',r).onclick=()=>{
-      const src=ta.value;const P=songParse(src);
+      const src=`{bpm:${E.bpm}}{time:${E.beats}/4}{style:${E.style}}\n`+ta.value.replace(/\{\s*(style|time|bpm|tempo)\s*:[^}]*\}[ \t]*\n?/gi,'');const P=songParse(src);
       if(!P.lines.some(l=>l.pieces&&l.pieces.some(p=>p.text.trim()||p.p))){$('#sbmsg',r).textContent='No encontré letra ni acordes. Revisa lo que pegaste.';return}
       DB.songs=DB.songs||[];const sid=ex&&ex.mine?id:'u'+Date.now().toString(36);
       const i=DB.songs.findIndex(s=>s.id===sid);if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
@@ -423,7 +438,7 @@ function viewSongPlay(id,slow){
   ${s.top?`<div class="card note">Esta es solo la <b>progresión principal</b> para practicar con la banda. Para tener la canción completa con letra, toca <b>Agregar letra</b>.</div>`:''}
   <div class="card kctl">
    <div class="krow"><div><span class="cl">Tono</span><div class="row"><button class="btn sm" data-k="-1" aria-label="Bajar medio tono">${IC.minus}</button><b class="kkey" id="kkey">${esc(keyLbl())}</b><button class="btn sm" data-k="1" aria-label="Subir medio tono">${IC.plus}</button><button class="btn sm" data-k="0">Original</button></div></div>
-    <div><span class="cl">Tempo</span><div class="row"><button class="btn sm" data-b="-4" aria-label="Más lento">${IC.minus}</button><b class="kkey" id="kbpm">${st.bpm}</b><button class="btn sm" data-b="4" aria-label="Más rápido">${IC.plus}</button><button class="btn sm" id="ktap" title="Toca 4 veces al ritmo de la canción">Marcar</button></div></div></div>
+    <div><span class="cl">Tempo</span><div class="row"><button class="btn sm" data-b="-4" aria-label="Más lento">${IC.minus}</button><b class="kkey" id="kbpm">${st.bpm}</b><button class="btn sm" data-b="4" aria-label="Más rápido">${IC.plus}</button><button class="btn sm" id="ktap" title="Toca 4 veces al ritmo de la canción">Marcar</button><button class="btn sm ${KAR.met?'on':''}" data-t="met">${IC.play2}Metrónomo</button></div></div></div>
    <p class="cap" id="kcapo" style="margin:0">${capoHint(P.key,st.shift)}</p>
    <div class="kslow${slow?' hl':''}"><div><span class="cl">Velocidad${slow?' · cámara lenta':''}</span><div class="chips">${[.5,.6,.75,.9,1].map(v=>`<button class="chip" data-sp="${v}" aria-pressed="${st.sp===v}">${Math.round(v*100)} %</button>`).join('')}</div></div>
     <div><span class="cl">Repetir desde el renglón elegido</span><div class="seg">${[[0,'No'],[1,'1 renglón'],[2,'2'],[4,'4']].map(([v,l])=>`<button data-lp="${v}" aria-pressed="${st.loop===v}">${l}</button>`).join('')}</div></div>
@@ -513,7 +528,7 @@ function viewSongPlay(id,slow){
       const b=e.target.closest('[data-b]');if(b){st.bpm=Math.max(40,Math.min(220,st.bpm+ +b.dataset.b));DB.kbpm[id]=st.bpm;save();$('#kbpm',r).textContent=st.bpm;side();return}
       const sh=e.target.closest('[data-show]');if(sh){KAR.show=sh.dataset.show;kar.className='karaoke show-'+KAR.show;$$('[data-show]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sh)));DB.kar=Object.assign({},KAR);save();return}
       const n=e.target.closest('[data-not]');if(n){DB.notation=n.dataset.not;save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===n)));rerender();return}
-      const t=e.target.closest('[data-t]');if(t){KAR[t.dataset.t]=!KAR[t.dataset.t];t.classList.toggle('on',KAR[t.dataset.t]);DB.kar=Object.assign({},KAR);save();return}
+      const t=e.target.closest('[data-t]');if(t){const k=t.dataset.t;KAR[k]=!KAR[k];$$(`[data-t="${k}"]`,r).forEach(x=>x.classList.toggle('on',KAR[k]));if(k==='met'&&KAR.met)toast(logo()+'<span>Metrónomo encendido</span>');DB.kar=Object.assign({},KAR);save();return}
       const sp=e.target.closest('[data-sp]');if(sp){st.sp=+sp.dataset.sp;DB.ksp[id]=st.sp;save();$$('[data-sp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sp)));spdTxt();return}
       const lp=e.target.closest('[data-lp]');if(lp){const was=running();if(was)seqStop();st.loop=+lp.dataset.lp;$$('[data-lp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lp)));if(was)go();paint();return}
       const bb=e.target.closest('[data-beats]');if(bb){const was=running();if(was)seqStop();st.beats=+bb.dataset.beats;DB.kbeats[id]=st.beats;sumK();save();$$('[data-beats]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===bb)));build();if(pos>=TL.lines.length)pos=0;$('#kstys',r).innerHTML=styChips();sumK();side();paint();$('#kpos',r).textContent=`${st.beats}/4 · ${BSTYLES[gid()]} · listo`;return}
