@@ -42,6 +42,13 @@ const TART={metro:[352,'<path d="M34 84h32l-8-62H42z"/><path d="M50 64l18-34"/><
 function toolHead(k,title,eyebrow){const[h,m]=TART[k];return`<div class="kamb tamb" style="--th:${h}" aria-hidden="true"></div><div class="khead"><span class="sart big tcov">${coverArt(h,m,null,'t'+k)}</span><div class="kht"><span class="eyebrow">${eyebrow}</span><h2>${title}</h2><small class="kmeta" id="tmeta"></small></div></div>`}
 function toolBar(items){const n=items.length;return`<div class="ktools" role="toolbar" style="--nt:${n};--ntm:${n<=3?n:n===4?2:3}">${items.map(([k,l,ic])=>`<button class="ktool" data-panel="${k}" aria-pressed="false">${ic}<b id="tv-${k}"></b><small>${l}</small></button>`).join('')}</div>`}
 function toolPanels(ps){return`<div class="kpanels card kctl" hidden>${ps.map(([k,t,h])=>`<div class="kpanel" data-p="${k}" hidden><div class="kph"><b>${t}</b><button class="kic" data-pclose aria-label="Cerrar">${IC.x}</button></div>${h}</div>`).join('')}</div>`}
+// latido: el fondo de color y el botón redondo respiran con el pulso (no se mueve si el teléfono pide menos movimiento)
+const RMOT=matchMedia('(prefers-reduced-motion: reduce)');
+function beatPulse(root,strong){
+  if(RMOT.matches||document.hidden)return;const a=root.querySelector('.kamb'),p=root.querySelector('.kplayb');
+  if(a&&a.animate)a.animate([{opacity:strong?.9:.72,transform:`scale(${strong?1.07:1.04})`},{opacity:.45,transform:'scale(1)'}],{duration:strong?560:400,easing:'cubic-bezier(.2,.7,.3,1)'});
+  if(p&&p.animate)p.animate([{transform:`scale(${strong?1.09:1.05})`},{transform:'scale(1)'}],{duration:strong?300:240,easing:'ease-out'});
+}
 const toolDock=inner=>`<div class="kbar tdock"><div class="kbrow">${inner}</div></div>`;
 const playLbl=(on,l1,l2,i1,i2)=>`${on?(i2||IC.stop):(i1||IC.play)}<span>${on?l2:l1}</span>`;
 // abre y cierra paneles y repinta los valores de la barra tras cada toque
@@ -76,7 +83,7 @@ function viewMetronome(){
   </div>`,
   mount(r){
     const go=$('#metgo',r),bv=$('#bpmv',r),rg=$('#bpmr',r);
-    const light=(b,isBeat)=>{if(!isBeat)return;$$('#beats i',r).forEach((x,i)=>x.classList.toggle('on',i===b))};
+    const light=(b,isBeat)=>{if(!isBeat)return;$$('#beats i',r).forEach((x,i)=>x.classList.toggle('on',i===b));beatPulse(r,b===0)};
     const running=()=>SEQ.id==='met'&&OWNER==='tool';
     const tv=toolMount(r,()=>({meter:MET.meter,sub:SUBN[MET.sub],pulse:DB.metMute?'Solo vista':DB.flash?'Destello':'Barra',meta:`${MET.bpm} bpm · ${MET.meter} · ${SUBN[MET.sub].toLowerCase()}`}));
     const paint=()=>{go.innerHTML=playLbl(running(),'Iniciar','Detener');bv.textContent=MET.bpm;rg.value=MET.bpm;$('#tdm',r).textContent=running()?`Sonando · ${MET.bpm} bpm`:`${MET.meter} · listo`;tv();if(!running())$$('#beats i',r).forEach(x=>x.classList.remove('on'))};

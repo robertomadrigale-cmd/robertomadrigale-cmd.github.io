@@ -947,3 +947,16 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .tabs .tab{min-width:0}
 @media(max-width:360px){.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.tabs .tab{font-size:10px}.tabs .tab svg{width:42px;padding:3px 9px}}
 .kamb{-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 35%,transparent 100%);mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 35%,transparent 100%)}
+/* ===================== letra en «modo concierto» (estilo Apple Music) =====================
+   mientras suena: el renglón actual grande y brillante, el siguiente a media luz, los demás tenues y desenfocados;
+   cada sílaba se llena de izquierda a derecha en lo que dura (--sd) */
+.karaoke .kl{transition:opacity .45s ease,filter .45s ease,background .2s,font-size .3s ease}
+.karaoke.live .kl{opacity:.32;filter:blur(.8px)}
+.karaoke.live .kl.past{opacity:.24}
+.karaoke.live .kl.nxt{opacity:.62;filter:none}
+.karaoke.live .kl.cur{opacity:1;filter:none;background:none;box-shadow:none;font-size:1.07em}
+.karaoke.live .kl.cur .pc i{color:transparent;text-shadow:none;background:linear-gradient(90deg,var(--fg) 0 50%,color-mix(in srgb,var(--fg) 36%,transparent) 50% 100%);background-size:200% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;transition:background-position var(--sd,.25s) linear}
+.karaoke.live .kl.cur .pc.lit i{color:transparent;text-shadow:none;background-position:0 0}
+.karaoke.live .kl.cur .pc .kc{color:var(--accent-text)}
+.karaoke.live .klab,.karaoke.live .kgap{opacity:.3}
+@media(prefers-reduced-motion:reduce){.karaoke.live .kl{filter:none}.karaoke .kl{transition:none}}
