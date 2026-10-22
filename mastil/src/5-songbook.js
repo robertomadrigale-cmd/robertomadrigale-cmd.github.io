@@ -45,7 +45,10 @@ function voicing(p,shift){
     const useE=eS&&(e<=a||!aS)&&e>0,base=useE?e:a,sh=useE?eS:aS;
     frets=sh.map(f=>f==null?null:f+base);
   }
-  if(bass!=null){const low=frets.findIndex(f=>f!=null);for(let i=0;i<3;i++){const s=6-i,f=(bass-OPEN_PC[s]+12)%12;if(f<=Math.max(...frets.filter(x=>x!=null))+1){for(let j=0;j<i;j++)frets[j]=null;frets[i]=f;break}}}
+  // acorde con bajo (G/B, E/G♯): el bajo va en la cuerda más grave que lo alcance sin estirar la mano; si no cabe, lo toca el bajista
+  if(bass!=null){const fr=frets.filter(x=>x!=null&&x>0),lo=fr.length?Math.min(...fr):0,hi=fr.length?Math.max(...fr):0;
+    for(let i=0;i<3;i++){const s=6-i;let f=(bass-OPEN_PC[s]+12)%12;if(f>0&&f<lo-1&&f+12<=hi+2)f+=12;const ok=f===0||(Math.max(hi,f)-Math.min(lo||f,f)<=3);
+      if(ok){for(let j=0;j<i;j++)frets[j]=null;frets[i]=f;break}}}
   const midi=frets.map((f,i)=>f==null?null:OPEN_MIDI[6-i]+f).filter(x=>x!=null),strs=frets.map((f,i)=>f==null?null:6-i).filter(x=>x!=null);
   return VCACHE[key]={frets,midi,strs,root:36+((bass!=null?bass:pc)<4?(bass!=null?bass:pc)+12:(bass!=null?bass:pc))};
 }
@@ -61,13 +64,18 @@ function chordSVG(v){
 /* ---------- cancionero: instrumentos ---------- */
 // cada cuerda suena una sola vez: al volver a tocarla se apaga la nota anterior (como en una guitarra real)
 const GSTR={};
-function gNote(m,s,t,len,vol){
-  const pv=GSTR[s];if(pv&&pv.end>t){try{pv.g.gain.cancelScheduledValues(t);pv.g.gain.setTargetAtTime(0,t,.018)}catch(e){}}
-  const n=pluck(m,t,len,vol);if(n)GSTR[s]=n;
+function gNote(m,s,t,len,vol,o){
+  const pv=GSTR[s];if(pv&&pv.end>t){try{const G=pv.g.gain;if(G.cancelAndHoldAtTime)G.cancelAndHoldAtTime(t);else G.cancelScheduledValues(t);G.setTargetAtTime(0,t,.015)}catch(e){}}
+  // cada cuerda un poco a su lado del estéreo, como si la guitarra estuviera enfrente
+  const n=pluck(m,t,len,vol,Object.assign({pan:(3.5-s)*.06},o||{}));if(n)GSTR[s]=n;
 }
-function gtrStrum(v,t,dir,vol,len){
-  const up=dir==='u',idx=v.midi.map((_,j)=>j),L=up?idx.slice(-4).reverse():idx,gap=up?.011:.015;
-  L.forEach((j,n)=>gNote(v.midi[j],v.strs[j],t+n*gap*(.85+Math.random()*.3),len,(up?.62:1)*vol*(.9+Math.random()*.2)*(up?1:n<2?.9:1)));
+/* Rasgueo: abajo = de la 6ª a la 1ª, arriba = de la 1ª hacia las graves pero solo 3-4 cuerdas.
+   La púa tarda ~10 ms entre cuerdas (menos si el golpe es suave), con variaciones mínimas para que no suene a máquina. */
+function gtrStrum(v,t,dir,vol,len,o){
+  const up=dir==='u',n=v.midi.length,idx=v.midi.map((_,j)=>j),L=up?idx.slice(-Math.min(4,n)).reverse():idx;
+  const gap=(up?.008:.011)*(vol<.06?.8:1);let tt=t;
+  L.forEach((j,k)=>{const acc=up?(k===0?1:.8-k*.08):(k<2?.85:1)-(k>3?.05:0);
+    gNote(v.midi[j],v.strs[j],tt,len,vol*acc*(.93+Math.random()*.14),o);tt+=gap*(.8+Math.random()*.4)});
 }
 // arpegio por número de cuerda (6 = la más grave); si esa cuerda no suena en el acorde, usa la vecina más aguda
 function gtrPick(v,s,t,len,vol){
@@ -111,12 +119,12 @@ const KBASS={
 function bandStep(st,i,L,p,sh,t,spb,bar){
   const K=KPAT[st]?st:'folk',three=L===12,v=voicing(p,sh),root=v.root,fifth=root+7>52?root-5:root+7,q=spb;
   // batería y percusión
-  if(K==='rock'){if(i%2===0)hat(t,i%4?.05:.09);if(i===0||(!three&&(i===8||i===10)))kick(t,.75);if(i===4||(!three&&i===12)||(three&&i===8))snare(t,.34)}
-  else if(K==='pop'){if(i%2===0)hat(t,i%4?.035:.06);if(i===0||(!three&&(i===8||i===10)))kick(t,.6);if(i===4||(!three&&i===12)||(three&&i===8))snare(t,.26)}
-  else if(K==='urbano'){if(i%4===0)kick(t,.7);if(three?(i===3||i===6||i===10):(i===3||i===6||i===11||i===14))snare(t,.24);if(i%2===0)hat(t,.03)}
+  if(K==='rock'){if(i%2===0)hat(t,i%4?.05:.09);if(i===0||(!three&&(i===8||i===10)))kick(t,.55);if(i===4||(!three&&i===12)||(three&&i===8))snare(t,.26)}
+  else if(K==='pop'){if(i%2===0)hat(t,i%4?.035:.06);if(i===0||(!three&&(i===8||i===10)))kick(t,.42);if(i===4||(!three&&i===12)||(three&&i===8))snare(t,.2)}
+  else if(K==='urbano'){if(i%4===0)kick(t,.5);if(three?(i===3||i===6||i===10):(i===3||i===6||i===11||i===14))snare(t,.18);if(i%2===0)hat(t,.03)}
   else if(K==='balada'){if(i===0)kick(t,.5);if(!three&&i===8)kick(t,.35);if(!three&&(i===4||i===12))noise(t,.05,'bandpass',2600,.07,2);if(i%4===2)hat(t,.03)}
   else if(K==='vals'){if(i%4===0&&i)hat(t,.04)}
-  else if(K==='cumbia'){if(i%2===0)guiro(t,i%4===0);if(i===0||i===8)kick(t,.5)}
+  else if(K==='cumbia'){if(i%2===0)guiro(t,i%4===0);if(i===0||i===8)kick(t,.38)}
   else if(K==='son'){if(i%4===0)noise(t,.02,'highpass',6000,.04)}
   else if(K==='folk'){if(i%4===2)noise(t,.03,'highpass',6500,.025)}
   // bajo
@@ -125,10 +133,11 @@ function bandStep(st,i,L,p,sh,t,spb,bar){
   // guitarra: exactamente el patrón que se ve
   if(i%2)return;const P=KPAT[K][three?3:4],c=P[i/2];if(!c||c==='-')return;
   const ring=KPAT[K].ring*q,lc=c.toLowerCase(),acc=c!==lc;
-  if(c==='B'){const want=bassM!=null?bassM%12:root%12,j=v.midi.findIndex(m=>m%12===want);gNote(v.midi[j<0?0:j],v.strs[j<0?0:j],t,Math.max(ring,q*.9),.1);return}
-  if(/\d/.test(c)){gtrPick(v,+c,t,q*2.4,.15);return}
-  if(lc==='x'){gtrStrum(v,t,'d',.06,q*.22);noise(t,.03,'highpass',5000,.05);return}
-  gtrStrum(v,t,lc,acc?.072:.05,lc==='u'?Math.min(ring,q*1.2):ring);
+  if(c==='B'){const want=bassM!=null?bassM%12:root%12,j=v.midi.findIndex(m=>m%12===want);gNote(v.midi[j<0?0:j],v.strs[j<0?0:j],t,Math.max(ring,q*.9),.17);return}
+  if(/\d/.test(c)){gtrPick(v,+c,t,q*2.4,.24);return}
+  if(lc==='x'){gtrStrum(v,t,'d',.11,.07,{rel:.04,lp:1600,wet:.15});noise(t,.025,'bandpass',2500,.035,1.2);return}
+  const sb=KPAT[K].ring<.7?1.3:1; // golpes cortos (vals, ranchera, cumbia) un poco más fuertes para que se oigan
+  gtrStrum(v,t,lc,(acc?.125:.085)*sb,lc==='u'?Math.min(ring,q*1.2):ring);
 }
 /* ---------- cancionero: formato ---------- */
 // ChordPro: [Sol]letra con [Re7]acordes, {title:} {artist:} {key:} {bpm:} {time:3/4} {bpl:2} {cpb:1} {style:} {pickup:1} {c:Coro}
@@ -422,7 +431,7 @@ function viewSongPlay(id,slow){
     const lineIdx=li=>TL.lines.findIndex(x=>x.li===li);
     const go=()=>{
       if(running()){seqStop();paint();return}
-      if(!ac())return;
+      if(!ac())return;loadSamples();
       const bt=st.beats,startB0=TL.lines[pos]?TL.lines[pos].start:0,startB=P.pickup?startB0:Math.floor(startB0/bt+1e-6)*bt,startK=Math.round(startB*4);
       // cuenta: un compás completo y, si la canción entra con anacrusa, los pulsos que faltan para que caiga en su lugar
       const pk=P.pickup%bt,countK=(bt+(pos===0&&pk?bt-pk:0))*4,N=Math.ceil(TL.total*4);

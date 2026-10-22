@@ -1,5 +1,5 @@
 /* ---------- motor de audio ---------- */
-let AC=null,MASTER=null,UNLOCKED=false,NOISE=null;
+let AC=null,MASTER=null,REV=null,UNLOCKED=false,NOISE=null;
 function ac(){
   try{
     if(!AC){
@@ -7,6 +7,9 @@ function ac(){
       AC=new C({latencyHint:'interactive'});
       const comp=AC.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=4;
       MASTER=AC.createGain();MASTER.gain.value=.85;MASTER.connect(comp);comp.connect(AC.destination);
+      // sala corta: le da cuerpo a la guitarra y al bajo grabados (impulso generado, sin archivos)
+      try{const sr=AC.sampleRate,n=Math.floor(sr*1.4),ir=AC.createBuffer(2,n,sr);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.2)}
+        REV=AC.createConvolver();REV.buffer=ir;const rg=AC.createGain();rg.gain.value=.16;REV.connect(rg);rg.connect(MASTER)}catch(e){REV=null}
     }
     if(AC.state!=='running')AC.resume();
     return AC;
@@ -18,6 +21,7 @@ function unlockAudio(){
   try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
   try{const a=new Audio('data:audio/wav;base64,__SILENT__');a.setAttribute('playsinline','');a.play().catch(()=>{})}catch(e){}
   const c=ac();
+  if(c)setTimeout(loadSamples,300);
   if(c){try{const b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0)}catch(e){}}
 }
 ['pointerdown','touchend','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
@@ -36,7 +40,8 @@ function ksBuffer(m){
   const k=.6/(peak||1);for(let i=0;i<len;i++)d[i]*=k;
   return KS[m]={b,rate:(sr/N)/f};
 }
-function pluck(m,t,d,v){
+function pluck(m,t,d,v,o){
+  if(SMP.ready&&m>=37&&m<=79)return smpPlay('g',m,t,d,(v||.2)*1.15,o);
   const c=AC,K=ksBuffer(Math.round(m)),src=c.createBufferSource(),g=c.createGain(),lp=c.createBiquadFilter();
   src.buffer=K.b;src.playbackRate.value=K.rate;
   lp.type='lowpass';lp.frequency.value=m<55?3200:5200;lp.Q.value=.4;
@@ -45,7 +50,39 @@ function pluck(m,t,d,v){
   src.connect(lp);lp.connect(g);g.connect(out());src.start(t);src.stop(end+.02);
   return{g,end};
 }
+/* ---------- muestras reales: guitarra acústica y bajo eléctrico ----------
+   Grabaciones de tonejs-instruments (Nicholaus Brosowsky, CC BY 3.0), recortadas. Una muestra cada tono entero
+   (guitarra) o cada tercera menor (bajo); las notas intermedias se afinan con la velocidad de reproducción,
+   corrigiendo los centésimos medidos de cada grabación. Si no cargan, la app usa la cuerda sintetizada. */
+const SMP={ready:false,loading:null,g:{},b:{}};
+const SMPLIST={g:[['D2',38,2],['E2',40,-3],['Fs2',42,1],['Gs2',44,-5],['As2',46,2],['C3',48,-4],['D3',50,2],['E3',52,-3],['Fs3',54,3],['Gs3',56,-13],['As3',58,11],['C4',60,6],['D4',62,2],['E4',64,-3],['Fs4',66,17],['Gs4',68,3],['As4',70,11],['C5',72,6],['D5',74,-21]],
+  b:[['E1',28,7],['G1',31,-4],['As1',34,2],['Cs2',37,1],['E2',40,-3],['G2',43,0],['As2',46,2],['Cs3',49,1],['E3',52,-3],['G3',55,8]]};
+function loadSamples(){
+  if(SMP.loading)return SMP.loading;const c=ac();if(!c)return Promise.resolve(false);
+  const dec=b=>new Promise((res,rej)=>{try{const p=c.decodeAudioData(b,res,rej);if(p&&p.catch)p.catch(rej)}catch(e){rej(e)}});
+  const one=(k,[n,m,ct])=>fetch('samples/'+k+'-'+n+'.mp3').then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer()}).then(dec).then(buf=>{
+    const d=buf.getChannelData(0),sr=buf.sampleRate;let pk=0;for(let i=0,L=Math.min(d.length,sr*.35|0);i<L;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}
+    let on=0;const th=pk*.06;while(on<d.length&&Math.abs(d[on])<th)on++;
+    SMP[k][m]={buf,off:Math.max(0,on-24)/sr,norm:.5/(pk||1),ct}});
+  SMP.loading=Promise.all(['g','b'].flatMap(k=>SMPLIST[k].map(x=>one(k,x)))).then(()=>{SMP.ready=true;return true}).catch(()=>{SMP.loading=null;return false});
+  return SMP.loading;
+}
+function smpPlay(k,m,t,d,v,o){
+  o=o||{};const c=AC,tab=SMP[k];let best=null,bd=99;for(const key in tab){const dd=Math.abs(m-key);if(dd<bd){bd=dd;best=+key}}
+  const S=tab[best],src=c.createBufferSource(),g=c.createGain(),lp=c.createBiquadFilter();
+  src.buffer=S.buf;src.playbackRate.value=Math.pow(2,(m-best-S.ct/100)/12);
+  // golpe suave = más opaco; golpe fuerte = más brillante
+  lp.type='lowpass';lp.Q.value=.5;lp.frequency.value=o.lp||(k==='b'?2400:2200+Math.min(1,v*4)*7000);
+  const vol=Math.min(1.4,v*S.norm*(k==='b'?2.0:3.4)),rel=o.rel||(k==='b'?.07:.12),end=t+Math.max(.04,Math.min(d,(S.buf.duration-S.off)/src.playbackRate.value-.05));
+  g.gain.setValueAtTime(vol,t);g.gain.setValueAtTime(vol,Math.max(t,end-rel));g.gain.linearRampToValueAtTime(.0001,end);
+  src.connect(lp);lp.connect(g);
+  let node=g;if(o.pan&&c.createStereoPanner){const pn=c.createStereoPanner();pn.pan.value=o.pan;g.connect(pn);node=pn}
+  node.connect(out());if(REV&&k==='g'){const sg=c.createGain();sg.gain.value=o.wet!=null?o.wet:.5;node.connect(sg);sg.connect(REV)}
+  src.start(t,S.off);src.stop(end+.02);
+  return{g,end};
+}
 function bassNote(m,t,d,v){
+  if(SMP.ready){let n=m;while(n>39)n-=12;smpPlay('b',n,t,Math.max(.12,d),(v||.4)*.9);return}
   const c=AC,f=440*Math.pow(2,(m-69)/12),o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();
   o.type='sine';o2.type='triangle';o.frequency.value=f;o2.frequency.value=f;
   lp.type='lowpass';lp.frequency.value=900;
@@ -105,7 +142,8 @@ function seqStart(id,label,getDur,onStep,ui){
 }
 function seqPump(){
   if(!SEQ.id)return;
-  while(SEQ.next<AC.currentTime+.12){
+  if(SEQ.next<AC.currentTime-.05)SEQ.next=AC.currentTime+.03; // si el teléfono se atrasó, no amontones golpes
+  while(SEQ.next<AC.currentTime+.22){
     const s=SEQ.step,t=SEQ.next;
     SEQ.on(s,t);
     if(SEQ.ui){const d=Math.max(0,(t-AC.currentTime)*1000);setTimeout(()=>{if(SEQ.id&&SEQ.ui)SEQ.ui(s)},d)}

@@ -1,0 +1,4 @@
+Muestras de guitarra acústica (g-*) y bajo eléctrico (b-*) tomadas de tonejs-instruments
+https://github.com/nbrosowsky/tonejs-instruments — autor: Nicholaus Brosowsky
+Licencia de las muestras: Creative Commons Attribution 3.0 (CC BY 3.0) https://creativecommons.org/licenses/by/3.0/
+Cambios: recortadas a 3 s (guitarra) y 2.4 s (bajo) con desvanecido, mono, MP3 64/56 kbps.
