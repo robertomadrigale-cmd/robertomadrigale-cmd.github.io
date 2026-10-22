@@ -59,5 +59,5 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 ## Ideas pendientes que Roberto vio con buenos ojos
 - Canciones de práctica por lección (reutilizar ROKA Studio).
 - Grabarse desde la app y escucharse.
-- Activar Firebase (pendiente de que Roberto cree el proyecto; ver `FIREBASE.md`).
+- Firebase ya activo (proyecto `rokaguitarrall`, configuración en `1-firebase-config.js`, sin Analytics). Falta confirmar en la consola: Google y correo activados en Authentication, dominio `robertomadrigale-cmd.github.io` autorizado, Firestore creado con las reglas de `firestore.rules`.
 - Nivel 0 para principiantes con rasgueos (reutilizar ROKA Studio).
