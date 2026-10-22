@@ -743,3 +743,28 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .kmore[open] summary::after{transform:rotate(-135deg);margin-top:4px}
 .kmin{display:flex;flex-direction:column;gap:16px;padding-top:12px}
 :root[data-theme="claro"] .dial{box-shadow:inset 0 0 0 1px var(--hair),0 0 0 12px color-mix(in srgb,var(--surface2) 60%,transparent),0 24px 40px -30px rgba(0,0,0,.35)}
+/* apariencia: temas como portadas de disco */
+.thsec{display:flex;flex-direction:column;gap:12px}
+.thcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:18px 14px}
+.thc{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:0;border:0;background:none;color:var(--fg);text-align:left;cursor:pointer;font:inherit;min-width:0}
+.thc .cov{position:relative;display:block;aspect-ratio:1;border-radius:16px;overflow:hidden;margin-bottom:8px;background:var(--cimg) center top/cover no-repeat,var(--cb);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cf) 10%,transparent),0 12px 28px -18px rgba(0,0,0,.7);transition:transform .15s,box-shadow .15s}
+.thc:active .cov{transform:scale(.97)}
+.thc .mock{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:11px;background:color-mix(in srgb,var(--cs) 86%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cf) 10%,transparent)}
+.thc .mock > i{flex:none;width:22px;height:22px;border-radius:7px;background:var(--ca)}
+.thc .mock > span{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.thc .mock > span i{display:block;height:5px;border-radius:3px;background:var(--cf);opacity:.85;width:80%}
+.thc .mock > span i + i{background:var(--cm);opacity:.6;width:55%}
+.thc .mock > b{flex:none;width:30px;height:16px;border-radius:999px;background:color-mix(in srgb,var(--ca) 30%,transparent);box-shadow:inset 0 0 0 1px var(--ca)}
+.thc .ck{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);transform:scale(0);transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+.thc .ck svg{width:15px;height:15px}
+.thc[aria-pressed="true"] .cov{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent),0 12px 28px -18px rgba(0,0,0,.7)}
+.thc[aria-pressed="true"] .ck{transform:scale(1)}
+.thc > b{font:600 15px/1.25 var(--font-body);letter-spacing:-.01em;text-transform:none}
+.thc > small{font-size:12.5px;line-height:1.3;color:var(--muted)}
+.tool.look .ic{--ich:#bf5af2}
+.kslow{display:flex;flex-direction:column;gap:14px}
+.kslow.hl{padding:14px;margin:0 -6px;border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 28%,transparent)}
+.slist .lrow{text-decoration:none}
+.lrow .mt{min-width:0;overflow:hidden}
+.lrow .mt b,.lrow .mt > span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -24,7 +24,7 @@ const THEMES=[
  ['clasico','Grafito','El estándar · sobrio y oscuro',1,'#0b0b0c #161618 #1f1f22 #f5f5f7 #98989f #2c2c30 #ff9f0a #1a1000 #ffb340 #ff453a #fff #30d158 #ff453a #0a84ff','radial-gradient(ellipse at 70% -20%,rgba(255,159,10,.07),transparent 60%)'],
  ['claro','Aluminio','Claro y limpio',0,'#f5f5f7 #ffffff #ebebf0 #1d1d1f #6e6e73 #d9d9de #ff9500 #ffffff #b85f00 #d70015 #fff #248a3d #d70015 #0071e3','none'],
  ['rocknroll','Rock and Roll','Años 50 · rocola y cromo',0,'#f6efe0 #fffaf0 #f1e0c8 #1d1a24 #6b6270 #e2cfb3 #d7263d #fff #b0182c #0f8b8d #fff #2b8559 #c0392b #2f7cae','repeating-linear-gradient(45deg,rgba(215,38,61,.045) 0 16px,transparent 16px 32px)'],
- ['psico','Psicodelia','Años 60 · flores y fuzz',1,'#1a0b2e #26123f #341a56 #fdeee0 #c3a6d9 #4a2a70 #ff8a1f #200a00 #ffa64d #ff3d9a #fff #9be15d #ff5c7a #5ee0e6','radial-gradient(circle at 12% 8%,rgba(255,61,154,.24),transparent 45%),radial-gradient(circle at 92% 30%,rgba(255,138,31,.2),transparent 42%),radial-gradient(circle at 50% 105%,rgba(94,224,230,.16),transparent 50%)'],
+ ['psico','Psicodelia','Años 60 · color y fuzz',1,'#1a0b2e #26123f #341a56 #fdeee0 #c3a6d9 #4a2a70 #ff8a1f #200a00 #ffa64d #ff3d9a #fff #9be15d #ff5c7a #5ee0e6','radial-gradient(circle at 12% 8%,rgba(255,61,154,.24),transparent 45%),radial-gradient(circle at 92% 30%,rgba(255,138,31,.2),transparent 42%),radial-gradient(circle at 50% 105%,rgba(94,224,230,.16),transparent 50%)'],
  ['estadio','Rock de estadio','Años 70 · oro y reflectores',1,'#0d0b08 #17140f #221d15 #f5ecd8 #a8987a #3a3122 #d4a537 #1a1205 #e6bb55 #c8452c #fff #7fb069 #d9583b #7aa7c7','radial-gradient(ellipse at 50% -20%,rgba(255,226,150,.2),transparent 50%),linear-gradient(180deg,rgba(212,165,55,.06),transparent 40%)'],
  ['punk','Punk','1977 · fotocopia y alfileres',1,'#0b0b0b #161616 #222222 #fafafa #a0a0a0 #333333 #ff2d95 #120008 #ff5cab #f5e400 #111 #39e07a #ff4040 #29c5f6','repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 10px)'],
  ['metal','Heavy Metal','Años 80 · cromo y fuego',1,'#08090b #121419 #1b1f27 #e8ebf0 #8e96a5 #2b313d #c9ced8 #0b0d12 #dfe4ec #d3122c #fff #4fbf7f #e0263f #5b8fd6','linear-gradient(160deg,rgba(255,255,255,.06),transparent 30%),radial-gradient(ellipse at 50% 115%,rgba(211,18,44,.26),transparent 55%)'],
@@ -50,9 +50,22 @@ function applyTheme(){
 }
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(DB.theme==='auto')applyTheme()});
 applyTheme();
-function themeCards(){
-  const sw=([id,n,era,,c,art])=>{const v=c.split(' ');return`<button class="thm" data-theme-set="${id}" aria-pressed="${DB.theme===id}" style="--tb:${v[0]};--ts:${v[1]};--tf:${v[3]};--tm:${v[4]};--ta:${v[6]};--tr:${v[9]};--tart:${art};--timg:${ARTURL[id]||'none'}"><span class="thp"><i></i><i></i><i></i></span><b>${n}</b><small>${era}</small></button>`};
-  return`<button class="thm auto" data-theme-set="auto" aria-pressed="${DB.theme==='auto'}"><span class="thp"><i></i><i></i><i></i></span><b>Automático</b><small>Sigue a tu teléfono</small></button>`+THEMES.map(sw).join('');
+const ICPAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.2" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg>';
+const ICOK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const themeName=()=>DB.theme==='auto'||!themeById(DB.theme)?'Automático':themeById(DB.theme)[1];
+// portada de cada tema: su arte (o su luz de fondo) con una tarjetita que muestra cómo se ve la app
+function themeCards(ids){
+  const cov=(id,n,era,c,art)=>{const v=c.split(' ');return`<button class="thc" data-theme-set="${id}" aria-pressed="${DB.theme===id}">
+    <span class="cov" style="--cb:${v[0]};--cs:${v[1]};--cf:${v[3]};--cm:${v[4]};--ca:${v[6]};--cimg:${ARTURL[id]||art.replace(/"/g,"'")}"><span class="mock"><i></i><span><i></i><i></i></span><b></b></span><span class="ck">${ICOK}</span></span>
+    <b>${n}</b><small>${era}</small></button>`};
+  return ids.map(id=>{if(id==='auto')return cov('auto','Automático','Oscuro o claro según tu teléfono',themeById('clasico')[4],'linear-gradient(115deg,#0b0b0c 50%,#f5f5f7 50%)');const t=themeById(id);return cov(t[0],t[1],t[2],t[4],t[5])}).join('');
+}
+function viewLook(){
+  const eras=THEMES.map(t=>t[0]).filter(id=>id!=='clasico'&&id!=='claro');
+  return{title:'Apariencia',back:'#/',html:`<div class="lhead"><span class="eyebrow">Tema</span><h1>Apariencia</h1><p class="sub">Los colores y la luz de fondo de toda la app. Se aplica al instante.</p></div>
+  <section class="thsec"><p class="blockh">Básicos</p><div class="thcgrid">${themeCards(['auto','clasico','claro'])}</div></section>
+  <section class="thsec"><p class="blockh">Épocas del rock</p><div class="thcgrid">${themeCards(eras)}</div></section>`,
+  mount(r){r.addEventListener('click',e=>{const th=e.target.closest('[data-theme-set]');if(!th)return;DB.theme=th.dataset.themeSet;DB.tried=DB.tried||{};DB.tried[DB.theme]=1;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)))})}};
 }
 /* ---------- widgets interactivos ---------- */
 function ctrlHTML(c){return`<div><span class="cl">${c.label}</span><div class="chips">${c.opts.map(o=>`<button class="chip" data-k="${c.k}" data-v="${o.v}" aria-pressed="false">${o.l}${o.s?`<i>${o.s}</i>`:''}</button>`).join('')}</div></div>`}
@@ -163,7 +176,7 @@ function viewHome(){
   ${reminderCard()}
   ${cloudCard()}
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
-  <div><p class="eyebrow" style="margin-bottom:10px">Estilo · elige tu época</p><div class="thgrid">${themeCards()}</div></div>
+  <a class="card tool look" href="#/apariencia"><span class="ic">${ICPAL}</span><span><b>Apariencia</b><span>Tema: ${themeName()}</span></span></a>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Mano</span><div class="seg">${[[0,'Diestro'],[1,'Zurdo']].map(([v,l])=>`<button data-lefty="${v}" aria-pressed="${!!DB.lefty===!!v}">${l}</button>`).join('')}</div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Respaldo · llévate tu progreso a otro teléfono</span><span class="row"><button class="btn sm" data-h="bk-copy">${IC.down}Copiar código</button><button class="btn sm" data-h="bk-paste">Pegar código</button></span></div>
@@ -260,9 +273,10 @@ function route(){
   else if(p[0]==='lecciones')v=viewLessons();
   else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
   else if(p[0]==='cuenta')v=viewAccount();
+  else if(p[0]==='apariencia')v=viewLook();
   else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder,lento:viewSlow}[p[1]]||viewPractice)();
   else if(p[0]==='logros')v=viewAch();
-  else if(p[0]==='cancionero')v=p[1]==='ver'?viewSongPlay(p[2]||''):p[1]==='editar'?viewSongEdit(p[2]||'nueva'):viewSongbook();
+  else if(p[0]==='cancionero')v=p[1]==='ver'?viewSongPlay(p[2]||'',p[3]==='lento'):p[1]==='editar'?viewSongEdit(p[2]||'nueva'):viewSongbook();
   else if(p[0]==='referencia')v=({canciones:viewSongs,notas:viewNotes,acordes:viewChords,explorar:viewExplore,glosario:viewGlossary}[p[1]]||viewReference)();
   else v=viewHome();
   if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}

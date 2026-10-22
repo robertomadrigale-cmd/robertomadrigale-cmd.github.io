@@ -4,13 +4,23 @@ const fmt1=t=>{t=Math.max(0,t||0);return Math.floor(t/60)+':'+(t%60).toFixed(1).
 function slowIDB(){return new Promise((res,rej)=>{const r=indexedDB.open('roka-lento',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
 async function slowSave(file){try{const db=await slowIDB();db.transaction('f','readwrite').objectStore('f').put({blob:file,name:file.name},'ultima')}catch(e){}}
 async function slowLoad(){try{const db=await slowIDB();return await new Promise(res=>{const q=db.transaction('f').objectStore('f').get('ultima');q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(e){return null}}
+const slSrc=()=>DB.slowSrc||'canc',slGroup=()=>DB.slowGroup||((DB.songs||[]).length?'mine':'trad');
 function viewSlow(){
   const rate=DB.slowRate||.75;
   return{title:'Cámara lenta',back:'#/practicar',html:`
-  <div class="lhead"><h1>Cámara lenta</h1><p class="sub">Escucha tu canción más lenta sin que cambie el tono, y repite el pedazo que estás sacando.</p></div>
+  <div class="lhead"><h1>Cámara lenta</h1><p class="sub">Practica una canción más lenta y repite el pedazo que estás sacando.</p></div>
+  <div class="seg" id="slsrc">${[['canc','Del cancionero'],['audio','Archivo de audio']].map(([k,l])=>`<button data-src="${k}" aria-pressed="${slSrc()===k}">${l}</button>`).join('')}</div>
+  <div id="slcanc" ${slSrc()==='canc'?'':'hidden'} style="display:flex;flex-direction:column;gap:14px">
+    <p class="cap" style="margin:0">Elige una canción: se abre con la banda más lenta (sin cambiar el tono), y puedes repetir los renglones que quieras.</p>
+    <input class="inp" id="slq" type="search" placeholder="Buscar canción o artista" autocomplete="off">
+    <div class="chips">${[['mine','Mis canciones'],['trad','Con letra'],['top','Las 100']].map(([k,l])=>`<button class="chip" data-slg="${k}" aria-pressed="${slGroup()===k}">${l}</button>`).join('')}</div>
+    <div class="list slist" id="slist"></div>
+  </div>
+  <div id="slaudio" ${slSrc()==='audio'?'':'hidden'} style="display:flex;flex-direction:column;gap:20px">
+  <p class="cap" style="margin:0">Para una grabación que tengas en el teléfono (MP3, M4A…): baja la velocidad sin que cambie el tono.</p>
   <div class="card" style="display:flex;flex-direction:column;gap:14px">
     <div class="row" style="justify-content:space-between"><div style="min-width:0"><span class="cl" style="margin:0">Canción</span><b id="slname" class="slname">Ninguna elegida</b></div>
-      <label class="btn" for="slfile">${IC.down}Elegir canción</label><input type="file" id="slfile" accept="audio/*" hidden></div>
+      <label class="btn" for="slfile">${IC.down}Elegir archivo</label><input type="file" id="slfile" accept="audio/*" hidden></div>
     <div class="sltrack" id="sltrack"><div class="slab" id="slab"></div><div class="slpos" id="slpos"></div></div>
     <input type="range" id="slseek" min="0" max="1000" value="0" aria-label="Posición en la canción" disabled>
     <div class="row" style="justify-content:space-between"><span class="tm" id="sltime">0:00 / 0:00</span><span class="tm" id="slrate">${Math.round(rate*100)} %</span></div>
@@ -21,8 +31,19 @@ function viewSlow(){
     <div><span class="cl">Repetir un pedazo</span><div class="chips"><button class="chip" data-sl="a" disabled>Marcar inicio (A)</button><button class="chip" data-sl="b" disabled>Marcar fin (B)</button><button class="chip" data-sl="loop" aria-pressed="false" disabled>Repetir A-B</button><button class="chip" data-sl="clear" disabled>Quitar</button></div>
     <p class="cap" id="slabtxt" style="margin:6px 0 0">Reproduce y toca «Marcar inicio» y «Marcar fin» en el pedazo que quieras repetir.</p></div>
   </div>
-  <p class="cap">La canción se queda en este dispositivo; no se sube a ningún lado. Empieza al 60 o 70 % y sube cuando ya te salga.</p>`,
+  <p class="cap">La canción se queda en este dispositivo; no se sube a ningún lado. Empieza al 60 o 70 % y sube cuando ya te salga.</p></div>`,
   mount(r){
+    // canciones del cancionero (propias, con letra y las 100)
+    const list=()=>{const g=slGroup(),q=($('#slq',r).value||'').toLowerCase().trim();let L=[];
+      if(g==='mine')L=(DB.songs||[]).map(x=>{const P=songParse(x.src);return{id:x.id,t:P.title,a:P.artist||'Tu canción',k:chName(P.key,0,P.key,DB.notation==='es')+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':''),b:P.bpm}});
+      else if(g==='trad')L=TRAD.map((src,i)=>{const P=songParse(src);return{id:'pd'+i,t:P.title,a:P.artist,k:chName(P.key,0,P.key,DB.notation==='es')+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':''),b:P.bpm}});
+      else L=TOPLIST.map(x=>{const has=(DB.songs||[]).find(s=>s.top===x.id);return{id:has?has.id:x.id,t:x.t,a:x.a+(has?'':' · solo progresión'),k:x.k,b:x.bpm}});
+      if(q)L=L.filter(x=>(x.t+' '+x.a).toLowerCase().includes(q));
+      $('#slist',r).innerHTML=L.length?L.map(x=>`<a class="card lrow" href="#/cancionero/ver/${x.id}/lento"><span class="mn">${esc(x.k)}</span><span class="mt"><b>${esc(x.t)}</b><span>${esc(x.a)} · ${x.b} bpm</span></span></a>`).join('')
+        :`<div class="card"><p class="cap" style="margin:0">${g==='mine'&&!q?'Aún no agregas canciones. En el Cancionero toca «Agregar canción» y pega la letra con acordes.':'No encontré canciones con ese nombre.'}</p></div>`};
+    list();$('#slq',r).addEventListener('input',list);
+    r.addEventListener('click',e=>{const sc=e.target.closest('[data-src]');if(sc){DB.slowSrc=sc.dataset.src;save();$$('[data-src]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sc)));$('#slcanc',r).hidden=DB.slowSrc!=='canc';$('#slaudio',r).hidden=DB.slowSrc!=='audio';return}
+      const gg=e.target.closest('[data-slg]');if(gg){DB.slowGroup=gg.dataset.slg;save();$$('[data-slg]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===gg)));list()}});
     const au=new Audio();au.preload='auto';au.preservesPitch=true;au.mozPreservesPitch=true;au.webkitPreservesPitch=true;
     const q=id=>$('#'+id,r),en=on=>$$('[data-sl],#slseek',r).forEach(b=>b.disabled=!on);
     const setRate=v=>{DB.slowRate=v;save();au.playbackRate=v;q('slrate').textContent=Math.round(v*100)+' %';$$('[data-rate]',r).forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.rate===v)))};
