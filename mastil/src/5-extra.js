@@ -1,6 +1,7 @@
 /* ---------- logo ---------- */
 let LGN=0;
-const logo=()=>{const id='lgp'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb03a"/><stop offset="1" stop-color="#ff3ea5"/></linearGradient></defs><path d="M32 5c13 0 24 5 24 16 0 13-12 29-24 38C20 50 8 34 8 21 8 10 19 5 32 5z" fill="url(#${id})"/><text x="32" y="31" text-anchor="middle" font-family="Impact,'Barlow Condensed',sans-serif" font-weight="800" font-size="17" fill="#fff">MGH</text><path d="M31 37h5l-3 5h4l-8 9 2-6h-4z" fill="#1b0016"/></svg>`};
+// marca: púa en degradado metálico con una sola línea de cuerda
+const logo=()=>{const id='lgp'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".55" stop-color="#ff9f0a"/><stop offset="1" stop-color="#e2541f"/></linearGradient></defs><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58 20.6 48.6 9 33 9 20.8 9 10.6 19.5 6 32 6z" fill="url(#${id})"/><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M20 23h24" stroke="#1a1000" stroke-opacity=".55" stroke-width="2.4" stroke-linecap="round"/></svg>`};
 /* ---------- avisos ---------- */
 function toast(html,ms){
   let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}
@@ -47,7 +48,7 @@ const SONGS=[
 SONGS.forEach(S=>{let b=0;S.notes=[];S.src.trim().split(/\s+/).forEach(tok=>{const p=tok.split(',');if(p[0]==='-'){b+=+p[1];return}const s=+p[0],f=+p[1],d=+p[2];S.notes.push({s,f,d,b,m:OPEN_MIDI[s]+f});b+=d});S.beats=b});
 const RETO={speed:1,input:'tap'};
 const LVL=['','Fácil','Medio','Difícil'];
-function stars(n){return'<span class="stars">'+[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}">★</i>`).join('')+'</span>'}
+function stars(n){return'<span class="stars">'+[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></i>`).join('')+'</span>'}
 function viewReto(){
   DB.reto=DB.reto||{};
   const list=()=>SONGS.map(S=>{const r=DB.reto[S.id];return`<button class="card song-pick" data-rs="${S.id}"><span class="lv l${S.lvl}">${LVL[S.lvl]}</span><b>${S.n}</b><span class="cap" style="margin:0">${S.sub} · ${S.bpm} bpm</span><span class="row" style="justify-content:space-between;width:100%">${stars(r?r.stars:0)}<span class="tm">${r?r.score.toLocaleString('es-MX'):'—'}</span></span></button>`}).join('');
@@ -258,31 +259,33 @@ function viewRecorder(){
 }
 /* ---------- logros ---------- */
 const ACH=[
- ['primer','Primera nota','Marca tu primer ejercicio como hecho.','♪',D=>Object.keys(D.done).length>=1],
- ['diez','Diez de diez','Completa 10 ejercicios.','10',D=>Object.keys(D.done).length>=10],
- ['leccion','Lección superada','Termina todos los ejercicios de una lección.','✓',()=>LESSONS.some(l=>{const[d,t]=doneCount(l.id);return t&&d===t})],
- ['graduado','Graduado','Completa todos los ejercicios del curso.','🎓',()=>{const[d,t]=doneCount();return t&&d===t}],
- ['racha3','En racha','Practica 3 días seguidos.','3',()=>streak()>=3],
- ['racha7','Semana de fuego','Practica 7 días seguidos.','7',()=>streak()>=7],
- ['racha30','Disciplina de leyenda','Practica 30 días seguidos.','30',()=>streak()>=30],
- ['hora','Primera hora','Junta 1 hora de práctica con la app.','1h',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=3600],
- ['diezh','Diez horas','Junta 10 horas de práctica.','10h',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=36000],
- ['ojo','Ojo de halcón','Logra 10 aciertos en el juego del mástil.','◎',D=>Object.values(D.game).some(v=>v>=10)],
- ['mapa','Mástil en la mente','Logra 25 aciertos en el juego del mástil.','◉',D=>Object.values(D.game).some(v=>v>=25)],
- ['escenario','Primer escenario','Gana al menos una estrella en el modo reto.','★',D=>Object.values(D.reto||{}).some(r=>r.stars>=1)],
- ['cinco','Cinco estrellas','Saca 5 estrellas en el modo reto.','✦',D=>Object.values(D.reto||{}).some(r=>r.stars>=5)],
- ['gira','Gira completa','Gana estrellas en todas las canciones del reto.','⚡',D=>SONGS.every(s=>((D.reto||{})[s.id]||{}).stars>=1)],
- ['estudio','En el estudio','Graba tu primera toma.','●',D=>(D.recs||0)>=1],
- ['camaleon','Camaleón','Prueba 5 temas de color distintos.','◐',D=>Object.keys(D.tried||{}).length>=5]];
+ ['primer','Primera nota','Marca tu primer ejercicio como hecho.','note',D=>Object.keys(D.done).length>=1],
+ ['diez','Diez de diez','Completa 10 ejercicios.','list',D=>Object.keys(D.done).length>=10],
+ ['leccion','Lección superada','Termina todos los ejercicios de una lección.','book',()=>LESSONS.some(l=>{const[d,t]=doneCount(l.id);return t&&d===t})],
+ ['graduado','Graduado','Completa todos los ejercicios del curso.','cap',()=>{const[d,t]=doneCount();return t&&d===t}],
+ ['racha3','En racha','Practica 3 días seguidos.','flame',()=>streak()>=3],
+ ['racha7','Semana de fuego','Practica 7 días seguidos.','flame',()=>streak()>=7],
+ ['racha30','Disciplina de leyenda','Practica 30 días seguidos.','flame',()=>streak()>=30],
+ ['hora','Primera hora','Junta 1 hora de práctica con la app.','clock',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=3600],
+ ['diezh','Diez horas','Junta 10 horas de práctica.','clock',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=36000],
+ ['ojo','Ojo de halcón','Logra 10 aciertos en el juego del mástil.','target',D=>Object.values(D.game).some(v=>v>=10)],
+ ['mapa','Mástil en la mente','Logra 25 aciertos en el juego del mástil.','target',D=>Object.values(D.game).some(v=>v>=25)],
+ ['escenario','Primer escenario','Gana al menos una estrella en el modo reto.','star',D=>Object.values(D.reto||{}).some(r=>r.stars>=1)],
+ ['cinco','Cinco estrellas','Saca 5 estrellas en el modo reto.','award',D=>Object.values(D.reto||{}).some(r=>r.stars>=5)],
+ ['gira','Gira completa','Gana estrellas en todas las canciones del reto.','route',D=>SONGS.every(s=>((D.reto||{})[s.id]||{}).stars>=1)],
+ ['estudio','En el estudio','Graba tu primera toma.','mic',D=>(D.recs||0)>=1],
+ ['camaleon','Camaleón','Prueba 5 temas de color distintos.','palette',D=>Object.keys(D.tried||{}).length>=5]];
+const ACHIC={note:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',list:'<path d="M4 6h10M4 12h10M4 18h6"/><path d="M15 17l2.5 2.5L22 15"/>',book:'<path d="M4 5.5A2.5 2.5 0 016.5 3H20v15H6.5A2.5 2.5 0 004 20.5z"/><path d="M9 10l2 2 4-4"/>',cap:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3.5 2.5 8.5 2.5 12 0v-5"/>',flame:'<path d="M12 3c.5 3.5 5 5.5 5 10.5a5 5 0 01-10 0c0-2.5 1.5-3.5 2-5.5 1.5 1 2.5 2.5 2.5 4"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',star:'<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',award:'<circle cx="12" cy="9" r="5.5"/><path d="M8.6 13.4L7.5 21l4.5-2.6 4.5 2.6-1.1-7.6"/>',route:'<path d="M3 6.5l6-3 6 3 6-3v14l-6 3-6-3-6 3z"/><path d="M9 3.5v14M15 6.5v14"/>',mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/>',palette:'<path d="M12 3a9 9 0 100 18c1.4 0 2-1 2-2 0-1.5-1.3-1.8-1.3-3S14 14 15.5 14H18a3 3 0 003-3c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15" cy="7.5" r="1.2" fill="currentColor"/>'};
+const achIcon=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ACHIC[k]||ACHIC.star}</svg>`;
 function checkAch(quiet){
   DB.ach=DB.ach||{};let any=false;
-  ACH.forEach(([id,n,,ic,test])=>{if(DB.ach[id])return;let ok=false;try{ok=test(DB)}catch(e){}if(ok){DB.ach[id]=today();any=true;if(!quiet)toast(`<span class="medal on sm">${ic}</span><span><small>Logro desbloqueado</small><b>${n}</b></span>`,4200)}});
+  ACH.forEach(([id,n,,ic,test])=>{if(DB.ach[id])return;let ok=false;try{ok=test(DB)}catch(e){}if(ok){DB.ach[id]=today();any=true;if(!quiet)toast(`<span class="medal on sm">${achIcon(ic)}</span><span><small>Logro desbloqueado</small><b>${n}</b></span>`,4200)}});
   return any;
 }
 function viewAch(){
   DB.ach=DB.ach||{};const got=ACH.filter(a=>DB.ach[a[0]]).length;
   return{title:'Logros',back:'#/practicar',html:`<div class="lhead"><span class="eyebrow">${got} de ${ACH.length} desbloqueados</span><h1>Logros</h1><div class="bar"><i style="width:${got/ACH.length*100}%"></i></div></div>
-  <div class="achgrid">${ACH.map(([id,n,d,ic])=>{const on=DB.ach[id];return`<div class="ach ${on?'on':''}"><span class="medal ${on?'on':''}">${ic}</span><b>${n}</b><span>${d}</span>${on?`<small>${on.split('-').reverse().join('/')}</small>`:''}</div>`}).join('')}</div>`};
+  <div class="achgrid">${ACH.map(([id,n,d,ic])=>{const on=DB.ach[id];return`<div class="ach ${on?'on':''}"><span class="medal ${on?'on':''}">${achIcon(ic)}</span><b>${n}</b><span>${d}</span>${on?`<small>${on.split('-').reverse().join('/')}</small>`:''}</div>`}).join('')}</div>`};
 }
 /* ---------- respaldo del progreso ---------- */
 function backupCode(){return'MGH1:'+btoa(unescape(encodeURIComponent(JSON.stringify(DB))))}

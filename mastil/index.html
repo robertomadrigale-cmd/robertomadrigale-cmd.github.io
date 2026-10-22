@@ -3,19 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Mades Guitar Hero</title>
+<title>Roka Guitar for All</title>
 <meta name="description" content="Teoría visual para guitarra con ejercicios, metrónomo, afinador, juego del mástil y pistas para improvisar.">
-<meta name="theme-color" content="#0c111c" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mades GH">
-<link rel="preload" href="fonts/source-sans-3-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/barlow-condensed-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="apple-mobile-web-app-title" content="Roka Guitar">
 <style>
 /* Concept: estudio nocturno — mástil como regla visual, barras de vidrio, ámbar para lo que se toca y rojo para la raíz. */
 @font-face{font-family:'Barlow Condensed';font-weight:800;font-display:swap;src:url(fonts/barlow-condensed-latin-800-normal.woff2) format('woff2')}
@@ -294,7 +292,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:32px}
 .bd.on{background:var(--accent)}
 .bd.on.acc{background:var(--root)}
 
-/* ---------- Mades Guitar Hero: marca y pulido ---------- */
+/* ---------- Roka Guitar for All: marca y pulido ---------- */
 /* entrada suave sin ocultar nada: si el navegador pausa la animación, el contenido igual se ve */
 @media (prefers-reduced-motion:no-preference){.page>*{animation:rise .3s cubic-bezier(.2,.7,.2,1)}}
 @keyframes rise{from{transform:translateY(6px)}}
@@ -413,10 +411,116 @@ textarea{width:100%;font:500 13px var(--font-mono);padding:10px;border-radius:10
 .raccopt{display:flex;flex-direction:column;gap:12px;width:100%;max-width:640px;text-align:left}
 .raccopt:empty{display:none}
 
+/* ===================== acabado sobrio (v3) =====================
+   Tipografía del sistema, jerarquía por peso y tamaño (no por mayúsculas),
+   superficies con bordes finos y sombras suaves, íconos de trazo delgado. */
+:root{
+  --font-display:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI Variable Display','Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  --font-body:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI Variable Text','Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  --font-mono:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI Variable Text','Segoe UI',Roboto,sans-serif;
+  --hair:color-mix(in srgb,var(--fg) 9%,transparent);
+  --r:18px;
+}
+body{font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+h1,h2{font-family:var(--font-display);font-weight:700;text-transform:none;letter-spacing:-.025em;line-height:1.08}
+h1{font-size:clamp(30px,6.4vw,44px)}
+h2{font-size:clamp(24px,5vw,32px)}
+h3{font-weight:600;font-size:18px;letter-spacing:-.01em}
+.glow{background:none;-webkit-background-clip:initial;background-clip:initial;color:inherit}
+.eyebrow{font:600 13px var(--font-body);letter-spacing:0;text-transform:none;color:var(--accent-text)}
+.cl,.blockh{font:600 11px var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.blockh{color:var(--accent-text)}
+.sub{font-size:17px;line-height:1.5}
+.lead{font:600 20px/1.3 var(--font-display);text-transform:none;letter-spacing:-.01em}
+.foot{font:500 12px var(--font-body)}
+.tm,.stat b,.big,.kkey,.gq,.tnote,.hud b{font-variant-numeric:tabular-nums}
+/* barra superior y navegación */
+.topbar .ttl{font:600 15px var(--font-body);letter-spacing:-.01em;text-transform:none}
+.tabs .tab{font:500 10.5px var(--font-body);letter-spacing:0}
+.tab svg{width:23px;height:23px}
+.side{background:color-mix(in srgb,var(--surface) 70%,var(--bg))}
+@media (min-width:900px){.side .brand{font:600 15px/1.2 var(--font-body);letter-spacing:-.01em;text-transform:none;padding:4px 10px 26px}.side a{font-weight:500;font-size:15px}.side .brand .logo{width:30px;height:30px}}
+/* superficies */
+.card,.ex,.widget,.box,.fig{border-color:var(--hair);border-radius:var(--r)}
+.card,.ex,.widget{box-shadow:0 1px 2px rgba(0,0,0,.18),0 8px 24px -18px rgba(0,0,0,.5)}
+.ex{border-left:1px solid var(--hair)}
+.ex.done{border-left-color:var(--hair)}
+.ex .tag,.ex .meta{font:600 11px var(--font-body);letter-spacing:.04em}
+a.card:hover,.btn:hover{border-color:color-mix(in srgb,var(--fg) 22%,transparent)}
+/* botones, chips y segmentados */
+.btn{border-radius:12px;border-color:var(--hair);background:var(--surface2);font-weight:600;font-size:15px;letter-spacing:-.01em;transition:transform .12s,filter .12s,background .12s}
+.btn:active{transform:scale(.97)}
+.btn.pri,.btn.on{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+.btn.sm{font-size:13.5px;border-radius:10px}
+.btn svg{width:17px;height:17px}
+.chip{border-radius:999px;border-color:transparent;background:var(--surface2);font-weight:500;font-size:13.5px;min-height:36px;padding:7px 14px}
+.chip i{font:500 10px var(--font-body);opacity:.6}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:transparent}
+.seg{border:0;background:var(--surface2);border-radius:11px;padding:3px}
+.seg button{font-size:13.5px;font-weight:500;border-radius:8px;color:var(--fg);opacity:.75}
+.seg button[aria-pressed="true"]{background:var(--surface);opacity:1;box-shadow:0 1px 3px rgba(0,0,0,.25),0 0 0 .5px var(--hair)}
+select,textarea{border-color:var(--hair);background:var(--surface2);border-radius:10px}
+/* listas e íconos de herramienta */
+.tool .ic{background:var(--surface2);color:var(--fg);border-radius:12px;width:44px;height:44px}
+.tool .ic svg{width:22px;height:22px}
+.tool b{font-weight:600;font-size:16px;letter-spacing:-.01em}
+.mn{font:600 16px var(--font-body);background:var(--surface2);color:var(--fg);border-radius:50%;min-width:36px;height:36px}
+.mn.done{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.lrow .cnt{font:500 13px var(--font-body)}
+.stat b{font:700 30px/1 var(--font-display);letter-spacing:-.02em}
+.stat span{font:500 12px var(--font-body);letter-spacing:0;text-transform:none}
+.bar{height:4px}
+/* inicio */
+.brandhero .logo{width:52px;height:52px;filter:none}
+.cta{border-color:var(--hair);background:var(--surface)}
+.cta b{font:700 24px/1.15 var(--font-display);text-transform:none;letter-spacing:-.02em}
+.cta .ic{width:52px;height:52px;border-radius:14px;box-shadow:none}
+.cta:hover{transform:none}
+.thm{border-width:1px;border-color:var(--hair);border-radius:16px}
+.thm b{font:600 15px/1.2 var(--font-body);text-transform:none;letter-spacing:-.01em}
+.thm .thp{border-radius:10px}
+.thm .thp i{width:12px;height:12px}
+.thm[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 45%,transparent)}
+/* números grandes */
+.big{font:200 clamp(64px,17vw,104px)/1 var(--font-display);letter-spacing:-.04em}
+.tnote{font:300 88px/1 var(--font-display);letter-spacing:-.03em}
+.gq{font:600 56px/1 var(--font-display);letter-spacing:-.02em}
+.kkey{font:600 24px/1 var(--font-display);letter-spacing:-.01em}
+.hrow .rn,.rt-step .n{font:600 18px var(--font-body)}
+.song-pick b,.song-h b{font:600 18px/1.2 var(--font-display);text-transform:none;letter-spacing:-.01em}
+.lv{font:600 10px var(--font-body);letter-spacing:.05em;border-color:currentColor}
+.hud b{font:700 26px/1 var(--font-display);letter-spacing:-.02em}
+.hud small{font:600 10px var(--font-body);letter-spacing:.06em}
+.judge{font:700 40px/1 var(--font-display);text-transform:none;letter-spacing:-.02em}
+/* estrellas y medallas */
+.stars{gap:3px}.stars i svg{width:16px;height:16px;fill:var(--line)}.stars i.on svg{fill:var(--accent)}
+.stars i{text-shadow:none}.result .stars i svg{width:26px;height:26px}
+.medal{width:52px;height:52px;border:1px solid var(--hair);background:var(--surface2);color:var(--muted)}
+.medal svg{width:24px;height:24px}
+.medal.on{background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--accent-text);border-color:color-mix(in srgb,var(--accent) 40%,transparent);box-shadow:none}
+.medal.sm{width:36px;height:36px}.medal.sm svg{width:18px;height:18px}
+.ach{border-color:var(--hair);opacity:.55}.ach.on{opacity:1;border-color:var(--hair)}
+.ach b{font-weight:600}.ach small{font:500 11px var(--font-body)}
+#toast{border-color:var(--hair);border-radius:14px;font-weight:500;box-shadow:0 12px 40px rgba(0,0,0,.35);padding:10px 16px 10px 12px}
+#toast>svg{width:26px;height:26px}
+#toast small{font:600 10px var(--font-body);letter-spacing:.06em}
+/* cancionero */
+.pc .kc{font:600 .74em/1.3 var(--font-body);letter-spacing:-.01em}
+.klab{font:600 11px var(--font-body);letter-spacing:.08em;color:var(--accent-text)}
+.karaoke{border-color:var(--hair)}
+.kchip{border-color:var(--hair)}
+.card.note{background:var(--surface);border-color:var(--hair);box-shadow:inset 3px 0 0 var(--accent)}
+/* mástil */
+.fb .num,.fb .slab{font:500 10.5px var(--font-body)}
+.fb .dtxt{font:600 10.5px var(--font-body)}
+.nt small,.pchip small,.fn,.strs button small,.steps label{font-family:var(--font-body)}
+@media (min-width:900px){.side a[aria-current="page"]{background:var(--surface2);color:var(--fg)}.side a[aria-current="page"] svg{color:var(--accent-text)}}
+.tab[aria-current="page"]{color:var(--accent-text)}
+
 </style>
 </head>
 <body>
-<noscript>Activa JavaScript para usar Mades Guitar Hero.</noscript>
+<noscript>Activa JavaScript para usar Roka Guitar for All.</noscript>
 <script>
 'use strict';
 const PRINT=false;
@@ -1042,7 +1146,8 @@ WID.openchords={
 
 /* ---------- logo ---------- */
 let LGN=0;
-const logo=()=>{const id='lgp'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb03a"/><stop offset="1" stop-color="#ff3ea5"/></linearGradient></defs><path d="M32 5c13 0 24 5 24 16 0 13-12 29-24 38C20 50 8 34 8 21 8 10 19 5 32 5z" fill="url(#${id})"/><text x="32" y="31" text-anchor="middle" font-family="Impact,'Barlow Condensed',sans-serif" font-weight="800" font-size="17" fill="#fff">MGH</text><path d="M31 37h5l-3 5h4l-8 9 2-6h-4z" fill="#1b0016"/></svg>`};
+// marca: púa en degradado metálico con una sola línea de cuerda
+const logo=()=>{const id='lgp'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".55" stop-color="#ff9f0a"/><stop offset="1" stop-color="#e2541f"/></linearGradient></defs><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58 20.6 48.6 9 33 9 20.8 9 10.6 19.5 6 32 6z" fill="url(#${id})"/><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M20 23h24" stroke="#1a1000" stroke-opacity=".55" stroke-width="2.4" stroke-linecap="round"/></svg>`};
 /* ---------- avisos ---------- */
 function toast(html,ms){
   let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}
@@ -1089,7 +1194,7 @@ const SONGS=[
 SONGS.forEach(S=>{let b=0;S.notes=[];S.src.trim().split(/\s+/).forEach(tok=>{const p=tok.split(',');if(p[0]==='-'){b+=+p[1];return}const s=+p[0],f=+p[1],d=+p[2];S.notes.push({s,f,d,b,m:OPEN_MIDI[s]+f});b+=d});S.beats=b});
 const RETO={speed:1,input:'tap'};
 const LVL=['','Fácil','Medio','Difícil'];
-function stars(n){return'<span class="stars">'+[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}">★</i>`).join('')+'</span>'}
+function stars(n){return'<span class="stars">'+[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></i>`).join('')+'</span>'}
 function viewReto(){
   DB.reto=DB.reto||{};
   const list=()=>SONGS.map(S=>{const r=DB.reto[S.id];return`<button class="card song-pick" data-rs="${S.id}"><span class="lv l${S.lvl}">${LVL[S.lvl]}</span><b>${S.n}</b><span class="cap" style="margin:0">${S.sub} · ${S.bpm} bpm</span><span class="row" style="justify-content:space-between;width:100%">${stars(r?r.stars:0)}<span class="tm">${r?r.score.toLocaleString('es-MX'):'—'}</span></span></button>`}).join('');
@@ -1300,31 +1405,33 @@ function viewRecorder(){
 }
 /* ---------- logros ---------- */
 const ACH=[
- ['primer','Primera nota','Marca tu primer ejercicio como hecho.','♪',D=>Object.keys(D.done).length>=1],
- ['diez','Diez de diez','Completa 10 ejercicios.','10',D=>Object.keys(D.done).length>=10],
- ['leccion','Lección superada','Termina todos los ejercicios de una lección.','✓',()=>LESSONS.some(l=>{const[d,t]=doneCount(l.id);return t&&d===t})],
- ['graduado','Graduado','Completa todos los ejercicios del curso.','🎓',()=>{const[d,t]=doneCount();return t&&d===t}],
- ['racha3','En racha','Practica 3 días seguidos.','3',()=>streak()>=3],
- ['racha7','Semana de fuego','Practica 7 días seguidos.','7',()=>streak()>=7],
- ['racha30','Disciplina de leyenda','Practica 30 días seguidos.','30',()=>streak()>=30],
- ['hora','Primera hora','Junta 1 hora de práctica con la app.','1h',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=3600],
- ['diezh','Diez horas','Junta 10 horas de práctica.','10h',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=36000],
- ['ojo','Ojo de halcón','Logra 10 aciertos en el juego del mástil.','◎',D=>Object.values(D.game).some(v=>v>=10)],
- ['mapa','Mástil en la mente','Logra 25 aciertos en el juego del mástil.','◉',D=>Object.values(D.game).some(v=>v>=25)],
- ['escenario','Primer escenario','Gana al menos una estrella en el modo reto.','★',D=>Object.values(D.reto||{}).some(r=>r.stars>=1)],
- ['cinco','Cinco estrellas','Saca 5 estrellas en el modo reto.','✦',D=>Object.values(D.reto||{}).some(r=>r.stars>=5)],
- ['gira','Gira completa','Gana estrellas en todas las canciones del reto.','⚡',D=>SONGS.every(s=>((D.reto||{})[s.id]||{}).stars>=1)],
- ['estudio','En el estudio','Graba tu primera toma.','●',D=>(D.recs||0)>=1],
- ['camaleon','Camaleón','Prueba 5 temas de color distintos.','◐',D=>Object.keys(D.tried||{}).length>=5]];
+ ['primer','Primera nota','Marca tu primer ejercicio como hecho.','note',D=>Object.keys(D.done).length>=1],
+ ['diez','Diez de diez','Completa 10 ejercicios.','list',D=>Object.keys(D.done).length>=10],
+ ['leccion','Lección superada','Termina todos los ejercicios de una lección.','book',()=>LESSONS.some(l=>{const[d,t]=doneCount(l.id);return t&&d===t})],
+ ['graduado','Graduado','Completa todos los ejercicios del curso.','cap',()=>{const[d,t]=doneCount();return t&&d===t}],
+ ['racha3','En racha','Practica 3 días seguidos.','flame',()=>streak()>=3],
+ ['racha7','Semana de fuego','Practica 7 días seguidos.','flame',()=>streak()>=7],
+ ['racha30','Disciplina de leyenda','Practica 30 días seguidos.','flame',()=>streak()>=30],
+ ['hora','Primera hora','Junta 1 hora de práctica con la app.','clock',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=3600],
+ ['diezh','Diez horas','Junta 10 horas de práctica.','clock',D=>Object.values(D.secs).reduce((a,b)=>a+b,0)>=36000],
+ ['ojo','Ojo de halcón','Logra 10 aciertos en el juego del mástil.','target',D=>Object.values(D.game).some(v=>v>=10)],
+ ['mapa','Mástil en la mente','Logra 25 aciertos en el juego del mástil.','target',D=>Object.values(D.game).some(v=>v>=25)],
+ ['escenario','Primer escenario','Gana al menos una estrella en el modo reto.','star',D=>Object.values(D.reto||{}).some(r=>r.stars>=1)],
+ ['cinco','Cinco estrellas','Saca 5 estrellas en el modo reto.','award',D=>Object.values(D.reto||{}).some(r=>r.stars>=5)],
+ ['gira','Gira completa','Gana estrellas en todas las canciones del reto.','route',D=>SONGS.every(s=>((D.reto||{})[s.id]||{}).stars>=1)],
+ ['estudio','En el estudio','Graba tu primera toma.','mic',D=>(D.recs||0)>=1],
+ ['camaleon','Camaleón','Prueba 5 temas de color distintos.','palette',D=>Object.keys(D.tried||{}).length>=5]];
+const ACHIC={note:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',list:'<path d="M4 6h10M4 12h10M4 18h6"/><path d="M15 17l2.5 2.5L22 15"/>',book:'<path d="M4 5.5A2.5 2.5 0 016.5 3H20v15H6.5A2.5 2.5 0 004 20.5z"/><path d="M9 10l2 2 4-4"/>',cap:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3.5 2.5 8.5 2.5 12 0v-5"/>',flame:'<path d="M12 3c.5 3.5 5 5.5 5 10.5a5 5 0 01-10 0c0-2.5 1.5-3.5 2-5.5 1.5 1 2.5 2.5 2.5 4"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',star:'<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',award:'<circle cx="12" cy="9" r="5.5"/><path d="M8.6 13.4L7.5 21l4.5-2.6 4.5 2.6-1.1-7.6"/>',route:'<path d="M3 6.5l6-3 6 3 6-3v14l-6 3-6-3-6 3z"/><path d="M9 3.5v14M15 6.5v14"/>',mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/>',palette:'<path d="M12 3a9 9 0 100 18c1.4 0 2-1 2-2 0-1.5-1.3-1.8-1.3-3S14 14 15.5 14H18a3 3 0 003-3c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15" cy="7.5" r="1.2" fill="currentColor"/>'};
+const achIcon=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ACHIC[k]||ACHIC.star}</svg>`;
 function checkAch(quiet){
   DB.ach=DB.ach||{};let any=false;
-  ACH.forEach(([id,n,,ic,test])=>{if(DB.ach[id])return;let ok=false;try{ok=test(DB)}catch(e){}if(ok){DB.ach[id]=today();any=true;if(!quiet)toast(`<span class="medal on sm">${ic}</span><span><small>Logro desbloqueado</small><b>${n}</b></span>`,4200)}});
+  ACH.forEach(([id,n,,ic,test])=>{if(DB.ach[id])return;let ok=false;try{ok=test(DB)}catch(e){}if(ok){DB.ach[id]=today();any=true;if(!quiet)toast(`<span class="medal on sm">${achIcon(ic)}</span><span><small>Logro desbloqueado</small><b>${n}</b></span>`,4200)}});
   return any;
 }
 function viewAch(){
   DB.ach=DB.ach||{};const got=ACH.filter(a=>DB.ach[a[0]]).length;
   return{title:'Logros',back:'#/practicar',html:`<div class="lhead"><span class="eyebrow">${got} de ${ACH.length} desbloqueados</span><h1>Logros</h1><div class="bar"><i style="width:${got/ACH.length*100}%"></i></div></div>
-  <div class="achgrid">${ACH.map(([id,n,d,ic])=>{const on=DB.ach[id];return`<div class="ach ${on?'on':''}"><span class="medal ${on?'on':''}">${ic}</span><b>${n}</b><span>${d}</span>${on?`<small>${on.split('-').reverse().join('/')}</small>`:''}</div>`}).join('')}</div>`};
+  <div class="achgrid">${ACH.map(([id,n,d,ic])=>{const on=DB.ach[id];return`<div class="ach ${on?'on':''}"><span class="medal ${on?'on':''}">${achIcon(ic)}</span><b>${n}</b><span>${d}</span>${on?`<small>${on.split('-').reverse().join('/')}</small>`:''}</div>`}).join('')}</div>`};
 }
 /* ---------- respaldo del progreso ---------- */
 function backupCode(){return'MGH1:'+btoa(unescape(encodeURIComponent(JSON.stringify(DB))))}
@@ -2127,7 +2234,7 @@ ${bars}
 ${bars}`}
 
 /* ---------- íconos ---------- */
-const sv=(p,vb)=>`<svg viewBox="${vb||'0 0 24 24'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const sv=(p,vb)=>`<svg viewBox="${vb||'0 0 24 24'}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 const IC={
  home:sv('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>'),
  book:sv('<path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M4 19V5"/><path d="M8 7h7"/>'),
@@ -2424,6 +2531,8 @@ function viewRoutine(){
 }
 
 /* ---------- datos locales ---------- */
+IC.levels=sv('<path d="M5 20v-6M10 20V9M15 20V5M20 20v-9"/>');
+IC.note=sv('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>');
 const DBK='mastil-a-la-vista:v2';
 let DB={done:{},secs:{},days:{},game:{},bpm:{},theme:'auto',last:1,met:80,meter:'4/4',sub:1};
 try{Object.assign(DB,JSON.parse(localStorage.getItem(DBK)||'{}'))}catch(e){}
@@ -2444,8 +2553,8 @@ LEFTY=!!DB.lefty;
 /* ---------- temas: épocas y estilos del rock ---------- */
 // orden de c: bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue
 const THEMES=[
- ['clasico','Estudio nocturno','El original',1,'#0c111c #151d30 #1d2843 #f2ede3 #98a4bd #2a3857 #e8a23a #1b1305 #f0b24f #ea6f50 #fff #62c394 #ea6f50 #6db3e0','radial-gradient(ellipse at 80% -10%,rgba(232,162,58,.16),transparent 55%)'],
- ['claro','Partitura','Claro de día',0,'#f4efe4 #fffaf1 #ebe2cf #1a2236 #586380 #d6cab0 #e8a23a #1b1305 #955700 #bf4128 #fff #2b8559 #bf4128 #2f7cae','radial-gradient(ellipse at 80% -10%,rgba(232,162,58,.18),transparent 55%)'],
+ ['clasico','Grafito','El estándar · sobrio y oscuro',1,'#0b0b0c #161618 #1f1f22 #f5f5f7 #98989f #2c2c30 #ff9f0a #1a1000 #ffb340 #ff453a #fff #30d158 #ff453a #0a84ff','radial-gradient(ellipse at 70% -20%,rgba(255,159,10,.07),transparent 60%)'],
+ ['claro','Aluminio','Claro y limpio',0,'#f5f5f7 #ffffff #ebebf0 #1d1d1f #6e6e73 #d9d9de #ff9500 #ffffff #b85f00 #d70015 #fff #248a3d #d70015 #0071e3','none'],
  ['rocknroll','Rock and Roll','Años 50 · rocola y cromo',0,'#f6efe0 #fffaf0 #f1e0c8 #1d1a24 #6b6270 #e2cfb3 #d7263d #fff #b0182c #0f8b8d #fff #2b8559 #c0392b #2f7cae','repeating-linear-gradient(45deg,rgba(215,38,61,.045) 0 16px,transparent 16px 32px)'],
  ['psico','Psicodelia','Años 60 · flores y fuzz',1,'#1a0b2e #26123f #341a56 #fdeee0 #c3a6d9 #4a2a70 #ff8a1f #200a00 #ffa64d #ff3d9a #fff #9be15d #ff5c7a #5ee0e6','radial-gradient(circle at 12% 8%,rgba(255,61,154,.24),transparent 45%),radial-gradient(circle at 92% 30%,rgba(255,138,31,.2),transparent 42%),radial-gradient(circle at 50% 105%,rgba(94,224,230,.16),transparent 50%)'],
  ['estadio','Rock de estadio','Años 70 · oro y reflectores',1,'#0d0b08 #17140f #221d15 #f5ecd8 #a8987a #3a3122 #d4a537 #1a1205 #e6bb55 #c8452c #fff #7fb069 #d9583b #7aa7c7','radial-gradient(ellipse at 50% -20%,rgba(255,226,150,.2),transparent 50%),linear-gradient(180deg,rgba(212,165,55,.06),transparent 40%)'],
@@ -2568,7 +2677,7 @@ const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||na
 function viewHome(){
   const nx=nextEx(),[d,t]=doneCount();
   const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
-  return{title:'Mades Guitar Hero',html:`
+  return{title:'Roka Guitar for All',html:`
   <div class="brandhero"><span class="logo">${logo()}</span><div><span class="eyebrow">${greet()}</span><h1 class="glow">Tu práctica de hoy</h1></div></div>
   <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
     <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
@@ -2576,10 +2685,10 @@ function viewHome(){
     <div class="stat"><b>${d}<small style="font-size:18px;color:var(--muted)">/${t}</small></b><span>ejercicios</span></div>
   </div>
   ${nx?`<a class="card tool" href="#/leccion/${nx.lesson}/${nx.id}"><span class="ic">${IC.play}</span><span style="flex:1;min-width:0"><b>Continuar: ${nx.t}</b><span>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</span></span></a>`:`<div class="card"><h3>Completaste todos los ejercicios</h3><p class="cap">Repite los que más te costaron con un tempo más alto.</p></div>`}
-  <a class="card cta" href="#/practicar/reto"><span><span class="eyebrow">Nuevo · modo reto</span><b>Sube al escenario</b><span>Notas que bajan por el mástil, combos y estrellas. Con toques o con tu guitarra real.</span></span><span class="ic">${IC.game}</span></a>
+  <a class="card cta" href="#/practicar/reto"><span><span class="eyebrow">Nuevo · modo reto</span><b>Sube al escenario</b><span>Notas que bajan por el mástil, combos y estrellas. Con toques o con tu guitarra real.</span></span><span class="ic">${IC.levels}</span></a>
   <a class="card tool" href="#/cancionero"><span class="ic">${IC.note}</span><span><b>Cancionero karaoke</b><span>Letra que se ilumina, acordes en tu tono, metrónomo y 100 canciones por género.</span></span></a>
   <div class="grid2"><a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación.</span></span></a>
-  <a class="card tool" href="#/logros"><span class="ic medal-ic">★</span><span><b>Logros · ${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length}</b><span>Rachas, récords y retos superados.</span></span></a></div>
+  <a class="card tool" href="#/logros"><span class="ic">${achIcon('award')}</span><span><b>Logros · ${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length}</b><span>Rachas, récords y retos superados.</span></span></a></div>
   ${inst}
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
   <div><p class="eyebrow" style="margin-bottom:10px">Estilo · elige tu época</p><div class="thgrid">${themeCards()}</div></div>
@@ -2589,7 +2698,7 @@ function viewHome(){
     <div id="bkw" hidden><textarea id="bkt" rows="3" placeholder="Pega aquí el código que copiaste en tu otro dispositivo"></textarea><div class="row" style="margin-top:8px"><button class="btn sm pri" data-h="bk-load">Restaurar progreso</button><span class="cap" id="bkm" style="margin:0"></span></div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
   </div>
-  <p class="foot">Mades Guitar Hero · funciona sin conexión</p>`,
+  <p class="foot">Roka Guitar for All · funciona sin conexión</p>`,
   mount(r){
     r.addEventListener('click',async e=>{
       const lf=e.target.closest('[data-lefty]');if(lf){DB.lefty=lf.dataset.lefty==='1';LEFTY=DB.lefty;save();$$('[data-lefty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lf)));return}
@@ -2606,7 +2715,7 @@ function viewHome(){
     });
   }};
 }
-const TOOLS=[['reto','Modo reto','Toca canciones con notas que caen.',IC.game],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
+const TOOLS=[['reto','Modo reto','Toca canciones con notas que caen.',IC.levels],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
 const toolCards=()=>TOOLS.map(([k,n,d,ic])=>`<a class="card tool" href="#/practicar/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('');
 function viewLessons(){
   return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">11 lecciones · ${ALLEX.length} ejercicios</span><h1>Lecciones</h1><p class="sub">Cada lección se apoya en la anterior. Lee la idea, mira el mástil y haz los ejercicios con la guitarra en la mano.</p></div>
@@ -2642,7 +2751,7 @@ function viewPractice(){
   return{title:'Practicar',html:`<div class="lhead"><span class="eyebrow">Herramientas</span><h1>Practicar</h1></div>
   <a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina diaria</b><span>10, 15 o 30 minutos guiados con temporizador.</span></span></a>
   <div class="grid2">${toolCards()}</div>
-  <a class="card tool" href="#/logros"><span class="ic medal-ic">★</span><span><b>Logros</b><span>${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length} desbloqueados.</span></span></a>`};
+  <a class="card tool" href="#/logros"><span class="ic">${achIcon('award')}</span><span><b>Logros</b><span>${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length} desbloqueados.</span></span></a>`};
 }
 function viewReference(){
   const R=[['canciones','Canciones','Progresiones famosas para tocar con pista.',IC.wave],['notas','Mapa de notas','Todas las notas del mástil, del traste 0 al 12.',IC.grid],['acordes','Acordes abiertos','26 acordes con digitación y sonido.',IC.book],['explorar','Explorador','Escalas, modos, acordes, CAGED y más en las 12 tonalidades.',IC.play2],['glosario','Glosario','Los términos de la teoría en idioma humano.',IC.book]];
@@ -2666,7 +2775,6 @@ function viewExplore(){
 }
 function viewGlossary(){return{title:'Glosario',back:'#/referencia',html:`<div class="gl">${GLOS.map(g=>`<div><b>${g[0]}</b><span>${g[1]}</span></div>`).join('')}</div>`}}
 /* ---------- enrutador ---------- */
-IC.note=sv('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>');
 const NAV=[['#/','Inicio',IC.home,''],['#/lecciones','Lecciones',IC.book,'leccion'],['#/practicar','Practicar',IC.play2,'practicar'],['#/cancionero','Canciones',IC.note,'cancionero'],['#/referencia','Referencia',IC.grid,'referencia']];
 let UNMOUNT=null;
 function route(){
@@ -2688,7 +2796,7 @@ function route(){
   const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
   // página nueva en cada vista: así no se acumulan los clics de vistas anteriores
   const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
-  document.title=v.title==='Mades Guitar Hero'?v.title:v.title+' · Mades Guitar Hero';
+  document.title=v.title==='Roka Guitar for All'?v.title:v.title+' · Roka Guitar for All';
   if(v.mount)UNMOUNT=v.mount(pg)||null;
   if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);
   paintPlayer();
@@ -2703,7 +2811,7 @@ document.addEventListener('click',e=>{
 });
 /* ---------- arranque ---------- */
 document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
- <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Mades<br>Guitar Hero</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
+ <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Guitar for All</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
  <main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main>
 </div>
 <nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);

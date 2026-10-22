@@ -4,7 +4,7 @@ Este repositorio publica en GitHub Pages (rama `main`, se despliega solo al hace
 
 | Carpeta | App | URL |
 |---|---|---|
-| `mastil/` | **Mades Guitar Hero** (antes Mástil a la Vista) — teoría visual para guitarra (PWA) | https://robertomadrigale-cmd.github.io/mastil/ |
+| `mastil/` | **Roka Guitar for All** (antes Mástil a la Vista) — teoría visual para guitarra (PWA) | https://robertomadrigale-cmd.github.io/mastil/ |
 | `bateria/` | **Pulso a la Vista** — pulso y tiempo para baterista de banda (PWA) | https://robertomadrigale-cmd.github.io/bateria/ |
 
 Roberto no es programador: entrégale cambios terminados y publicados, sin pedirle que edite código. Todo el texto de las apps va en español de México, tuteando.
@@ -21,7 +21,7 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 - Sin dependencias ni frameworks: JavaScript puro, audio con Web Audio API (sonidos sintetizados), fuentes locales en `fonts/`, funciona sin conexión.
 - Datos del usuario: solo `localStorage` del dispositivo (claves `mastil-a-la-vista:v2` y `pulso-a-la-vista:v1`).
 
-### Mades Guitar Hero (guitarra)
+### Roka Guitar for All (guitarra)
 - `1-theory.js` notas, escalas, acordes y el dibujo del mástil `fretboard()` (soporta modo zurdo con `LEFTY`).
 - `2-widgets.js` diagramas interactivos (`WID`), `3-engine.js` audio (cuerda Karplus-Strong), secuenciador, metrónomo, pistas, temporizador.
 - `4-content.js` las 11 lecciones; cada ejercicio `E({...})` puede tener `fig` (`pts(...)` = notas en orden, `chords(ch(...))` = acordes que cambian al pulso), `bpm`, `track`, `game`.
@@ -30,7 +30,7 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 - `5-songbook.js` **cancionero karaoke** (motor): ChordPro (`[Sol]letra`, `{bpm:}` `{time:}` `{bpl:}` `{cpb:}` `{style:}` `{pickup:}` `{c:}`), `normalizePaste()` convierte "acordes arriba, letra abajo" (UG, LaCuerda; Do-Re-Mi en mayúsculas; quita tablaturas). Cada renglón se divide en piezas (palabras o sílabas con `~`); con `{mel: G4/1 +A4/.5 r/1}` la melodía da el tiempo exacto de cada sílaba (voz guía) y si no, los acordes caen en compases. `voicing()` = digitación real (abiertos de `OC` o cejilla), `bandStep()` = banda por estilo (folk, balada, rock, vals, ranchera, cumbia, son). Secuenciador a dieciseisavos (`SEQ.id='kar'`).
 - `5-songlib.js` datos: `TRAD` (dominio público con letra; validar que sílabas = notas en las que tienen `{mel}`) y `TOP100` (solo tono, BPM y progresión: sus letras tienen derechos de autor, no las incluyas; el usuario las pega y se guardan en `DB.songs`).
 - `route()` reemplaza `#page` en cada vista para que no se acumulen listeners. La animación de entrada solo mueve (nunca usa opacidad 0) para que el contenido no quede invisible si el navegador la pausa.
-- Íconos generados con Pillow (púa degradada con "MGH" en Impact).
+- **Diseño (v3, sobrio estilo Apple):** la capa final de `0-style.css` ("acabado sobrio") manda: tipografía del sistema, títulos en minúsculas con peso, bordes `--hair`, íconos de trazo 1.7, medallas con íconos SVG (`ACHIC` en `5-extra.js`), sin emojis ni símbolos. Tema por defecto "Grafito" (claro: "Aluminio"). Ícono de la app: púa ámbar sobre grafito, sin texto (Pillow).
 - Temas de color por épocas del rock: lista `THEMES` en `6-app.js` (colores + fondo `--art`). La carpeta `mastil/` y la clave de `localStorage` no cambian, para no romper links ni perder progreso.
 
 ### Pulso a la Vista (batería)
