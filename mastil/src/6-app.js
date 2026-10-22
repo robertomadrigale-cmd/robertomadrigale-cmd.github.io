@@ -153,12 +153,15 @@ function viewHome(){
     <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
     <div class="stat"><b>${d}<small style="font-size:18px;color:var(--muted)">/${t}</small></b><span>ejercicios</span></div>
   </div>
+  ${planCard()}
   ${nx?`<a class="card tool" href="#/leccion/${nx.lesson}/${nx.id}"><span class="ic">${IC.play}</span><span style="flex:1;min-width:0"><b>Continuar: ${nx.t}</b><span>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</span></span></a>`:`<div class="card"><h3>Completaste todos los ejercicios</h3><p class="cap">Repite los que más te costaron con un tempo más alto.</p></div>`}
   <a class="card cta" href="#/practicar/reto"><span><span class="eyebrow">Nuevo · modo reto</span><b>Sube al escenario</b><span>Notas que bajan por el mástil, combos y estrellas. Con toques o con tu guitarra real.</span></span><span class="ic">${IC.levels}</span></a>
   <a class="card tool" href="#/cancionero"><span class="ic">${IC.note}</span><span><b>Cancionero karaoke</b><span>Letra que se ilumina, acordes en tu tono, metrónomo y 100 canciones por género.</span></span></a>
   <div class="grid2"><a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación.</span></span></a>
   <a class="card tool" href="#/logros"><span class="ic">${achIcon('award')}</span><span><b>Logros · ${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length}</b><span>Rachas, récords y retos superados.</span></span></a></div>
   ${inst}
+  ${reminderCard()}
+  ${cloudCard()}
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
   <div><p class="eyebrow" style="margin-bottom:10px">Estilo · elige tu época</p><div class="thgrid">${themeCards()}</div></div>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
@@ -169,6 +172,7 @@ function viewHome(){
   </div>
   <p class="foot">Roka Guitar for All · funciona sin conexión</p>`,
   mount(r){
+    if(DB.onb==null)setTimeout(()=>{if(DB.onb==null&&(!location.hash||location.hash==='#/'))onboardShow()},400);
     r.addEventListener('click',async e=>{
       const lf=e.target.closest('[data-lefty]');if(lf){DB.lefty=lf.dataset.lefty==='1';LEFTY=DB.lefty;save();$$('[data-lefty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lf)));return}
       const th=e.target.closest('[data-theme-set]');if(th){DB.theme=th.dataset.themeSet;DB.tried=DB.tried||{};DB.tried[DB.theme]=1;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)));return}
@@ -184,7 +188,7 @@ function viewHome(){
     });
   }};
 }
-const TOOLS=[['reto','Modo reto','Toca canciones con notas que caen.',IC.levels],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
+const TOOLS=[['lento','Cámara lenta','Tu canción más lenta, sin cambiar el tono, con repetición A-B.',IC.timer],['reto','Modo reto','Toca canciones con notas que caen.',IC.levels],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
 const toolCards=()=>TOOLS.map(([k,n,d,ic])=>`<a class="card tool" href="#/practicar/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('');
 function viewLessons(){
   return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">11 lecciones · ${ALLEX.length} ejercicios</span><h1>Lecciones</h1><p class="sub">Cada lección se apoya en la anterior. Lee la idea, mira el mástil y haz los ejercicios con la guitarra en la mano.</p></div>
@@ -255,7 +259,8 @@ function route(){
   if(!p[0])v=viewHome();
   else if(p[0]==='lecciones')v=viewLessons();
   else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
-  else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder}[p[1]]||viewPractice)();
+  else if(p[0]==='cuenta')v=viewAccount();
+  else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder,lento:viewSlow}[p[1]]||viewPractice)();
   else if(p[0]==='logros')v=viewAch();
   else if(p[0]==='cancionero')v=p[1]==='ver'?viewSongPlay(p[2]||''):p[1]==='editar'?viewSongEdit(p[2]||'nueva'):viewSongbook();
   else if(p[0]==='referencia')v=({canciones:viewSongs,notas:viewNotes,acordes:viewChords,explorar:viewExplore,glosario:viewGlossary}[p[1]]||viewReference)();

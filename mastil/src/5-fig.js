@@ -2,7 +2,7 @@
 const FIGST={};
 const midiOf=(s,f)=>OPEN_MIDI[s]+f;
 function figState(x){
-  if(!FIGST[x.id])FIGST[x.id]={updown:true,per:1,guide:true,beats:x.fig.beats||4};
+  if(!FIGST[x.id])FIGST[x.id]={updown:true,per:1,guide:true,mic:false,beats:x.fig.beats||4};
   return FIGST[x.id];
 }
 const figBpm=x=>DB.bpm[x.id]||x.bpm||(x.fig.type==='chords'?70:60);
@@ -22,7 +22,7 @@ function figHTML(x){
   const bpmCtl=ownBpm?`<span class="minimet"><button class="icon-btn" data-fx="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-fx="bpmv" data-id="${x.id}">${figBpm(x)} bpm</span><button class="icon-btn" data-fx="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button></span>`:'';
   const opt=(k,v,l)=>`<button class="chip" data-fx="opt" data-k="${k}" data-v="${v}" data-id="${x.id}" aria-pressed="${String(st[k])===String(v)}">${l}</button>`;
   const opts=F.type==='seq'
-    ?`${opt('updown',true,'Ida y vuelta')}${opt('updown',false,'Solo ida')}<span class="sep"></span>${opt('per',1,'1 nota por pulso')}${opt('per',2,'2 notas por pulso')}<span class="sep"></span>${opt('guide',true,'Con nota guía')}${opt('guide',false,'Solo click')}`
+    ?`${opt('updown',true,'Ida y vuelta')}${opt('updown',false,'Solo ida')}<span class="sep"></span>${opt('per',1,'1 nota por pulso')}${opt('per',2,'2 notas por pulso')}<span class="sep"></span>${opt('guide',true,'Con nota guía')}${opt('guide',false,'Solo click')}<span class="sep"></span>${opt('mic',false,'Sin calificar')}${opt('mic',true,'Calificar con micrófono')}`
     :`${opt('beats',2,'2 pulsos por acorde')}${opt('beats',4,'4 pulsos por acorde')}<span class="sep"></span>${opt('guide',true,'Con rasgueo guía')}${opt('guide',false,'Solo click')}`;
   const board=F.type==='seq'?(()=>{const{dots}=seqData(F);return fretboard(Object.assign({dots,label:'Diagrama del ejercicio'},F.o))})():
     `<div class="chnow"><b data-fx="chname" data-id="${x.id}">${F.list[0][0]}</b><span data-fx="chnext" data-id="${x.id}">${F.list.length>1?'Sigue: '+F.list[1][0]:''}</span></div><div data-fx="chboard" data-id="${x.id}">${chordBoard(F,0)}</div><div class="chlist">${F.list.map((c,i)=>`<span class="pchip sm" data-fx="chip" data-i="${i}" data-id="${x.id}"><b>${c[0]}</b></span>`).join('')}</div>`;
@@ -57,13 +57,15 @@ function figStart(x,preview){
       const k=s-count;if(preview&&k>=order.length)return;
       const i=k%order.length;
       if(!preview&&k%per===0)tick(t,(k/per)%4===0?'acc':'beat');
-      if(preview||st.guide)pluck(midiOf(order[i][0],order[i][1]),t,preview?.6:60/figBpm(x)/per*1.5,.22);
+      if(preview||(st.guide&&!st.mic))pluck(midiOf(order[i][0],order[i][1]),t,preview?.6:60/figBpm(x)/per*1.5,.22);
     },s=>{
       if(s<count){figLight(x.id,null);figStatus(x.id,'Cuenta: '+(Math.floor(s/per)+1));return}
       const k=s-count;
       if(preview&&k>=order.length){if(OWNER===own)seqStop();return}
-      const i=k%order.length;figLight(x.id,order[i][0],order[i][1]);
-      figStatus(x.id,preview?'Nota '+(i+1)+' de '+order.length:'Nota '+(i+1)+' de '+order.length+(st.updown&&order.length>seq.length?(i<seq.length?' · subiendo':' · bajando'):''));
+      const i=k%order.length;
+      if(!preview&&st.mic)fmStep(x,i,order);
+      figLight(x.id,order[i][0],order[i][1]);
+      figStatus(x.id,preview?'Nota '+(i+1)+' de '+order.length:'Nota '+(i+1)+' de '+order.length+(st.mic&&FM.total?` · aciertos ${FM.hits} de ${FM.total}`:'')+(st.updown&&order.length>seq.length&&!st.mic?(i<seq.length?' · subiendo':' · bajando'):''));
     });
   }else{
     const L=F.list.length,beats=preview?1:st.beats,count=preview?0:4;
@@ -85,6 +87,7 @@ function figStart(x,preview){
   paintFig();
 }
 function paintFig(root){
+  if(FM.ownMic&&!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.ownMic=false;fmFinish();tunerStop()}
   $$('[data-fx="preview"],[data-fx="follow"],[data-fx="bpmv"]',root||document).forEach(b=>{
     const id=b.dataset.id,x=ALLEX.find(z=>z.id===id);if(!x)return;
     const k=b.dataset.fx;
@@ -95,14 +98,14 @@ function paintFig(root){
   });
   $$('.fig').forEach(el=>{
     const id=el.dataset.fig,active=SEQ.id==='fig'&&OWNER.startsWith('fig:'+id);
-    if(!active&&el.classList.contains('playing')){el.classList.remove('playing');$$('.dg.on',el).forEach(d=>d.classList.remove('on'));figStatus(id,'')}
+    if(!active&&el.classList.contains('playing')){el.classList.remove('playing');$$('.dg.on',el).forEach(d=>d.classList.remove('on'));if(FM.id===id&&FM.total)figStatus(id,fmSummary());else figStatus(id,'')}
   });
 }
 document.addEventListener('playstate',()=>paintFig());
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-fx]');if(!b)return;
   const id=b.dataset.id,x=ALLEX.find(z=>z.id===id),k=b.dataset.fx;if(!x)return;
-  if(k==='preview'||k==='follow'){const own='fig:'+id+(k==='preview'?':p':'');if(SEQ.id==='fig'&&OWNER===own)figStop();else figStart(x,k==='preview');paintFig()}
+  if(k==='preview'||k==='follow'){const own='fig:'+id+(k==='preview'?':p':'');if(SEQ.id==='fig'&&OWNER===own){figStop()}else if(k==='follow'&&figState(x).mic&&x.fig.type==='seq'){fmStart(x)}else figStart(x,k==='preview');paintFig()}
   else if(k==='bpm'){DB.bpm[id]=Math.max(30,Math.min(220,figBpm(x)+ +b.dataset.d));save();paintFig()}
   else if(k==='opt'){const st=figState(x),key=b.dataset.k,v=b.dataset.v;st[key]=v==='true'?true:v==='false'?false:+v;$$(`[data-fx="opt"][data-k="${key}"][data-id="${id}"]`).forEach(c=>c.setAttribute('aria-pressed',String(c===b)));if(SEQ.id==='fig'&&OWNER==='fig:'+id)figStart(x,false)}
   else if(k==='chip'&&x.fig.type==='chords'){const i=+b.dataset.i;if(!(SEQ.id==='fig'&&OWNER.startsWith('fig:'+id))){figChord(id,x.fig,i);if(ac())chordMidiF(x.fig.list[i][1]).forEach((m,j)=>pluck(m,AC.currentTime+.02+j*.022,1.2,.17))}}
@@ -117,4 +120,42 @@ function lightSequence(btn,list,mode,step){
   const box=btn.closest('.widget');if(!box||!$('.fb',box))return;
   if(mode==='seq')list.forEach((m,i)=>setTimeout(()=>{$$('.dg.lit',box).forEach(d=>d.classList.remove('lit'));lightPcs(box,[m%12],step*1000+250)},30+i*step*1000));
   else lightPcs(box,[...new Set(list.map(m=>m%12))],1600);
+}
+
+/* ---------- calificar con micrófono: escucha la nota en cada paso ---------- */
+const FM={id:null,target:null,prev:null,hits:0,total:0,round:0,last:-1,run:0,ownMic:false,results:[]};
+async function fmStart(x){
+  if(!TUN.stream){
+    toast('Activando el micrófono… toca cerca del teléfono.');
+    let err=null;await tunerStart(fmPitch,e=>{err=e});
+    if(err||!TUN.stream){toast({denied:'El micrófono está bloqueado. Permite el acceso en los ajustes del navegador.',nomic:'No se encontró un micrófono.',nosupport:'Este navegador no permite usar el micrófono aquí.'}[err]||'No se pudo activar el micrófono.',5000);return}
+    FM.ownMic=true;
+  }
+  Object.assign(FM,{id:x.id,target:null,prev:null,hits:0,total:0,round:0,last:-1,run:0,results:[]});
+  const el=document.querySelector(`[data-fig="${x.id}"]`);if(el)$$('.dg',el).forEach(d=>d.classList.remove('hit','miss'));
+  figStart(x,false);paintFig();
+}
+function fmDot(t,cls){const el=document.querySelector(`[data-fig="${FM.id}"]`);if(!el||!t)return;$$(`.dg[data-s="${t.s}"][data-f="${t.f}"]`,el).forEach(d=>{d.classList.remove('hit','miss');d.classList.add(cls)})}
+function fmClose(t){if(!t||t.done)return;t.done=true;FM.total++;if(t.hit){FM.hits++;fmDot(t,'hit')}else fmDot(t,'miss')}
+function fmStep(x,i,order){
+  if(i===0&&FM.total>0&&FM.last!==-1){fmClose(FM.prev&&FM.prev.t);fmClose(FM.target);FM.prev=null;FM.target=null;fmRound(x)}
+  if(FM.target){const p=FM.target;FM.prev={t:p,until:performance.now()+280};setTimeout(()=>{if(FM.prev&&FM.prev.t===p){fmClose(p);FM.prev=null}},300)}
+  const [s,f]=order[i];FM.target={s,f,m:midiOf(s,f),hit:false,done:false};FM.last=i;
+}
+function fmRound(x){
+  FM.round++;const pct=Math.round(FM.hits/FM.total*100);FM.results.push(pct);
+  DB.figbest=DB.figbest||{};if(!DB.figbest[x.id]||pct>DB.figbest[x.id]){DB.figbest[x.id]=pct;save()}
+  toast(`Ronda ${FM.round}: ${FM.hits} de ${FM.total} notas (${pct} %)${pct>=90?' · ¡excelente!':pct>=70?' · vas bien':' · baja el tempo y repite'}`,3500);
+  FM.hits=0;FM.total=0;
+  setTimeout(()=>{const el=document.querySelector(`[data-fig="${x.id}"]`);if(el)$$('.dg',el).forEach(d=>d.classList.remove('hit','miss'))},700);
+}
+function fmFinish(){if(FM.target&&!FM.target.done&&FM.target.hit)fmClose(FM.target);FM.target=null;FM.prev=null}
+function fmSummary(){const best=(DB.figbest||{})[FM.id];const last=FM.results.length?FM.results[FM.results.length-1]:Math.round(FM.hits/Math.max(1,FM.total)*100);return`Última ronda: ${last} %`+(best!=null?` · mejor: ${best} %`:'')}
+function fmPitch(fr){
+  if(!fr||!FM.id||!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.run=0;return}
+  const n=Math.round(69+12*Math.log2(fr/440)),pc=((n%12)+12)%12;
+  FM.run=(FM.lastPc===pc)?FM.run+1:1;FM.lastPc=pc;if(FM.run<2)return;
+  const ok=t=>t&&!t.hit&&!t.done&&((t.m%12)===pc);
+  if(ok(FM.target)){FM.target.hit=true;fmDot(FM.target,'hit')}
+  else if(FM.prev&&performance.now()<FM.prev.until&&ok(FM.prev.t)){FM.prev.t.hit=true;fmDot(FM.prev.t,'hit')}
 }

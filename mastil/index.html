@@ -627,11 +627,49 @@ p,li,h1,h2,h3,.cap,.sub{overflow-wrap:anywhere}
 @media (max-width:360px){.minimet .v{min-width:52px;font-size:13px}.minimet .icon-btn{width:32px;height:32px}.exbar{gap:6px}}
 .strs button{font-size:clamp(13px,3.6vw,16px)}
 
+/* calificación con micrófono */
+.fig .dg.hit circle{fill:var(--good)}
+.fig .dg.miss circle{fill:var(--bad)}
+.fig.playing .dg.hit,.fig.playing .dg.miss{opacity:1}
+.fig .dg.hit .dtxt,.fig .dg.miss .dtxt{fill:#fff}
+
+/* cámara lenta */
+.slname{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52vw}
+.sltrack{position:relative;height:10px;border-radius:9px;background:var(--surface2)}
+.sltrack .slab{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--accent) 45%,transparent);border-radius:9px}
+.sltrack .slpos{position:absolute;top:-4px;width:4px;height:18px;margin-left:-2px;border-radius:2px;background:var(--fg)}
+label.btn{cursor:pointer}
+/* bienvenida */
+.onb{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+@media (min-width:700px){.onb{align-items:center}}
+.onbc{width:min(560px,100%);max-height:calc(100vh - 40px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.onbc .chip{white-space:normal}
+.lrow.plan{padding:10px 4px;border-radius:12px}
+.lrow.plan:hover{background:var(--surface2)}
+
+/* cuenta y modo maestro */
+.clg{border-top:1px solid var(--line);padding-top:12px;margin-top:6px;display:flex;flex-direction:column;gap:10px}
+.cltable{display:flex;flex-direction:column;overflow-x:auto}
+.clr{display:grid;grid-template-columns:minmax(0,1.8fr) repeat(3,minmax(0,1fr));gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px;font-variant-numeric:tabular-nums}
+.clr.h{font:600 11px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:0}
+.clname{display:flex;flex-direction:column;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.clname small{font-weight:400;color:var(--muted);font-size:12px}
+
+.inp{font:500 16px var(--font-body);padding:10px 12px;border-radius:10px;border:1px solid var(--hair,var(--line));background:var(--surface2);color:var(--fg);min-height:44px;width:100%;max-width:100%;box-sizing:border-box}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px}
+input[type=time].inp{width:auto}
+
 </style>
 </head>
 <body>
 <noscript>Activa JavaScript para usar Roka Guitar for All.</noscript>
 <script>
+/* Configuración de Firebase para la cuenta en la nube y el modo maestro.
+   Mientras sea null, la app funciona igual que siempre y no muestra nada de cuentas.
+   Para activarla, reemplaza null por el objeto que da Firebase (ver FIREBASE.md en la raíz del repo), por ejemplo:
+   const FIREBASE_CONFIG={apiKey:"...",authDomain:"tu-proyecto.firebaseapp.com",projectId:"tu-proyecto",appId:"..."}; */
+const FIREBASE_CONFIG=null;
+
 'use strict';
 const PRINT=false;
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1254,6 +1292,136 @@ WID.openchords={
   init:{i:0},controls:[{k:'i',label:'Acorde',opts:OC.map((c,i)=>({v:i,l:c[0]}))}],
   view:s=>{const c=OC[s.i],{d,m}=ocDots(c);return fretboard({to:5,dots:d,muted:m,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
 
+/* ---------- cuenta en la nube (Firebase) y modo maestro ----------
+   Se activa solo cuando 1-firebase-config.js trae una configuración. Sin configuración, nada de esto aparece. */
+const CLOUD={app:null,auth:null,db:null,M:null,user:null,ready:false,err:'',pushT:null,group:null,groups:null,busy:false};
+const FBV='10.12.2',FBU=n=>`https://www.gstatic.com/firebasejs/${FBV}/firebase-${n}.js`;
+const cloudOn=()=>typeof FIREBASE_CONFIG!=='undefined'&&!!(FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey);
+const SYNC=['done','secs','days','bpm','figbest','reto','ach','game','tried'];
+async function cloudInit(){
+  if(!cloudOn()||CLOUD.app)return;
+  try{
+    const [A,U,F]=await Promise.all([import(FBU('app')),import(FBU('auth')),import(FBU('firestore'))]);
+    CLOUD.M={...A,...U,...F};const M=CLOUD.M;
+    CLOUD.app=M.initializeApp(FIREBASE_CONFIG);CLOUD.auth=M.getAuth(CLOUD.app);CLOUD.db=M.getFirestore(CLOUD.app);
+    if(window.__FB_EMU){M.connectAuthEmulator(CLOUD.auth,window.__FB_EMU.auth,{disableWarnings:true});M.connectFirestoreEmulator(CLOUD.db,window.__FB_EMU.host,window.__FB_EMU.port)}
+    try{await M.getRedirectResult(CLOUD.auth)}catch(e){}
+    M.onAuthStateChanged(CLOUD.auth,async u=>{CLOUD.user=u;CLOUD.ready=true;CLOUD.groups=null;if(u){try{await cloudPull()}catch(e){CLOUD.err=cloudMsg(e)}}else CLOUD.group=null;cloudRefresh()});
+  }catch(e){CLOUD.err='No se pudo conectar con la nube. Revisa tu internet.';CLOUD.ready=true;cloudRefresh()}
+}
+function cloudRefresh(){const h=location.hash;if(h===''||h==='#/'||h.startsWith('#/cuenta'))route()}
+function cloudMsg(e){const c=(e&&e.code)||'';return{'auth/invalid-email':'Ese correo no es válido.','auth/missing-password':'Escribe una contraseña.','auth/weak-password':'La contraseña debe tener al menos 6 caracteres.','auth/email-already-in-use':'Ese correo ya tiene cuenta: usa «Entrar».','auth/invalid-credential':'Correo o contraseña incorrectos.','auth/wrong-password':'Correo o contraseña incorrectos.','auth/user-not-found':'No hay una cuenta con ese correo: usa «Crear cuenta».','auth/too-many-requests':'Demasiados intentos. Espera unos minutos.','auth/network-request-failed':'Sin conexión. Intenta cuando tengas internet.','auth/popup-closed-by-user':'Se cerró la ventana antes de terminar.','permission-denied':'No tienes permiso para esa acción.','unavailable':'Sin conexión con la nube. Intenta de nuevo.'}[c]||'Algo salió mal. Intenta de nuevo.'}
+function mergeVal(a,b){
+  if(a==null)return b;if(b==null)return a;
+  if(typeof a==='number'&&typeof b==='number')return Math.max(a,b);
+  if(typeof a==='boolean'||typeof b==='boolean')return!!(a||b);
+  if(Array.isArray(a)||Array.isArray(b))return(Array.isArray(a)&&a.length>=(Array.isArray(b)?b.length:0))?a:b;
+  if(typeof a==='object'&&typeof b==='object'){const o=Object.assign({},a);for(const k in b)o[k]=mergeVal(a[k],b[k]);return o}
+  return a;
+}
+const uref=()=>CLOUD.M.doc(CLOUD.db,'users',CLOUD.user.uid);
+async function cloudPull(){
+  const M=CLOUD.M,snap=await M.getDoc(uref()),d=snap.exists()?snap.data():{};
+  const p=d.progress||{};SYNC.forEach(k=>{DB[k]=mergeVal(DB[k],p[k])});
+  if((!DB.songs||!DB.songs.length)&&Array.isArray(d.songs))DB.songs=d.songs;
+  if(DB.onb==null&&d.onb)DB.onb=d.onb;
+  CLOUD.group=d.group||null;persist();await cloudPush(true);
+}
+function memberStats(){const[d,t]=doneCount();const fb=Object.values(DB.figbest||{});return{done:d,total:t,mins7:weekMins(),streak:streak(),last:DB.last||1,mic:fb.length?Math.round(fb.reduce((a,b)=>a+b,0)/fb.length):null}}
+async function cloudPush(now){
+  if(!CLOUD.user)return;
+  if(!now){clearTimeout(CLOUD.pushT);CLOUD.pushT=setTimeout(()=>cloudPush(true).catch(()=>{}),2500);return}
+  const M=CLOUD.M,u=CLOUD.user,progress={};SYNC.forEach(k=>{if(DB[k]!=null)progress[k]=DB[k]});
+  await M.setDoc(uref(),{name:u.displayName||u.email||'Sin nombre',email:u.email||'',photo:u.photoURL||'',updated:M.serverTimestamp(),progress,songs:DB.songs||[],onb:DB.onb||null,group:CLOUD.group||null},{mergeFields:['name','email','photo','updated','progress','songs','onb','group']});
+  if(CLOUD.group)await M.setDoc(M.doc(CLOUD.db,'groups',CLOUD.group,'members',u.uid),{name:u.displayName||u.email||'Alumno',photo:u.photoURL||'',lastSeen:M.serverTimestamp(),stats:memberStats()},{merge:true});
+}
+const _localSave=save;save=function(){_localSave.apply(this,arguments);if(CLOUD.user)cloudPush()};
+async function cloudGoogle(){
+  const M=CLOUD.M,pr=new M.GoogleAuthProvider();pr.setCustomParameters({prompt:'select_account'});
+  try{await M.signInWithPopup(CLOUD.auth,pr)}catch(e){if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'))await M.signInWithRedirect(CLOUD.auth,pr);else throw e}
+}
+async function cloudEmail(email,pass,create){const M=CLOUD.M;if(create){const c=await M.createUserWithEmailAndPassword(CLOUD.auth,email,pass);const n=email.split('@')[0];await M.updateProfile(c.user,{displayName:n})}else await M.signInWithEmailAndPassword(CLOUD.auth,email,pass)}
+const genCode=()=>Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+async function cloudCreateGroup(name){
+  const M=CLOUD.M;let code=genCode();for(let i=0;i<4;i++){const s=await M.getDoc(M.doc(CLOUD.db,'groups',code));if(!s.exists())break;code=genCode()}
+  await M.setDoc(M.doc(CLOUD.db,'groups',code),{owner:CLOUD.user.uid,name,created:M.serverTimestamp()});CLOUD.groups=null;return code;
+}
+async function cloudJoin(code){
+  const M=CLOUD.M;code=code.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==6)throw{code:'x',msg:'El código tiene 6 letras y números.'};
+  const s=await M.getDoc(M.doc(CLOUD.db,'groups',code));if(!s.exists())throw{code:'x',msg:'Ese código no existe. Revísalo con tu maestro.'};
+  if(CLOUD.group&&CLOUD.group!==code)await cloudLeave(true);
+  CLOUD.group=code;await cloudPush(true);return s.data().name;
+}
+async function cloudLeave(silent){const M=CLOUD.M;if(!CLOUD.group)return;try{await M.deleteDoc(M.doc(CLOUD.db,'groups',CLOUD.group,'members',CLOUD.user.uid))}catch(e){}CLOUD.group=null;await cloudPush(true);if(!silent)cloudRefresh()}
+async function cloudMyGroups(){
+  const M=CLOUD.M,q=M.query(M.collection(CLOUD.db,'groups'),M.where('owner','==',CLOUD.user.uid)),gs=await M.getDocs(q),out=[];
+  for(const g of gs.docs){const ms=await M.getDocs(M.collection(CLOUD.db,'groups',g.id,'members'));out.push({code:g.id,name:g.data().name,members:ms.docs.map(m=>Object.assign({uid:m.id},m.data()))})}
+  return out.sort((a,b)=>a.name.localeCompare(b.name));
+}
+async function cloudGroupName(code){try{const s=await CLOUD.M.getDoc(CLOUD.M.doc(CLOUD.db,'groups',code));return s.exists()?s.data().name:''}catch(e){return''}}
+/* ---------- interfaz ---------- */
+function cloudCard(){
+  if(!cloudOn())return'';
+  if(!CLOUD.ready)return`<div class="card"><h3>Tu cuenta</h3><p class="cap" style="margin:4px 0 0">Conectando…</p></div>`;
+  const u=CLOUD.user;
+  return u?`<a class="card tool" href="#/cuenta"><span class="ic">${IC.check}</span><span style="flex:1;min-width:0"><b>Progreso guardado en la nube</b><span>${esc(u.displayName||u.email||'')} · ${CLOUD.group?'en un grupo de clase':'abre para unirte a una clase o ser maestro'}</span></span></a>`
+   :`<a class="card tool" href="#/cuenta"><span class="ic">${IC.down}</span><span style="flex:1;min-width:0"><b>Guarda tu progreso en la nube</b><span>Úsalo en tu celular, tablet y PC, y únete a la clase de tu maestro.</span></span></a>`;
+}
+const ago=ts=>{if(!ts||!ts.toDate)return'—';const m=Math.round((Date.now()-ts.toDate().getTime())/60000);return m<60?`hace ${Math.max(1,m)} min`:m<1440?`hace ${Math.round(m/60)} h`:`hace ${Math.round(m/1440)} d`};
+function viewAccount(){
+  if(!cloudOn())return{title:'Cuenta',back:'#/',html:`<div class="card"><h3>La cuenta en la nube aún no está activada</h3><p class="cap">Pronto podrás guardar tu progreso en la nube.</p></div>`};
+  const u=CLOUD.user;
+  if(!CLOUD.ready)return{title:'Cuenta',back:'#/',html:'<div class="card"><p class="cap">Conectando con la nube…</p></div>'};
+  if(!u)return{title:'Cuenta',back:'#/',html:`
+   <div class="lhead"><h1>Tu cuenta</h1><p class="sub">Guarda tu progreso en la nube para usarlo en todos tus dispositivos y unirte a la clase de tu maestro.</p></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:14px">
+    <button class="btn pri" data-cl="google">Entrar con Google</button>
+    <p class="cap" style="margin:0;text-align:center">o con tu correo</p>
+    <label class="cl" for="clmail" style="margin:0">Correo</label><input id="clmail" class="inp" type="email" autocomplete="email" placeholder="tu@correo.com">
+    <label class="cl" for="clpass" style="margin:0">Contraseña</label><input id="clpass" class="inp" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres">
+    <div class="row"><button class="btn" data-cl="in">Entrar</button><button class="btn" data-cl="new">Crear cuenta</button></div>
+    <p class="msg err" id="clerr" ${CLOUD.err?'':'hidden'}>${esc(CLOUD.err)}</p>
+   </div>`,mount:cloudMount};
+  return{title:'Cuenta',back:'#/',html:`
+   <div class="lhead"><h1>Tu cuenta</h1><p class="sub">${esc(u.displayName||'')} ${u.email?'· '+esc(u.email):''}</p></div>
+   <div class="card"><h3>Progreso en la nube</h3><p class="cap" style="margin:4px 0 0">Se guarda solo cada vez que avanzas. Entra con la misma cuenta en otro dispositivo y verás el mismo progreso.</p><div class="row" style="margin-top:10px"><button class="btn sm" data-cl="out">Cerrar sesión</button></div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>Soy alumno</h3>
+    ${CLOUD.group?`<p class="cap" style="margin:0">Estás en la clase <b id="clgname">${CLOUD.group}</b>. Tu maestro ve tus ejercicios, minutos y racha.</p><div class="row"><button class="btn sm" data-cl="leave">Salir de la clase</button></div>`
+     :`<p class="cap" style="margin:0">Escribe el código de 6 letras que te dio tu maestro.</p><div class="row"><input id="clcode" class="inp" maxlength="8" placeholder="Código" style="width:150px;text-transform:uppercase"><button class="btn" data-cl="join">Unirme</button></div>`}
+   </div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>Soy maestro</h3>
+    <p class="cap" style="margin:0">Crea una clase y comparte el código con tus alumnos. Verás quién practica, cuántos minutos y en qué lección va.</p>
+    <div class="row"><input id="clgnew" class="inp" maxlength="40" placeholder="Nombre de la clase" style="flex:1;min-width:160px"><button class="btn" data-cl="create">Crear clase</button></div>
+    <div id="clgroups"><p class="cap">Cargando tus clases…</p></div>
+   </div>
+   <p class="msg err" id="clerr" hidden></p>`,mount:cloudMount};
+}
+function groupsHTML(gs){
+  if(!gs.length)return'<p class="cap">Todavía no tienes clases.</p>';
+  return gs.map(g=>`<div class="clg"><div class="row" style="justify-content:space-between"><div style="min-width:0"><b>${esc(g.name)}</b><span class="cap" style="display:block;margin:0">${g.members.length} ${g.members.length===1?'alumno':'alumnos'}</span></div><button class="btn sm" data-cl="copy" data-code="${g.code}">Código: <b class="mono">${g.code}</b></button></div>
+   ${g.members.length?`<div class="cltable"><div class="clr h"><span>Alumno</span><span>Hechos</span><span>Min/sem</span><span>Racha</span></div>${g.members.sort((a,b)=>((b.stats||{}).mins7||0)-((a.stats||{}).mins7||0)).map(m=>{const s=m.stats||{};return`<div class="clr"><span class="clname">${esc(m.name||'Alumno')}<small>Lección ${s.last||1} · ${ago(m.lastSeen)}${s.mic!=null?' · mic '+s.mic+' %':''}</small></span><span>${s.done||0}/${s.total||ALLEX.length}</span><span>${s.mins7||0}</span><span>${s.streak||0} d</span></div>`}).join('')}</div>`:'<p class="cap">Comparte el código para que tus alumnos se unan.</p>'}</div>`).join('');
+}
+function cloudMount(r){
+  const err=t=>{const e=$('#clerr',r);if(e){e.hidden=!t;e.textContent=t||''}};
+  const busy=async(fn)=>{if(CLOUD.busy)return;CLOUD.busy=true;err('');try{await fn()}catch(e){err(e&&e.msg?e.msg:cloudMsg(e))}finally{CLOUD.busy=false}};
+  if(CLOUD.user){
+    if(CLOUD.group)cloudGroupName(CLOUD.group).then(n=>{const e=$('#clgname',r);if(e&&n)e.textContent=n+' ('+CLOUD.group+')'});
+    (CLOUD.groups?Promise.resolve(CLOUD.groups):cloudMyGroups()).then(gs=>{CLOUD.groups=gs;const e=$('#clgroups',r);if(e)e.innerHTML=groupsHTML(gs)}).catch(e=>{const el=$('#clgroups',r);if(el)el.innerHTML=`<p class="msg err">${cloudMsg(e)}</p>`});
+  }
+  r.addEventListener('click',e=>{
+    const b=e.target.closest('[data-cl]');if(!b)return;const k=b.dataset.cl;
+    if(k==='google')busy(cloudGoogle);
+    else if(k==='in'||k==='new')busy(()=>cloudEmail($('#clmail',r).value.trim(),$('#clpass',r).value,k==='new'));
+    else if(k==='out')busy(async()=>{await CLOUD.M.signOut(CLOUD.auth)});
+    else if(k==='join')busy(async()=>{const n=await cloudJoin($('#clcode',r).value);toast(`Te uniste a la clase «${esc(n)}».`);cloudRefresh()});
+    else if(k==='leave')busy(()=>cloudLeave());
+    else if(k==='create')busy(async()=>{const n=$('#clgnew',r).value.trim();if(!n)throw{msg:'Ponle nombre a la clase.'};const c=await cloudCreateGroup(n);toast(`Clase creada. Código: ${c}`,5000);cloudRefresh()});
+    else if(k==='copy'){const c=b.dataset.code,t=`Únete a mi clase en Roka Guitar for All: abre ${location.href.split('#')[0]}#/cuenta y escribe el código ${c}`;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Invitación copiada. Pégala en WhatsApp.'),()=>toast('Código: '+c,5000))}
+  });
+}
+cloudInit();
+
 /* ---------- logo ---------- */
 let LGN=0;
 // marca: púa en degradado metálico con una sola línea de cuerda
@@ -1556,7 +1724,7 @@ function restoreCode(txt){
 const FIGST={};
 const midiOf=(s,f)=>OPEN_MIDI[s]+f;
 function figState(x){
-  if(!FIGST[x.id])FIGST[x.id]={updown:true,per:1,guide:true,beats:x.fig.beats||4};
+  if(!FIGST[x.id])FIGST[x.id]={updown:true,per:1,guide:true,mic:false,beats:x.fig.beats||4};
   return FIGST[x.id];
 }
 const figBpm=x=>DB.bpm[x.id]||x.bpm||(x.fig.type==='chords'?70:60);
@@ -1576,7 +1744,7 @@ function figHTML(x){
   const bpmCtl=ownBpm?`<span class="minimet"><button class="icon-btn" data-fx="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-fx="bpmv" data-id="${x.id}">${figBpm(x)} bpm</span><button class="icon-btn" data-fx="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button></span>`:'';
   const opt=(k,v,l)=>`<button class="chip" data-fx="opt" data-k="${k}" data-v="${v}" data-id="${x.id}" aria-pressed="${String(st[k])===String(v)}">${l}</button>`;
   const opts=F.type==='seq'
-    ?`${opt('updown',true,'Ida y vuelta')}${opt('updown',false,'Solo ida')}<span class="sep"></span>${opt('per',1,'1 nota por pulso')}${opt('per',2,'2 notas por pulso')}<span class="sep"></span>${opt('guide',true,'Con nota guía')}${opt('guide',false,'Solo click')}`
+    ?`${opt('updown',true,'Ida y vuelta')}${opt('updown',false,'Solo ida')}<span class="sep"></span>${opt('per',1,'1 nota por pulso')}${opt('per',2,'2 notas por pulso')}<span class="sep"></span>${opt('guide',true,'Con nota guía')}${opt('guide',false,'Solo click')}<span class="sep"></span>${opt('mic',false,'Sin calificar')}${opt('mic',true,'Calificar con micrófono')}`
     :`${opt('beats',2,'2 pulsos por acorde')}${opt('beats',4,'4 pulsos por acorde')}<span class="sep"></span>${opt('guide',true,'Con rasgueo guía')}${opt('guide',false,'Solo click')}`;
   const board=F.type==='seq'?(()=>{const{dots}=seqData(F);return fretboard(Object.assign({dots,label:'Diagrama del ejercicio'},F.o))})():
     `<div class="chnow"><b data-fx="chname" data-id="${x.id}">${F.list[0][0]}</b><span data-fx="chnext" data-id="${x.id}">${F.list.length>1?'Sigue: '+F.list[1][0]:''}</span></div><div data-fx="chboard" data-id="${x.id}">${chordBoard(F,0)}</div><div class="chlist">${F.list.map((c,i)=>`<span class="pchip sm" data-fx="chip" data-i="${i}" data-id="${x.id}"><b>${c[0]}</b></span>`).join('')}</div>`;
@@ -1611,13 +1779,15 @@ function figStart(x,preview){
       const k=s-count;if(preview&&k>=order.length)return;
       const i=k%order.length;
       if(!preview&&k%per===0)tick(t,(k/per)%4===0?'acc':'beat');
-      if(preview||st.guide)pluck(midiOf(order[i][0],order[i][1]),t,preview?.6:60/figBpm(x)/per*1.5,.22);
+      if(preview||(st.guide&&!st.mic))pluck(midiOf(order[i][0],order[i][1]),t,preview?.6:60/figBpm(x)/per*1.5,.22);
     },s=>{
       if(s<count){figLight(x.id,null);figStatus(x.id,'Cuenta: '+(Math.floor(s/per)+1));return}
       const k=s-count;
       if(preview&&k>=order.length){if(OWNER===own)seqStop();return}
-      const i=k%order.length;figLight(x.id,order[i][0],order[i][1]);
-      figStatus(x.id,preview?'Nota '+(i+1)+' de '+order.length:'Nota '+(i+1)+' de '+order.length+(st.updown&&order.length>seq.length?(i<seq.length?' · subiendo':' · bajando'):''));
+      const i=k%order.length;
+      if(!preview&&st.mic)fmStep(x,i,order);
+      figLight(x.id,order[i][0],order[i][1]);
+      figStatus(x.id,preview?'Nota '+(i+1)+' de '+order.length:'Nota '+(i+1)+' de '+order.length+(st.mic&&FM.total?` · aciertos ${FM.hits} de ${FM.total}`:'')+(st.updown&&order.length>seq.length&&!st.mic?(i<seq.length?' · subiendo':' · bajando'):''));
     });
   }else{
     const L=F.list.length,beats=preview?1:st.beats,count=preview?0:4;
@@ -1639,6 +1809,7 @@ function figStart(x,preview){
   paintFig();
 }
 function paintFig(root){
+  if(FM.ownMic&&!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.ownMic=false;fmFinish();tunerStop()}
   $$('[data-fx="preview"],[data-fx="follow"],[data-fx="bpmv"]',root||document).forEach(b=>{
     const id=b.dataset.id,x=ALLEX.find(z=>z.id===id);if(!x)return;
     const k=b.dataset.fx;
@@ -1649,14 +1820,14 @@ function paintFig(root){
   });
   $$('.fig').forEach(el=>{
     const id=el.dataset.fig,active=SEQ.id==='fig'&&OWNER.startsWith('fig:'+id);
-    if(!active&&el.classList.contains('playing')){el.classList.remove('playing');$$('.dg.on',el).forEach(d=>d.classList.remove('on'));figStatus(id,'')}
+    if(!active&&el.classList.contains('playing')){el.classList.remove('playing');$$('.dg.on',el).forEach(d=>d.classList.remove('on'));if(FM.id===id&&FM.total)figStatus(id,fmSummary());else figStatus(id,'')}
   });
 }
 document.addEventListener('playstate',()=>paintFig());
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-fx]');if(!b)return;
   const id=b.dataset.id,x=ALLEX.find(z=>z.id===id),k=b.dataset.fx;if(!x)return;
-  if(k==='preview'||k==='follow'){const own='fig:'+id+(k==='preview'?':p':'');if(SEQ.id==='fig'&&OWNER===own)figStop();else figStart(x,k==='preview');paintFig()}
+  if(k==='preview'||k==='follow'){const own='fig:'+id+(k==='preview'?':p':'');if(SEQ.id==='fig'&&OWNER===own){figStop()}else if(k==='follow'&&figState(x).mic&&x.fig.type==='seq'){fmStart(x)}else figStart(x,k==='preview');paintFig()}
   else if(k==='bpm'){DB.bpm[id]=Math.max(30,Math.min(220,figBpm(x)+ +b.dataset.d));save();paintFig()}
   else if(k==='opt'){const st=figState(x),key=b.dataset.k,v=b.dataset.v;st[key]=v==='true'?true:v==='false'?false:+v;$$(`[data-fx="opt"][data-k="${key}"][data-id="${id}"]`).forEach(c=>c.setAttribute('aria-pressed',String(c===b)));if(SEQ.id==='fig'&&OWNER==='fig:'+id)figStart(x,false)}
   else if(k==='chip'&&x.fig.type==='chords'){const i=+b.dataset.i;if(!(SEQ.id==='fig'&&OWNER.startsWith('fig:'+id))){figChord(id,x.fig,i);if(ac())chordMidiF(x.fig.list[i][1]).forEach((m,j)=>pluck(m,AC.currentTime+.02+j*.022,1.2,.17))}}
@@ -1671,6 +1842,44 @@ function lightSequence(btn,list,mode,step){
   const box=btn.closest('.widget');if(!box||!$('.fb',box))return;
   if(mode==='seq')list.forEach((m,i)=>setTimeout(()=>{$$('.dg.lit',box).forEach(d=>d.classList.remove('lit'));lightPcs(box,[m%12],step*1000+250)},30+i*step*1000));
   else lightPcs(box,[...new Set(list.map(m=>m%12))],1600);
+}
+
+/* ---------- calificar con micrófono: escucha la nota en cada paso ---------- */
+const FM={id:null,target:null,prev:null,hits:0,total:0,round:0,last:-1,run:0,ownMic:false,results:[]};
+async function fmStart(x){
+  if(!TUN.stream){
+    toast('Activando el micrófono… toca cerca del teléfono.');
+    let err=null;await tunerStart(fmPitch,e=>{err=e});
+    if(err||!TUN.stream){toast({denied:'El micrófono está bloqueado. Permite el acceso en los ajustes del navegador.',nomic:'No se encontró un micrófono.',nosupport:'Este navegador no permite usar el micrófono aquí.'}[err]||'No se pudo activar el micrófono.',5000);return}
+    FM.ownMic=true;
+  }
+  Object.assign(FM,{id:x.id,target:null,prev:null,hits:0,total:0,round:0,last:-1,run:0,results:[]});
+  const el=document.querySelector(`[data-fig="${x.id}"]`);if(el)$$('.dg',el).forEach(d=>d.classList.remove('hit','miss'));
+  figStart(x,false);paintFig();
+}
+function fmDot(t,cls){const el=document.querySelector(`[data-fig="${FM.id}"]`);if(!el||!t)return;$$(`.dg[data-s="${t.s}"][data-f="${t.f}"]`,el).forEach(d=>{d.classList.remove('hit','miss');d.classList.add(cls)})}
+function fmClose(t){if(!t||t.done)return;t.done=true;FM.total++;if(t.hit){FM.hits++;fmDot(t,'hit')}else fmDot(t,'miss')}
+function fmStep(x,i,order){
+  if(i===0&&FM.total>0&&FM.last!==-1){fmClose(FM.prev&&FM.prev.t);fmClose(FM.target);FM.prev=null;FM.target=null;fmRound(x)}
+  if(FM.target){const p=FM.target;FM.prev={t:p,until:performance.now()+280};setTimeout(()=>{if(FM.prev&&FM.prev.t===p){fmClose(p);FM.prev=null}},300)}
+  const [s,f]=order[i];FM.target={s,f,m:midiOf(s,f),hit:false,done:false};FM.last=i;
+}
+function fmRound(x){
+  FM.round++;const pct=Math.round(FM.hits/FM.total*100);FM.results.push(pct);
+  DB.figbest=DB.figbest||{};if(!DB.figbest[x.id]||pct>DB.figbest[x.id]){DB.figbest[x.id]=pct;save()}
+  toast(`Ronda ${FM.round}: ${FM.hits} de ${FM.total} notas (${pct} %)${pct>=90?' · ¡excelente!':pct>=70?' · vas bien':' · baja el tempo y repite'}`,3500);
+  FM.hits=0;FM.total=0;
+  setTimeout(()=>{const el=document.querySelector(`[data-fig="${x.id}"]`);if(el)$$('.dg',el).forEach(d=>d.classList.remove('hit','miss'))},700);
+}
+function fmFinish(){if(FM.target&&!FM.target.done&&FM.target.hit)fmClose(FM.target);FM.target=null;FM.prev=null}
+function fmSummary(){const best=(DB.figbest||{})[FM.id];const last=FM.results.length?FM.results[FM.results.length-1]:Math.round(FM.hits/Math.max(1,FM.total)*100);return`Última ronda: ${last} %`+(best!=null?` · mejor: ${best} %`:'')}
+function fmPitch(fr){
+  if(!fr||!FM.id||!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.run=0;return}
+  const n=Math.round(69+12*Math.log2(fr/440)),pc=((n%12)+12)%12;
+  FM.run=(FM.lastPc===pc)?FM.run+1:1;FM.lastPc=pc;if(FM.run<2)return;
+  const ok=t=>t&&!t.hit&&!t.done&&((t.m%12)===pc);
+  if(ok(FM.target)){FM.target.hit=true;fmDot(FM.target,'hit')}
+  else if(FM.prev&&performance.now()<FM.prev.until&&ok(FM.prev.t)){FM.prev.t.hit=true;fmDot(FM.prev.t,'hit')}
 }
 
 /* ---------- narrador: lee la lección en voz alta y enciende las notas que menciona ---------- */
@@ -1871,6 +2080,107 @@ function pulseOptions(){return`<div><span class="cl">Ver el pulso</span><div cla
   <button class="chip" data-pulse="flash" aria-pressed="${!!DB.flash}">Destello en cada pulso</button>
   <button class="chip" data-pulse="mute" aria-pressed="${!!DB.metMute}">${DB.metMute?IC.mute+'Solo visual':IC.sound+'Con sonido'}</button></div>
   <p class="cap" style="margin:6px 0 0">La barra de pulso aparece arriba en cualquier ejercicio con metrónomo. «Solo visual» quita el click y deja las luces.</p></div>`}
+
+/* ---------- cámara lenta: tu canción más lenta sin cambiar el tono, con repetición A-B ---------- */
+const SL={a:null,b:null,loop:false,raf:null,url:null,name:''};
+const fmt1=t=>{t=Math.max(0,t||0);return Math.floor(t/60)+':'+(t%60).toFixed(1).padStart(4,'0')};
+function slowIDB(){return new Promise((res,rej)=>{const r=indexedDB.open('roka-lento',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function slowSave(file){try{const db=await slowIDB();db.transaction('f','readwrite').objectStore('f').put({blob:file,name:file.name},'ultima')}catch(e){}}
+async function slowLoad(){try{const db=await slowIDB();return await new Promise(res=>{const q=db.transaction('f').objectStore('f').get('ultima');q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(e){return null}}
+function viewSlow(){
+  const rate=DB.slowRate||.75;
+  return{title:'Cámara lenta',back:'#/practicar',html:`
+  <div class="lhead"><h1>Cámara lenta</h1><p class="sub">Escucha tu canción más lenta sin que cambie el tono, y repite el pedazo que estás sacando.</p></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px">
+    <div class="row" style="justify-content:space-between"><div style="min-width:0"><span class="cl" style="margin:0">Canción</span><b id="slname" class="slname">Ninguna elegida</b></div>
+      <label class="btn" for="slfile">${IC.down}Elegir canción</label><input type="file" id="slfile" accept="audio/*" hidden></div>
+    <div class="sltrack" id="sltrack"><div class="slab" id="slab"></div><div class="slpos" id="slpos"></div></div>
+    <input type="range" id="slseek" min="0" max="1000" value="0" aria-label="Posición en la canción" disabled>
+    <div class="row" style="justify-content:space-between"><span class="tm" id="sltime">0:00 / 0:00</span><span class="tm" id="slrate">${Math.round(rate*100)} %</span></div>
+    <div class="row" style="justify-content:center"><button class="btn sm" data-sl="back" disabled>−5 s</button><button class="btn pri" data-sl="play" id="slplay" style="min-width:150px" disabled>${IC.play}Reproducir</button><button class="btn sm" data-sl="fwd" disabled>+5 s</button></div>
+  </div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px">
+    <div><span class="cl">Velocidad</span><div class="chips">${[.5,.6,.7,.75,.8,.9,1].map(v=>`<button class="chip" data-rate="${v}" aria-pressed="${v===rate}">${Math.round(v*100)} %</button>`).join('')}</div></div>
+    <div><span class="cl">Repetir un pedazo</span><div class="chips"><button class="chip" data-sl="a" disabled>Marcar inicio (A)</button><button class="chip" data-sl="b" disabled>Marcar fin (B)</button><button class="chip" data-sl="loop" aria-pressed="false" disabled>Repetir A-B</button><button class="chip" data-sl="clear" disabled>Quitar</button></div>
+    <p class="cap" id="slabtxt" style="margin:6px 0 0">Reproduce y toca «Marcar inicio» y «Marcar fin» en el pedazo que quieras repetir.</p></div>
+  </div>
+  <p class="cap">La canción se queda en este dispositivo; no se sube a ningún lado. Empieza al 60 o 70 % y sube cuando ya te salga.</p>`,
+  mount(r){
+    const au=new Audio();au.preload='auto';au.preservesPitch=true;au.mozPreservesPitch=true;au.webkitPreservesPitch=true;
+    const q=id=>$('#'+id,r),en=on=>$$('[data-sl],#slseek',r).forEach(b=>b.disabled=!on);
+    const setRate=v=>{DB.slowRate=v;save();au.playbackRate=v;q('slrate').textContent=Math.round(v*100)+' %';$$('[data-rate]',r).forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.rate===v)))};
+    const paintAB=()=>{const d=au.duration||0,ab=q('slab');if(SL.a!=null&&d){const b=SL.b!=null?SL.b:d;ab.style.left=(SL.a/d*100)+'%';ab.style.width=(Math.max(0,b-SL.a)/d*100)+'%';ab.hidden=false}else ab.hidden=true;
+      q('slabtxt').textContent=SL.a==null?'Reproduce y toca «Marcar inicio» y «Marcar fin» en el pedazo que quieras repetir.':`Pedazo: ${fmt1(SL.a)} a ${SL.b!=null?fmt1(SL.b):'el final'}${SL.loop?' · repitiendo':''}`;
+      const lb=$('[data-sl="loop"]',r);lb.setAttribute('aria-pressed',String(SL.loop))};
+    const tickUI=()=>{const d=au.duration||0,t=au.currentTime;q('sltime').textContent=fmt(t)+' / '+fmt(d);if(d){q('slpos').style.left=(t/d*100)+'%';if(!q('slseek')._drag)q('slseek').value=Math.round(t/d*1000)}
+      if(SL.loop&&SL.a!=null){const b=SL.b!=null?SL.b:d;if(t>=b-.02||t<SL.a-.3){au.currentTime=SL.a}}
+      if(!au.paused)SL.raf=requestAnimationFrame(tickUI)};
+    const paintPlay=()=>{q('slplay').innerHTML=au.paused?IC.play+'Reproducir':IC.pause+'Pausa'};
+    const load=(blob,name)=>{if(SL.url)URL.revokeObjectURL(SL.url);SL.url=URL.createObjectURL(blob);au.src=SL.url;SL.name=name;SL.a=SL.b=null;SL.loop=false;q('slname').textContent=name;au.playbackRate=DB.slowRate||.75;en(true);paintAB()};
+    au.addEventListener('loadedmetadata',()=>{au.playbackRate=DB.slowRate||.75;tickUI();paintAB()});
+    au.addEventListener('play',()=>{paintPlay();cancelAnimationFrame(SL.raf);tickUI()});au.addEventListener('pause',paintPlay);au.addEventListener('ended',paintPlay);
+    q('slfile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;load(f,f.name.replace(/\.[^.]+$/,''));slowSave(f)});
+    const sk=q('slseek');sk.addEventListener('input',()=>{sk._drag=true;if(au.duration)au.currentTime=sk.value/1000*au.duration;tickUI()});sk.addEventListener('change',()=>{sk._drag=false});
+    r.addEventListener('click',e=>{
+      const rt=e.target.closest('[data-rate]');if(rt){setRate(+rt.dataset.rate);return}
+      const b=e.target.closest('[data-sl]');if(!b||b.disabled)return;const k=b.dataset.sl;
+      if(k==='play'){if(au.paused){seqStop();au.play().catch(()=>toast('No se pudo reproducir este archivo.'))}else au.pause()}
+      else if(k==='back')au.currentTime=Math.max(0,au.currentTime-5);
+      else if(k==='fwd')au.currentTime=Math.min(au.duration||0,au.currentTime+5);
+      else if(k==='a'){SL.a=au.currentTime;if(SL.b!=null&&SL.b<=SL.a)SL.b=null;paintAB()}
+      else if(k==='b'){if(SL.a==null)SL.a=0;SL.b=Math.max(SL.a+.5,au.currentTime);SL.loop=true;au.currentTime=SL.a;paintAB();if(au.paused)au.play().catch(()=>{})}
+      else if(k==='loop'){if(SL.a==null){toast('Primero marca el inicio (A).');return}SL.loop=!SL.loop;paintAB()}
+      else if(k==='clear'){SL.a=SL.b=null;SL.loop=false;paintAB()}
+      tickUI();
+    });
+    slowLoad().then(d=>{if(d&&d.blob&&!SL.name)load(d.blob,d.name.replace(/\.[^.]+$/,''));else if(SL.url&&SL.name){au.src=SL.url;q('slname').textContent=SL.name;en(true)}});
+    return()=>{au.pause();cancelAnimationFrame(SL.raf);SL.name='';};
+  }};
+}
+/* ---------- recordatorio diario por calendario (.ics) ---------- */
+function reminderCard(){
+  const t=DB.remTime||'19:00';
+  return`<div class="card" style="display:flex;flex-direction:column;gap:10px"><div><h3>Recordatorio diario</h3><p class="cap" style="margin:4px 0 0">Agrega a tu calendario una alarma diaria para practicar; te avisa aunque la app esté cerrada.</p></div>
+   <div class="row"><label class="cl" for="remt" style="margin:0">Hora</label><input type="time" id="remt" class="inp" value="${t}" style="width:auto"><button class="btn" data-rem="ics">${IC.cal}Agregar a mi calendario</button></div></div>`;
+}
+function downloadICS(time){
+  const [h,m]=time.split(':').map(Number),d=new Date();d.setDate(d.getDate()+(d.getHours()*60+d.getMinutes()>=h*60+m?1:0));
+  const pad=n=>String(n).padStart(2,'0'),dt=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(h)}${pad(m)}00`,now=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const url=location.href.split('#')[0]+'#/practicar/rutina';
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Roka Guitar for All//ES','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:practica-${Date.now()}@roka-guitar`,`DTSTAMP:${now}`,`DTSTART:${dt}`,'DURATION:PT15M','RRULE:FREQ=DAILY','SUMMARY:Practicar guitarra · Roka',`DESCRIPTION:Tu rutina de hoy: ${url}`,`URL:${url}`,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Hora de practicar guitarra','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='practicar-guitarra.ics';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
+  DB.remTime=time;save();toast('Abre el archivo para agregar el recordatorio a tu calendario.',4500);
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-rem="ics"]');if(!b)return;const inp=document.getElementById('remt');downloadICS(inp&&inp.value?inp.value:'19:00')});
+/* ---------- bienvenida: 3 preguntas y un plan ---------- */
+const ONB_Q=[
+ ['nivel','¿Ya tocas guitarra?',[['cero','Nunca he tocado'],['algo','Sé algunos acordes'],['suelto','Toco con soltura']]],
+ ['meta','¿Qué quieres lograr?',[['canciones','Tocar canciones'],['teoria','Entender la teoría'],['solos','Improvisar y hacer solos']]],
+ ['tiempo','¿Cuánto tiempo al día?',[['10','10 minutos'],['15','15 minutos'],['30','30 minutos']]]];
+function onboardShow(){
+  if(document.getElementById('onb'))return;const A=Object.assign({},DB.onb&&!DB.onb.skip?DB.onb:{});
+  const d=document.createElement('div');d.id='onb';d.className='onb';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','Bienvenida');
+  const paint=()=>{d.innerHTML=`<div class="onbc"><p class="eyebrow">Bienvenido a Roka Guitar for All</p><h2>Armemos tu plan</h2>
+   ${ONB_Q.map(([k,q,os])=>`<div><span class="cl">${q}</span><div class="chips">${os.map(([v,l])=>`<button class="chip" data-onb="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join('')}</div></div>`).join('')}
+   <div class="row" style="justify-content:space-between"><button class="btn sm" data-onb="skip">Ahora no</button><button class="btn pri" data-onb="go" ${ONB_Q.every(([k])=>A[k])?'':'disabled'}>Ver mi plan</button></div></div>`};
+  d.addEventListener('click',e=>{const b=e.target.closest('[data-onb]');if(!b)return;const k=b.dataset.onb;
+    if(k==='skip'){DB.onb={skip:true};save();d.remove();return}
+    if(k==='go'){DB.onb=A;RT.len=+A.tiempo;save();d.remove();if(!location.hash||location.hash==='#/')route();else location.hash='#/';return}
+    A[k]=b.dataset.v;paint()});
+  paint();document.body.appendChild(d);
+}
+function planCard(){
+  const o=DB.onb;if(!o||o.skip)return'';
+  const steps=[];
+  if(o.nivel==='cero')steps.push(['#/practicar/afinador','Afina tu guitarra','Con el micrófono, cuerda por cuerda.'],['#/referencia/acordes','Aprende tus primeros acordes','Mi menor, La menor, Do, Sol y Re.'],['#/cancionero','Toca una canción fácil','Elige una tradicional con 2 o 3 acordes.']);
+  else if(o.nivel==='algo')steps.push(['#/cancionero','Toca canciones con la banda','Usa los acordes que ya sabes.'],['#/leccion/1','Lección 1: el mástil','Para dejar de tocar de memoria.'],['#/practicar/rutina',`Rutina de ${o.tiempo} minutos`,'Todos los días a la misma hora.']);
+  else steps.push(['#/leccion/4','Modos sin misticismo','Cambia el color de tus solos.'],['#/leccion/7','CAGED','Todo el mástil conectado.'],['#/practicar/pistas','Improvisa con pistas','Rock, blues, cumbia y ranchera.']);
+  if(o.meta==='solos'&&o.nivel!=='suelto')steps[2]=['#/leccion/10','Improvisar con intención','Pentatónica y notas objetivo.'];
+  if(o.meta==='teoria'&&o.nivel==='cero')steps[2]=['#/leccion/1','Lección 1: el mástil','Las 12 notas, sin enredos.'];
+  return`<div class="card"><div class="row" style="justify-content:space-between"><p class="eyebrow">Tu plan</p><button class="btn sm" data-onb-open>Cambiar respuestas</button></div>
+   <div class="list" style="margin-top:8px">${steps.map((s,i)=>`<a class="lrow plan" href="${s[0]}"><span class="mn">${i+1}</span><span class="mt"><b>${s[1]}</b><span>${s[2]}</span></span></a>`).join('')}</div></div>`;
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-onb-open]'))onboardShow()});
 
 /* ---------- cancionero: acordes ---------- */
 const LAT={Do:0,Re:2,Mi:4,Fa:5,Sol:7,La:9,Si:11},ANG={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
@@ -3123,12 +3433,15 @@ function viewHome(){
     <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
     <div class="stat"><b>${d}<small style="font-size:18px;color:var(--muted)">/${t}</small></b><span>ejercicios</span></div>
   </div>
+  ${planCard()}
   ${nx?`<a class="card tool" href="#/leccion/${nx.lesson}/${nx.id}"><span class="ic">${IC.play}</span><span style="flex:1;min-width:0"><b>Continuar: ${nx.t}</b><span>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</span></span></a>`:`<div class="card"><h3>Completaste todos los ejercicios</h3><p class="cap">Repite los que más te costaron con un tempo más alto.</p></div>`}
   <a class="card cta" href="#/practicar/reto"><span><span class="eyebrow">Nuevo · modo reto</span><b>Sube al escenario</b><span>Notas que bajan por el mástil, combos y estrellas. Con toques o con tu guitarra real.</span></span><span class="ic">${IC.levels}</span></a>
   <a class="card tool" href="#/cancionero"><span class="ic">${IC.note}</span><span><b>Cancionero karaoke</b><span>Letra que se ilumina, acordes en tu tono, metrónomo y 100 canciones por género.</span></span></a>
   <div class="grid2"><a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación.</span></span></a>
   <a class="card tool" href="#/logros"><span class="ic">${achIcon('award')}</span><span><b>Logros · ${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length}</b><span>Rachas, récords y retos superados.</span></span></a></div>
   ${inst}
+  ${reminderCard()}
+  ${cloudCard()}
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
   <div><p class="eyebrow" style="margin-bottom:10px">Estilo · elige tu época</p><div class="thgrid">${themeCards()}</div></div>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
@@ -3139,6 +3452,7 @@ function viewHome(){
   </div>
   <p class="foot">Roka Guitar for All · funciona sin conexión</p>`,
   mount(r){
+    if(DB.onb==null)setTimeout(()=>{if(DB.onb==null&&(!location.hash||location.hash==='#/'))onboardShow()},400);
     r.addEventListener('click',async e=>{
       const lf=e.target.closest('[data-lefty]');if(lf){DB.lefty=lf.dataset.lefty==='1';LEFTY=DB.lefty;save();$$('[data-lefty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lf)));return}
       const th=e.target.closest('[data-theme-set]');if(th){DB.theme=th.dataset.themeSet;DB.tried=DB.tried||{};DB.tried[DB.theme]=1;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)));return}
@@ -3154,7 +3468,7 @@ function viewHome(){
     });
   }};
 }
-const TOOLS=[['reto','Modo reto','Toca canciones con notas que caen.',IC.levels],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
+const TOOLS=[['lento','Cámara lenta','Tu canción más lenta, sin cambiar el tono, con repetición A-B.',IC.timer],['reto','Modo reto','Toca canciones con notas que caen.',IC.levels],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
 const toolCards=()=>TOOLS.map(([k,n,d,ic])=>`<a class="card tool" href="#/practicar/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('');
 function viewLessons(){
   return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">11 lecciones · ${ALLEX.length} ejercicios</span><h1>Lecciones</h1><p class="sub">Cada lección se apoya en la anterior. Lee la idea, mira el mástil y haz los ejercicios con la guitarra en la mano.</p></div>
@@ -3225,7 +3539,8 @@ function route(){
   if(!p[0])v=viewHome();
   else if(p[0]==='lecciones')v=viewLessons();
   else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
-  else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder}[p[1]]||viewPractice)();
+  else if(p[0]==='cuenta')v=viewAccount();
+  else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder,lento:viewSlow}[p[1]]||viewPractice)();
   else if(p[0]==='logros')v=viewAch();
   else if(p[0]==='cancionero')v=p[1]==='ver'?viewSongPlay(p[2]||''):p[1]==='editar'?viewSongEdit(p[2]||'nueva'):viewSongbook();
   else if(p[0]==='referencia')v=({canciones:viewSongs,notas:viewNotes,acordes:viewChords,explorar:viewExplore,glosario:viewGlossary}[p[1]]||viewReference)();
