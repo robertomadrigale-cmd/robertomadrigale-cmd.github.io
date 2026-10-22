@@ -59,7 +59,7 @@ la gallina, la gallina con el cara, cara, cara, cara, [G]cara;
 [G7]los pollitos, los pollitos con el [C]pío, pío, pío, pío, [G]pí,
 y por [D7]eso los grandes amores de muchos co[G]lores me gustan a mí,
 y por [D7]eso los grandes amores de muchos co[G]lores me gustan a mí.`,
-`{title:La bamba}{artist:Son jarocho tradicional}{key:C}{bpm:150}{time:4/4}{style:son}{bpl:1}{cpb:0.5}{bps:1}
+`{title:La bamba}{artist:Son jarocho tradicional}{key:C}{bpm:150}{time:4/4}{style:rocknroll}{bpl:1}{cpb:0.5}{bps:1}{chordbeats:2 2 4}
 [C]Para bai[F]lar la [G]bamba,
 [C]para bai[F]lar la [G]bamba
 se nece[C]sita una [F]poca de [G]gracia,
@@ -73,7 +73,7 @@ soy [C]capi[F]tán, soy [G]capitán,
 soy [C]capi[F]tán. [G]
 [C]Bamba, [F]bam[G]ba, [C]bamba, [F]bam[G]ba,
 [C]bamba, [F]bam[G]ba, [C]bamba, [F]bam[G]ba.`,
-`{title:La llorona}{artist:Tradicional del Istmo de Tehuantepec}{key:Am}{bpm:96}{time:3/4}{style:vals}{bpl:2}
+`{title:La llorona}{artist:Tradicional del Istmo de Tehuantepec}{key:Am}{bpm:96}{time:3/4}{style:arpegio}{bpl:2}
 {c:Estrofa}
 [Am]Todos me dicen el [E7]negro, llo[Am]rona,
 negro pero cari[E7]ñoso.
@@ -109,7 +109,7 @@ que hasta el mismo coronel la respe[G]taba.
 la seguiría por tierra y por [G]mar,
 si por mar en un buque de [D7]guerra,
 si por tierra en un tren mili[G]tar.`,
-`{title:Las mañanitas}{artist:Tradicional mexicana}{key:D}{bpm:100}{time:3/4}{style:vals}{bpl:4}
+`{title:Las mañanitas}{artist:Tradicional mexicana}{key:D}{bpm:100}{time:3/4}{style:ranchera}{bpl:4}
 [D]Estas son las mañanitas que can[A7]taba el rey David,
 hoy por ser día de tu santo te las can[D]tamos a ti.
 [D]Despierta, mi bien, despierta, mira que [A7]ya amaneció,
@@ -144,7 +144,7 @@ cum~ple~[C]a~ños [G7]fe~[C]liz.
 {mel:C4/1 C4/1 G4/1 G4/1 A4/1 A4/1 G4/2}
 [F]Me pre~[C]gun~to [G7]qué se~[C]rás.
 {mel:F4/1 F4/1 E4/1 E4/1 D4/1 D4/1 C4/2}`,
-`{title:Amazing Grace}{artist:John Newton · 1779}{key:G}{bpm:84}{time:3/4}{style:balada}{pickup:1}
+`{title:Amazing Grace}{artist:John Newton · 1779}{key:G}{bpm:84}{time:3/4}{style:arpegio}{pickup:1}
 A~[G]ma~zing grace! How [C]sweet the [G]sound
 {mel:D4/1 G4/2 B4/.5 +G4/.5 B4/2 A4/1 G4/2 E4/1 D4/2}
 that [G]saved a [Em]wretch like [D]me!
@@ -183,14 +183,14 @@ dame un abrazo que yo te [Am]pido.
 en otros tiempos se olvida[Am]rán.
 [A7]Toca la marcha, mi pecho [Dm]llora,
 a[E7]diós, señora, yo ya me [Am]voy.`,
-`{title:Noche de paz}{artist:Franz Gruber · 1818 · versión en español}{key:C}{bpm:84}{time:3/4}{style:balada}{bpl:2}
+`{title:Noche de paz}{artist:Franz Gruber · 1818 · versión en español}{key:C}{bpm:84}{time:3/4}{style:arpegio}{bpl:2}
 [C]Noche de paz, noche de a[C]mor,
 [G7]todo duerme en derre[C]dor.
 [F]Entre los astros que esparcen su [C]luz,
 [F]bella anunciando al niñito Je[C]sús,
 [G7]brilla la estrella de [C]paz,
 [C]brilla la [G7]estrella de [C]paz.`,
-`{title:The House of the Rising Sun}{artist:Folk tradicional estadounidense}{key:Am}{bpm:116}{time:3/4}{style:balada}{bpl:1}
+`{title:The House of the Rising Sun}{artist:Folk tradicional estadounidense}{key:Am}{bpm:116}{time:3/4}{style:arpegio}{bpl:1}
 There [Am]is a [C]house in [D]New Or[F]leans
 they [Am]call the [C]Rising [E]Sun, [E]
 and it's [Am]been the [C]ruin of [D]many a poor [F]boy,
@@ -200,7 +200,7 @@ My [Am]mother [C]was a [D]tailor, [F]
 she [Am]sewed my [C]new blue [E]jeans; [E]
 my [Am]father [C]was a [D]gambling [F]man
 [Am]down in [E]New Or[Am]leans. [E]`,
-`{title:When the Saints Go Marching In}{artist:Espiritual tradicional}{key:G}{bpm:120}{time:4/4}{style:folk}{bpl:2}
+`{title:When the Saints Go Marching In}{artist:Espiritual tradicional}{key:G}{bpm:120}{time:4/4}{style:country}{bpl:2}
 Oh, when the [G]saints go marching in,
 oh, when the saints go marching [D7]in,
 Lord, how I [G]want to [G7]be in that [C]number,
@@ -210,13 +210,13 @@ Oh, when the [G]sun refuse to shine,
 oh, when the sun refuse to [D7]shine,
 Lord, how I [G]want to [G7]be in that [C]number,
 when the [G]sun re[D7]fuse to [G]shine.`,
-`{title:Oh! Susanna}{artist:Stephen Foster · 1848}{key:C}{bpm:120}{time:4/4}{style:folk}{bpl:2}
+`{title:Oh! Susanna}{artist:Stephen Foster · 1848}{key:C}{bpm:120}{time:4/4}{style:country}{bpl:2}
 I [C]come from Alabama with my banjo on my [G7]knee,
 I'm [C]going to Louisiana, my [G7]true love for to [C]see.
 {c:Coro}
 [F]Oh, Su[F]sanna, [C]oh don't you cry for [G7]me,
 for I [C]come from Alabama with my [G7]banjo on my [C]knee.`,
-`{title:Jingle Bells}{artist:James Lord Pierpont · 1857}{key:G}{bpm:120}{time:4/4}{style:folk}{bpl:2}
+`{title:Jingle Bells}{artist:James Lord Pierpont · 1857}{key:G}{bpm:120}{time:4/4}{style:country}{bpl:2}
 [G]Dashing through the snow in a one-horse open [C]sleigh,
 [Am]o'er the fields we [D7]go, laughing all the [G]way.
 [G]Bells on bobtail ring, making spirits [C]bright,
@@ -246,7 +246,7 @@ Oh my [G]darling, oh my darling,
 oh my darling Clemen[D7]tine,
 you are [D7]lost and gone forever,
 dreadful [G]sorry, Clemen[D7]tine. [G]`,
-`{title:Red River Valley}{artist:Folk tradicional}{key:G}{bpm:96}{time:4/4}{style:folk}{bpl:2}
+`{title:Red River Valley}{artist:Folk tradicional}{key:G}{bpm:96}{time:4/4}{style:country}{bpl:2}
 From this [G]valley they say you are going,
 we will miss your bright eyes and sweet [D7]smile,
 for they [G]say you are taking the [C]sunshine
@@ -256,7 +256,7 @@ Come and [G]sit by my side if you love me,
 do not hasten to bid me a[D7]dieu,
 but re[G]member the Red River [C]Valley,
 and the [G]cowboy who [D7]loved you so [G]true.`,
-`{title:Michael, Row the Boat Ashore}{artist:Espiritual tradicional}{key:C}{bpm:100}{time:4/4}{style:folk}{bpl:2}
+`{title:Michael, Row the Boat Ashore}{artist:Espiritual tradicional}{key:C}{bpm:100}{time:4/4}{style:travis}{bpl:2}
 [C]Michael, row the boat a[F]shore, Halle[C]lujah!
 Michael, row the boat a[G7]shore, Halle[C]lujah!
 [C]Sister, help to trim the [F]sail, Halle[C]lujah!
@@ -272,7 +272,7 @@ oh [F]Lord, [C]kumba[G7]ya. [C]
 someone's singing, Lord, [Dm]kumba[G7]ya,
 [C]someone's singing, Lord, [F]kumba[C]ya,
 oh [F]Lord, [C]kumba[G7]ya. [C]`,
-`{title:Scarborough Fair}{artist:Balada inglesa tradicional}{key:Am}{bpm:100}{time:3/4}{style:balada}{bpl:2}
+`{title:Scarborough Fair}{artist:Balada inglesa tradicional}{key:Am}{bpm:100}{time:3/4}{style:arpegio}{bpl:2}
 [Am]Are you going to [G]Scarborough [Am]Fair?
 [C]Parsley, [Am]sage, rose[D]mary and [Am]thyme.
 Re[Am]member me to [C]one who lives [G]there,
@@ -298,8 +298,19 @@ const TOP100={
 const TOPLIST=[];Object.entries(TOP100).forEach(([g,a])=>a.forEach((r,i)=>{const[t,ar,y,k,b,p]=r.split('|');TOPLIST.push({id:'top'+TOPLIST.length,g,t,a:ar,y,k,bpm:+b,prog:p})}));
 // ritmo de banda según el género (las lentas van como balada)
 const TOPSTY={'Rock clásico':'rock','Rock en español':'rock','Alternativo y grunge':'rock','Blues y soul':'rock','Pop internacional':'pop','Baladas en español':'balada','Regional mexicano':'ranchera','Cumbia y tropical':'cumbia','Folk y acústico':'folk','Latino actual':'urbano'};
-function topStyle(x){const g=TOPSTY[x.g]||'folk';return x.bpm<=80&&g!=='cumbia'&&g!=='urbano'?'balada':g}
-function topHead(x){return`{title:${x.t}}{artist:${x.a} · ${x.y}}{key:${x.k}}{bpm:${x.bpm}}{style:${topStyle(x)}}`}
+// ritmo por canción (cuando se sabe); «|3» = va en 3/4
+const TOPSONG={'Sweet Child O’ Mine':'rock','Hotel California':'balada','Stairway to Heaven':'arpegio','Hey Jude':'balada','Bohemian Rhapsody':'balada',
+ 'Lamento boliviano':'pop','Rayando el sol':'pop','Flaca':'pop','Eres':'balada','Devuélveme a mi chica':'pop','Labios rotos':'pop',
+ 'Someone Like You':'arpegio','Shape of You':'urbano','Perfect':'balada|3','Let It Be':'balada','Imagine':'balada','Wonderwall':'pop',
+ 'Bésame mucho':'bolero','Querida':'pop','Sabor a mí':'bolero','Contigo en la distancia':'bolero','Ella':'ranchera|3','Tu falta de querer':'balada',
+ 'El Rey':'ranchera|3','Volver, volver':'ranchera|3','Si nos dejan':'ranchera|3','El triste':'balada','Amor prohibido':'cumbia',
+ 'Tiburón':'merengue','Suavemente':'merengue','Ojalá que llueva café':'merengue','La negra Tomasa':'son','La vida es un carnaval':'son',
+ 'Johnny B. Goode':'rocknroll','Pride and Joy':'shuffle','Hound Dog':'shuffle','The Thrill Is Gone':'shuffle','Sweet Home Chicago':'shuffle','Stand by Me':'pop','Hit the Road Jack':'pop','(Sittin’ On) The Dock of the Bay':'pop',"Ain’t No Sunshine":'balada','Respect':'pop',
+ 'Blowin’ in the Wind':'folk','Knockin’ on Heaven’s Door':'folk','Hallelujah':'arpegio|3','Gracias a la vida':'arpegio|3','Ojalá':'arpegio','Sound of Silence':'arpegio','Hotel Yorba':'country','Fast Car':'travis','Volver a los 17':'vals|3','Alfonsina y el mar':'arpegio|3',
+ 'Black':'balada','Under the Bridge':'arpegio','Boulevard of Broken Dreams':'pop',
+ 'La bicicleta':'cumbia','Clandestino':'reggae','Corazón espinado':'son','Oye cómo va':'son','Vivir mi vida':'son','Me enamoré':'pop'};
+function topStyle(x){const o=TOPSONG[x.t];if(o)return o.split('|')[0];const g=TOPSTY[x.g]||'folk';return x.bpm<=80&&g!=='cumbia'&&g!=='urbano'?'balada':g}
+function topHead(x){const t3=/\|3$/.test(TOPSONG[x.t]||'');return`{title:${x.t}}{artist:${x.a} · ${x.y}}{key:${x.k}}{bpm:${x.bpm}}{style:${topStyle(x)}}${t3?'{time:3/4}':''}`}
 function topSrc(x){const bars=x.prog.split(' ').map(c=>'['+c+']').join(' ');return`${topHead(x)}{bpl:1}
 {c:Progresión principal}
 ${bars}

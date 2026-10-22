@@ -81,8 +81,10 @@ function smpPlay(k,m,t,d,v,o){
   src.start(t,S.off);src.stop(end+.02);
   return{g,end};
 }
-function bassNote(m,t,d,v){
-  if(SMP.ready){let n=m;while(n>39)n-=12;smpPlay('b',n,t,Math.max(.12,d),(v||.4)*.9);return}
+// raw = la nota ya viene en el registro del bajo (E1–D♯3); si no, se baja de octava
+function bassNote(m,t,d,v,raw){
+  if(SMP.ready){let n=m;if(!raw)while(n>39)n-=12;smpPlay('b',n,t,Math.max(.12,d),(v||.4)*.9);return}
+  if(raw)m+=12;
   const c=AC,f=440*Math.pow(2,(m-69)/12),o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();
   o.type='sine';o2.type='triangle';o.frequency.value=f;o2.frequency.value=f;
   lp.type='lowpass';lp.frequency.value=900;
