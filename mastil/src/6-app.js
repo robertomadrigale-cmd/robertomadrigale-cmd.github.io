@@ -152,6 +152,7 @@ function viewHome(){
   </div>
   ${nx?`<a class="card tool" href="#/leccion/${nx.lesson}/${nx.id}"><span class="ic">${IC.play}</span><span style="flex:1;min-width:0"><b>Continuar: ${nx.t}</b><span>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</span></span></a>`:`<div class="card"><h3>Completaste todos los ejercicios</h3><p class="cap">Repite los que más te costaron con un tempo más alto.</p></div>`}
   <a class="card cta" href="#/practicar/reto"><span><span class="eyebrow">Nuevo · modo reto</span><b>Sube al escenario</b><span>Notas que bajan por el mástil, combos y estrellas. Con toques o con tu guitarra real.</span></span><span class="ic">${IC.game}</span></a>
+  <a class="card tool" href="#/cancionero"><span class="ic">${IC.note}</span><span><b>Cancionero karaoke</b><span>Letra que se ilumina, acordes en tu tono, metrónomo y 100 canciones por género.</span></span></a>
   <div class="grid2"><a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación.</span></span></a>
   <a class="card tool" href="#/logros"><span class="ic medal-ic">★</span><span><b>Logros · ${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length}</b><span>Rachas, récords y retos superados.</span></span></a></div>
   ${inst}
@@ -240,7 +241,8 @@ function viewExplore(){
 }
 function viewGlossary(){return{title:'Glosario',back:'#/referencia',html:`<div class="gl">${GLOS.map(g=>`<div><b>${g[0]}</b><span>${g[1]}</span></div>`).join('')}</div>`}}
 /* ---------- enrutador ---------- */
-const NAV=[['#/','Inicio',IC.home,''],['#/lecciones','Lecciones',IC.book,'leccion'],['#/practicar','Practicar',IC.play2,'practicar'],['#/referencia','Referencia',IC.grid,'referencia']];
+IC.note=sv('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>');
+const NAV=[['#/','Inicio',IC.home,''],['#/lecciones','Lecciones',IC.book,'leccion'],['#/practicar','Practicar',IC.play2,'practicar'],['#/cancionero','Canciones',IC.note,'cancionero'],['#/referencia','Referencia',IC.grid,'referencia']];
 let UNMOUNT=null;
 function route(){
   const h=location.hash.replace(/^#\/?/,''),p=h.split('/');
@@ -250,6 +252,7 @@ function route(){
   else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
   else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder}[p[1]]||viewPractice)();
   else if(p[0]==='logros')v=viewAch();
+  else if(p[0]==='cancionero')v=p[1]==='ver'?viewSongPlay(p[2]||''):p[1]==='editar'?viewSongEdit(p[2]||'nueva'):viewSongbook();
   else if(p[0]==='referencia')v=({canciones:viewSongs,notas:viewNotes,acordes:viewChords,explorar:viewExplore,glosario:viewGlossary}[p[1]]||viewReference)();
   else v=viewHome();
   if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}

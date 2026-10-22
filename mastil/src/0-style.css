@@ -52,7 +52,7 @@ main{flex:1;min-width:0;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-b
 .icon-btn:hover{background:var(--surface)}
 .icon-btn svg{width:22px;height:22px}
 .page{max-width:880px;margin:0 auto;padding-block:24px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--glass);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--glass);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 .tab{height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--muted);font:600 11px var(--font-body);letter-spacing:.02em}
 .tab svg{width:24px;height:24px}
 .tab[aria-current="page"]{color:var(--accent-text)}
@@ -348,3 +348,35 @@ textarea{width:100%;font:500 13px var(--font-mono);padding:10px;border-radius:10
 .takes{display:flex;flex-direction:column;gap:12px}
 .take{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
 .take audio{width:100%;height:40px}
+/* cancionero karaoke */
+.tab{font-size:10.5px}
+.lrow.top{gap:10px;flex-wrap:wrap}.lrow.top .mt{text-decoration:none;color:var(--fg)}
+.khead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.khead h2{margin-top:4px}
+.kctl{display:flex;flex-direction:column;gap:12px}
+.kkey{font:800 26px/1 var(--font-display);min-width:64px;text-align:center;color:var(--accent-text)}
+.kchips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.kchip{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--fg)}
+.kchip b{font-size:15px}
+.mch{width:52px;height:58px}.mch line{stroke:var(--muted);stroke-width:1}.mch circle{fill:var(--accent)}.mch circle.o{fill:none;stroke:var(--muted);stroke-width:1.2}.mch text{fill:var(--muted);font:600 9px var(--font-mono);text-anchor:middle}
+.karaoke{--kz:1;display:flex;flex-direction:column;gap:6px;padding:18px 16px 40vh;border-radius:18px;background:var(--surface);border:1px solid var(--line);font-size:calc(20px * var(--kz))}
+.kl{display:flex;flex-wrap:wrap;align-items:flex-end;padding:6px 8px;border-radius:12px;cursor:pointer;transition:background .2s,opacity .2s;line-height:1.25}
+.kl:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.kl.past{opacity:.45}
+.kl.cur{background:color-mix(in srgb,var(--accent) 12%,transparent);box-shadow:inset 3px 0 0 var(--accent)}
+.sg{display:inline-flex;flex-direction:column;white-space:pre-wrap;max-width:100%}
+.kc{font:700 .8em var(--font-mono);color:var(--accent-text);min-height:1.2em;padding-right:.4em}
+.sg.now .kc{color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:0 .3em;margin-right:.2em}
+.kt i{font-style:normal;transition:color .25s}
+.kl.cur .kt i{color:var(--muted)}
+.kl.cur .kt i.lit,.kl.past .kt i{color:var(--fg)}
+.kl.cur .kt i.lit{color:var(--accent-text);text-shadow:0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
+.karaoke.show-lyrics .kc{display:none}
+.karaoke.show-chords .kt{display:none}
+.karaoke.show-chords .sg{white-space:normal}
+.karaoke.show-chords .kc{font-size:1em;padding-right:.9em}
+.klab{font:600 12px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--root);margin-top:10px}
+.kgap{height:14px}
+.kbar{position:sticky;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 8px);z-index:5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:16px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line)}
+.kbar .tm{flex:1;min-width:120px}
+@media (min-width:900px){.kbar{bottom:12px}}

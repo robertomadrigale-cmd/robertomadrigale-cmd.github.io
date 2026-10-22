@@ -27,6 +27,7 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 - `4-content.js` las 11 lecciones; cada ejercicio `E({...})` puede tener `fig` (`pts(...)` = notas en orden, `chords(ch(...))` = acordes que cambian al pulso), `bpm`, `track`, `game`.
 - `5-fig.js` diagramas que suenan y siguen el pulso. `5-tools.js` metrónomo, afinador, juego, pistas, rutina. `6-app.js` inicio, navegación, tarjetas de ejercicio, progreso.
 - `5-extra.js` logo, avisos (`toast`), Canciones (`SONGBOOK`), afinaciones (`TUNINGS`), **modo reto** (`SONGS`: notas que caen en canvas, toques o micrófono), grabadora (IndexedDB `mades-guitar-hero`), logros (`ACH`, se revisan en cada `save()`) y respaldo por código `MGH1:`.
+- `5-songbook.js` **cancionero karaoke**: formato ChordPro (`[Sol]letra`, `{bpm:}` `{time:}` `{bpl:}` `{c:}`) y conversión de "acordes arriba, letra abajo"; transposición con sugerencia de capo, notación C/Do, letra que se ilumina por tiempos, metrónomo y guitarra de fondo. `TRAD` = canciones de dominio público con letra; `TOP100` = 100 canciones por género solo con tono, BPM y progresión (sus letras tienen derechos de autor: no las incluyas, el usuario las pega en "Mis canciones", guardadas en `DB.songs`).
 - Íconos generados con Pillow (púa degradada con "MGH" en Impact).
 - Temas de color por épocas del rock: lista `THEMES` en `6-app.js` (colores + fondo `--art`). La carpeta `mastil/` y la clave de `localStorage` no cambian, para no romper links ni perder progreso.
 
