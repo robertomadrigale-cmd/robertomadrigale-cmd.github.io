@@ -492,8 +492,8 @@ function bandRender(steps,cd){
   // Safari viejo entrega el resultado por evento y no por promesa
   return new Promise((res,rej)=>{off.oncomplete=e=>res(e.renderedBuffer);try{const p=off.startRendering();if(p&&p.then)p.then(res,rej)}catch(e){rej(e)}});
 }
-function bandPlay(buf,when){
-  const src=AC.createBufferSource();src.buffer=buf;src.connect(out());const now=AC.currentTime;
+function bandPlay(buf,when,gain){
+  const src=AC.createBufferSource();src.buffer=buf;if(gain!=null){const g=AC.createGain();g.gain.value=gain;src.connect(g);g.connect(out())}else src.connect(out());const now=AC.currentTime;
   if(when>=now+.005)src.start(when);else{const late=now+.02-when;if(late<buf.duration)src.start(now+.02,late);else return}
   BR.src.push(src);src.onended=()=>{BR.src=BR.src.filter(x=>x!==src)};
 }

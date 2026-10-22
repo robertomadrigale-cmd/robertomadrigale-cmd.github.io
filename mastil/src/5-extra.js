@@ -36,17 +36,21 @@ const tuningStrings=()=>(TUNINGS[DB.tuning]||TUNINGS.std).m.map((m,i)=>({m,n:PCS
 /* ---------- modo reto: notas que caen ---------- */
 // cada canción: "cuerda,traste,tiempos" separados por espacios; "-,tiempos" es silencio
 const SONGS=[
- {id:'crom',n:'Cromático 1-2-3-4',sub:'Calentamiento · un dedo por traste',lvl:1,bpm:72,src:'6,1,.5 6,2,.5 6,3,.5 6,4,.5 5,1,.5 5,2,.5 5,3,.5 5,4,.5 4,1,.5 4,2,.5 4,3,.5 4,4,.5 3,1,.5 3,2,.5 3,3,.5 3,4,.5 2,1,.5 2,2,.5 2,3,.5 2,4,.5 1,1,.5 1,2,.5 1,3,.5 1,4,2'},
- {id:'estrellita',n:'Estrellita',sub:'Tradicional · en Do',lvl:1,bpm:92,src:'2,1,1 2,1,1 1,3,1 1,3,1 1,5,1 1,5,1 1,3,2 1,1,1 1,1,1 1,0,1 1,0,1 2,3,1 2,3,1 2,1,2 1,3,1 1,3,1 1,1,1 1,1,1 1,0,1 1,0,1 2,3,2 1,3,1 1,3,1 1,1,1 1,1,1 1,0,1 1,0,1 2,3,2 2,1,1 2,1,1 1,3,1 1,3,1 1,5,1 1,5,1 1,3,2 1,1,1 1,1,1 1,0,1 1,0,1 2,3,1 2,3,1 2,1,2'},
- {id:'oda',n:'Oda a la alegría',sub:'Beethoven · en Sol',lvl:1,bpm:100,src:'2,0,1 2,0,1 2,1,1 2,3,1 2,3,1 2,1,1 2,0,1 3,2,1 3,0,1 3,0,1 3,2,1 2,0,1 2,0,1.5 3,2,.5 3,2,2 2,0,1 2,0,1 2,1,1 2,3,1 2,3,1 2,1,1 2,0,1 3,2,1 3,0,1 3,0,1 3,2,1 2,0,1 3,2,1.5 3,0,.5 3,0,2'},
- {id:'cucaracha',n:'La cucaracha',sub:'Tradicional mexicana · en Do',lvl:2,bpm:120,src:'3,0,.5 3,0,.5 3,0,.5 2,1,1 1,0,1.5 -,.5 3,0,.5 3,0,.5 3,0,.5 2,1,1 1,0,1.5 -,.5 2,1,.5 2,1,.5 2,0,.5 2,0,.5 3,2,.5 3,2,.5 3,0,2 -,1 3,0,.5 3,0,.5 3,0,.5 2,0,1 2,3,1.5 -,.5 3,0,.5 3,0,.5 3,0,.5 2,0,1 2,3,1.5 -,.5 1,3,.5 1,5,.5 1,3,.5 1,1,.5 1,0,.5 2,3,.5 2,1,2'},
- {id:'penta',n:'Pentatónica de La menor',sub:'La caja 1 · sube y baja',lvl:2,bpm:84,src:'6,5,.5 6,8,.5 5,5,.5 5,7,.5 4,5,.5 4,7,.5 3,5,.5 3,7,.5 2,5,.5 2,8,.5 1,5,.5 1,8,1 1,5,.5 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,.5 4,5,.5 5,7,.5 5,5,.5 6,8,.5 6,5,2'},
- {id:'arpegios',n:'Arpegios Do – Lam – Fa – Sol',sub:'Acordes abiertos nota por nota',lvl:2,bpm:84,src:'5,3,.5 4,2,.5 3,0,.5 2,1,.5 1,0,.5 2,1,.5 3,0,.5 4,2,.5 5,0,.5 4,2,.5 3,2,.5 2,1,.5 1,0,.5 2,1,.5 3,2,.5 4,2,.5 4,3,.5 3,2,.5 2,1,.5 1,1,.5 2,1,.5 3,2,.5 4,3,1 6,3,.5 5,2,.5 4,0,.5 3,0,.5 2,0,.5 1,3,.5 2,0,.5 3,0,.5 5,3,2'},
- {id:'boogie',n:'Boogie en La',sub:'Blues · bajo que camina',lvl:3,bpm:108,src:'5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 4,0,.5 4,4,.5 3,2,.5 3,4,.5 3,5,.5 3,4,.5 3,2,.5 4,4,.5 5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 6,0,.5 6,4,.5 5,2,.5 5,4,.5 4,0,.5 4,4,.5 3,2,.5 3,4,.5 5,0,2'},
- {id:'pesado',n:'Riff pesado en Mi',sub:'Original · cuerdas graves',lvl:3,bpm:100,src:'6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,6,.5 6,5,.5 6,3,.5 5,0,.5 5,0,.5 5,3,.5 5,0,.5 5,5,.5 5,3,.5 5,2,.5 5,0,.5 6,3,.5 6,2,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,2'},
- {id:'solo',n:'Solo de blues en La',sub:'Frases con la caja 1',lvl:3,bpm:96,src:'1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,1 -,1 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,1 -,1 3,5,.5 3,7,.5 2,5,.5 2,8,.5 1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,.5 4,5,.5 5,7,.5 5,5,2'}];
+ {id:'crom',sty:'rock',n:'Cromático 1-2-3-4',sub:'Calentamiento · un dedo por traste',lvl:1,bpm:72,src:'6,1,.5 6,2,.5 6,3,.5 6,4,.5 5,1,.5 5,2,.5 5,3,.5 5,4,.5 4,1,.5 4,2,.5 4,3,.5 4,4,.5 3,1,.5 3,2,.5 3,3,.5 3,4,.5 2,1,.5 2,2,.5 2,3,.5 2,4,.5 1,1,.5 1,2,.5 1,3,.5 1,4,2'},
+ {id:'estrellita',sty:'folk',chb:'0:C 4:F 6:C 8:F 10:C 12:G 14:C 16:C 18:F 20:C 22:G 24:C 26:F 28:C 30:G 32:C 36:F 38:C 40:F 42:C 44:G 46:C',n:'Estrellita',sub:'Tradicional · en Do',lvl:1,bpm:92,src:'2,1,1 2,1,1 1,3,1 1,3,1 1,5,1 1,5,1 1,3,2 1,1,1 1,1,1 1,0,1 1,0,1 2,3,1 2,3,1 2,1,2 1,3,1 1,3,1 1,1,1 1,1,1 1,0,1 1,0,1 2,3,2 1,3,1 1,3,1 1,1,1 1,1,1 1,0,1 1,0,1 2,3,2 2,1,1 2,1,1 1,3,1 1,3,1 1,5,1 1,5,1 1,3,2 1,1,1 1,1,1 1,0,1 1,0,1 2,3,1 2,3,1 2,1,2'},
+ {id:'oda',sty:'balada',chb:'0:G 4:D 8:G 12:D 16:G 20:D 24:G 28:D 30:G',n:'Oda a la alegría',sub:'Beethoven · en Sol',lvl:1,bpm:100,src:'2,0,1 2,0,1 2,1,1 2,3,1 2,3,1 2,1,1 2,0,1 3,2,1 3,0,1 3,0,1 3,2,1 2,0,1 2,0,1.5 3,2,.5 3,2,2 2,0,1 2,0,1 2,1,1 2,3,1 2,3,1 2,1,1 2,0,1 3,2,1 3,0,1 3,0,1 3,2,1 2,0,1 3,2,1.5 3,0,.5 3,0,2'},
+ {id:'cucaracha',sty:'ranchera',chn:'0:C 12:G7 29:C',n:'La cucaracha',sub:'Tradicional mexicana · en Do',lvl:2,bpm:120,src:'3,0,.5 3,0,.5 3,0,.5 2,1,1 1,0,1.5 -,.5 3,0,.5 3,0,.5 3,0,.5 2,1,1 1,0,1.5 -,.5 2,1,.5 2,1,.5 2,0,.5 2,0,.5 3,2,.5 3,2,.5 3,0,2 -,1 3,0,.5 3,0,.5 3,0,.5 2,0,1 2,3,1.5 -,.5 3,0,.5 3,0,.5 3,0,.5 2,0,1 2,3,1.5 -,.5 1,3,.5 1,5,.5 1,3,.5 1,1,.5 1,0,.5 2,3,.5 2,1,2'},
+ {id:'penta',sty:'pop',chb:'0:Am',n:'Pentatónica de La menor',sub:'La caja 1 · sube y baja',lvl:2,bpm:84,src:'6,5,.5 6,8,.5 5,5,.5 5,7,.5 4,5,.5 4,7,.5 3,5,.5 3,7,.5 2,5,.5 2,8,.5 1,5,.5 1,8,1 1,5,.5 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,.5 4,5,.5 5,7,.5 5,5,.5 6,8,.5 6,5,2'},
+ {id:'arpegios',sty:'balada',chn:'0:C 8:Am 16:F 23:G 31:C',n:'Arpegios Do – Lam – Fa – Sol',sub:'Acordes abiertos nota por nota',lvl:2,bpm:84,src:'5,3,.5 4,2,.5 3,0,.5 2,1,.5 1,0,.5 2,1,.5 3,0,.5 4,2,.5 5,0,.5 4,2,.5 3,2,.5 2,1,.5 1,0,.5 2,1,.5 3,2,.5 4,2,.5 4,3,.5 3,2,.5 2,1,.5 1,1,.5 2,1,.5 3,2,.5 4,3,1 6,3,.5 5,2,.5 4,0,.5 3,0,.5 2,0,.5 1,3,.5 2,0,.5 3,0,.5 5,3,2'},
+ {id:'boogie',sty:'shuffle',chn:'0:A 16:D 24:A 32:E 36:D 40:A',n:'Boogie en La',sub:'Blues · bajo que camina',lvl:3,bpm:108,src:'5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 4,0,.5 4,4,.5 3,2,.5 3,4,.5 3,5,.5 3,4,.5 3,2,.5 4,4,.5 5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 6,0,.5 6,4,.5 5,2,.5 5,4,.5 4,0,.5 4,4,.5 3,2,.5 3,4,.5 5,0,2'},
+ {id:'pesado',sty:'rock',chn:'0:Em 16:A 24:Em',n:'Riff pesado en Mi',sub:'Original · cuerdas graves',lvl:3,bpm:100,src:'6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,6,.5 6,5,.5 6,3,.5 5,0,.5 5,0,.5 5,3,.5 5,0,.5 5,5,.5 5,3,.5 5,2,.5 5,0,.5 6,3,.5 6,2,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,2'},
+ {id:'solo',sty:'shuffle',chb:'0:A7',n:'Solo de blues en La',sub:'Frases con la caja 1',lvl:3,bpm:96,src:'1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,1 -,1 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,1 -,1 3,5,.5 3,7,.5 2,5,.5 2,8,.5 1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,.5 4,5,.5 5,7,.5 5,5,2'}];
 SONGS.forEach(S=>{let b=0;S.notes=[];S.src.trim().split(/\s+/).forEach(tok=>{const p=tok.split(',');if(p[0]==='-'){b+=+p[1];return}const s=+p[0],f=+p[1],d=+p[2];S.notes.push({s,f,d,b,m:OPEN_MIDI[s]+f});b+=d});S.beats=b});
-const RETO={speed:1,input:'tap'};
+// acordes del acompañamiento en pulsos: chb = por pulso, chn = por número de nota
+SONGS.forEach(S=>{S.chords=[];if(S.chb)S.chb.split(' ').forEach(x=>{const[a,c]=x.split(':');S.chords.push([+a,c])});
+  if(S.chn)S.chn.split(' ').forEach(x=>{const[a,c]=x.split(':');const n=S.notes[+a];if(n)S.chords.push([n.b,c])});S.chords.sort((a,b)=>a[0]-b[0])});
+const RETO=Object.assign({speed:1,input:'tap',music:true,met:true,guide:false},(()=>{try{return JSON.parse(localStorage.getItem('roka-reto-opt')||'{}')}catch(e){return{}}})());
+const retoSave=()=>{try{localStorage.setItem('roka-reto-opt',JSON.stringify(RETO))}catch(e){}};
 const LVL=['','Fácil','Medio','Difícil'];
 function stars(n){return'<span class="stars">'+[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></i>`).join('')+'</span>'}
 function viewReto(){
@@ -55,16 +59,18 @@ function viewReto(){
   return{title:'Modo reto',back:'#/practicar',html:`<div id="retohost"><div class="hero-reto"><span class="eyebrow">Modo reto</span><h1 class="glow">Sube al escenario</h1><p class="sub">Las notas bajan por las seis cuerdas con su número de traste. Tócalas justo cuando lleguen a la línea: combos, multiplicador y estrellas.</p></div>
   <div class="card" style="display:flex;flex-direction:column;gap:14px">
    ${chipRow('input','Cómo tocas',[{v:'tap',l:'Toques en pantalla'},{v:'mic',l:'Guitarra real (micrófono)'}],RETO.input)}
-   ${chipRow('speed','Velocidad',[{v:.7,l:'Práctica 70%'},{v:1,l:'Normal'},{v:1.2,l:'Leyenda 120%'}],RETO.speed)}
+   ${chipRow('speed','Velocidad',[.5,.6,.7,.8,.9,1,1.2].map(v=>({v,l:Math.round(v*100)+' %'})),RETO.speed)}
+   <div><span class="cl">Para darle seguimiento</span><div class="chips">${[['music','Música de fondo'],['met','Metrónomo'],['guide','Nota guía']].map(([k,l])=>`<button class="chip" data-rt="${k}" aria-pressed="${!!RETO[k]}">${l}</button>`).join('')}</div></div>
    <p class="cap" style="margin:0" id="rtip"></p>
   </div>
   <div class="songgrid">${list()}</div></div>`,
   mount(r){
     let stop=null;
-    const tip=()=>{$('#rtip',r).innerHTML=RETO.input==='mic'?'Pon el teléfono cerca de la guitarra, en un lugar callado. La app escucha cada nota y la compara con la que baja. Funciona mejor con guitarra acústica o con el ampli bajito.':'Toca el carril de la cuerda cuando la nota cruce la línea. En computadora también puedes usar las teclas 1 a 6 (cuerda 6 a la 1).'};
+    const tip=()=>{$('#rtip',r).innerHTML=RETO.input==='mic'?'Pon el teléfono cerca de la guitarra, en un lugar callado. La app escucha cada nota y la compara con la que baja. Funciona mejor con guitarra acústica o con el ampli bajito.'+(RETO.music?' Con música de fondo usa audífonos, para que el micrófono solo oiga tu guitarra.':'')+(RETO.guide?' La nota guía se apaga con micrófono (si no, la app se oiría a sí misma).':''):'Toca el carril de la cuerda cuando la nota cruce la línea. En computadora también puedes usar las teclas 1 a 6 (cuerda 6 a la 1).'};
     tip();
     r.addEventListener('click',e=>{
-      const c=e.target.closest('[data-set]');if(c&&!stop){const k=c.dataset.set;RETO[k]=k==='speed'?+c.dataset.v:c.dataset.v;$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===c)));tip();return}
+      const rt=e.target.closest('[data-rt]');if(rt&&!stop){const k=rt.dataset.rt;RETO[k]=!RETO[k];rt.setAttribute('aria-pressed',String(RETO[k]));retoSave();tip();return}
+      const c=e.target.closest('[data-set]');if(c&&!stop){const k=c.dataset.set;RETO[k]=k==='speed'?+c.dataset.v:c.dataset.v;retoSave();$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===c)));tip();return}
       const s=e.target.closest('[data-rs]');if(s&&!stop){const S=SONGS.find(x=>x.id===s.dataset.rs);stop=retoPlay($('#retohost',r),S,()=>{stop=null;route()})}
     });
     return()=>{if(stop)stop()};
@@ -89,8 +95,25 @@ function retoPlay(host,S,onExit){
   size();window.addEventListener('resize',size);
   const laneOf=s=>LEFTY?s-1:6-s; // carril 0 = cuerda 6 a la izquierda
   const hitY=()=>H-74,pps=()=>H*.5;
-  const begin=()=>{
-    G.t0=c.currentTime+.4+4*spb;N.forEach(n=>n.t=G.t0+n.b*spb);G.end=G.t0+S.beats*spb+1.2;G.nextTick=G.t0-4*spb;
+  // lo que se ve va con lo que se OYE: el sonido tarda outLat() en salir por la bocina
+  const vt=()=>c.currentTime-outLat();
+  // música de fondo: la banda del cancionero con los acordes de la canción, grabada completa antes de empezar
+  const music=async()=>{
+    if(!RETO.music||!S.chords||(!S.chords.length&&S.sty!=='rock'))return null;
+    try{if(!SMP.ready){$('#hmsg',host).textContent='Cargando sonidos…';await loadSamples()}
+      const sty=S.sty||'folk',Q=GROOVES[sty].sub,cd=spb/Q,L=4*Q,nc=Math.ceil(S.beats*Q)+L,steps=[];let ci=0,cs=0;
+      for(let k=0;k<nc;k++){const b=k/Q;while(ci+1<S.chords.length&&S.chords[ci+1][0]<=b+1e-6){ci++;cs=k}
+        const ch=S.chords[ci];steps.push(ch?{G:sty,bt:4,i:k%L,bar:Math.floor(k/L),p:chParse(ch[1]),ci:k-cs,sh:0,spb}:null)}
+      if(!S.chords.length){// sin acordes (calentamiento): solo batería y bajo en Mi
+        steps.forEach((x,k)=>steps[k]={G:'rock',bt:4,i:k%L,bar:Math.floor(k/L),p:chParse('E'),ci:k,sh:0,spb})}
+      // por tramos de 2 compases: el primero antes de arrancar, los demás mientras suena
+      const CH=2*L,parts=[];for(let k=0;k<steps.length;k+=CH)parts.push(steps.slice(k,k+CH));
+      $('#hmsg',host).textContent='Preparando la música…';
+      const first=await bandRender(parts[0],cd);if(!bufHasSound(first))return null;
+      return{first,more:async t0=>{for(let n=1;n<parts.length;n++){if(!G.run)return;try{const b=await bandRender(parts[n],cd);if(G.run)bandPlay(b,t0+n*CH*cd,.7)}catch(e){return}}}}}catch(e){return null}};
+  const begin=async()=>{
+    const M=await music();if(!G.run)return;
+    G.t0=c.currentTime+.4+4*spb;if(M){G.mus=true;bandPlay(M.first,G.t0,.7);M.more(G.t0)}N.forEach(n=>n.t=G.t0+n.b*spb);G.end=G.t0+S.beats*spb+1.2;G.nextTick=G.t0-4*spb;
     $('#hmsg',host).textContent=mic?'Escuchando tu guitarra':'Toca el carril cuando la nota llegue a la línea';
     G.raf=requestAnimationFrame(frame);
   };
@@ -100,13 +123,13 @@ function retoPlay(host,S,onExit){
     n.hit=1;G.combo++;G.max=Math.max(G.max,G.combo);const mul=Math.min(4,1+Math.floor(G.combo/8));
     G.score+=(perfect?300:150)*mul;perfect?G.perf++:G.good++;
     G.flash[laneOf(n.s)]=performance.now();G.bursts.push({l:laneOf(n.s),t:performance.now()});
-    judge(perfect?'¡Perfecto!':'Bien',perfect?'p':'g');if(!mic)pluck(n.m,c.currentTime+.005,1.2,.22);hud();
+    judge(perfect?'¡Perfecto!':'Bien',perfect?'p':'g');if(!mic&&!RETO.guide)pluck(n.m,c.currentTime+.005,1.2,.22);hud();
   };
   const missN=n=>{n.miss=1;G.miss++;if(G.combo>=8)judge('Combo roto','m');G.combo=0;hud()};
   const tapLane=l=>{
-    if(mic||!G.run)return;const now=c.currentTime;G.flash[l]=performance.now();
+    if(mic||!G.run)return;const now=vt();G.flash[l]=performance.now();
     let best=null;N.forEach(n=>{if(n.hit||n.miss||laneOf(n.s)!==l)return;const d=Math.abs(now-n.t);if(d<.2&&(!best||d<Math.abs(now-best.t)))best=n});
-    if(best)award(best,Math.abs(now-best.t)<.075);else{noise(now,.06,'lowpass',300,.18);if(G.combo){G.combo=0;hud()}}
+    if(best)award(best,Math.abs(now-best.t)<.075);else{noise(c.currentTime,.06,'lowpass',300,.18);if(G.combo){G.combo=0;hud()}}
   };
   cv.addEventListener('pointerdown',e=>{e.preventDefault();const r=cv.getBoundingClientRect();tapLane(Math.max(0,Math.min(5,Math.floor((e.clientX-r.left)/(r.width/6)))))});
   const kd=e=>{const i='123456'.indexOf(e.key);if(i>=0){e.preventDefault();tapLane(laneOf(6-i))}};
@@ -115,7 +138,7 @@ function retoPlay(host,S,onExit){
   const micLoop=()=>{
     const an=G.an,buf=G.buf;an.getFloatTimeDomainData(buf);
     let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/buf.length);
-    const now=c.currentTime;if(rms>.012&&rms>G.lvl*1.45)G.onset=now;G.lvl=G.lvl*.8+rms*.2;
+    const now=vt()-.015;if(rms>.012&&rms>G.lvl*1.45)G.onset=now;G.lvl=G.lvl*.8+rms*.2;
     const f=detectPitch(buf,c.sampleRate);if(f<0)return;
     const m=69+12*Math.log2(f/440);
     let best=null;N.forEach(n=>{if(n.hit||n.miss)return;const dt=now-n.t;if(dt<-.2||dt>.45||G.onset<n.t-.25)return;const d=[0,12,-12].some(o=>Math.abs(m-n.m-o)<.55);if(d&&(!best||n.t<best.t))best=n});
@@ -131,8 +154,13 @@ function retoPlay(host,S,onExit){
   };
   function frame(){
     if(!G.run)return;
-    const now=c.currentTime;
-    while(G.nextTick<now+.12&&G.nextTick<G.end-1){tick(G.nextTick,G.tickN%4===0?'acc':mic?'sub':'beat',G.tickN%4===0?'bar':'beat');G.nextTick+=spb;G.tickN++}
+    const au=c.currentTime,now=vt();
+    // cuenta de 4 siempre; después el metrónomo solo si está encendido (la barra de pulso sigue)
+    while(G.nextTick<au+.2&&G.nextTick<G.end-1){const cnt=G.nextTick<G.t0-.01,v=G.tickN%4===0?'bar':'beat';
+      if(cnt||RETO.met)tick(G.nextTick,G.tickN%4===0?'acc':mic?'sub':'beat',v);else{const d=Math.max(0,(G.nextTick-au+outLat())*1000);setTimeout(()=>{if(G.run)pulseBeat(v==='bar')},d)}
+      G.nextTick+=spb;G.tickN++}
+    // nota guía: suena cada nota justo cuando la burbuja cruza la línea
+    if(RETO.guide&&!mic)N.forEach(n=>{if(!n.gs&&n.t<au+.2){n.gs=1;if(n.t>au-.05)pluck(n.m,Math.max(au+.005,n.t),Math.min(2,n.d*spb*1.1),.16)}});
     N.forEach(n=>{if(!n.hit&&!n.miss&&now-n.t>(mic?.5:.22))missN(n)});
     draw(now);
     $('#hpr',host).style.width=Math.max(0,Math.min(100,(now-G.t0)/(G.end-G.t0)*100))+'%';
@@ -170,7 +198,7 @@ function retoPlay(host,S,onExit){
     if(now<G.t0){const n=Math.ceil((G.t0-now)/spb);if(n<=4){ctx.fillStyle=col.fg;ctx.font=`800 ${Math.round(H*.18)}px 'Barlow Condensed',sans-serif`;ctx.textAlign='center';ctx.fillText(String(n),W/2,H*.38)}}
   }
   function cleanup(){
-    G.run=false;cancelAnimationFrame(G.raf);if(G.iv)clearInterval(G.iv);
+    G.run=false;cancelAnimationFrame(G.raf);if(G.iv)clearInterval(G.iv);if(G.mus)bandStop();
     if(G.stream)G.stream.getTracks().forEach(t=>t.stop());try{G.src&&G.src.disconnect()}catch(e){}
     window.removeEventListener('resize',size);document.removeEventListener('keydown',kd);GAMEON=false;
   }

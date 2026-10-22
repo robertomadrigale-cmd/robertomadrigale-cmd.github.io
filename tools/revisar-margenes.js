@@ -14,7 +14,7 @@ while(true){const r=[...R].find(x=>!visited.has(x));if(!r)break;visited.add(r);
   document.querySelectorAll('#page *').forEach(el=>{if(el.closest('svg')||el.dataset.zz)return;el.dataset.zz=1;const fs=parseFloat(getComputedStyle(el).fontSize);el.style.fontSize=(fs*Z)+'px'});
   window.dispatchEvent(new Event('resize'));const out=[];const vw=document.documentElement.clientWidth;
   if(document.documentElement.scrollWidth>vw+1)out.push('scroll horizontal de la página');
-  const inScroll=el=>el.closest('.fbwrap,.gwrap,.kchips,.chlist,.hscroll,[data-hscroll]');
+  const inScroll=el=>el.closest('.fbwrap,.gwrap,.kchips,.chlist,.hscroll,.shelf,[data-hscroll]');
   document.querySelectorAll('#page *').forEach(el=>{if(el.closest('svg'))return;const cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden')return;const rc=el.getBoundingClientRect();if(!rc.width)return;
    if(!inScroll(el)&&(rc.right>vw+1||rc.left<-1))out.push('se sale del margen: <'+el.tagName.toLowerCase()+' class="'+el.className+'"> '+(el.textContent||'').trim().slice(0,40))});
   document.querySelectorAll('#page button,#page .btn,#page .chip').forEach(el=>{const cs=getComputedStyle(el);if(cs.display==='none')return;const rc=el.getBoundingClientRect();if(!rc.width)return;
