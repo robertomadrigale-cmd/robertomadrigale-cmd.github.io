@@ -374,18 +374,21 @@ function viewSongPlay(id){
    <div class="krow"><div><span class="cl">Tono</span><div class="row"><button class="btn sm" data-k="-1" aria-label="Bajar medio tono">${IC.minus}</button><b class="kkey" id="kkey">${esc(keyLbl())}</b><button class="btn sm" data-k="1" aria-label="Subir medio tono">${IC.plus}</button><button class="btn sm" data-k="0">Original</button></div></div>
     <div><span class="cl">Tempo</span><div class="row"><button class="btn sm" data-b="-4" aria-label="Más lento">${IC.minus}</button><b class="kkey" id="kbpm">${st.bpm}</b><button class="btn sm" data-b="4" aria-label="Más rápido">${IC.plus}</button><button class="btn sm" id="ktap" title="Toca 4 veces al ritmo de la canción">Marcar</button></div></div></div>
    <p class="cap" id="kcapo" style="margin:0">${capoHint(P.key,st.shift)}</p>
+   <details class="kmore"><summary>Ritmo, compás, vista y sonido<small>${BSTYLES[st.style]} · ${st.beats}/4</small></summary><div class="kmin">
    <div><span class="cl">Ver</span><div class="row"><div class="seg">${[['both','Letra y acordes'],['lyrics','Letra'],['chords','Acordes']].map(([v,l])=>`<button data-show="${v}" aria-pressed="${KAR.show===v}">${l}</button>`).join('')}</div>
     <div class="seg">${[['us','C D E'],['es','Do Re Mi']].map(([v,l])=>`<button data-not="${v}" aria-pressed="${(DB.notation||'us')===v}">${l}</button>`).join('')}</div><button class="btn sm" data-z="-1" aria-label="Letra más chica">A−</button><button class="btn sm" data-z="1" aria-label="Letra más grande">A+</button></div></div>
    <div><span class="cl">Sonido</span><div class="row"><button class="btn sm ${KAR.band?'on':''}" data-t="band">${IC.wave}Banda</button>${P.hasMel?`<button class="btn sm ${KAR.voice?'on':''}" data-t="voice">${IC.note}Voz guía</button>`:''}<button class="btn sm ${KAR.met?'on':''}" data-t="met">${IC.play2}Metrónomo</button></div></div>
    <div><span class="cl">Ritmo de la banda</span><div class="chips">${Object.entries(BSTYLES).map(([k,l])=>`<button class="chip" data-sty="${k}" aria-pressed="${st.style===k}">${l}</button>`).join('')}</div></div>
    <div class="krow"><div><span class="cl">Compás</span><div class="seg">${[[4,'4/4'],[3,'3/4 vals']].map(([v,l])=>`<button data-beats="${v}" aria-pressed="${st.beats===v}">${l}</button>`).join('')}</div></div>
     ${P.lines.some(l=>l.pieces&&!l.mel)?`<div><span class="cl">Compases por renglón</span><select class="inp" id="kbpl" style="width:auto">${[0,1,2,3,4,6,8].map(v=>`<option value="${v}" ${v===st.bars?'selected':''}>${v||'Automático'}</option>`).join('')}</select></div>`:''}</div>
+   </div></details>
   </div>
   <div class="kchips" id="kchips">${chips()}</div>
   <div class="kwrap"><div class="karaoke show-${KAR.show}" id="kar" style="--kz:${KAR.size}">${P.lines.map(lineHTML).join('')}</div>
   <aside class="kside" id="kside"></aside></div>
   <div class="kbar"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${st.beats}/4 · ${BSTYLES[st.style]} · listo</span><button class="btn sm" id="kreset" aria-label="Desde el inicio">${IC.back}</button><button class="btn pri" id="kgo">${IC.play}Empezar</button></div>`,
   mount(r){
+    const sumK=()=>{const m=$('.kmore summary small',r);if(m)m.textContent=`${BSTYLES[st.style]} · ${st.beats}/4`};
     const kar=$('#kar',r);let pos=0,TL=null,BK=null,curCh=P.chords[0]||null;
     requestAnimationFrame(()=>fitKar(kar));const onRs=()=>fitKar(kar);window.addEventListener('resize',onRs);setTimeout(()=>{if(!document.body.contains(kar))window.removeEventListener('resize',onRs)},0);
     // panel lateral: tono, rasgueo sugerido y acorde que suena
@@ -452,8 +455,8 @@ function viewSongPlay(id){
       const sh=e.target.closest('[data-show]');if(sh){KAR.show=sh.dataset.show;kar.className='karaoke show-'+KAR.show;$$('[data-show]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sh)));DB.kar=Object.assign({},KAR);save();return}
       const n=e.target.closest('[data-not]');if(n){DB.notation=n.dataset.not;save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===n)));rerender();return}
       const t=e.target.closest('[data-t]');if(t){KAR[t.dataset.t]=!KAR[t.dataset.t];t.classList.toggle('on',KAR[t.dataset.t]);DB.kar=Object.assign({},KAR);save();return}
-      const bb=e.target.closest('[data-beats]');if(bb){const was=running();if(was)seqStop();st.beats=+bb.dataset.beats;DB.kbeats[id]=st.beats;save();$$('[data-beats]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===bb)));build();if(pos>=TL.lines.length)pos=0;side();paint();$('#kpos',r).textContent=`${st.beats}/4 · ${BSTYLES[st.style]} · listo`;return}
-      const y=e.target.closest('[data-sty]');if(y){st.style=y.dataset.sty;DB.kst[id]=st.style;save();$$('[data-sty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===y)));side();return}
+      const bb=e.target.closest('[data-beats]');if(bb){const was=running();if(was)seqStop();st.beats=+bb.dataset.beats;DB.kbeats[id]=st.beats;sumK();save();$$('[data-beats]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===bb)));build();if(pos>=TL.lines.length)pos=0;side();paint();$('#kpos',r).textContent=`${st.beats}/4 · ${BSTYLES[st.style]} · listo`;return}
+      const y=e.target.closest('[data-sty]');if(y){st.style=y.dataset.sty;sumK();DB.kst[id]=st.style;save();$$('[data-sty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===y)));side();return}
       const z=e.target.closest('[data-z]');if(z){KAR.size=Math.max(.8,Math.min(1.8,+(KAR.size+ +z.dataset.z*.15).toFixed(2)));kar.style.setProperty('--kz',KAR.size);fitKar(kar);DB.kar=Object.assign({},KAR);save();return}
       const c=e.target.closest('[data-kc]');if(c){const p=chParse(c.dataset.kc);if(p&&ac())gtrStrum(voicing(p,0),AC.currentTime+.02,'d',.09,2)}
     });

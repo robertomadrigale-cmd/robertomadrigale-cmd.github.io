@@ -641,3 +641,105 @@ label.btn{cursor:pointer}
 .inp{font:500 16px var(--font-body);padding:10px 12px;border-radius:10px;border:1px solid var(--hair,var(--line));background:var(--surface2);color:var(--fg);min-height:44px;width:100%;max-width:100%;box-sizing:border-box}
 .inp:focus{outline:2px solid var(--accent);outline-offset:1px}
 input[type=time].inp{width:auto}
+
+/* ===================== estudio (v4) =====================
+   Inspirado en apps de músico (Moises, etc.): negro profundo, superficies planas con borde fino,
+   más aire entre secciones, listas agrupadas, color solo donde importa y el pulso como riel lateral. */
+:root[data-theme="clasico"]{--bg:#09090b;--surface:#141417;--surface2:#1e1e22;--line:#2a2a2f;--glass:rgba(9,9,11,.78)}
+:root{--r:20px;--hair:color-mix(in srgb,var(--fg) 8%,transparent)}
+.page{gap:20px;padding-block:28px 40px}
+@media (max-width:899px){.page{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}}
+.lhead{margin-bottom:2px}
+.lhead h1{font-size:clamp(32px,8vw,46px);letter-spacing:-.035em}
+.lhead .sub{color:var(--muted)}
+/* superficies planas: en oscuro sin sombras, solo borde fino */
+.card,.ex,.widget{box-shadow:none;background:var(--surface);border:1px solid var(--hair)}
+:root[data-theme="claro"] .card,:root[data-theme="claro"] .ex,:root[data-theme="claro"] .widget,
+:root[data-theme="rocknroll"] .card,:root[data-theme="surf"] .card,:root[data-theme="indie"] .card{box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 30px -22px rgba(0,0,0,.35)}
+.card{padding:20px}
+/* barra superior y pestañas de vidrio */
+.topbar{border-bottom:1px solid var(--hair);background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6)}
+.tabs{border-top:1px solid var(--hair);background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6)}
+.tabs .tab{color:var(--muted);gap:3px}
+.tabs .tab svg{padding:3px 14px;width:52px;height:30px;border-radius:999px;box-sizing:border-box;transition:background .2s}
+.tabs .tab[aria-current="page"]{color:var(--fg);font-weight:600}
+.tabs .tab[aria-current="page"] svg{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent-text)}
+/* chips: el activo se tiñe del color del tema en vez de negro/blanco */
+.chip{background:var(--surface2);color:var(--fg);border:1px solid transparent}
+.chip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 17%,transparent);color:var(--accent-text);border-color:color-mix(in srgb,var(--accent) 42%,transparent);font-weight:600}
+.chips{gap:8px}
+.cl{margin-bottom:8px;display:block}
+/* segmentados tipo iOS */
+.seg{background:var(--surface2);border:0;padding:3px;border-radius:12px}
+.seg button{border-radius:9px}
+.seg button[aria-pressed="true"]{background:color-mix(in srgb,var(--fg) 14%,var(--surface));color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+/* botones */
+.btn{min-height:44px}
+.btn.sm{min-height:36px}
+.btn.pri{box-shadow:0 8px 24px -12px color-mix(in srgb,var(--accent) 80%,transparent)}
+/* listas agrupadas: herramientas y referencias en un solo bloque con separadores */
+@media (max-width:699px){
+  .grid2:has(> .tool){gap:0;background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);overflow:hidden}
+  .grid2:has(> .tool) > .tool{border:0;border-radius:0;box-shadow:none;background:transparent;padding:14px 16px}
+  .grid2:has(> .tool) > .tool + .tool{border-top:1px solid var(--hair)}
+  html.arty .grid2:has(> .tool){background-color:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+  html.arty .grid2:has(> .tool) > .tool{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+.tool{padding:16px 18px}
+.tool > span:last-child{flex:1;min-width:0}
+.tool::after{content:'';flex:none;width:8px;height:8px;border-right:2px solid var(--muted);border-top:2px solid var(--muted);transform:rotate(45deg);opacity:.5;margin-right:4px}
+.tool b{font-weight:600;font-size:16px;color:var(--fg)}
+.tool span span{font-size:13.5px;color:var(--muted);line-height:1.4}
+/* íconos con color propio, como en Ajustes de iPhone */
+.tool .ic{width:40px;height:40px;border-radius:11px;background:color-mix(in srgb,var(--ich,var(--accent)) 18%,transparent);color:var(--ich,var(--accent-text))}
+.tool .ic svg{width:21px;height:21px}
+.grid2 > .tool:nth-child(6n+1){--ich:#ff9f0a}.grid2 > .tool:nth-child(6n+2){--ich:#64d2ff}.grid2 > .tool:nth-child(6n+3){--ich:#bf5af2}
+.grid2 > .tool:nth-child(6n+4){--ich:#ff6482}.grid2 > .tool:nth-child(6n+5){--ich:#30d158}.grid2 > .tool:nth-child(6n){--ich:#5e9cff}
+:root[data-theme="claro"] .grid2 > .tool .ic{--ich-l:1;filter:saturate(1.1) brightness(.85)}
+/* metrónomo: dial circular con los tiempos alrededor */
+.metstage{padding:26px 20px 22px;gap:18px;display:flex;flex-direction:column;align-items:stretch}
+.dial{--D:min(72vw,280px);position:relative;width:var(--D);height:var(--D);margin:4px auto 0;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--fg) 7%,var(--surface2)),var(--surface) 72%);
+  box-shadow:inset 0 0 0 1px var(--hair),0 0 0 12px color-mix(in srgb,var(--surface2) 55%,transparent),0 30px 60px -30px rgba(0,0,0,.6)}
+.dial .beats{position:absolute;inset:0;margin:0;display:block}
+.dial .beats i{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;border-radius:50%;background:color-mix(in srgb,var(--fg) 16%,transparent);outline:0;
+  transform:rotate(calc(360deg / var(--n) * var(--k))) translateY(calc(var(--D) / -2 + 24px));transition:background .08s,box-shadow .08s,scale .08s}
+.dial .beats i.acc{background:color-mix(in srgb,var(--root) 45%,transparent);width:18px;height:18px;margin:-9px;outline:0}
+.dial .beats i.on{background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 22%,transparent),0 0 22px var(--accent);scale:1.35}
+.dial .beats i.on.acc{background:var(--root);box-shadow:0 0 0 5px color-mix(in srgb,var(--root) 25%,transparent),0 0 24px var(--root)}
+.dial .dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.dial .big{font-size:calc(var(--D) * .3);font-weight:250;letter-spacing:-.05em}
+.mstep .btn{min-width:56px;border-radius:999px}
+.metstage input[type=range]{margin:2px 6px}
+/* pulso visual: riel vertical a la derecha */
+#pulsebar{left:auto;right:calc(env(safe-area-inset-right,0px) + 8px);top:50%;transform:translate(170%,-50%);flex-direction:column;align-items:center;gap:10px;
+  width:46px;padding:12px 0 8px;border-radius:999px;background:color-mix(in srgb,var(--surface2) 82%,transparent);border:1px solid var(--hair);
+  box-shadow:0 12px 40px -12px rgba(0,0,0,.6);transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s;visibility:hidden}
+#pulsebar.show{transform:translate(0,-50%);visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:900px){#pulsebar{left:auto;right:24px}}
+#pulsebar .pnum{font-size:22px;min-width:0}
+#pulsebar .pdots{flex-direction:column;flex-wrap:nowrap;gap:6px}
+#pulsebar .pdots i{width:8px;height:24px;border-radius:5px;background:color-mix(in srgb,var(--fg) 16%,transparent);box-shadow:none;transform:none;transition:background .06s,width .06s}
+#pulsebar .pdots:has(i:nth-child(7)) i{height:14px}
+#pulsebar .pdots i.one{width:8px;height:30px;background:color-mix(in srgb,var(--root) 40%,transparent);box-shadow:none}
+#pulsebar .pdots:has(i:nth-child(7)) i.one{height:20px}
+#pulsebar .pdots i.on{background:var(--accent);width:12px;transform:none;box-shadow:0 0 14px var(--accent)}
+#pulsebar .pdots i.on.one{background:var(--root);box-shadow:0 0 14px var(--root)}
+#pulsebar .ptog{flex-direction:column;gap:2px;margin:0;padding:8px 0 0;border-left:0;border-top:1px solid var(--hair)}
+#pulsebar .ptog button{width:36px;height:36px}
+#pulsebar .ptog button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent-text)}
+@media (max-width:899px){.page{transition:padding-right .3s}html.pulse-on .page{padding-right:max(66px,env(safe-area-inset-right,0px))}}
+/* temas de época: la ilustración solo como fondo de cabecera que se desvanece, con tarjetas casi sólidas */
+#artbg{opacity:.42;filter:saturate(.8);-webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 26%,transparent 58%);mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 26%,transparent 58%)}
+html.arty .card,html.arty .widget,html.arty .ex,html.arty .box,html.arty .kside,html.arty .cta,html.arty .lrow{background-color:color-mix(in srgb,var(--surface) 90%,transparent)}
+html.arty .lhead,html.arty p.prose,html.arty div.prose{background-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0;border-radius:0}
+html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:0 2px 18px var(--bg),0 0 2px color-mix(in srgb,var(--bg) 60%,transparent)}
+/* ajustes del karaoke plegados, como hoja de opciones */
+.kmore{border-top:1px solid var(--hair);padding-top:12px}
+.kmore summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;min-height:40px}
+.kmore summary::-webkit-details-marker{display:none}
+.kmore summary small{margin-left:auto;color:var(--muted);font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kmore summary::after{content:'';width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 0;transition:transform .2s;flex:none}
+.kmore[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.kmin{display:flex;flex-direction:column;gap:16px;padding-top:12px}
+:root[data-theme="claro"] .dial{box-shadow:inset 0 0 0 1px var(--hair),0 0 0 12px color-mix(in srgb,var(--surface2) 60%,transparent),0 24px 40px -30px rgba(0,0,0,.35)}

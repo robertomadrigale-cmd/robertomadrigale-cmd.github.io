@@ -27,10 +27,10 @@ function paintPulse(){
   if(/metronomo/.test(location.hash))return hidePulse();
   let el=document.getElementById('pulsebar');
   if(!el){el=document.createElement('div');el.id='pulsebar';el.setAttribute('aria-hidden','true');document.body.appendChild(el)}
-  el.innerHTML=pulseHTML();el.classList.add('show');
+  el.innerHTML=pulseHTML();el.classList.add('show');document.documentElement.classList.add('pulse-on');
   el.classList.toggle('isone',PULSE.beat===0&&acc1());
 }
-function hidePulse(){const el=document.getElementById('pulsebar');if(el)el.classList.remove('show');PULSE.count=0}
+function hidePulse(){const el=document.getElementById('pulsebar');if(el)el.classList.remove('show');document.documentElement.classList.remove('pulse-on');PULSE.count=0}
 function flash(strong){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   let f=document.getElementById('flash');
@@ -50,4 +50,4 @@ function pulseOptions(){return`<div><span class="cl">Ver el pulso</span><div cla
   <button class="chip" data-pulse="acc1" aria-pressed="${acc1()}">Resaltar el tiempo 1</button>
   <button class="chip" data-pulse="flash" aria-pressed="${!!DB.flash}">Destello en cada pulso</button>
   <button class="chip" data-pulse="mute" aria-pressed="${!!DB.metMute}">${DB.metMute?IC.mute+'Solo visual':IC.sound+'Con sonido'}</button></div>
-  <p class="cap" style="margin:6px 0 0">La barra de pulso aparece arriba en cualquier ejercicio con metrónomo. «Solo visual» quita el click y deja las luces.</p></div>`}
+  <p class="cap" style="margin:6px 0 0">La barra de pulso aparece a la derecha en cualquier ejercicio con metrónomo. «Solo visual» quita el click y deja las luces.</p></div>`}

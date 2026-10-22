@@ -659,6 +659,108 @@ label.btn{cursor:pointer}
 .inp:focus{outline:2px solid var(--accent);outline-offset:1px}
 input[type=time].inp{width:auto}
 
+/* ===================== estudio (v4) =====================
+   Inspirado en apps de músico (Moises, etc.): negro profundo, superficies planas con borde fino,
+   más aire entre secciones, listas agrupadas, color solo donde importa y el pulso como riel lateral. */
+:root[data-theme="clasico"]{--bg:#09090b;--surface:#141417;--surface2:#1e1e22;--line:#2a2a2f;--glass:rgba(9,9,11,.78)}
+:root{--r:20px;--hair:color-mix(in srgb,var(--fg) 8%,transparent)}
+.page{gap:20px;padding-block:28px 40px}
+@media (max-width:899px){.page{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}}
+.lhead{margin-bottom:2px}
+.lhead h1{font-size:clamp(32px,8vw,46px);letter-spacing:-.035em}
+.lhead .sub{color:var(--muted)}
+/* superficies planas: en oscuro sin sombras, solo borde fino */
+.card,.ex,.widget{box-shadow:none;background:var(--surface);border:1px solid var(--hair)}
+:root[data-theme="claro"] .card,:root[data-theme="claro"] .ex,:root[data-theme="claro"] .widget,
+:root[data-theme="rocknroll"] .card,:root[data-theme="surf"] .card,:root[data-theme="indie"] .card{box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 30px -22px rgba(0,0,0,.35)}
+.card{padding:20px}
+/* barra superior y pestañas de vidrio */
+.topbar{border-bottom:1px solid var(--hair);background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6)}
+.tabs{border-top:1px solid var(--hair);background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6)}
+.tabs .tab{color:var(--muted);gap:3px}
+.tabs .tab svg{padding:3px 14px;width:52px;height:30px;border-radius:999px;box-sizing:border-box;transition:background .2s}
+.tabs .tab[aria-current="page"]{color:var(--fg);font-weight:600}
+.tabs .tab[aria-current="page"] svg{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent-text)}
+/* chips: el activo se tiñe del color del tema en vez de negro/blanco */
+.chip{background:var(--surface2);color:var(--fg);border:1px solid transparent}
+.chip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 17%,transparent);color:var(--accent-text);border-color:color-mix(in srgb,var(--accent) 42%,transparent);font-weight:600}
+.chips{gap:8px}
+.cl{margin-bottom:8px;display:block}
+/* segmentados tipo iOS */
+.seg{background:var(--surface2);border:0;padding:3px;border-radius:12px}
+.seg button{border-radius:9px}
+.seg button[aria-pressed="true"]{background:color-mix(in srgb,var(--fg) 14%,var(--surface));color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+/* botones */
+.btn{min-height:44px}
+.btn.sm{min-height:36px}
+.btn.pri{box-shadow:0 8px 24px -12px color-mix(in srgb,var(--accent) 80%,transparent)}
+/* listas agrupadas: herramientas y referencias en un solo bloque con separadores */
+@media (max-width:699px){
+  .grid2:has(> .tool){gap:0;background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);overflow:hidden}
+  .grid2:has(> .tool) > .tool{border:0;border-radius:0;box-shadow:none;background:transparent;padding:14px 16px}
+  .grid2:has(> .tool) > .tool + .tool{border-top:1px solid var(--hair)}
+  html.arty .grid2:has(> .tool){background-color:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+  html.arty .grid2:has(> .tool) > .tool{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+.tool{padding:16px 18px}
+.tool > span:last-child{flex:1;min-width:0}
+.tool::after{content:'';flex:none;width:8px;height:8px;border-right:2px solid var(--muted);border-top:2px solid var(--muted);transform:rotate(45deg);opacity:.5;margin-right:4px}
+.tool b{font-weight:600;font-size:16px;color:var(--fg)}
+.tool span span{font-size:13.5px;color:var(--muted);line-height:1.4}
+/* íconos con color propio, como en Ajustes de iPhone */
+.tool .ic{width:40px;height:40px;border-radius:11px;background:color-mix(in srgb,var(--ich,var(--accent)) 18%,transparent);color:var(--ich,var(--accent-text))}
+.tool .ic svg{width:21px;height:21px}
+.grid2 > .tool:nth-child(6n+1){--ich:#ff9f0a}.grid2 > .tool:nth-child(6n+2){--ich:#64d2ff}.grid2 > .tool:nth-child(6n+3){--ich:#bf5af2}
+.grid2 > .tool:nth-child(6n+4){--ich:#ff6482}.grid2 > .tool:nth-child(6n+5){--ich:#30d158}.grid2 > .tool:nth-child(6n){--ich:#5e9cff}
+:root[data-theme="claro"] .grid2 > .tool .ic{--ich-l:1;filter:saturate(1.1) brightness(.85)}
+/* metrónomo: dial circular con los tiempos alrededor */
+.metstage{padding:26px 20px 22px;gap:18px;display:flex;flex-direction:column;align-items:stretch}
+.dial{--D:min(72vw,280px);position:relative;width:var(--D);height:var(--D);margin:4px auto 0;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--fg) 7%,var(--surface2)),var(--surface) 72%);
+  box-shadow:inset 0 0 0 1px var(--hair),0 0 0 12px color-mix(in srgb,var(--surface2) 55%,transparent),0 30px 60px -30px rgba(0,0,0,.6)}
+.dial .beats{position:absolute;inset:0;margin:0;display:block}
+.dial .beats i{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;border-radius:50%;background:color-mix(in srgb,var(--fg) 16%,transparent);outline:0;
+  transform:rotate(calc(360deg / var(--n) * var(--k))) translateY(calc(var(--D) / -2 + 24px));transition:background .08s,box-shadow .08s,scale .08s}
+.dial .beats i.acc{background:color-mix(in srgb,var(--root) 45%,transparent);width:18px;height:18px;margin:-9px;outline:0}
+.dial .beats i.on{background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 22%,transparent),0 0 22px var(--accent);scale:1.35}
+.dial .beats i.on.acc{background:var(--root);box-shadow:0 0 0 5px color-mix(in srgb,var(--root) 25%,transparent),0 0 24px var(--root)}
+.dial .dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.dial .big{font-size:calc(var(--D) * .3);font-weight:250;letter-spacing:-.05em}
+.mstep .btn{min-width:56px;border-radius:999px}
+.metstage input[type=range]{margin:2px 6px}
+/* pulso visual: riel vertical a la derecha */
+#pulsebar{left:auto;right:calc(env(safe-area-inset-right,0px) + 8px);top:50%;transform:translate(170%,-50%);flex-direction:column;align-items:center;gap:10px;
+  width:46px;padding:12px 0 8px;border-radius:999px;background:color-mix(in srgb,var(--surface2) 82%,transparent);border:1px solid var(--hair);
+  box-shadow:0 12px 40px -12px rgba(0,0,0,.6);transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s;visibility:hidden}
+#pulsebar.show{transform:translate(0,-50%);visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:900px){#pulsebar{left:auto;right:24px}}
+#pulsebar .pnum{font-size:22px;min-width:0}
+#pulsebar .pdots{flex-direction:column;flex-wrap:nowrap;gap:6px}
+#pulsebar .pdots i{width:8px;height:24px;border-radius:5px;background:color-mix(in srgb,var(--fg) 16%,transparent);box-shadow:none;transform:none;transition:background .06s,width .06s}
+#pulsebar .pdots:has(i:nth-child(7)) i{height:14px}
+#pulsebar .pdots i.one{width:8px;height:30px;background:color-mix(in srgb,var(--root) 40%,transparent);box-shadow:none}
+#pulsebar .pdots:has(i:nth-child(7)) i.one{height:20px}
+#pulsebar .pdots i.on{background:var(--accent);width:12px;transform:none;box-shadow:0 0 14px var(--accent)}
+#pulsebar .pdots i.on.one{background:var(--root);box-shadow:0 0 14px var(--root)}
+#pulsebar .ptog{flex-direction:column;gap:2px;margin:0;padding:8px 0 0;border-left:0;border-top:1px solid var(--hair)}
+#pulsebar .ptog button{width:36px;height:36px}
+#pulsebar .ptog button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent-text)}
+@media (max-width:899px){.page{transition:padding-right .3s}html.pulse-on .page{padding-right:max(66px,env(safe-area-inset-right,0px))}}
+/* temas de época: la ilustración solo como fondo de cabecera que se desvanece, con tarjetas casi sólidas */
+#artbg{opacity:.42;filter:saturate(.8);-webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 26%,transparent 58%);mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 26%,transparent 58%)}
+html.arty .card,html.arty .widget,html.arty .ex,html.arty .box,html.arty .kside,html.arty .cta,html.arty .lrow{background-color:color-mix(in srgb,var(--surface) 90%,transparent)}
+html.arty .lhead,html.arty p.prose,html.arty div.prose{background-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0;border-radius:0}
+html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:0 2px 18px var(--bg),0 0 2px color-mix(in srgb,var(--bg) 60%,transparent)}
+/* ajustes del karaoke plegados, como hoja de opciones */
+.kmore{border-top:1px solid var(--hair);padding-top:12px}
+.kmore summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;min-height:40px}
+.kmore summary::-webkit-details-marker{display:none}
+.kmore summary small{margin-left:auto;color:var(--muted);font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kmore summary::after{content:'';width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 0;transition:transform .2s;flex:none}
+.kmore[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.kmin{display:flex;flex-direction:column;gap:16px;padding-top:12px}
+:root[data-theme="claro"] .dial{box-shadow:inset 0 0 0 1px var(--hair),0 0 0 12px color-mix(in srgb,var(--surface2) 60%,transparent),0 24px 40px -30px rgba(0,0,0,.35)}
+
 </style>
 </head>
 <body>
@@ -2057,10 +2159,10 @@ function paintPulse(){
   if(/metronomo/.test(location.hash))return hidePulse();
   let el=document.getElementById('pulsebar');
   if(!el){el=document.createElement('div');el.id='pulsebar';el.setAttribute('aria-hidden','true');document.body.appendChild(el)}
-  el.innerHTML=pulseHTML();el.classList.add('show');
+  el.innerHTML=pulseHTML();el.classList.add('show');document.documentElement.classList.add('pulse-on');
   el.classList.toggle('isone',PULSE.beat===0&&acc1());
 }
-function hidePulse(){const el=document.getElementById('pulsebar');if(el)el.classList.remove('show');PULSE.count=0}
+function hidePulse(){const el=document.getElementById('pulsebar');if(el)el.classList.remove('show');document.documentElement.classList.remove('pulse-on');PULSE.count=0}
 function flash(strong){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   let f=document.getElementById('flash');
@@ -2080,7 +2182,7 @@ function pulseOptions(){return`<div><span class="cl">Ver el pulso</span><div cla
   <button class="chip" data-pulse="acc1" aria-pressed="${acc1()}">Resaltar el tiempo 1</button>
   <button class="chip" data-pulse="flash" aria-pressed="${!!DB.flash}">Destello en cada pulso</button>
   <button class="chip" data-pulse="mute" aria-pressed="${!!DB.metMute}">${DB.metMute?IC.mute+'Solo visual':IC.sound+'Con sonido'}</button></div>
-  <p class="cap" style="margin:6px 0 0">La barra de pulso aparece arriba en cualquier ejercicio con metrónomo. «Solo visual» quita el click y deja las luces.</p></div>`}
+  <p class="cap" style="margin:6px 0 0">La barra de pulso aparece a la derecha en cualquier ejercicio con metrónomo. «Solo visual» quita el click y deja las luces.</p></div>`}
 
 /* ---------- cámara lenta: tu canción más lenta sin cambiar el tono, con repetición A-B ---------- */
 const SL={a:null,b:null,loop:false,raf:null,url:null,name:''};
@@ -2559,18 +2661,21 @@ function viewSongPlay(id){
    <div class="krow"><div><span class="cl">Tono</span><div class="row"><button class="btn sm" data-k="-1" aria-label="Bajar medio tono">${IC.minus}</button><b class="kkey" id="kkey">${esc(keyLbl())}</b><button class="btn sm" data-k="1" aria-label="Subir medio tono">${IC.plus}</button><button class="btn sm" data-k="0">Original</button></div></div>
     <div><span class="cl">Tempo</span><div class="row"><button class="btn sm" data-b="-4" aria-label="Más lento">${IC.minus}</button><b class="kkey" id="kbpm">${st.bpm}</b><button class="btn sm" data-b="4" aria-label="Más rápido">${IC.plus}</button><button class="btn sm" id="ktap" title="Toca 4 veces al ritmo de la canción">Marcar</button></div></div></div>
    <p class="cap" id="kcapo" style="margin:0">${capoHint(P.key,st.shift)}</p>
+   <details class="kmore"><summary>Ritmo, compás, vista y sonido<small>${BSTYLES[st.style]} · ${st.beats}/4</small></summary><div class="kmin">
    <div><span class="cl">Ver</span><div class="row"><div class="seg">${[['both','Letra y acordes'],['lyrics','Letra'],['chords','Acordes']].map(([v,l])=>`<button data-show="${v}" aria-pressed="${KAR.show===v}">${l}</button>`).join('')}</div>
     <div class="seg">${[['us','C D E'],['es','Do Re Mi']].map(([v,l])=>`<button data-not="${v}" aria-pressed="${(DB.notation||'us')===v}">${l}</button>`).join('')}</div><button class="btn sm" data-z="-1" aria-label="Letra más chica">A−</button><button class="btn sm" data-z="1" aria-label="Letra más grande">A+</button></div></div>
    <div><span class="cl">Sonido</span><div class="row"><button class="btn sm ${KAR.band?'on':''}" data-t="band">${IC.wave}Banda</button>${P.hasMel?`<button class="btn sm ${KAR.voice?'on':''}" data-t="voice">${IC.note}Voz guía</button>`:''}<button class="btn sm ${KAR.met?'on':''}" data-t="met">${IC.play2}Metrónomo</button></div></div>
    <div><span class="cl">Ritmo de la banda</span><div class="chips">${Object.entries(BSTYLES).map(([k,l])=>`<button class="chip" data-sty="${k}" aria-pressed="${st.style===k}">${l}</button>`).join('')}</div></div>
    <div class="krow"><div><span class="cl">Compás</span><div class="seg">${[[4,'4/4'],[3,'3/4 vals']].map(([v,l])=>`<button data-beats="${v}" aria-pressed="${st.beats===v}">${l}</button>`).join('')}</div></div>
     ${P.lines.some(l=>l.pieces&&!l.mel)?`<div><span class="cl">Compases por renglón</span><select class="inp" id="kbpl" style="width:auto">${[0,1,2,3,4,6,8].map(v=>`<option value="${v}" ${v===st.bars?'selected':''}>${v||'Automático'}</option>`).join('')}</select></div>`:''}</div>
+   </div></details>
   </div>
   <div class="kchips" id="kchips">${chips()}</div>
   <div class="kwrap"><div class="karaoke show-${KAR.show}" id="kar" style="--kz:${KAR.size}">${P.lines.map(lineHTML).join('')}</div>
   <aside class="kside" id="kside"></aside></div>
   <div class="kbar"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${st.beats}/4 · ${BSTYLES[st.style]} · listo</span><button class="btn sm" id="kreset" aria-label="Desde el inicio">${IC.back}</button><button class="btn pri" id="kgo">${IC.play}Empezar</button></div>`,
   mount(r){
+    const sumK=()=>{const m=$('.kmore summary small',r);if(m)m.textContent=`${BSTYLES[st.style]} · ${st.beats}/4`};
     const kar=$('#kar',r);let pos=0,TL=null,BK=null,curCh=P.chords[0]||null;
     requestAnimationFrame(()=>fitKar(kar));const onRs=()=>fitKar(kar);window.addEventListener('resize',onRs);setTimeout(()=>{if(!document.body.contains(kar))window.removeEventListener('resize',onRs)},0);
     // panel lateral: tono, rasgueo sugerido y acorde que suena
@@ -2637,8 +2742,8 @@ function viewSongPlay(id){
       const sh=e.target.closest('[data-show]');if(sh){KAR.show=sh.dataset.show;kar.className='karaoke show-'+KAR.show;$$('[data-show]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sh)));DB.kar=Object.assign({},KAR);save();return}
       const n=e.target.closest('[data-not]');if(n){DB.notation=n.dataset.not;save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===n)));rerender();return}
       const t=e.target.closest('[data-t]');if(t){KAR[t.dataset.t]=!KAR[t.dataset.t];t.classList.toggle('on',KAR[t.dataset.t]);DB.kar=Object.assign({},KAR);save();return}
-      const bb=e.target.closest('[data-beats]');if(bb){const was=running();if(was)seqStop();st.beats=+bb.dataset.beats;DB.kbeats[id]=st.beats;save();$$('[data-beats]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===bb)));build();if(pos>=TL.lines.length)pos=0;side();paint();$('#kpos',r).textContent=`${st.beats}/4 · ${BSTYLES[st.style]} · listo`;return}
-      const y=e.target.closest('[data-sty]');if(y){st.style=y.dataset.sty;DB.kst[id]=st.style;save();$$('[data-sty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===y)));side();return}
+      const bb=e.target.closest('[data-beats]');if(bb){const was=running();if(was)seqStop();st.beats=+bb.dataset.beats;DB.kbeats[id]=st.beats;sumK();save();$$('[data-beats]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===bb)));build();if(pos>=TL.lines.length)pos=0;side();paint();$('#kpos',r).textContent=`${st.beats}/4 · ${BSTYLES[st.style]} · listo`;return}
+      const y=e.target.closest('[data-sty]');if(y){st.style=y.dataset.sty;sumK();DB.kst[id]=st.style;save();$$('[data-sty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===y)));side();return}
       const z=e.target.closest('[data-z]');if(z){KAR.size=Math.max(.8,Math.min(1.8,+(KAR.size+ +z.dataset.z*.15).toFixed(2)));kar.style.setProperty('--kz',KAR.size);fitKar(kar);DB.kar=Object.assign({},KAR);save();return}
       const c=e.target.closest('[data-kc]');if(c){const p=chParse(c.dataset.kc);if(p&&ac())gtrStrum(voicing(p,0),AC.currentTime+.02,'d',.09,2)}
     });
@@ -3092,12 +3197,12 @@ let OWNER='';
 /* ---------- metrónomo ---------- */
 const TAPS=[];
 function viewMetronome(){
-  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i class="${(i===0?acc1():m.acc.includes(i))?'acc':''}"></i>`).join('')};
+  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i style="--k:${i}" class="${(i===0?acc1():m.acc.includes(i))?'acc':''}"></i>`).join('')};
   return{title:'Metrónomo',back:'#/practicar',html:`
-  <div class="card center">
-    <div class="beats" id="beats">${beats()}</div>
-    <div class="big" id="bpmv">${MET.bpm}</div><div class="cl" style="margin:0">BPM</div>
-    <div class="row" style="justify-content:center">
+  <div class="card center metstage">
+    <div class="dial"><div class="beats" id="beats" style="--n:${METERS[MET.meter].b}">${beats()}</div>
+     <div class="dc"><div class="big" id="bpmv">${MET.bpm}</div><div class="cl" style="margin:0">BPM</div></div></div>
+    <div class="row mstep" style="justify-content:center">
       <button class="btn sm" data-m="-5">−5</button><button class="btn sm" data-m="-1">−1</button>
       <button class="btn sm" data-m="1">+1</button><button class="btn sm" data-m="5">+5</button></div>
     <input type="range" id="bpmr" min="30" max="240" value="${MET.bpm}" aria-label="Tempo en BPM">
@@ -3122,7 +3227,7 @@ function viewMetronome(){
     rg.oninput=()=>setBpm(+rg.value);
     $$('[data-m]',r).forEach(b=>b.onclick=()=>setBpm(MET.bpm+ +b.dataset.m));
     $('#tap',r).onclick=()=>{const n=performance.now();if(TAPS.length&&n-TAPS[TAPS.length-1]>2000)TAPS.length=0;TAPS.push(n);if(TAPS.length>5)TAPS.shift();const tb=$('#tap',r);if(ac())tick(AC.currentTime+.01,'beat');if(TAPS.length>=2){const d=(TAPS[TAPS.length-1]-TAPS[0])/(TAPS.length-1);setBpm(60000/d);tb.textContent='Marcar tempo · '+TAPS.length+' toques'}else tb.textContent='Sigue tocando al pulso…';clearTimeout(tb._t);tb._t=setTimeout(()=>{tb.textContent='Marcar tempo'},2200)};
-    $$('[data-set]',r).forEach(b=>b.onclick=()=>{const k=b.dataset.set;MET[k]=k==='sub'?+b.dataset.v:b.dataset.v;$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#beats',r).innerHTML=beats();DB.meter=MET.meter;DB.sub=MET.sub;save()});
+    $$('[data-set]',r).forEach(b=>b.onclick=()=>{const k=b.dataset.set;MET[k]=k==='sub'?+b.dataset.v:b.dataset.v;$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#beats',r).innerHTML=beats();$('#beats',r).style.setProperty('--n',METERS[MET.meter].b);DB.meter=MET.meter;DB.sub=MET.sub;save()});
     const h=()=>paint();document.addEventListener('playstate',h);paint();
     return()=>{document.removeEventListener('playstate',h);if(SEQ.id==='met'&&OWNER==='tool')SEQ.ui=null};
   }};

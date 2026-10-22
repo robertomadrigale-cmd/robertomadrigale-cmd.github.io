@@ -31,12 +31,12 @@ let OWNER='';
 /* ---------- metrónomo ---------- */
 const TAPS=[];
 function viewMetronome(){
-  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i class="${(i===0?acc1():m.acc.includes(i))?'acc':''}"></i>`).join('')};
+  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i style="--k:${i}" class="${(i===0?acc1():m.acc.includes(i))?'acc':''}"></i>`).join('')};
   return{title:'Metrónomo',back:'#/practicar',html:`
-  <div class="card center">
-    <div class="beats" id="beats">${beats()}</div>
-    <div class="big" id="bpmv">${MET.bpm}</div><div class="cl" style="margin:0">BPM</div>
-    <div class="row" style="justify-content:center">
+  <div class="card center metstage">
+    <div class="dial"><div class="beats" id="beats" style="--n:${METERS[MET.meter].b}">${beats()}</div>
+     <div class="dc"><div class="big" id="bpmv">${MET.bpm}</div><div class="cl" style="margin:0">BPM</div></div></div>
+    <div class="row mstep" style="justify-content:center">
       <button class="btn sm" data-m="-5">−5</button><button class="btn sm" data-m="-1">−1</button>
       <button class="btn sm" data-m="1">+1</button><button class="btn sm" data-m="5">+5</button></div>
     <input type="range" id="bpmr" min="30" max="240" value="${MET.bpm}" aria-label="Tempo en BPM">
@@ -61,7 +61,7 @@ function viewMetronome(){
     rg.oninput=()=>setBpm(+rg.value);
     $$('[data-m]',r).forEach(b=>b.onclick=()=>setBpm(MET.bpm+ +b.dataset.m));
     $('#tap',r).onclick=()=>{const n=performance.now();if(TAPS.length&&n-TAPS[TAPS.length-1]>2000)TAPS.length=0;TAPS.push(n);if(TAPS.length>5)TAPS.shift();const tb=$('#tap',r);if(ac())tick(AC.currentTime+.01,'beat');if(TAPS.length>=2){const d=(TAPS[TAPS.length-1]-TAPS[0])/(TAPS.length-1);setBpm(60000/d);tb.textContent='Marcar tempo · '+TAPS.length+' toques'}else tb.textContent='Sigue tocando al pulso…';clearTimeout(tb._t);tb._t=setTimeout(()=>{tb.textContent='Marcar tempo'},2200)};
-    $$('[data-set]',r).forEach(b=>b.onclick=()=>{const k=b.dataset.set;MET[k]=k==='sub'?+b.dataset.v:b.dataset.v;$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#beats',r).innerHTML=beats();DB.meter=MET.meter;DB.sub=MET.sub;save()});
+    $$('[data-set]',r).forEach(b=>b.onclick=()=>{const k=b.dataset.set;MET[k]=k==='sub'?+b.dataset.v:b.dataset.v;$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#beats',r).innerHTML=beats();$('#beats',r).style.setProperty('--n',METERS[MET.meter].b);DB.meter=MET.meter;DB.sub=MET.sub;save()});
     const h=()=>paint();document.addEventListener('playstate',h);paint();
     return()=>{document.removeEventListener('playstate',h);if(SEQ.id==='met'&&OWNER==='tool')SEQ.ui=null};
   }};
