@@ -126,7 +126,7 @@ function exAction(b){
 function paintPlayer(){
   let p=$('#player');
   const on=SEQ.id||(TMR.id&&TMR.id!=='rt');
-  if(!on||(SEQ.id&&OWNER==='rt')){if(p)p.remove();return}
+  if(!on||(SEQ.id&&OWNER==='rt')||(SEQ.id==='kar'&&/^#\/cancionero\/ver/.test(location.hash))){if(p)p.remove();return}
   if(!p){p=document.createElement('div');p.id='player';p.className='player';document.body.appendChild(p)}
   const lab=SEQ.id?SEQ.label:'Temporizador';
   const t=TMR.id&&TMR.id!=='rt'?' · '+fmt(TMR.paused?TMR.paused/1000:(TMR.end-Date.now())/1000):'';
@@ -261,7 +261,8 @@ function route(){
   $$('[data-nav]').forEach(a=>{const on=a.dataset.nav===sec;if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   $('#ttl').textContent=v.title;
   const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
-  const pg=$('#page');pg.innerHTML=v.html;
+  // página nueva en cada vista: así no se acumulan los clics de vistas anteriores
+  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
   document.title=v.title==='Mades Guitar Hero'?v.title:v.title+' · Mades Guitar Hero';
   if(v.mount)UNMOUNT=v.mount(pg)||null;
   if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);

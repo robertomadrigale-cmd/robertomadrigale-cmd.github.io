@@ -276,9 +276,9 @@ input[type=range]{width:100%;accent-color:var(--accent);height:32px}
 .bd.on.acc{background:var(--root)}
 
 /* ---------- Mades Guitar Hero: marca y pulido ---------- */
-.page>*{animation:rise .32s cubic-bezier(.2,.7,.2,1) both}
-.page>*:nth-child(2){animation-delay:.03s}.page>*:nth-child(3){animation-delay:.06s}.page>*:nth-child(4){animation-delay:.09s}.page>*:nth-child(5){animation-delay:.12s}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+/* entrada suave sin ocultar nada: si el navegador pausa la animación, el contenido igual se ve */
+@media (prefers-reduced-motion:no-preference){.page>*{animation:rise .3s cubic-bezier(.2,.7,.2,1)}}
+@keyframes rise{from{transform:translateY(6px)}}
 .logo{display:inline-grid;flex:none}.logo svg{width:100%;height:100%}
 .brandhero{display:flex;align-items:center;gap:14px}
 .brandhero .logo{width:64px;height:64px;filter:drop-shadow(0 6px 18px color-mix(in srgb,var(--root) 45%,transparent))}
@@ -350,33 +350,44 @@ textarea{width:100%;font:500 13px var(--font-mono);padding:10px;border-radius:10
 .take audio{width:100%;height:40px}
 /* cancionero karaoke */
 .tab{font-size:10.5px}
-.lrow.top{gap:10px;flex-wrap:wrap}.lrow.top .mt{text-decoration:none;color:var(--fg)}
+.lrow.top{gap:10px;flex-wrap:wrap}.lrow.top .mt{min-width:180px}
+.card.note{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));background:color-mix(in srgb,var(--accent) 8%,var(--surface));font-size:15px}
 .khead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
 .khead h2{margin-top:4px}
-.kctl{display:flex;flex-direction:column;gap:12px}
+.kctl{display:flex;flex-direction:column;gap:14px}
+.krow{display:flex;flex-wrap:wrap;gap:14px 24px}
 .kkey{font:800 26px/1 var(--font-display);min-width:64px;text-align:center;color:var(--accent-text)}
 .kchips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .kchip{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--fg)}
 .kchip b{font-size:15px}
-.mch{width:52px;height:58px}.mch line{stroke:var(--muted);stroke-width:1}.mch circle{fill:var(--accent)}.mch circle.o{fill:none;stroke:var(--muted);stroke-width:1.2}.mch text{fill:var(--muted);font:600 9px var(--font-mono);text-anchor:middle}
-.karaoke{--kz:1;display:flex;flex-direction:column;gap:6px;padding:18px 16px 40vh;border-radius:18px;background:var(--surface);border:1px solid var(--line);font-size:calc(20px * var(--kz))}
-.kl{display:flex;flex-wrap:wrap;align-items:flex-end;padding:6px 8px;border-radius:12px;cursor:pointer;transition:background .2s,opacity .2s;line-height:1.25}
+.mch{width:56px;height:58px}.mch line{stroke:var(--muted);stroke-width:1}.mch circle{fill:var(--accent)}.mch circle.o{fill:none;stroke:var(--muted);stroke-width:1.2}.mch text{fill:var(--muted);font:600 9px var(--font-mono);text-anchor:middle}.mch .fr{text-anchor:start}
+.karaoke{--kz:1;display:flex;flex-direction:column;gap:4px;padding:16px 12px 45vh;border-radius:18px;background:var(--surface);border:1px solid var(--line);font-size:calc(21px * var(--kz));overflow-wrap:anywhere}
+.kl{padding:6px 8px;border-radius:12px;cursor:pointer;transition:background .2s,opacity .3s;line-height:1.2}
 .kl:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
-.kl.past{opacity:.45}
+.kl.past{opacity:.42}
 .kl.cur{background:color-mix(in srgb,var(--accent) 12%,transparent);box-shadow:inset 3px 0 0 var(--accent)}
-.sg{display:inline-flex;flex-direction:column;white-space:pre-wrap;max-width:100%}
-.kc{font:700 .8em var(--font-mono);color:var(--accent-text);min-height:1.2em;padding-right:.4em}
-.sg.now .kc{color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:0 .3em;margin-right:.2em}
-.kt i{font-style:normal;transition:color .25s}
-.kl.cur .kt i{color:var(--muted)}
-.kl.cur .kt i.lit,.kl.past .kt i{color:var(--fg)}
-.kl.cur .kt i.lit{color:var(--accent-text);text-shadow:0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
+.wd{display:inline-block;white-space:nowrap;vertical-align:bottom;margin-bottom:4px}
+.pc{display:inline-flex;flex-direction:column;vertical-align:bottom}
+/* acorde a mitad de palabra: flota sobre la sílaba sin abrir hueco */
+.pc.mid{position:relative;padding-top:.975em}.pc.mid .kc{position:absolute;top:0;left:0}
+.karaoke.show-lyrics .pc.mid{padding-top:0}
+.pc .kc{font:700 .78em/1.25 var(--font-mono);color:var(--accent-text);min-height:1.25em;padding-right:.35em;white-space:nowrap}
+.pc i{font-style:normal;transition:color .2s,text-shadow .2s;white-space:pre}
+.kl.cur .pc i{color:var(--muted)}
+.kl.cur .pc.lit i,.kl.past .pc i{color:var(--fg)}
+.kl.cur .pc.lit i{color:var(--accent-text);text-shadow:0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
+.pc.now .kc{color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:0 .3em;margin-right:.15em}
+.kl.inst .pc{margin-right:.6em}.kl.inst .kc{font-size:1em}
 .karaoke.show-lyrics .kc{display:none}
-.karaoke.show-chords .kt{display:none}
-.karaoke.show-chords .sg{white-space:normal}
-.karaoke.show-chords .kc{font-size:1em;padding-right:.9em}
-.klab{font:600 12px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--root);margin-top:10px}
-.kgap{height:14px}
-.kbar{position:sticky;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 8px);z-index:5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:16px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line)}
-.kbar .tm{flex:1;min-width:120px}
+.karaoke.show-chords .pc i{display:none}
+.karaoke.show-chords .pc:not(.hc){display:none}
+.karaoke.show-chords .wd{margin-right:.2em}
+.karaoke.show-chords .kl{font-size:0}.karaoke.show-chords .wd:not(:has(.hc)){display:none}
+.karaoke.show-chords .kc{font-size:calc(21px * var(--kz));padding-right:.7em}
+.karaoke.show-chords .pc.mid{padding-top:0}.karaoke.show-chords .pc.mid .kc{position:static}
+.karaoke.show-chords .kl:not(:has(.hc)){display:none}
+.klab{font:600 12px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--root);margin-top:10px;padding-left:8px}
+.kgap{height:12px}
+.kbar{position:sticky;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 8px);z-index:5;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:0 10px 30px -12px rgba(0,0,0,.6)}
+.kbar .tm{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (min-width:900px){.kbar{bottom:12px}}
