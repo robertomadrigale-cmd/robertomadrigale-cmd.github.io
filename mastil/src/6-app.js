@@ -157,6 +157,12 @@ let DEFERRED=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFERRED=e;if(location.hash===''||location.hash==='#/')route()});
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+// repisa de canciones: las tuyas primero y luego una famosa de cada género (con su portada)
+function songShelf(){
+  const mine=(DB.songs||[]).slice(0,8).map(s=>{const P=songParse(s.src);return{h:'#/cancionero/ver/'+s.id,t:P.title,a:P.artist}});
+  const seen={},top=TOPLIST.filter(x=>!seen[x.g]&&(seen[x.g]=1)).map(x=>{const has=(DB.songs||[]).find(s=>s.top===x.id);return{h:'#/cancionero/ver/'+(has?has.id:x.id),t:x.t,a:x.a}});
+  return[...mine,...top].slice(0,14).map(x=>`<a class="alb" href="${x.h}"><span class="acov">${coverHTML(x.t,x.a)}</span><b>${esc(x.t)}</b><small>${esc(x.a||'Tu canción')}</small></a>`).join('');
+}
 function viewHome(){
   const nx=nextEx(),[d,t]=doneCount();
   const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
@@ -168,9 +174,10 @@ function viewHome(){
     <div class="stat"><b>${d}<small style="font-size:18px;color:var(--muted)">/${t}</small></b><span>ejercicios</span></div>
   </div>
   ${planCard()}
-  ${nx?`<a class="card tool" href="#/leccion/${nx.lesson}/${nx.id}"><span class="ic">${IC.play}</span><span style="flex:1;min-width:0"><b>Continuar: ${nx.t}</b><span>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</span></span></a>`:`<div class="card"><h3>Completaste todos los ejercicios</h3><p class="cap">Repite los que más te costaron con un tempo más alto.</p></div>`}
+  ${nx?(()=>{const[ld,lt]=doneCount(nx.lesson);return`<a class="card nowp" href="#/leccion/${nx.lesson}/${nx.id}"><span class="acov">${lessonArt(nx.lesson)}</span><span class="np"><span class="eyebrow">Continúa donde te quedaste</span><b>${nx.t}</b><small>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</small><span class="pg"><i style="width:${Math.round(ld/lt*100)}%"></i></span></span><span class="playc">${IC.play}</span></a>`})():`<div class="card"><h3>Completaste todos los ejercicios</h3><p class="cap">Repite los que más te costaron con un tempo más alto.</p></div>`}
+  <section><div class="sech"><h2>Lecciones</h2><a href="#/lecciones">Ver todas</a></div><div class="shelf">${LESSONS.map(l=>lessonAlb(l.id)).join('')}</div></section>
+  <section><div class="sech"><h2>Para tocar</h2><a href="#/cancionero">Cancionero</a></div><div class="shelf">${songShelf()}</div></section>
   <a class="card cta" href="#/practicar/reto"><span><span class="eyebrow">Nuevo · modo reto</span><b>Sube al escenario</b><span>Notas que bajan por el mástil, combos y estrellas. Con toques o con tu guitarra real.</span></span><span class="ic">${IC.levels}</span></a>
-  <a class="card tool" href="#/cancionero"><span class="ic">${IC.note}</span><span><b>Cancionero karaoke</b><span>Letra que se ilumina, acordes en tu tono, metrónomo y 100 canciones por género.</span></span></a>
   <div class="grid2"><a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación.</span></span></a>
   <a class="card tool" href="#/logros"><span class="ic">${achIcon('award')}</span><span><b>Logros · ${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length}</b><span>Rachas, récords y retos superados.</span></span></a></div>
   ${inst}
@@ -186,6 +193,7 @@ function viewHome(){
   </div>
   <p class="foot">Roka Guitar for All · funciona sin conexión<br>Guitarra y bajo grabados: tonejs-instruments de Nicholaus Brosowsky (licencia CC BY 3.0)</p>`,
   mount(r){
+    coverWatch(r);
     if(DB.onb==null)setTimeout(()=>{if(DB.onb==null&&(!location.hash||location.hash==='#/'))onboardShow()},400);
     r.addEventListener('click',async e=>{
       const lf=e.target.closest('[data-lefty]');if(lf){DB.lefty=lf.dataset.lefty==='1';LEFTY=DB.lefty;save();$$('[data-lefty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lf)));return}
@@ -204,9 +212,38 @@ function viewHome(){
 }
 const TOOLS=[['lento','Cámara lenta','Tu canción más lenta, sin cambiar el tono, con repetición A-B.',IC.timer],['reto','Modo reto','Toca canciones con notas que caen.',IC.levels],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
 const toolCards=()=>TOOLS.map(([k,n,d,ic])=>`<a class="card tool" href="#/practicar/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('');
+/* ---------- portadas tipo disco para lecciones y herramientas ----------
+   Abstractas (luz difusa + un trazo del tema de la lección + el número), sin dibujos ni fotos. */
+const PARTHUE={1:218,2:262,3:328,4:26};
+const ARTM={
+  1:'<path d="M14 30h72M14 40h72M14 50h72M14 60h72M14 70h72M14 80h72"/><path d="M30 26v58M48 26v58M64 26v58M78 26v58" stroke-opacity=".35"/>',
+  2:'<circle cx="28" cy="62" r="5" fill="#fff" stroke="none"/><circle cx="74" cy="34" r="5" fill="#fff" stroke="none"/><path d="M28 62C30 30 60 22 74 34"/>',
+  3:'<path d="M14 82h12v-9h12v-9h12v-6h12v-9h12v-9h12v-6"/>',
+  4:'<circle cx="50" cy="48" r="10"/><circle cx="50" cy="48" r="18"/><circle cx="50" cy="48" r="26" stroke-dasharray="3 5"/><circle cx="50" cy="48" r="34" stroke-opacity=".4"/>',
+  5:'<circle cx="50" cy="66" r="10"/><circle cx="50" cy="46" r="10"/><circle cx="50" cy="26" r="10"/>',
+  6:'<circle cx="50" cy="72" r="8"/><circle cx="50" cy="55" r="8"/><circle cx="50" cy="38" r="8"/><circle cx="50" cy="21" r="8" fill="#fff" fill-opacity=".35"/>',
+  7:'<rect x="12" y="30" width="26" height="40" rx="6"/><rect x="28" y="26" width="26" height="40" rx="6"/><rect x="44" y="30" width="26" height="40" rx="6"/><rect x="60" y="26" width="26" height="40" rx="6" stroke-opacity=".5"/>',
+  8:'<path d="M22 76V44M40 76V30M58 76V52M76 76V36" stroke-width="6" stroke-linecap="round"/>',
+  9:[...Array(12)].map((_,k)=>{const a=k/12*2*Math.PI-Math.PI/2;return`<circle cx="${(50+30*Math.cos(a)).toFixed(1)}" cy="${(46+30*Math.sin(a)).toFixed(1)}" r="${k?3:5}" fill="#fff" fill-opacity="${k?.6:1}" stroke="none"/>`}).join('')+'<circle cx="50" cy="46" r="30" stroke-opacity=".3"/>',
+  10:'<path d="M8 52c8-18 14-18 20 0s12 18 20 0 14-26 22-8 10 22 22 4"/>',
+  11:'<path d="M50 30v32"/><path d="M38 38c-6 6-6 18 0 24M62 38c6 6 6 18 0 24M28 30c-12 12-12 36 0 48M72 30c12 12 12 36 0 48" stroke-opacity=".6"/>'
+};
+function coverArt(h,motif,label,uid){
+  const h2=(h+44)%360,g='ca'+uid;
+  return`<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><radialGradient id="${g}a" cx=".22" cy=".18" r=".95"><stop offset="0" stop-color="hsl(${h} 88% 62%)"/><stop offset=".55" stop-color="hsl(${h} 62% 30%)"/><stop offset="1" stop-color="hsl(${h} 55% 12%)"/></radialGradient><radialGradient id="${g}b" cx=".92" cy=".96" r=".75"><stop offset="0" stop-color="hsl(${h2} 92% 62% / .9)"/><stop offset="1" stop-color="hsl(${h2} 92% 50% / 0)"/></radialGradient></defs>
+  <rect width="100" height="100" fill="url(#${g}a)"/><rect width="100" height="100" fill="url(#${g}b)"/>
+  <g transform="translate(18 -2) scale(.8)" fill="none" stroke="#fff" stroke-width="2" stroke-opacity=".8" stroke-linecap="round" stroke-linejoin="round">${motif||''}</g>
+  ${label!=null?`<text x="8" y="93" font-size="30" font-weight="800" fill="#fff" font-family="system-ui,-apple-system,Segoe UI,sans-serif" letter-spacing="-1">${label}</text>`:''}</svg>`;
+}
+const lessonArt=i=>{const l=LESSONS.find(x=>x.id===i);return coverArt(PARTHUE[l.part]||218,ARTM[i],i,'l'+i)};
+// tarjeta de disco: portada, título en dos renglones, subtítulo y avance
+function albCard(href,art,title,sub,pct,done){
+  return`<a class="alb${done?' done':''}" href="${href}"><span class="acov">${art}${done?`<span class="aok">${IC.check}</span>`:''}</span><b>${title}</b><small>${sub}</small>${pct!=null?`<span class="pg"><i style="width:${Math.round(pct*100)}%"></i></span>`:''}</a>`;
+}
+const lessonAlb=i=>{const l=LESSONS.find(x=>x.id===i),[d,t]=doneCount(i);return albCard(`#/leccion/${i}`,lessonArt(i),l.title,`${d} de ${t} · ${l.sub}`,d/t,d===t)};
 function viewLessons(){
   return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">11 lecciones · ${ALLEX.length} ejercicios</span><h1>Lecciones</h1><p class="sub">Cada lección se apoya en la anterior. Lee la idea, mira el mástil y haz los ejercicios con la guitarra en la mano.</p></div>
-  ${PARTS2.map(p=>`<div class="list"><p class="eyebrow parth">Parte ${p.n} · ${p.t}</p>${p.m.map(i=>{const l=LESSONS.find(x=>x.id===i),[d,t]=doneCount(i);return`<a class="card lrow" href="#/leccion/${i}"><span class="mn ${d===t?'done':''}">${i}</span><span class="mt"><b>${l.title}</b><span>${l.sub}</span></span><span class="cnt">${d}/${t}</span></a>`}).join('')}</div>`).join('')}`};
+  ${PARTS2.map(p=>`<section class="albsec"><div class="sech"><h2>Parte ${p.n} · ${p.t}</h2></div><div class="albs">${p.m.map(lessonAlb).join('')}</div></section>`).join('')}`};
 }
 function refreshProgress(){const el=$('#lprog');if(!el)return;const l=+el.dataset.l,[d,t]=doneCount(l);el.querySelector('i').style.width=(d/t*100)+'%';const c=$('#lcnt');if(c)c.textContent=`${d} de ${t} ejercicios hechos`}
 function viewLesson(id,exId){
@@ -216,7 +253,7 @@ function viewLesson(id,exId){
   const body=l.blocks.map((b,bi)=>blockHTML(b,ws).replace(/^(\s*<\w+)/,`$1 data-nb="${bi}"`)).join('');
   const prev=LESSONS.find(x=>x.id===id-1),next=LESSONS.find(x=>x.id===id+1),[d,t]=doneCount(id);
   return{title:'Lección '+id,back:'#/lecciones',html:`
-  <div class="lhead"><span class="eyebrow">Lección ${id} · Parte ${l.part}</span><h1>${l.title}</h1><p class="lead">${l.lead}</p>
+  <div class="lhead"><div class="lhero"><span class="acov">${lessonArt(id)}</span><div><span class="eyebrow">Lección ${id} · Parte ${l.part}</span><h1>${l.title}</h1></div></div><p class="lead">${l.lead}</p>
   ${HAS_TTS?`<div><button class="btn pri" data-narr="start" data-l="${id}">${IC.voice}Escuchar la lección</button></div>`:''}
   <div><div class="bar" id="lprog" data-l="${id}"><i style="width:${d/t*100}%"></i></div><p class="cap" id="lcnt" style="margin-top:6px">${d} de ${t} ejercicios hechos</p></div></div>
   ${body}
@@ -239,7 +276,7 @@ function blockHTML(b,ws){
 }
 function viewPractice(){
   return{title:'Practicar',html:`<div class="lhead"><span class="eyebrow">Herramientas</span><h1>Practicar</h1></div>
-  <a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina diaria</b><span>10, 15 o 30 minutos guiados con temporizador.</span></span></a>
+  <a class="card nowp" href="#/practicar/rutina"><span class="acov">${coverArt(205,'<circle cx="50" cy="46" r="26"/><path d="M50 30v16l11 7"/>',null,'rt')}</span><span class="np"><span class="eyebrow">Rutina diaria</span><b>10, 15 o 30 minutos</b><small>Calentamiento, mástil, lección e improvisación con temporizador.</small></span><span class="playc">${IC.play}</span></a>
   <div class="grid2">${toolCards()}</div>
   <a class="card tool" href="#/logros"><span class="ic">${achIcon('award')}</span><span><b>Logros</b><span>${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length} desbloqueados.</span></span></a>`};
 }
