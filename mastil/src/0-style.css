@@ -1015,3 +1015,23 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 /* botones de escuchar de los diagramas: píldora rellena, como el resto */
 .pbtn{border:0;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-text,var(--accent));padding:8px 16px 8px 14px;gap:8px;min-height:40px}
 .pbtn:hover{background:color-mix(in srgb,var(--accent) 26%,transparent)}
+/* ===================== portada de bienvenida (entrar con Google) ===================== */
+#welcome{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transition:opacity .3s ease,transform .3s ease}
+#welcome.out{opacity:0;transform:scale(1.02);pointer-events:none}
+html.welcome-on{overflow:hidden}
+.wmos{position:absolute;left:50%;top:-6%;width:170%;display:grid;grid-template-columns:repeat(6,1fr);gap:14px;transform:translateX(-50%) rotate(-12deg);opacity:.75;animation:wdrift 40s linear infinite alternate}
+.wmos .acov{border-radius:12px}
+@keyframes wdrift{from{transform:translateX(-50%) rotate(-12deg) translateY(0)}to{transform:translateX(-50%) rotate(-12deg) translateY(-8%)}}
+@media(prefers-reduced-motion:reduce){.wmos{animation:none}}
+.wfade{position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 10%,transparent) 0%,color-mix(in srgb,var(--bg) 55%,transparent) 38%,var(--bg) 66%)}
+.wbox{position:relative;width:100%;max-width:440px;padding:24px 24px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.wlogo{width:64px;height:64px;display:grid;place-items:center}
+.wlogo svg{width:56px;height:56px}
+.wbox h1{margin:0;font-size:clamp(34px,9vw,46px);line-height:1.02;letter-spacing:-.03em}
+.wsub{margin:0;color:var(--muted);font-size:16px;line-height:1.45;max-width:340px}
+.wgoogle{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:54px;border:0;border-radius:999px;background:#fff;color:#1f1f1f;font:600 16px var(--font-body);cursor:pointer;box-shadow:0 10px 30px -12px rgba(0,0,0,.6);white-space:nowrap}
+.wgoogle svg{width:22px;height:22px;flex:none}
+.wgoogle:disabled{opacity:.7}
+.wskip{border:0;background:none;color:var(--fg);font:600 15px var(--font-body);padding:10px 16px;cursor:pointer;border-radius:999px}
+.wskip:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.wsmall{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4;max-width:320px}

@@ -1032,6 +1032,26 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 /* botones de escuchar de los diagramas: píldora rellena, como el resto */
 .pbtn{border:0;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-text,var(--accent));padding:8px 16px 8px 14px;gap:8px;min-height:40px}
 .pbtn:hover{background:color-mix(in srgb,var(--accent) 26%,transparent)}
+/* ===================== portada de bienvenida (entrar con Google) ===================== */
+#welcome{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transition:opacity .3s ease,transform .3s ease}
+#welcome.out{opacity:0;transform:scale(1.02);pointer-events:none}
+html.welcome-on{overflow:hidden}
+.wmos{position:absolute;left:50%;top:-6%;width:170%;display:grid;grid-template-columns:repeat(6,1fr);gap:14px;transform:translateX(-50%) rotate(-12deg);opacity:.75;animation:wdrift 40s linear infinite alternate}
+.wmos .acov{border-radius:12px}
+@keyframes wdrift{from{transform:translateX(-50%) rotate(-12deg) translateY(0)}to{transform:translateX(-50%) rotate(-12deg) translateY(-8%)}}
+@media(prefers-reduced-motion:reduce){.wmos{animation:none}}
+.wfade{position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 10%,transparent) 0%,color-mix(in srgb,var(--bg) 55%,transparent) 38%,var(--bg) 66%)}
+.wbox{position:relative;width:100%;max-width:440px;padding:24px 24px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.wlogo{width:64px;height:64px;display:grid;place-items:center}
+.wlogo svg{width:56px;height:56px}
+.wbox h1{margin:0;font-size:clamp(34px,9vw,46px);line-height:1.02;letter-spacing:-.03em}
+.wsub{margin:0;color:var(--muted);font-size:16px;line-height:1.45;max-width:340px}
+.wgoogle{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:54px;border:0;border-radius:999px;background:#fff;color:#1f1f1f;font:600 16px var(--font-body);cursor:pointer;box-shadow:0 10px 30px -12px rgba(0,0,0,.6);white-space:nowrap}
+.wgoogle svg{width:22px;height:22px;flex:none}
+.wgoogle:disabled{opacity:.7}
+.wskip{border:0;background:none;color:var(--fg);font:600 15px var(--font-body);padding:10px 16px;cursor:pointer;border-radius:999px}
+.wskip:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.wsmall{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4;max-width:320px}
 
 </style>
 </head>
@@ -1726,16 +1746,19 @@ WID.openchords={
 const CLOUD={app:null,auth:null,db:null,M:null,user:null,ready:false,err:'',pushT:null,group:null,groups:null,busy:false};
 const FBV='10.12.2',FBU=n=>`https://www.gstatic.com/firebasejs/${FBV}/firebase-${n}.js`;
 const cloudOn=()=>typeof FIREBASE_CONFIG!=='undefined'&&!!(FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey);
+// el correo y contraseña se muestran solo cuando se active ese método en Firebase (Authentication → Método de acceso)
+const CLOUD_EMAIL=false;
 const SYNC=['done','secs','days','bpm','figbest','reto','ach','game','tried'];
 async function cloudInit(){
   if(!cloudOn()||CLOUD.app)return;
   try{
     const [A,U,F]=await Promise.all([import(FBU('app')),import(FBU('auth')),import(FBU('firestore'))]);
     CLOUD.M={...A,...U,...F};const M=CLOUD.M;
-    CLOUD.app=M.initializeApp(FIREBASE_CONFIG);CLOUD.auth=M.getAuth(CLOUD.app);CLOUD.db=M.getFirestore(CLOUD.app);
+    const host=location.hostname,ownHost=/\.(web\.app|firebaseapp\.com)$/.test(host);
+    CLOUD.app=M.initializeApp(ownHost?Object.assign({},FIREBASE_CONFIG,{authDomain:host}):FIREBASE_CONFIG);CLOUD.auth=M.getAuth(CLOUD.app);CLOUD.db=M.getFirestore(CLOUD.app);
     if(window.__FB_EMU){M.connectAuthEmulator(CLOUD.auth,window.__FB_EMU.auth,{disableWarnings:true});M.connectFirestoreEmulator(CLOUD.db,window.__FB_EMU.host,window.__FB_EMU.port)}
     try{await M.getRedirectResult(CLOUD.auth)}catch(e){}
-    M.onAuthStateChanged(CLOUD.auth,async u=>{CLOUD.user=u;CLOUD.ready=true;CLOUD.groups=null;if(u){try{await cloudPull()}catch(e){CLOUD.err=cloudMsg(e)}}else CLOUD.group=null;cloudRefresh()});
+    M.onAuthStateChanged(CLOUD.auth,async u=>{CLOUD.user=u;CLOUD.ready=true;CLOUD.groups=null;if(u){welcomeClose(true);try{await cloudPull()}catch(e){CLOUD.err=cloudMsg(e)}}else{CLOUD.group=null;welcomeShow()}cloudRefresh()});
   }catch(e){CLOUD.err='No se pudo conectar con la nube. Revisa tu internet.';CLOUD.ready=true;cloudRefresh()}
 }
 function cloudRefresh(){const h=location.hash;if(h===''||h==='#/'||h.startsWith('#/cuenta'))route()}
@@ -1789,6 +1812,28 @@ async function cloudMyGroups(){
   return out.sort((a,b)=>a.name.localeCompare(b.name));
 }
 async function cloudGroupName(code){try{const s=await CLOUD.M.getDoc(CLOUD.M.doc(CLOUD.db,'groups',code));return s.exists()?s.data().name:''}catch(e){return''}}
+/* ---------- portada de bienvenida ----------
+   La primera vez (sin sesión): mosaico de portadas inclinado, logo, frase y «Continuar con Google» o «Seguir sin cuenta». */
+const GLOGO='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+function welcomeShow(){
+  if(!cloudOn()||CLOUD.user||DB.welcomed||document.getElementById('welcome'))return;
+  const H=[218,262,328,26,150,352,200,28,265,330,205,180],tiles=[];
+  for(let i=0;i<24;i++){const l=i%11+1;tiles.push(i%3===1?coverArt(H[i%12],ARTM[(i*5)%11+1],null,'w'+i):lessonArt(l))}
+  document.body.insertAdjacentHTML('beforeend',`<div id="welcome" role="dialog" aria-modal="true" aria-labelledby="wtitle">
+   <div class="wmos" aria-hidden="true">${tiles.map(t=>`<span class="acov">${t}</span>`).join('')}</div><div class="wfade" aria-hidden="true"></div>
+   <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">Roka Guitar<br>for All</h1>
+    <p class="wsub">Aprende guitarra viendo el mástil: lecciones, canciones con karaoke y una banda que te acompaña.</p>
+    <button class="wgoogle" data-w="google">${GLOGO}Continuar con Google</button>
+    <button class="wskip" data-w="skip">Seguir sin cuenta</button>
+    <p class="msg err" id="werr" hidden></p>
+    <p class="wsmall">Con tu cuenta, tu progreso se guarda en la nube y lo ves en tu celular, tablet y computadora.</p></div></div>`);
+  const w=document.getElementById('welcome');document.documentElement.classList.add('welcome-on');
+  w.addEventListener('click',async e=>{const b=e.target.closest('[data-w]');if(!b)return;
+    if(b.dataset.w==='skip'){welcomeClose(true);return}
+    const er=$('#werr',w);er.hidden=true;b.disabled=true;
+    try{await cloudGoogle()}catch(x){er.textContent=cloudMsg(x);er.hidden=false}finally{b.disabled=false}});
+}
+function welcomeClose(remember){const w=document.getElementById('welcome');if(remember&&!DB.welcomed){DB.welcomed=1;persist()}if(!w)return;w.classList.add('out');document.documentElement.classList.remove('welcome-on');setTimeout(()=>w.remove(),320)}
 /* ---------- interfaz ---------- */
 function cloudCard(){
   if(!cloudOn())return'';
@@ -1805,11 +1850,11 @@ function viewAccount(){
   if(!u)return{title:'Cuenta',back:'#/',html:`
    <div class="lhead"><h1>Tu cuenta</h1><p class="sub">Guarda tu progreso en la nube para usarlo en todos tus dispositivos y unirte a la clase de tu maestro.</p></div>
    <div class="card" style="display:flex;flex-direction:column;gap:14px">
-    <button class="btn pri" data-cl="google">Entrar con Google</button>
-    <p class="cap" style="margin:0;text-align:center">o con tu correo</p>
+    <button class="wgoogle" data-cl="google">${GLOGO}Continuar con Google</button>
+    ${CLOUD_EMAIL?`<p class="cap" style="margin:0;text-align:center">o con tu correo</p>
     <label class="cl" for="clmail" style="margin:0">Correo</label><input id="clmail" class="inp" type="email" autocomplete="email" placeholder="tu@correo.com">
     <label class="cl" for="clpass" style="margin:0">Contraseña</label><input id="clpass" class="inp" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres">
-    <div class="row"><button class="btn" data-cl="in">Entrar</button><button class="btn" data-cl="new">Crear cuenta</button></div>
+    <div class="row"><button class="btn" data-cl="in">Entrar</button><button class="btn" data-cl="new">Crear cuenta</button></div>`:''}
     <p class="msg err" id="clerr" ${CLOUD.err?'':'hidden'}>${esc(CLOUD.err)}</p>
    </div>`,mount:cloudMount};
   return{title:'Cuenta',back:'#/',html:`
