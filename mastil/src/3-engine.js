@@ -5,7 +5,7 @@ function ac(){
     if(!AC){
       const C=window.AudioContext||window.webkitAudioContext;
       AC=new C({latencyHint:'interactive'});
-      const comp=AC.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=4;
+      const comp=AC.createDynamicsCompressor();comp.threshold.value=-6;comp.ratio.value=3;comp.knee.value=10;comp.attack.value=.006;comp.release.value=.2;
       MASTER=AC.createGain();MASTER.gain.value=.85;MASTER.connect(comp);comp.connect(AC.destination);
       // sala corta: le da cuerpo a la guitarra y al bajo grabados (impulso generado, sin archivos)
       try{const sr=AC.sampleRate,n=Math.floor(sr*1.4),ir=AC.createBuffer(2,n,sr);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.2)}

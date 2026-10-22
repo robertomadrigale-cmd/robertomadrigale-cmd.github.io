@@ -1039,7 +1039,7 @@ function ac(){
     if(!AC){
       const C=window.AudioContext||window.webkitAudioContext;
       AC=new C({latencyHint:'interactive'});
-      const comp=AC.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=4;
+      const comp=AC.createDynamicsCompressor();comp.threshold.value=-6;comp.ratio.value=3;comp.knee.value=10;comp.attack.value=.006;comp.release.value=.2;
       MASTER=AC.createGain();MASTER.gain.value=.85;MASTER.connect(comp);comp.connect(AC.destination);
       // sala corta: le da cuerpo a la guitarra y al bajo grabados (impulso generado, sin archivos)
       try{const sr=AC.sampleRate,n=Math.floor(sr*1.4),ir=AC.createBuffer(2,n,sr);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.2)}
@@ -2461,12 +2461,22 @@ function gNote(m,s,t,len,vol,o){
 }
 /* Rasgueo: abajo = de la 6ª a la 1ª, arriba = de la 1ª hacia las graves pero solo 3-4 cuerdas.
    La púa tarda ~10 ms entre cuerdas (menos si el golpe es suave), con variaciones mínimas para que no suene a máquina. */
-function gtrStrum(v,t,dir,vol,len,o){
-  const up=dir==='u',n=v.midi.length,idx=v.midi.map((_,j)=>j),L=up?idx.slice(-Math.min(4,n)).reverse():idx;
-  const gap=(up?.008:.011)*(vol<.06?.8:1);let tt=t;
-  L.forEach((j,k)=>{const acc=up?(k===0?1:.8-k*.08):(k<2?.85:1)-(k>3?.05:0);
-    gNote(v.midi[j],v.strs[j],tt,len,vol*acc*(.93+Math.random()*.14),o);tt+=gap*(.8+Math.random()*.4)});
+/* Rasgueo con intención. vel (0–1) decide todo, como la mano de un guitarrista:
+   · cuántas cuerdas: golpe fuerte abajo = todas desde el bajo; medio = sin la más grave; suave = solo las 4 agudas.
+     Arriba: 4 agudas si es fuerte, 3 si es normal, 2 si es un roce.
+   · velocidad de la púa: fuerte = barrido rápido y junto; suave = más lento y abierto.
+   · brillo: fuerte = brillante; suave = opaco (filtro).
+   · volumen con mucho más rango (≈ 18 dB entre un roce y un acento) y el chasquido de la púa sobre las cuerdas. */
+function strum(v,t,dir,vel,len,o){
+  vel=Math.max(.08,Math.min(1.15,vel));const up=dir==='u',n=v.midi.length,idx=v.midi.map((_,j)=>j);
+  let L;if(up)L=idx.slice(-Math.min(n,vel>.75?4:vel>.4?3:2)).reverse();else{const skip=vel>.82?0:vel>.5?1:Math.max(0,n-4);L=idx.slice(Math.min(skip,n-2))}
+  const gap=(up?.007:.010)*(1.35-vel*.6),amp=.16*Math.pow(vel,1.35),bright=1300+Math.pow(Math.min(1,vel),1.6)*8500;let tt=t;
+  L.forEach((j,k)=>{// en el barrido las primeras cuerdas suenan un poco menos que donde «cae» la mano
+    const shape=up?(k===0?1:.86-k*.06):(vel>.82&&k<2?1:k===0?.8:1);
+    gNote(v.midi[j],v.strs[j],tt,len,amp*shape*(.92+Math.random()*.16),Object.assign({lp:bright},o||{}));tt+=gap*(.75+Math.random()*.5)});
+  noise(t,Math.max(.02,tt-t+.012),'bandpass',up?3800:3000,.022*vel,.9); // la púa rozando las cuerdas
 }
+function gtrStrum(v,t,dir,vol,len,o){strum(v,t,dir,vol/.11,len,o)} // compatibilidad: volumen viejo → fuerza
 // arpegio por número de cuerda (6 = la más grave); si esa cuerda no suena en el acorde, usa la vecina más aguda
 function gtrPick(v,s,t,len,vol){
   if(s==='B'){gNote(v.midi[0],v.strs[0],t,len,vol*1.1);return}
@@ -2490,29 +2500,29 @@ function leadNote(m,t,d,v){
    Batería: k bombo, s tarola, r aro, h contratiempo, p maraca/shaker, g güiro o guacharaca, c clave; X fuerte, x normal, o suave.
    Lo que se ve en «Rasgueo sugerido» es exactamente la línea g que suena. */
 const GROOVES={
- folk:{n:'Fogata',sub:4,ring:1.5,tip:'El de fogata: abajo, abajo-arriba, arriba-abajo-arriba. La mano sigue moviéndose aunque no toque.',
-  4:{g:'D---D-U---U-D-U-',b:'R-------F-------',p:'--o---o---o---o-'},3:{g:'D---D-U-D-U-',b:'R-------F---',p:'--o---o---o-'}},
- pop:{n:'Pop',sub:4,ring:1,tip:'Corcheas parejas abajo-arriba con acento en el 2 y el 4, junto con la tarola.',
+ folk:{feel:0.06,n:'Fogata',sub:4,ring:1.5,tip:'El de fogata: abajo, abajo-arriba, arriba-abajo-arriba. La mano sigue moviéndose aunque no toque.',
+  4:{g:'D---d-U---u-D-u-',b:'R-------F-------',p:'--o---o---o---o-'},3:{g:'D---d-u-d-u-',b:'R-------F---',p:'--o---o---o-'}},
+ pop:{feel:0.03,n:'Pop',sub:4,ring:1,tip:'Corcheas parejas abajo-arriba con acento en el 2 y el 4, junto con la tarola.',
   4:{g:'d-u-D-u-d-u-D-u-',b:'R--R--R-R--R--R-',k:'X-----x-X-------',s:'----X-------X---',h:'x-x-x-x-x-x-x-x-'},3:{g:'D-u-d-u-d-u-',b:'R-------F---',k:'X-----------',s:'----x---x---',h:'x-x-x-x-x-x-'}},
- balada:{n:'Balada',sub:4,ring:2.4,tip:'Lento y con espacio: abajo, arriba-arriba, abajo. Deja que cada golpe suene completo.',
-  4:{g:'D-----U---U-D---',b:'R-------F-------',k:'x-------o-------',r:'----x-------x---'},3:{g:'D-----U-U-D-',b:'R-----------',k:'x-----------',r:'--------x---'}},
- arpegio:{n:'Arpegio',sub:4,ring:2.6,tip:'Pulgar en el bajo y luego una cuerda a la vez (p-i-m-a), dejando que todo suene.',
+ balada:{feel:0.04,n:'Balada',sub:4,ring:2.4,tip:'Lento y con espacio: abajo, arriba-arriba, abajo. Deja que cada golpe suene completo.',
+  4:{g:'D-----u---U-d---',b:'R-------F-------',k:'x-------o-------',r:'----x-------x---'},3:{g:'D-----u-U-d-',b:'R-----------',k:'x-----------',r:'--------x---'}},
+ arpegio:{feel:0.03,n:'Arpegio',sub:4,ring:2.6,tip:'Pulgar en el bajo y luego una cuerda a la vez (p-i-m-a), dejando que todo suene.',
   4:{g:'B-3-2-3-1-3-2-3-',b:'R---------------'},3:{g:'B-3-2-1-2-3-',b:'R-----------'}},
- travis:{n:'Travis',sub:4,ring:1.8,tip:'El pulgar alterna dos bajos en cada tiempo y los dedos tocan las agudas entre ellos.',
+ travis:{feel:0.05,n:'Travis',sub:4,ring:1.8,tip:'El pulgar alterna dos bajos en cada tiempo y los dedos tocan las agudas entre ellos.',
   4:{g:'B-2-b-1-B-2-b-1-',b:'R-------F-------'}},
  rock:{n:'Rock',sub:4,ring:.5,tip:'Corcheas hacia abajo, apagando un poco con la palma; más fuerte en cada tiempo.',
-  4:{g:'D-d-D-d-D-d-D-d-',b:'R-R-R-R-R-R-R-R-',k:'X-----x-X-------',s:'----X-------X---',h:'x-x-x-x-x-x-x-x-'},3:{g:'D-d-d-D-d-d-',b:'R-R-R-R-R-R-',k:'X-------x---',s:'----X-------',h:'x-x-x-x-x-x-'}},
+  4:{g:'D-d-d-d-D-d-d-d-',b:'R-R-R-R-R-R-R-R-',k:'X-----x-X-------',s:'----X-------X---',h:'x-x-x-x-x-x-x-x-'},3:{g:'D-d-d-D-d-d-',b:'R-R-R-R-R-R-',k:'X-------x---',s:'----X-------',h:'x-x-x-x-x-x-'}},
  rocknroll:{n:'Rock and roll',sub:4,walk:1,ring:.8,tip:'Abajo-arriba sin parar, golpe fuerte en el 2 y el 4. El bajo camina: raíz, tercera, quinta, sexta, séptima.',
   4:{g:'d-u-D-u-d-u-D-u-',b:'R-3-F-6-7-6-F-3-',k:'x-------x-------',s:'----X-------X---',h:'x-x-x-x-x-x-x-x-'}},
  shuffle:{n:'Blues shuffle',sub:3,walk:1,ring:.5,tip:'Swing: «lar-go cor-to». Golpe abajo en el tiempo y arriba en la última parte del tresillo.',
   4:{g:'D-uD-uD-uD-u',b:'R-R3-3F-F6-6',k:'x-----x-----',s:'---X-----X--',h:'x-xx-xx-xx-x'}},
- country:{n:'Country',sub:4,ring:.9,tip:'«Bum-chi-ca»: pulgar en el bajo y rasgueo abajo-arriba; el bajo alterna raíz y quinta.',
-  4:{g:'B---D-U-b---D-U-',b:'R-------F-------',k:'x-------x-------',s:'----o-------o---'}},
+ country:{feel:0.07,n:'Country',sub:4,ring:.9,tip:'«Bum-chi-ca»: pulgar en el bajo y rasgueo abajo-arriba; el bajo alterna raíz y quinta.',
+  4:{g:'B---D-u-b---D-u-',b:'R-------F-------',k:'x-------x-------',s:'----o-------o---'}},
  ranchera:{n:'Ranchera',sub:4,ring:.45,tip:'4/4: polka norteña, «bum-chac» con bajo en cada tiempo. 3/4: vals ranchero de mariachi con abanico.',
   4:{g:'B-x-b-x-B-x-b-x-',b:'R---F---R---F---',k:'x---x---x---x---',s:'--o---o---o---o-'},3:{g:'B---D-u-D-u-',b:'A-----------'}},
  vals:{n:'Vals',sub:4,ring:.6,tip:'Bum-chi-chi: bajo en el 1 y golpes cortos hacia abajo en el 2 y el 3.',
   3:{g:'B---d---d---',b:'A-----------',h:'----o---o---'}},
- bolero:{n:'Bolero',sub:4,ring:1.2,tip:'Pulgar en el 1 y el 3; acorde en el 2, su «y», y el 4. Suave, con maracas.',
+ bolero:{feel:0.03,n:'Bolero',sub:4,ring:1.2,tip:'Pulgar en el 1 y el 3; acorde en el 2, su «y», y el 4. Suave, con maracas.',
   4:{g:'B---d-d-b---d---',b:'R-------F-------',p:'o-x-o-x-o-x-o-x-'}},
  cumbia:{n:'Cumbia',sub:4,ring:.35,tip:'Golpe corto y apagado en el «y» de cada tiempo, junto con la guacharaca; el bajo en el 1 y el 3.',
   4:{g:'--x---x---x---x-',b:'R-----F-F-------',k:'x-------x-------',g2:'X-xxX-xxX-xxX-xx'}},
@@ -2545,17 +2555,24 @@ function bandStep(id,beats,i,p,sh,t,spb,bar,ci){
   const bi=G.walk&&ci!=null?ci%L:i;
   const B=V.b;if(B&&B[bi]&&B[bi]!=='-'&&B[bi]!=='.'){let n=1;while(bi+n<L&&B[bi+n]==='-')n++;
     const c=B[bi],w=c==='A'?(bar%2?'F':'R'):c,iv={R:0,F:7,O:12,'3':minor?3:4,'6':9,'7':10}[w]||0;let m=rootLo+iv;if(w==='F'&&m>40)m-=12;
-    bassNote(m,t,n*cd*.92,id==='rock'?.3:.36,true)}
+    bassNote(m,t,n*cd*.92,(id==='rock'?.3:.36)*(bi===0?1.08:bi%sub===0?.95:.78),true)}
   // guitarra: exactamente la línea que se ve
   const c=V.g&&V.g[i];if(!c||c==='-')return;
-  const ring=G.ring*spb,lc=c.toLowerCase(),acc=c!==lc,sb=G.ring<.7?1.3:1;
+  const ring=G.ring*spb,lc=c.toLowerCase(),acc=c!==lc,sb=G.ring<.7?1.15:1;
+  // acento natural del compás: el 1 manda, luego los demás tiempos, luego los «y», y los dieciseisavos son roces
+  const pos=i%sub,met=i===0?1:pos===0?.86:(sub===4&&pos===2)||(sub===3&&pos===2)?.68:.5;
+  // pequeño swing en los «y» (le da caminado al folk, pop, country, balada)
+  if(G.feel&&pos){t+=G.feel*spb*(sub===4&&pos===2?1:.5)}
+  const vel=met*(acc?1.18:.9)*sb*(.95+Math.random()*.1);
   const bassStr=w=>{const want=(w==='b'?pc+7:pc)%12;let j=v.midi.findIndex((m,k)=>k<3&&m%12===want);if(j<0)j=w==='b'?Math.min(1,v.midi.length-1):0;return j};
   if(c==='B'||c==='b'||c==='C'){const j=bassStr(c==='C'?'B':c);gNote(v.midi[j],v.strs[j],t,Math.max(ring,spb*.9),.17)}
   if(c==='c'||c==='C'){v.midi.slice(-3).forEach((m,k)=>gNote(m,v.strs[v.midi.length-3+k],t+k*.004,ring,.13));return}
   if(c==='B'||c==='b')return;
-  if(/\d/.test(c)){gtrPick(v,+c,t,spb*2.4,.24);return}
-  if(lc==='x'){gtrStrum(v,t,'d',(acc?.13:.11),.07,{rel:.04,lp:1600,wet:.15});noise(t,.025,'bandpass',2500,.035,1.2);return}
-  gtrStrum(v,t,lc,(acc?.125:.085)*sb,lc==='u'?Math.min(ring,spb*1.2):ring);
+  if(/\d/.test(c)){gtrPick(v,+c,t,spb*2.4,.24*(.75+met*.3));return}
+  // apagado: la mano cae sobre las cuerdas (golpe seco, oscuro, con el «chak» de la palma)
+  if(lc==='x'){strum(v,t,'d',Math.max(.55,vel),.06,{rel:.035,lp:1400,wet:.12});noise(t,.03,'bandpass',1900,.05*vel,1.1);return}
+  // los golpes de acento dejan sonar; los roces se cortan antes
+  strum(v,t,lc,vel,lc==='u'?Math.min(ring,spb*1.1)*(vel>.7?1:.7):ring*(vel>.75?1:.8));
 }
 /* ---------- cancionero: formato ---------- */
 // ChordPro: [Sol]letra con [Re7]acordes, {title:} {artist:} {key:} {bpm:} {time:3/4} {bpl:2} {cpb:1} {style:} {pickup:1} {c:Coro}
