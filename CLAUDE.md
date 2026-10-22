@@ -60,5 +60,5 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 ## Ideas pendientes que Roberto vio con buenos ojos
 - Canciones de práctica por lección (reutilizar ROKA Studio).
 - Grabarse desde la app y escucharse.
-- Firebase ya activo (proyecto `rokaguitarrall`, configuración en `1-firebase-config.js`, sin Analytics). Falta confirmar en la consola: Google y correo activados en Authentication, dominio `robertomadrigale-cmd.github.io` autorizado, Firestore creado con las reglas de `firestore.rules`.
+- Firebase activo: proyecto `rokaguitarrall` (`1-firebase-config.js`, sin Analytics). La base de Firestore se llama **`rokaguitarrhero`** (no es la «(default)»; `FIRESTORE_DB`), edición Enterprise en nam5; reglas publicadas con `npx -y firebase-tools@13.29.1 deploy --only firestore --project rokaguitarrall` (`firebase.json` las apunta a esa base). Solo Google está activado en Authentication (por eso `CLOUD_EMAIL=false`). El inicio de sesión va por `rokaguitarrall.firebaseapp.com` (con `web.app` como authDomain sale `redirect_uri_mismatch`, a menos que se registre `https://rokaguitarrall.web.app/__/auth/handler` en el cliente OAuth de Google Cloud).
 - Nivel 0 para principiantes con rasgueos (reutilizar ROKA Studio).

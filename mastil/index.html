@@ -1063,6 +1063,8 @@ html.welcome-on{overflow:hidden}
    Para activarla, reemplaza null por el objeto que da Firebase (ver FIREBASE.md en la raíz del repo), por ejemplo:
    const FIREBASE_CONFIG={apiKey:"...",authDomain:"tu-proyecto.firebaseapp.com",projectId:"tu-proyecto",appId:"..."}; */
 const FIREBASE_CONFIG={apiKey:"AIzaSyCx69uouBXA30FQQYtnSbD66cyeBr0ufHw",authDomain:"rokaguitarrall.firebaseapp.com",projectId:"rokaguitarrall",storageBucket:"rokaguitarrall.firebasestorage.app",messagingSenderId:"804560385041",appId:"1:804560385041:web:38262af85e5d3354aeedb0"};
+// la base de datos de Firestore tiene nombre propio (no es la «(default)»)
+const FIRESTORE_DB='rokaguitarrhero';
 
 'use strict';
 const PRINT=false;
@@ -1755,7 +1757,7 @@ async function cloudInit(){
     const [A,U,F]=await Promise.all([import(FBU('app')),import(FBU('auth')),import(FBU('firestore'))]);
     CLOUD.M={...A,...U,...F};const M=CLOUD.M;
     // el inicio de sesión va por rokaguitarrall.firebaseapp.com: es la dirección que Google tiene registrada (otra da «redirect_uri_mismatch»)
-    CLOUD.app=M.initializeApp(FIREBASE_CONFIG);CLOUD.auth=M.getAuth(CLOUD.app);CLOUD.db=M.getFirestore(CLOUD.app);
+    CLOUD.app=M.initializeApp(FIREBASE_CONFIG);CLOUD.auth=M.getAuth(CLOUD.app);CLOUD.db=FIRESTORE_DB?M.getFirestore(CLOUD.app,FIRESTORE_DB):M.getFirestore(CLOUD.app);
     if(window.__FB_EMU){M.connectAuthEmulator(CLOUD.auth,window.__FB_EMU.auth,{disableWarnings:true});M.connectFirestoreEmulator(CLOUD.db,window.__FB_EMU.host,window.__FB_EMU.port)}
     try{await M.getRedirectResult(CLOUD.auth)}catch(e){}
     M.onAuthStateChanged(CLOUD.auth,async u=>{CLOUD.user=u;CLOUD.ready=true;CLOUD.groups=null;if(u){welcomeClose(true);try{await cloudPull()}catch(e){CLOUD.err=cloudMsg(e)}}else{CLOUD.group=null;welcomeShow()}cloudRefresh()});
