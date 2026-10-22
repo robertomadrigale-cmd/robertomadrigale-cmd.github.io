@@ -27,6 +27,8 @@ function unlockAudio(){
 ['pointerdown','touchend','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC&&AC.state!=='running')AC.resume()});
 const out=()=>MASTER;
+// retraso del sonido + ajuste manual (audífonos Bluetooth; Safari no informa ese retraso)
+const outLat=()=>AC?Math.min(.8,(AC.outputLatency||0)+(AC.baseLatency||0)+(+DB.lat||0)/1000):0;
 /* Cuerda pulsada (Karplus-Strong): un ruido corto que circula por un retardo filtrado suena como cuerda. */
 const KS={};
 function ksBuffer(m){
@@ -103,18 +105,29 @@ function noise(t,dur,type,freq,v,q){
   g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
   s.connect(f);f.connect(g);g.connect(out());s.start(t);s.stop(t+dur+.02);
 }
+/* batería sintetizada con más cuerpo: bombo con golpe + cuerpo, tarola con dos tonos + cuerdas, platillo metálico tipo 808 */
 function kick(t,v){
-  const o=AC.createOscillator(),g=AC.createGain();
-  o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
-  g.gain.setValueAtTime(v||.9,t);g.gain.exponentialRampToValueAtTime(.0001,t+.32);
-  o.connect(g);g.connect(out());o.start(t);o.stop(t+.35);
+  v=v||.9;const o=AC.createOscillator(),g=AC.createGain(),sh=AC.createWaveShaper();
+  const cv=new Float32Array(256);for(let i=0;i<256;i++){const x=i/128-1;cv[i]=Math.tanh(x*1.6)}sh.curve=cv;
+  o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(52,t+.09);o.frequency.exponentialRampToValueAtTime(44,t+.3);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(v*.5,t+.08);g.gain.exponentialRampToValueAtTime(.0001,t+.42);
+  o.connect(sh);sh.connect(g);g.connect(out());o.start(t);o.stop(t+.45);
+  noise(t,.012,'highpass',2500,v*.22); // el golpe del mazo
 }
 function snare(t,v){
-  v=v||.45;noise(t,.18,'bandpass',1900,v,.8);
-  const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.setValueAtTime(210,t);o.frequency.exponentialRampToValueAtTime(140,t+.08);
-  g.gain.setValueAtTime(v*.6,t);g.gain.exponentialRampToValueAtTime(.0001,t+.1);o.connect(g);g.connect(out());o.start(t);o.stop(t+.12);
+  v=v||.45;
+  [[185,.5],[330,.28]].forEach(([f,k])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.setValueAtTime(f*1.25,t);o.frequency.exponentialRampToValueAtTime(f,t+.03);
+    g.gain.setValueAtTime(v*k,t);g.gain.exponentialRampToValueAtTime(.0001,t+.11);o.connect(g);g.connect(out());o.start(t);o.stop(t+.13)});
+  noise(t,.2,'highpass',1800,v*.75);noise(t,.07,'bandpass',4200,v*.35,1.2);
 }
-const hat=(t,v,open)=>noise(t,open?.22:.045,'highpass',7500,v||.16);
+const HATR=[2,3,4.16,5.43,6.79,8.21];
+function hat(t,v,open){
+  v=v||.16;const d=open?.3:.05,g=AC.createGain(),bp=AC.createBiquadFilter(),hp=AC.createBiquadFilter();
+  bp.type='bandpass';bp.frequency.value=10000;bp.Q.value=.8;hp.type='highpass';hp.frequency.value=7000;
+  HATR.forEach(r=>{const o=AC.createOscillator();o.type='square';o.frequency.value=40*r*1.02;o.connect(bp);o.start(t);o.stop(t+d+.02)});
+  bp.connect(hp);hp.connect(g);g.connect(out());
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v*1.4,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+}
 const guiro=(t,long)=>{if(long){for(let i=0;i<5;i++)noise(t+i*.022,.02,'bandpass',3600,.11,2)}else noise(t,.03,'bandpass',3600,.13,2)};
 function tickSound(t,kind){
   const o=AC.createOscillator(),g=AC.createGain();
@@ -148,7 +161,8 @@ function seqPump(){
   while(SEQ.next<AC.currentTime+.22){
     const s=SEQ.step,t=SEQ.next;
     SEQ.on(s,t);
-    if(SEQ.ui){const d=Math.max(0,(t-AC.currentTime)*1000);setTimeout(()=>{if(SEQ.id&&SEQ.ui)SEQ.ui(s)},d)}
+    // lo visual se retrasa lo mismo que tarda el sonido en salir por la bocina (en Android 0.1–0.3 s, más con Bluetooth)
+    if(SEQ.ui){const d=Math.max(0,(t-AC.currentTime+outLat())*1000);setTimeout(()=>{if(SEQ.id&&SEQ.ui)SEQ.ui(s)},d)}
     SEQ.next+=SEQ.dur();SEQ.step++;
   }
 }

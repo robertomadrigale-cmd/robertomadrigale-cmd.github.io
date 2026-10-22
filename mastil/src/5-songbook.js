@@ -416,10 +416,30 @@ function patHTML(style,beats){
     const g=c==='-'?'<span class="rest">·</span>':c==='B'||c==='b'?`<span class="bass">${c==='B'?'B':'b'}</span>`:c==='c'||c==='C'?`<span class="bass">${c==='C'?'B+':'•'}</span>`:/\d/.test(c)?`<span class="str">${c}</span>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strong?2.4:1.6}" stroke-linecap="round" stroke-linejoin="round">${KARR[lc]}</svg>`;
     return`<span class="sl${strong&&/[dux]/i.test(c)?' acc':''}" data-sl="${k}">${g}<small>${lbl(i)}</small></span>`}).join('')}</div>`;
 }
+/* ---------- banda pre-grabada por tramos ----------
+   En vez de crear cientos de notas en vivo (el teléfono puede atrasarse y el ritmo tropieza), cada tramo de 4 compases
+   se graba en una OfflineAudioContext con el mismo motor (bandStep) y se reproduce como un solo audio, en su lugar exacto. */
+const BR={gen:0,src:[],ir:null};
+function bandRender(steps,cd){
+  const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext,live=[AC,MASTER,REV],sr=AC.sampleRate,off=new OAC(2,Math.ceil((steps.length*cd+2.8)*sr),sr);
+  if(!BR.ir){const n=Math.floor(sr*1.4),ir=off.createBuffer(2,n,sr);for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.2)}BR.ir=ir}
+  const keep=Object.assign({},GSTR);for(const k in GSTR)delete GSTR[k];
+  try{AC=off;MASTER=off.createGain();MASTER.connect(off.destination);REV=off.createConvolver();REV.buffer=BR.ir;const rg=off.createGain();rg.gain.value=.16;REV.connect(rg);rg.connect(MASTER);
+    steps.forEach((x,j)=>{if(x)bandStep(x.G,x.bt,x.i,x.p,x.sh,j*cd,x.spb,x.bar,x.ci)})}
+  finally{[AC,MASTER,REV]=live;for(const k in GSTR)delete GSTR[k];Object.assign(GSTR,keep)}
+  // Safari viejo entrega el resultado por evento y no por promesa
+  return new Promise((res,rej)=>{off.oncomplete=e=>res(e.renderedBuffer);try{const p=off.startRendering();if(p&&p.then)p.then(res,rej)}catch(e){rej(e)}});
+}
+function bandPlay(buf,when){
+  const src=AC.createBufferSource();src.buffer=buf;src.connect(out());const now=AC.currentTime;
+  if(when>=now+.005)src.start(when);else{const late=now+.02-when;if(late<buf.duration)src.start(now+.02,late);else return}
+  BR.src.push(src);src.onended=()=>{BR.src=BR.src.filter(x=>x!==src)};
+}
+function bandStop(){BR.gen++;BR.src.forEach(x=>{try{x.stop()}catch(e){}});BR.src=[]}
 function viewSongPlay(id,slow){
   const s=sbGet(id);if(!s)return viewSongbook();
   const P=songParse(s.src);DB.kt=DB.kt||{};DB.kbpm=DB.kbpm||{};DB.kst=DB.kst||{};
-  DB.kbeats=DB.kbeats||{};DB.ksp=DB.ksp||{};const st={sp:slow?(DB.ksp[id]&&DB.ksp[id]<1?DB.ksp[id]:.75):(DB.ksp[id]||1),loop:0,shift:DB.kt[id]||0,bpm:DB.kbpm[id]||P.bpm,bars:0,style:GROOVES[DB.kst[id]]?DB.kst[id]:P.style,beats:DB.kbeats[id]||P.beats};
+  DB.kbeats=DB.kbeats||{};DB.ksp=DB.ksp||{};const st={sp:slow?(DB.ksp[id]&&DB.ksp[id]<1?DB.ksp[id]:.75):1,loop:0,shift:DB.kt[id]||0,bpm:DB.kbpm[id]||P.bpm,bars:0,style:GROOVES[DB.kst[id]]?DB.kst[id]:P.style,beats:DB.kbeats[id]||P.beats};
   const gid=()=>grooveFor(st.style,st.beats),RES=()=>GROOVES[gid()].sub;
   const styChips=()=>Object.entries(GROOVES).filter(([k,g])=>g[st.beats===3?3:4]).map(([k,g])=>`<button class="chip" data-sty="${k}" aria-pressed="${gid()===k}">${g.n}</button>`).join('');
   Object.assign(KAR,DB.kar||{});
@@ -448,6 +468,7 @@ function viewSongPlay(id,slow){
     <div class="seg">${[['us','C D E'],['es','Do Re Mi']].map(([v,l])=>`<button data-not="${v}" aria-pressed="${(DB.notation||'us')===v}">${l}</button>`).join('')}</div><button class="btn sm" data-z="-1" aria-label="Letra más chica">A−</button><button class="btn sm" data-z="1" aria-label="Letra más grande">A+</button></div></div>
    <div><span class="cl">Sonido</span><div class="row"><button class="btn sm ${KAR.band?'on':''}" data-t="band">${IC.wave}Banda</button>${P.hasMel?`<button class="btn sm ${KAR.voice?'on':''}" data-t="voice">${IC.note}Voz guía</button>`:''}<button class="btn sm ${KAR.met?'on':''}" data-t="met">${IC.play2}Metrónomo</button></div></div>
    <div><span class="cl">Ritmo de la banda</span><div class="chips" id="kstys">${styChips()}</div></div>
+   <div><span class="cl">Sincronizar luces con el sonido</span><div class="seg">${[[0,'Normal'],[150,'+150 ms'],[300,'+300 ms'],[450,'+450 ms']].map(([v,l])=>`<button data-lat="${v}" aria-pressed="${(+DB.lat||0)===v}">${l}</button>`).join('')}</div><p class="cap" style="margin:6px 0 0">Si la letra o el rasgueo se iluminan antes de que suene (pasa con audífonos Bluetooth), sube el ajuste.</p></div>
    <div class="krow"><div><span class="cl">Compás</span><div class="seg">${[[4,'4/4'],[3,'3/4 vals']].map(([v,l])=>`<button data-beats="${v}" aria-pressed="${st.beats===v}">${l}</button>`).join('')}</div></div>
     ${P.lines.some(l=>l.pieces&&!l.mel)?`<div><span class="cl">Compases por renglón</span><select class="inp" id="kbpl" style="width:auto">${[0,1,2,3,4,6,8].map(v=>`<option value="${v}" ${v===st.bars?'selected':''}>${v||'Automático'}</option>`).join('')}</select></div>`:''}</div>
    </div></details>
@@ -459,7 +480,7 @@ function viewSongPlay(id,slow){
   mount(r){
     const sumK=()=>{const m=$('.kmore summary small',r);if(m)m.textContent=`${BSTYLES[gid()]} · ${st.beats}/4`};
     let LP=null;
-    const spdTxt=()=>{const m=$('#kspd',r);if(m)m.textContent=st.sp<1?`La banda va a ${Math.round(st.bpm*st.sp)} bpm (de ${st.bpm}). El tono no cambia.`:''};
+    const spdTxt=()=>{const m=$('#kspd',r);if(m)m.textContent=st.sp<1?`La banda va a ${Math.round(st.bpm*st.sp)} bpm (de ${st.bpm}). El tono no cambia.`:'';const kb=$('#kbpm',r);if(kb)kb.textContent=st.sp<1?Math.round(st.bpm*st.sp):st.bpm};
     const kar=$('#kar',r);let pos=0,TL=null,BK=null,curCh=P.chords[0]||null;
     requestAnimationFrame(()=>fitKar(kar));const onRs=()=>fitKar(kar);window.addEventListener('resize',onRs);setTimeout(()=>{if(!document.body.contains(kar))window.removeEventListener('resize',onRs)},0);
     // panel lateral: tono, rasgueo sugerido y acorde que suena
@@ -486,22 +507,33 @@ function viewSongPlay(id,slow){
       const top=el.getBoundingClientRect().top;if(top<90||top>innerHeight*.55)el.scrollIntoView({block:'center',behavior:'smooth'});
     };
     const lineIdx=li=>TL.lines.findIndex(x=>x.li===li);
-    const go=()=>{
-      if(running()){seqStop();paint();return}
-      if(!ac())return;loadSamples();if(TL.res!==RES())build();
+    const go=async()=>{
+      if(running()){seqStop();bandStop();paint();return}
+      if(!ac())return;
+      // primero las grabaciones de guitarra y bajo, para que la canción no cambie de sonido a medias
+      if(!SMP.ready){const gb=$('#kgo',r);gb.disabled=true;gb.innerHTML='Cargando sonidos…';await loadSamples();gb.disabled=false;if(!document.body.contains(gb))return}
+      if(TL.res!==RES())build();
       const Q=TL.res,G=gid(),stp=+(($('.kpat',r)||{}).dataset||{}).step||1,bt=st.beats,startB0=TL.lines[pos]?TL.lines[pos].start:0,startB=P.pickup?startB0:Math.floor(startB0/bt+1e-6)*bt,startK=Math.round(startB*Q);
       // cuenta: un compás completo y, si la canción entra con anacrusa, los pulsos que faltan para que caiga en su lugar
       const pk=P.pickup%bt,countK=(bt+(pos===0&&pk?bt-pk:0))*Q,N=Math.ceil(TL.total*Q);
       LP=null;if(st.loop&&TL.lines[pos]){const g1=Math.min(TL.lines.length,pos+st.loop),e0=g1<TL.lines.length?TL.lines[g1].start:TL.total,e=Math.ceil(e0/bt-1e-6)*bt*Q;if(e>startK)LP={s:startK,e,g0:pos,g1}}
       const absA=k=>{const a=startK+k;return LP?LP.s+((a-LP.s)%(LP.e-LP.s)):a};
             clearHL();for(let g=0;g<pos;g++){const e=$(`.kl[data-li="${TL.lines[g].li}"]`,kar);if(e)e.classList.add('past')}
+      // la banda se pre-graba por tramos de 4 compases (sin tropiezos aunque el teléfono esté ocupado)
+      const cd=60/(st.bpm*st.sp)/Q,spbB=60/(st.bpm*st.sp),CH=bt*Q*4,gen=++BR.gen,done={};let T0=0;
+      const cell=k=>{const a=absA(k);if(a>=N||!TL.chAt[a])return null;const rel=a-Math.round(P.pickup*Q),L=bt*Q;return{G,bt,i:((rel%L)+L)%L,bar:Math.floor(rel/L),p:TL.chAt[a],ci:a-TL.chS[a],sh:st.shift,spb:spbB}};
+      const stepsOf=n=>{const a=[];for(let k=n*CH;k<(n+1)*CH;k++)a.push(cell(k));return a};
+      const want=n=>{if(!KAR.band||done[n]||(!LP&&startK+n*CH>=N))return;done[n]=1;
+        bandRender(stepsOf(n),cd).then(buf=>{if(gen!==BR.gen||!running())return;bandPlay(buf,T0+(countK+n*CH)*cd)}).catch(()=>{})};
+      // el primer tramo se graba ANTES de arrancar, para que el primer golpe caiga exacto
+      let first=null;if(KAR.band){const gb=$('#kgo',r);gb.disabled=true;gb.innerHTML='Preparando…';try{first=await bandRender(stepsOf(0),cd)}catch(e){}gb.disabled=false;done[0]=1;if(gen!==BR.gen||!document.body.contains(gb))return}
       seqStart('kar','Karaoke · '+P.title,()=>60/(st.bpm*st.sp)/Q,(s,t)=>{
         const k=s-countK;
         if(k<0){if(s%Q===0)tick(t,s===0?'acc':'beat');return}
         const a=absA(k);if(a>=N)return;
         const spb=60/(st.bpm*st.sp),rel=a-Math.round(P.pickup*Q),L=bt*Q,i=((rel%L)+L)%L,bar=Math.floor(rel/L);
         if(KAR.met&&i%Q===0)tick(t,i===0?'acc':'sub',i===0?'bar':'beat');
-        if(KAR.band&&TL.chAt[a])bandStep(G,bt,i,TL.chAt[a],st.shift,t,spb,bar,a-TL.chS[a]);
+        if(k%CH===0)want(Math.floor(k/CH)+2);
         if(KAR.voice&&BK[a])BK[a].forEach(e=>{if(e.type==='note')leadNote(e.m+st.shift,t,e.d*spb,.2)});
       },s=>{
         const k=s-countK;
@@ -517,19 +549,21 @@ function viewSongPlay(id,slow){
           else if(e.type==='chord'){if(e.p!==curCh){curCh=e.p;const k=$('#ksch',r);if(k)k.innerHTML=chNow()}$$('.pc.now',kar).forEach(x=>x.classList.remove('now'));const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p)p.classList.add('now')}
         });
       });
+      T0=SEQ.next-SEQ.step*cd;if(first)bandPlay(first,T0+countK*cd);want(1);
       paint();
     };
     $('#kgo',r).onclick=go;
-    $('#kreset',r).onclick=()=>{if(running())seqStop();pos=0;clearHL();window.scrollTo({top:0,behavior:'smooth'});paint()};
-    kar.addEventListener('click',e=>{const l=e.target.closest('.kl');if(!l)return;const g=lineIdx(+l.dataset.li);if(g<0)return;const was=running();if(was)seqStop();pos=g;clearHL();setLine(+l.dataset.li);if(was)go();paint()});
+    $('#kreset',r).onclick=()=>{if(running())seqStop();bandStop();pos=0;clearHL();window.scrollTo({top:0,behavior:'smooth'});paint()};
+    kar.addEventListener('click',e=>{const l=e.target.closest('.kl');if(!l)return;const g=lineIdx(+l.dataset.li);if(g<0)return;const was=running();if(was){seqStop();bandStop()}pos=g;clearHL();setLine(+l.dataset.li);if(was)go();paint()});
     const rerender=()=>{kar.innerHTML=P.lines.map(lineHTML).join('');requestAnimationFrame(()=>fitKar(kar));$('#kchips',r).innerHTML=chips();$('#kkey',r).textContent=keyLbl();$('#kcapo',r).textContent=capoHint(P.key,st.shift);side()};
     r.addEventListener('click',e=>{
-      const k=e.target.closest('[data-k]');if(k){const v=+k.dataset.k;st.shift=v?((st.shift+v+18)%12)-6:0;DB.kt[id]=st.shift;save();rerender();return}
-      const b=e.target.closest('[data-b]');if(b){st.bpm=Math.max(40,Math.min(220,st.bpm+ +b.dataset.b));DB.kbpm[id]=st.bpm;save();$('#kbpm',r).textContent=st.bpm;side();return}
+      const k=e.target.closest('[data-k]');if(k){const v=+k.dataset.k;st.shift=v?((st.shift+v+18)%12)-6:0;DB.kt[id]=st.shift;save();rerender();restart();return}
+      const b=e.target.closest('[data-b]');if(b){st.bpm=Math.max(40,Math.min(220,st.bpm+ +b.dataset.b));DB.kbpm[id]=st.bpm;save();$('#kbpm',r).textContent=st.bpm;side();spdTxt();restart();return}
       const sh=e.target.closest('[data-show]');if(sh){KAR.show=sh.dataset.show;kar.className='karaoke show-'+KAR.show;$$('[data-show]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sh)));DB.kar=Object.assign({},KAR);save();return}
       const n=e.target.closest('[data-not]');if(n){DB.notation=n.dataset.not;save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===n)));rerender();return}
-      const t=e.target.closest('[data-t]');if(t){const k=t.dataset.t;KAR[k]=!KAR[k];$$(`[data-t="${k}"]`,r).forEach(x=>x.classList.toggle('on',KAR[k]));if(k==='met'&&KAR.met)toast(logo()+'<span>Metrónomo encendido</span>');DB.kar=Object.assign({},KAR);save();return}
-      const sp=e.target.closest('[data-sp]');if(sp){st.sp=+sp.dataset.sp;DB.ksp[id]=st.sp;save();$$('[data-sp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sp)));spdTxt();return}
+      const t=e.target.closest('[data-t]');if(t){const k=t.dataset.t;KAR[k]=!KAR[k];if(k==='band')restart();$$(`[data-t="${k}"]`,r).forEach(x=>x.classList.toggle('on',KAR[k]));if(k==='met'&&KAR.met)toast(logo()+'<span>Metrónomo encendido</span>');DB.kar=Object.assign({},KAR);save();return}
+      const lt=e.target.closest('[data-lat]');if(lt){DB.lat=+lt.dataset.lat;save();$$('[data-lat]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lt)));return}
+      const sp=e.target.closest('[data-sp]');if(sp){st.sp=+sp.dataset.sp;if(slow){DB.ksp[id]=st.sp;save()}$$('[data-sp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sp)));spdTxt();restart();return}
       const lp=e.target.closest('[data-lp]');if(lp){const was=running();if(was)seqStop();st.loop=+lp.dataset.lp;$$('[data-lp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lp)));if(was)go();paint();return}
       const bb=e.target.closest('[data-beats]');if(bb){const was=running();if(was)seqStop();st.beats=+bb.dataset.beats;DB.kbeats[id]=st.beats;sumK();save();$$('[data-beats]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===bb)));build();if(pos>=TL.lines.length)pos=0;$('#kstys',r).innerHTML=styChips();sumK();side();paint();$('#kpos',r).textContent=`${st.beats}/4 · ${BSTYLES[gid()]} · listo`;return}
       const y=e.target.closest('[data-sty]');if(y){const was=running();if(was)seqStop();st.style=y.dataset.sty;sumK();DB.kst[id]=st.style;save();$$('[data-sty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===y)));side();build();if(was)go();paint();return}
@@ -541,9 +575,10 @@ function viewSongPlay(id,slow){
     let taps=[];$('#ktap',r).onclick=()=>{const now=performance.now();taps=taps.filter(x=>now-x<2500);taps.push(now);
       if(taps.length>=4){const iv=(taps[taps.length-1]-taps[0])/(taps.length-1),b=Math.round(60000/iv);if(b>=40&&b<=220){st.bpm=b;DB.kbpm[id]=b;save();$('#kbpm',r).textContent=b;side()}}
       $('#ktap',r).textContent=taps.length<4?'Toca '+(4-taps.length):'Marcar'};
-    const onState=()=>{paint();if(!running())$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'))};
+    const restart=()=>{if(running()){seqStop();bandStop();go()}};
+    const onState=()=>{paint();if(!running()){bandStop();$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'))}};
     document.addEventListener('playstate',onState);
     side();paint();spdTxt();
-    return()=>{document.removeEventListener('playstate',onState);if(running())seqStop()};
+    return()=>{document.removeEventListener('playstate',onState);if(running())seqStop();bandStop()};
   }};
 }
