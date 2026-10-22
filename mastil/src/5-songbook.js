@@ -190,13 +190,15 @@ function bandStep(id,beats,i,p,sh,t,spb,bar,ci){
 const TAB_RX=/^\s*[eBGDAEbgda]\s*\|[-\d|hpbrx\/\\~*.() ]{4,}$/;
 const SEC_RX=/^\s*[\[(]?\s*(coro|estribillo|verso|estrofa|puente|intro|introducci[oó]n|final|outro|solo|interludio|instrumental|pre-?coro|chorus|verse|bridge|interlude|pre-?chorus|riff)\b[^\]\n]*?[\])]?\s*:?\s*$/i;
 const LABEL_PFX=/^\s*\[?(intro|introducci[oó]n|final|outro|solo|interludio|instrumental|riff|coro|chorus)\]?\s*[:\-]\s*/i;
+// datos de la página de donde se copió (afinación, capo, dificultad…): no son letra
+const META_RX=/^\s*(tuning|afinaci[oó]n|capo|cejilla|key|tonalidad|difficulty|dificultad|strumming|rasgueo|author|autor|bpm|tempo)\s*:/i;
 function isChordTok(t){const c=t.replace(/[|()[\]]/g,'');return!!c&&!!chParse(c)}
 function isChordLine(l){const ts=l.trim().split(/\s+/).filter(Boolean);return ts.length>0&&ts.every(t=>isChordTok(t)||/^[|x\d()\-.:/]+$/i.test(t)||/^\(?x\d+\)?$/i.test(t))&&ts.some(isChordTok)}
 function normalizePaste(txt){
   const L=txt.replace(/\r/g,'').replace(/\t/g,'    ').replace(/\u00a0/g,' ').split('\n'),out=[];
   for(let i=0;i<L.length;i++){
     let l=L[i];
-    if(TAB_RX.test(l))continue;
+    if(TAB_RX.test(l)||META_RX.test(l))continue;
     if(/^\s*\{/.test(l)||/\[[^\]]+\]/.test(l)&&!SEC_RX.test(l)){out.push(l);continue}
     const pf=LABEL_PFX.exec(l);
     if(pf&&isChordLine(l.slice(pf[0].length))){out.push('{c:'+pf[1][0].toUpperCase()+pf[1].slice(1).toLowerCase()+'}');l=' '.repeat(pf[0].length)+l.slice(pf[0].length)}
@@ -498,7 +500,7 @@ function viewSongPlay(id,slow){
   <div class="ksync" id="ksync" hidden></div><div class="kbar"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${st.beats}/4 · ${BSTYLES[gid()]} · listo</span><button class="btn sm" id="kreset" aria-label="Desde el inicio">${IC.back}</button><button class="btn pri" id="kgo">${IC.play}Empezar</button></div>`,
   mount(r){
     const sumK=()=>{const m=$('.kmore summary small',r);if(m)m.textContent=`${BSTYLES[gid()]} · ${st.beats}/4`};
-    const O={blob:null,name:'',type:'',el:null,url:null,use:false,playing:false,syncing:false,raf:0,last:-1,lastBeat:null};
+    const O={blob:null,name:'',fname:'',type:'',el:null,url:null,use:false,playing:false,syncing:false,busy:false,prog:0,grid:null,recK:0,raf:0,last:-1,lastBeat:null};
     let LP=null;
     const spdTxt=()=>{const m=$('#kspd',r);if(m)m.textContent=st.sp<1?`La banda va a ${Math.round(st.bpm*st.sp)} bpm (de ${st.bpm}). El tono no cambia.`:'';const kb=$('#kbpm',r);if(kb)kb.textContent=st.sp<1?Math.round(st.bpm*st.sp):st.bpm};
     const kar=$('#kar',r);let pos=0,TL=null,BK=null,curCh=P.chords[0]||null;
@@ -511,7 +513,8 @@ function viewSongPlay(id,slow){
        <div class="ks-ch"><span class="cl">Acorde</span><div id="ksch">${chNow()}</div></div>`};
     const chNow=()=>curCh?`<div class="ks-chord">${chordSVG(voicing(curCh,st.shift))}<b>${esc(chName(curCh,st.shift,P.key,es()))}</b></div>`:'<p class="ks-tip">—</p>';
     const build=()=>{
-      TL=songTimeline(P,st.bars,st.beats);BK={};const Q=TL.res=RES();
+      // con la grabación sincronizada, la canción se mide al tempo real que se detectó
+      TL=songTimeline(O.use&&O.grid&&DB.kbpm[id]?Object.assign({},P,{bpm:DB.kbpm[id]}):P,st.bars,st.beats);BK={};const Q=TL.res=RES();
       TL.ev.forEach(e=>{const k=Math.round(e.b*Q);(BK[k]=BK[k]||[]).push(e)});
       // acorde vigente en cada celda (dieciseisavo o tresillo, según el ritmo)
       const ch=TL.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b);TL.chAt=[];let j=-1;const N=Math.ceil(TL.total*Q);
@@ -604,27 +607,37 @@ function viewSongPlay(id,slow){
     const onState=()=>{paint();if(!running()){bandStop();$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'))}};
     document.addEventListener('playstate',onState);
     /* ---------- tocar sobre la grabación original (MP3 o video del usuario) ----------
-       El usuario sincroniza una vez tocando cuando empieza cada renglón (DB.ksync[id] = {li: segundos}).
-       Dentro del renglón, sílabas y acordes avanzan al tempo de la canción. */
+       Al subirla, la app la escucha (5-songsync.js): pulso real + acordes alineados → inicio de cada renglón
+       (DB.ksync[id] = {li: segundos}) y la rejilla de pulsos (O.grid, guardada en IndexedDB con el archivo).
+       «A mano» corrige tocando cuando empieza un renglón. */
     DB.ksync=DB.ksync||{};DB.kuse=DB.kuse||{};
-    const synced=()=>{const T=DB.ksync[id];return T&&Object.keys(T).length>=Math.min(2,TL.lines.length)};
+    const synced=()=>{const T=DB.ksync[id],n=T?Object.keys(T).length:0;return n>0&&n>=Math.min(O.grid?1:2,TL.lines.length)};
     const mediaEl=()=>{if(O.el)return O.el;const v=!!O.forceVideo;const el=document.createElement(v?'video':'audio');el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');
       if(v){el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;left:0';document.body.appendChild(el)}
       el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
+    const recIDB=()=>slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,k:O.recK},'orig:'+id)).catch(()=>{});
+    const semis=k=>Math.abs(k)===1?'medio tono':Math.abs(k)%2?Math.abs(k)+' semitonos':Math.abs(k)/2+(Math.abs(k)===2?' tono':' tonos');
     const origUI=()=>{const k=$('#korig',r);if(!k)return;
-      if(!O.blob){k.innerHTML=`<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La letra sigue a la canción real.</span></div>`;
-        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;DB.kuse[id]=true;save();
-          slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:f,name:f.name,type:O.type},'orig:'+id)).catch(()=>{});
-          if(O.el){O.el.remove&&O.el.remove();O.el=null}origUI();if(!synced())toast(logo()+'<span>Ahora toca «Sincronizar» una vez</span>',3500)};return}
-      const T=synced();
+      if(!O.blob){k.innerHTML=`<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La app la escucha y la letra sigue a la canción real.</span></div>`;
+        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.recK=0;DB.kuse[id]=true;delete DB.ksync[id];save();
+          recIDB();if(O.el){O.el.remove&&O.el.remove();O.el=null}build();origUI();autoSync()};return}
+      const T=synced(),B=O.busy;
       k.innerHTML=`<div class="seg">${[[0,'Banda de la app'],[1,'Mi grabación']].map(([v,l])=>`<button data-ou="${v}" aria-pressed="${O.use===!!v}">${l}</button>`).join('')}</div>
-        ${O.use?`<div class="row korow"><span class="cap koname" style="margin:0">${esc(O.name)}${T?' · sincronizada':' · falta sincronizar'}</span><button class="btn sm ${T?'':'pri'}" data-o="sync">${T?'Volver a sincronizar':'Sincronizar'}</button><button class="btn sm" data-o="del">Quitar</button></div>
-        ${T?`<div class="row korow"><span class="cap" style="margin:0">Ajuste fino de la letra</span><button class="btn sm" data-o="-">−0.1 s</button><button class="btn sm" data-o="+">+0.1 s</button></div>`:''}
-        <p class="cap" style="margin:0">La grabación suena en su tono original; el cambio de tono solo mueve los acordes que ves.</p>`:''}`};
-    // tiempos reales de cada evento a partir de la sincronización
-    let OEV=[];const lineT=g=>{const T=DB.ksync[id]||{},L=TL.lines[g];return L&&T[L.li]!=null?T[L.li]+(+(DB.ksyncOff||{})[id]||0):null};
-    const buildO=()=>{const spb=60/P.bpm;OEV=[];TL.ev.forEach(e=>{if(e.type==='note')return;const g=lineIdx(e.li);if(g<0)return;const t0=lineT(g);if(t0==null)return;let t=t0+(e.b-TL.lines[g].start)*spb;const n=lineT(g+1);if(n!=null&&e.type!=='line')t=Math.min(t,n-.05);OEV.push({t,e})});OEV.sort((a,b)=>a.t-b.t)};
-    const curLine=now=>{let g=-1;for(let i=0;i<TL.lines.length;i++){const t=lineT(i);if(t!=null&&t<=now+.02)g=i}return g};
+        ${O.use?`<div class="row korow"><span class="cap koname" style="margin:0">${B?`Escuchando la canción… ${Math.round(O.prog*100)} %`:esc(O.name)+(T?' · sincronizada':' · falta sincronizar')}</span><button class="btn sm ${T||B?'':'pri'}" data-o="auto" ${B?'disabled':''}>${T?'Repetir':'Sincronizar'}</button><button class="btn sm" data-o="sync" ${B?'disabled':''}>A mano</button><button class="btn sm" data-o="del" ${B?'disabled':''}>Quitar</button></div>
+        ${T&&!B?`<div class="row korow"><span class="cap" style="margin:0">Ajuste fino de la letra</span><button class="btn sm" data-o="-">−0.1 s</button><button class="btn sm" data-o="+">+0.1 s</button></div>`:''}
+        ${T&&!B&&O.recK&&O.recK!==st.shift?`<div class="row korow"><span class="cap koname" style="margin:0;white-space:normal">Tu grabación suena ${semis(O.recK)} más ${O.recK<0?'abajo':'arriba'} que estos acordes.</span><button class="btn sm" data-o="tk">Ver como suena</button></div>`:''}
+        <p class="cap" style="margin:0">${T?'Si un renglón no cae, tócalo y usa «A mano» desde ahí.':'La app escucha tu archivo y encuentra el pulso y los cambios de acorde.'} La grabación suena en su tono original.</p>`:''}`};
+    /* tiempos reales: cada renglón tiene su inicio (sincronizado solo o a mano) y dentro del renglón todo avanza
+       pulso a pulso sobre la rejilla de la grabación. Los renglones sin marcar se calculan desde el marcado más cercano. */
+    let OEV=[],OLT=[];const off=()=>+(DB.ksyncOff||{})[id]||0;
+    const beatT=(t0,db)=>O.grid?gridT(O.grid,gridIdx(O.grid,t0)+db):t0+db*60/(DB.kbpm[id]||P.bpm);
+    const lineRaw=g=>{const T=DB.ksync[id]||{},L=TL.lines[g];if(!L)return null;if(T[L.li]!=null)return T[L.li];
+      let h=-1;for(let i=g-1;i>=0;i--)if(T[TL.lines[i].li]!=null){h=i;break}
+      if(h<0)for(let i=g+1;i<TL.lines.length;i++)if(T[TL.lines[i].li]!=null){h=i;break}
+      return h<0?null:beatT(T[TL.lines[h].li],L.start-TL.lines[h].start)};
+    const lineT=g=>{const t=lineRaw(g);return t==null?null:t+off()};
+    const buildO=()=>{OEV=[];OLT=TL.lines.map((_,g)=>lineT(g));TL.ev.forEach(e=>{if(e.type==='note')return;const g=lineIdx(e.li);if(g<0)return;const t0=lineRaw(g);if(t0==null)return;let t=beatT(t0,e.b-TL.lines[g].start)+off();const n=OLT[g+1];if(n!=null&&e.type!=='line')t=Math.min(t,n-.05);OEV.push({t,e})});OEV.sort((a,b)=>a.t-b.t)};
+    const curLine=now=>{let g=-1;for(let i=0;i<OLT.length;i++){const t=OLT[i];if(t!=null&&t<=now+.02)g=i}return g};
     const applyUntil=(from,now)=>{OEV.forEach(({t,e})=>{if(t<=from||t>now)return;
       if(e.type==='line'){setLine(e.li);pos=Math.max(0,lineIdx(e.li));$('#kpos',r).textContent=(st.loop?'Repitiendo · ':'')+`Renglón ${pos+1} de ${TL.lines.length}`}
       else if(e.type==='lit'){const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p)p.classList.add('lit')}
@@ -633,8 +646,8 @@ function viewSongPlay(id,slow){
     const loopFrom={g:0};
     const frame=()=>{if(!O.playing)return;const el=O.el,now=el.currentTime-outLat();
       if(Math.abs(now-O.last)>.6){repaintTo(now)}else applyUntil(O.last,now);O.last=now;
-      // pulso, metrónomo y rasgueo iluminado según el renglón actual
-      const g=curLine(now);if(g>=0){const lb=(now-lineT(g))*P.bpm/60+TL.lines[g].start,bt=st.beats,bi=Math.floor(lb+1e-3);
+      // pulso, metrónomo y rasgueo iluminado: siguen los pulsos reales de la grabación
+      const g=curLine(now);if(g>=0){const t0=lineRaw(g),m=now-off(),lb=TL.lines[g].start+(O.grid?gridIdx(O.grid,m)-gridIdx(O.grid,t0):(m-t0)*(DB.kbpm[id]||P.bpm)/60),bt=st.beats,bi=Math.floor(lb+1e-3);
         if(O.lastBeat!==null&&bi!==O.lastBeat&&bi>O.lastBeat){const isBar=((bi%bt)+bt)%bt===0;if(KAR.met)tick(AC.currentTime+.005,isBar?'acc':'beat',isBar?'bar':'beat');else pulseBeat(isBar)}
         O.lastBeat=bi;const G=GROOVES[gid()],stp=+(($('.kpat',r)||{}).dataset||{}).step||1,cell=Math.floor((((lb%bt)+bt)%bt)*G.sub/stp+1e-3);
         const q=$(`.kpat [data-sl="${cell}"]`,r);if(q&&!q.classList.contains('on')){$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'));q.classList.add('on')}
@@ -642,30 +655,53 @@ function viewSongPlay(id,slow){
         if(st.loop){const end=lineT(loopFrom.g+st.loop)??(el.duration||1e9);if(now>=end-.05){el.currentTime=Math.max(0,lineT(loopFrom.g)-.4);O.last=-99}}}
       O.raf=requestAnimationFrame(frame)};
     const origGo=()=>{if(!ac())return;seqStop();bandStop();
-      if(!synced()){syncStart();return}
-      buildO();const el=mediaEl();el.playbackRate=st.sp;el.muted=!KAR.band;loopFrom.g=pos;const t0=lineT(pos);el.currentTime=pos>0&&t0!=null?Math.max(0,t0-1.2):0;
+      if(!synced()){autoSync();return}
+      build();buildO();const el=mediaEl();el.playbackRate=st.sp;el.muted=!KAR.band;loopFrom.g=pos;const t0=lineT(pos);el.currentTime=pos>0&&t0!=null?Math.max(0,t0-1.2):0;
       O.last=-99;O.lastBeat=null;clearHL();el.play().then(()=>{O.playing=true;paint();document.dispatchEvent(new Event('playstate'));frame()}).catch(()=>toast('No se pudo reproducir este archivo en tu navegador.'))};
     const origStop=()=>{O.playing=false;cancelAnimationFrame(O.raf);if(O.el)O.el.pause();$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'))};
-    // sincronizar: escuchar desde el principio y tocar cuando empieza cada renglón
+    // sincronizar sola: la app escucha el archivo, encuentra el pulso y alinea los acordes de la canción
+    const autoSync=async()=>{if(!O.blob)return;if(O.busy){toast('Sigo escuchando la canción…');return}
+      if(O.playing)origStop();if(O.syncing){O.syncing=false;if(O.el)O.el.pause();syncPaint()}
+      O.busy=true;O.prog=0;origUI();paint();
+      const show=p=>{O.prog=p;const s=$('.koname',r);if(s)s.textContent=`Escuchando la canción… ${Math.round(p*100)} %`};
+      try{const{x,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;
+        const A=await syncAnalyze(x,sr,DB.kbpm[id]||(P.set.bpm?P.bpm:0),show);if(!document.body.contains(r))return;
+        const bpm=Math.max(40,Math.min(220,Math.round(A.bpm)));O.grid=A.beats;st.bpm=bpm;DB.kbpm[id]=bpm;build();
+        const R=syncAlign(A,TL,st.beats);if(!R)throw new Error('sin acordes');
+        O.grid=R.grid;O.recK=R.k;DB.ksync[id]=R.T;if(DB.ksyncOff)delete DB.ksyncOff[id];save();recIDB();
+        $('#kbpm',r).textContent=bpm;side();spdTxt();pos=0;clearHL();buildO();
+        toast(logo()+`<span>Listo: la letra sigue a tu grabación (${bpm} bpm). Toca Empezar.</span>`,4000)}
+      catch(e){toast('No pude escuchar este archivo. Usa «A mano».',4000)}
+      O.busy=false;origUI();paint()};
+    // a mano: escuchar y tocar cuando empieza cada renglón; los que no se tocan se acomodan solos con el pulso
     let SY={i:0,T:{}};
     const syncPaint=()=>{const box=$('#ksync',r);if(!O.syncing){box.hidden=true;return}box.hidden=false;const L=TL.lines[SY.i];
       const words=L?P.lines[L.li].pieces.map(p=>(p.sp?' ':'')+p.text).join('').trim().slice(0,46):'';
-      box.innerHTML=`<p class="cap" style="margin:0">Renglón ${SY.i+1} de ${TL.lines.length} · toca justo cuando empiece:</p><b class="kswords">«${esc(words)||'(acordes)'}»</b>
-        <div class="row"><button class="btn pri" id="kstap">Ya empezó</button><button class="btn sm" id="ksback">Me equivoqué</button><button class="btn sm" id="ksx">Cancelar</button></div>`;
-      $('#kstap',r).onclick=()=>{const L=TL.lines[SY.i];if(!L)return;SY.T[L.li]=Math.max(0,O.el.currentTime-.06);setLine(L.li);SY.i++;if(SY.i>=TL.lines.length)syncEnd();else syncPaint()};
-      $('#ksback',r).onclick=()=>{if(SY.i>0){SY.i--;const L=TL.lines[SY.i];delete SY.T[L.li];O.el.currentTime=Math.max(0,(SY.T[TL.lines[SY.i-1]?.li]??0));syncPaint()}};
-      $('#ksx',r).onclick=()=>{O.syncing=false;O.el.pause();syncPaint();paint()}};
-    const syncStart=()=>{if(!O.blob)return;const el=mediaEl();el.playbackRate=1;el.muted=false;el.currentTime=0;SY={i:0,T:{}};O.syncing=true;clearHL();
+      box.innerHTML=`<p class="cap" style="margin:0">Renglón ${SY.i+1} de ${TL.lines.length} · toca justo cuando empiece. Lo que no toques se queda como está.</p><b class="kswords">«${esc(words)||'(acordes)'}»</b>
+        <div class="row"><button class="btn pri" id="kstap">Ya empezó</button><button class="btn sm" id="ksback">Atrás</button><button class="btn sm" id="ksx">Listo</button></div>`;
+      $('#kstap',r).onclick=()=>{const L=TL.lines[SY.i];if(!L)return;let t=Math.max(0,O.el.currentTime-.06);
+        // cae en el pulso más cercano de la grabación
+        if(O.grid){const gt=gridT(O.grid,Math.round(gridIdx(O.grid,t)));if(Math.abs(gt-t)<.18)t=gt}
+        SY.T[L.li]=+t.toFixed(3);setLine(L.li);SY.i++;if(SY.i>=TL.lines.length)syncEnd();else syncPaint()};
+      $('#ksback',r).onclick=()=>{if(SY.i>0){SY.i--;const P0=TL.lines[SY.i-1];O.el.currentTime=Math.max(0,P0&&SY.T[P0.li]!=null?SY.T[P0.li]:SY.T[TL.lines[SY.i].li]-3||0);syncPaint()}};
+      $('#ksx',r).onclick=()=>syncEnd()};
+    const syncStart=()=>{if(!O.blob)return;const was=synced(),el=mediaEl();el.playbackRate=1;el.muted=false;
+      SY={i:was?Math.max(0,Math.min(pos,TL.lines.length-1)):0,T:was?Object.assign({},DB.ksync[id]):{}};
+      // corregir desde el renglón elegido: los ya sincronizados se conservan
+      if(was)TL.lines.forEach((M,g)=>{if(SY.T[M.li]==null){const t=lineRaw(g);if(t!=null)SY.T[M.li]=+t.toFixed(3)}});
+      const L=TL.lines[SY.i];el.currentTime=was&&L&&SY.T[L.li]!=null?Math.max(0,SY.T[L.li]-4):0;O.syncing=true;clearHL();
       el.play().then(()=>{syncPaint();$('#ksync',r).scrollIntoView({block:'nearest',behavior:'smooth'})}).catch(()=>{O.syncing=false;toast('No se pudo reproducir este archivo en tu navegador.')})};
-    const syncEnd=()=>{O.syncing=false;if(O.el)O.el.pause();if(Object.keys(SY.T).length>=2){DB.ksync[id]=SY.T;save();toast(logo()+'<span>Listo: canción sincronizada</span>');pos=0;clearHL()}syncPaint();origUI();paint()};
+    const syncEnd=()=>{O.syncing=false;if(O.el)O.el.pause();if(Object.keys(SY.T).length>=(O.grid?1:2)){DB.ksync[id]=SY.T;save();toast(logo()+'<span>Listo: canción sincronizada</span>');pos=0;clearHL();buildO()}syncPaint();origUI();paint()};
     r.addEventListener('click',e=>{
-      const ou=e.target.closest('[data-ou]');if(ou){if(O.playing)origStop();if(running()){seqStop();bandStop()}O.use=ou.dataset.ou==='1';DB.kuse[id]=O.use;save();origUI();paint();return}
+      const ou=e.target.closest('[data-ou]');if(ou){if(O.playing)origStop();if(running()){seqStop();bandStop()}O.use=ou.dataset.ou==='1';DB.kuse[id]=O.use;save();build();origUI();paint();return}
       const o=e.target.closest('[data-o]');if(!o)return;const k=o.dataset.o;
-      if(k==='sync'){if(O.playing)origStop();syncStart()}
+      if(k==='auto')autoSync();
+      else if(k==='sync'){if(O.playing)origStop();syncStart()}
+      else if(k==='tk'){st.shift=((O.recK+18)%12)-6;DB.kt[id]=st.shift;save();rerender();origUI()}
       else if(k==='del'){if(O.playing)origStop();slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
-        O.blob=null;O.el=null;O.use=false;delete DB.ksync[id];DB.kuse[id]=false;save();origUI();paint()}
+        O.blob=null;O.el=null;O.use=false;O.grid=null;O.recK=0;delete DB.ksync[id];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[id]=+(((+DB.ksyncOff[id]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[id]>0?'+':''}${DB.ksyncOff[id]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.name=(rec.name||'').replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false}origUI();paint()}).catch(()=>origUI());
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.recK=rec.k||0;build()}origUI();paint()}).catch(()=>origUI());
     origUI();
     side();paint();spdTxt();
     return()=>{document.removeEventListener('playstate',onState);if(SEQ.id==='kar')seqStop();bandStop();origStop();O.syncing=false;if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url)};
