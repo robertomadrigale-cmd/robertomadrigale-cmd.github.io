@@ -15,8 +15,41 @@ setInterval(()=>{
   if(SEQ.id||(TMR.id&&!TMR.paused)||TUN.stream||GAMEON){const k=today();DB.secs[k]=(DB.secs[k]||0)+1;if(DB.secs[k]>=60)DB.days[k]=true;if(DB.secs[k]%10===0)save()}
 },1000);
 LEFTY=!!DB.lefty;
-function applyTheme(){if(DB.theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',DB.theme)}
+/* ---------- temas: épocas y estilos del rock ---------- */
+// orden de c: bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue
+const THEMES=[
+ ['clasico','Estudio nocturno','El original',1,'#0c111c #151d30 #1d2843 #f2ede3 #98a4bd #2a3857 #e8a23a #1b1305 #f0b24f #ea6f50 #fff #62c394 #ea6f50 #6db3e0','radial-gradient(ellipse at 80% -10%,rgba(232,162,58,.16),transparent 55%)'],
+ ['claro','Partitura','Claro de día',0,'#f4efe4 #fffaf1 #ebe2cf #1a2236 #586380 #d6cab0 #e8a23a #1b1305 #955700 #bf4128 #fff #2b8559 #bf4128 #2f7cae','radial-gradient(ellipse at 80% -10%,rgba(232,162,58,.18),transparent 55%)'],
+ ['rocknroll','Rock and Roll','Años 50 · rocola y cromo',0,'#f6efe0 #fffaf0 #f1e0c8 #1d1a24 #6b6270 #e2cfb3 #d7263d #fff #b0182c #0f8b8d #fff #2b8559 #c0392b #2f7cae','repeating-linear-gradient(45deg,rgba(215,38,61,.045) 0 16px,transparent 16px 32px)'],
+ ['psico','Psicodelia','Años 60 · flores y fuzz',1,'#1a0b2e #26123f #341a56 #fdeee0 #c3a6d9 #4a2a70 #ff8a1f #200a00 #ffa64d #ff3d9a #fff #9be15d #ff5c7a #5ee0e6','radial-gradient(circle at 12% 8%,rgba(255,61,154,.24),transparent 45%),radial-gradient(circle at 92% 30%,rgba(255,138,31,.2),transparent 42%),radial-gradient(circle at 50% 105%,rgba(94,224,230,.16),transparent 50%)'],
+ ['estadio','Rock de estadio','Años 70 · oro y reflectores',1,'#0d0b08 #17140f #221d15 #f5ecd8 #a8987a #3a3122 #d4a537 #1a1205 #e6bb55 #c8452c #fff #7fb069 #d9583b #7aa7c7','radial-gradient(ellipse at 50% -20%,rgba(255,226,150,.2),transparent 50%),linear-gradient(180deg,rgba(212,165,55,.06),transparent 40%)'],
+ ['punk','Punk','1977 · fotocopia y alfileres',1,'#0b0b0b #161616 #222222 #fafafa #a0a0a0 #333333 #ff2d95 #120008 #ff5cab #f5e400 #111 #39e07a #ff4040 #29c5f6','repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 10px)'],
+ ['metal','Heavy Metal','Años 80 · cromo y fuego',1,'#08090b #121419 #1b1f27 #e8ebf0 #8e96a5 #2b313d #c9ced8 #0b0d12 #dfe4ec #d3122c #fff #4fbf7f #e0263f #5b8fd6','linear-gradient(160deg,rgba(255,255,255,.06),transparent 30%),radial-gradient(ellipse at 50% 115%,rgba(211,18,44,.26),transparent 55%)'],
+ ['synth','Synthwave','Años 80 · neón y sintes',1,'#0f0624 #1a0c3a #251450 #f7ecff #b39ad6 #3d2470 #ff3ea5 #1b0016 #ff6fbf #2de2e6 #04121a #6dfcb0 #ff5470 #7b8cff','linear-gradient(180deg,transparent 55%,rgba(255,62,165,.18)),repeating-linear-gradient(0deg,rgba(45,226,230,.06) 0 1px,transparent 1px 36px)'],
+ ['rockmx','Rock mexicano','Años 80-90 · rock en tu idioma',1,'#0e0c0c #1a1615 #251f1d #f4ede6 #a89a90 #3a302c #e23b3b #fff #ff6a5f #21a66a #fff #5fd39a #ff5a4f #6aa8d8','linear-gradient(90deg,rgba(33,166,106,.12),transparent 28%,transparent 72%,rgba(226,59,59,.12))'],
+ ['grunge','Grunge','Años 90 · franela y distorsión',1,'#16140f #201d16 #2b271d #ece4d2 #a69c85 #3d3729 #d06a3a #170a03 #e08155 #8fae45 #0f1405 #6fae7c #d9483b #6a95a8','repeating-linear-gradient(90deg,rgba(208,106,58,.05) 0 26px,transparent 26px 52px),repeating-linear-gradient(0deg,rgba(208,106,58,.05) 0 26px,transparent 26px 52px)'],
+ ['blues','Blues y jazz','Club de medianoche',1,'#0a1424 #11203a #182b4c #eef2f8 #94a6c4 #243a60 #c9a24a #161003 #dcb85e #e05a4f #fff #5fbf8f #e05a4f #6fb2ff','radial-gradient(ellipse at 50% -10%,rgba(201,162,74,.22),transparent 55%)'],
+ ['surf','Surf rock','Playa, reverb y sol',0,'#e9f6f4 #f9fffd #d3ece8 #0f2b33 #4d6b72 #b7dad5 #ff6b4a #2a0800 #c7402a #0a8f9c #fff #2b8a57 #c7402a #2875b8','radial-gradient(circle at 100% 0,rgba(255,107,74,.2),transparent 42%),radial-gradient(circle at 0 100%,rgba(10,143,156,.14),transparent 45%)'],
+ ['indie','Indie','Años 2000 · cuarto de ensayo',0,'#f3eef7 #fffcff #e7dff0 #2a2433 #6d6479 #d8cde3 #7c5cff #fff #5b3fd6 #ff7a59 #fff #2e9e6a #d6453a #2f86c9','radial-gradient(circle at 85% 5%,rgba(124,92,255,.16),transparent 45%),radial-gradient(circle at 5% 95%,rgba(255,122,89,.12),transparent 45%)'],
+];
+const TVARS='bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue'.split(' ');
+const themeById=id=>THEMES.find(t=>t[0]===id);
+if(DB.theme==='dark')DB.theme='clasico';else if(DB.theme==='light')DB.theme='claro';
+document.head.insertAdjacentHTML('beforeend','<style>'+THEMES.map(([id,,,dark,c,art])=>{
+  const v=c.split(' ');
+  return`:root[data-theme="${id}"]{${TVARS.map((k,i)=>`--${k}:${v[i]}`).join(';')};--art:${art};--glass:color-mix(in srgb,${v[0]} 80%,transparent);color-scheme:${dark?'dark':'light'}}`;
+}).join('')+'</style>');
+function applyTheme(){
+  const id=DB.theme!=='auto'&&themeById(DB.theme)?DB.theme:matchMedia('(prefers-color-scheme: light)').matches?'claro':'clasico';
+  document.documentElement.setAttribute('data-theme',id);
+  $$('meta[name="theme-color"]').forEach(m=>{m.removeAttribute('media');m.content=themeById(id)[4].split(' ')[0]});
+}
+matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(DB.theme==='auto')applyTheme()});
 applyTheme();
+function themeCards(){
+  const sw=([id,n,era,,c,art])=>{const v=c.split(' ');return`<button class="thm" data-theme-set="${id}" aria-pressed="${DB.theme===id}" style="--tb:${v[0]};--ts:${v[1]};--tf:${v[3]};--tm:${v[4]};--ta:${v[6]};--tr:${v[9]};--tart:${art}"><span class="thp"><i></i><i></i><i></i></span><b>${n}</b><small>${era}</small></button>`};
+  return`<button class="thm auto" data-theme-set="auto" aria-pressed="${DB.theme==='auto'}"><span class="thp"><i></i><i></i><i></i></span><b>Automático</b><small>Sigue a tu teléfono</small></button>`+THEMES.map(sw).join('');
+}
 /* ---------- widgets interactivos ---------- */
 function ctrlHTML(c){return`<div><span class="cl">${c.label}</span><div class="chips">${c.opts.map(o=>`<button class="chip" data-k="${c.k}" data-v="${o.v}" aria-pressed="false">${o.l}${o.s?`<i>${o.s}</i>`:''}</button>`).join('')}</div></div>`}
 function mountWidget(host,spec){
@@ -109,8 +142,8 @@ const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||na
 function viewHome(){
   const nx=nextEx(),[d,t]=doneCount();
   const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
-  return{title:'Mástil a la Vista',html:`
-  <div class="lhead"><span class="eyebrow">${greet()}</span><h1>Tu práctica de hoy</h1></div>
+  return{title:'Madrigal Guitar Hero',html:`
+  <div class="lhead"><span class="eyebrow">${greet()}</span><h1 class="glow">Tu práctica de hoy</h1></div>
   <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
     <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
     <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
@@ -120,12 +153,12 @@ function viewHome(){
   <a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación con temporizador.</span></span></a>
   ${inst}
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
+  <div><p class="eyebrow" style="margin-bottom:10px">Estilo · elige tu época</p><div class="thgrid">${themeCards()}</div></div>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
-    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Tema</span><div class="seg">${[['auto','Automático'],['dark','Oscuro'],['light','Claro']].map(([v,l])=>`<button data-theme-set="${v}" aria-pressed="${DB.theme===v}">${l}</button>`).join('')}</div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Mano</span><div class="seg">${[[0,'Diestro'],[1,'Zurdo']].map(([v,l])=>`<button data-lefty="${v}" aria-pressed="${!!DB.lefty===!!v}">${l}</button>`).join('')}</div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
   </div>
-  <p class="foot">Mástil a la Vista · funciona sin conexión</p>`,
+  <p class="foot">Madrigal Guitar Hero · funciona sin conexión</p>`,
   mount(r){
     r.addEventListener('click',async e=>{
       const lf=e.target.closest('[data-lefty]');if(lf){DB.lefty=lf.dataset.lefty==='1';LEFTY=DB.lefty;save();$$('[data-lefty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lf)));return}
@@ -216,7 +249,7 @@ function route(){
   $('#ttl').textContent=v.title;
   const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
   const pg=$('#page');pg.innerHTML=v.html;
-  document.title=v.title==='Mástil a la Vista'?v.title:v.title+' · Mástil a la Vista';
+  document.title=v.title==='Madrigal Guitar Hero'?v.title:v.title+' · Madrigal Guitar Hero';
   if(v.mount)UNMOUNT=v.mount(pg)||null;
   if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);
   paintPlayer();
@@ -231,7 +264,7 @@ document.addEventListener('click',e=>{
 });
 /* ---------- arranque ---------- */
 document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
- <nav class="side" aria-label="Secciones"><div class="brand">${IC.pick}Mástil a la Vista</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
+ <nav class="side" aria-label="Secciones"><div class="brand">${IC.pick}Madrigal Guitar Hero</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
  <main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main>
 </div>
 <nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);

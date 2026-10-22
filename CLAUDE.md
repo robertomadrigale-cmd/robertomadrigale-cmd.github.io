@@ -4,7 +4,7 @@ Este repositorio publica en GitHub Pages (rama `main`, se despliega solo al hace
 
 | Carpeta | App | URL |
 |---|---|---|
-| `mastil/` | **Mástil a la Vista** — teoría visual para guitarra (PWA) | https://robertomadrigale-cmd.github.io/mastil/ |
+| `mastil/` | **Madrigal Guitar Hero** (antes Mástil a la Vista) — teoría visual para guitarra (PWA) | https://robertomadrigale-cmd.github.io/mastil/ |
 | `bateria/` | **Pulso a la Vista** — pulso y tiempo para baterista de banda (PWA) | https://robertomadrigale-cmd.github.io/bateria/ |
 
 Roberto no es programador: entrégale cambios terminados y publicados, sin pedirle que edite código. Todo el texto de las apps va en español de México, tuteando.
@@ -21,11 +21,12 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 - Sin dependencias ni frameworks: JavaScript puro, audio con Web Audio API (sonidos sintetizados), fuentes locales en `fonts/`, funciona sin conexión.
 - Datos del usuario: solo `localStorage` del dispositivo (claves `mastil-a-la-vista:v2` y `pulso-a-la-vista:v1`).
 
-### Mástil a la Vista (guitarra)
+### Madrigal Guitar Hero (guitarra)
 - `1-theory.js` notas, escalas, acordes y el dibujo del mástil `fretboard()` (soporta modo zurdo con `LEFTY`).
 - `2-widgets.js` diagramas interactivos (`WID`), `3-engine.js` audio (cuerda Karplus-Strong), secuenciador, metrónomo, pistas, temporizador.
 - `4-content.js` las 11 lecciones; cada ejercicio `E({...})` puede tener `fig` (`pts(...)` = notas en orden, `chords(ch(...))` = acordes que cambian al pulso), `bpm`, `track`, `game`.
 - `5-fig.js` diagramas que suenan y siguen el pulso. `5-tools.js` metrónomo, afinador, juego, pistas, rutina. `6-app.js` inicio, navegación, tarjetas de ejercicio, progreso.
+- Temas de color por épocas del rock: lista `THEMES` en `6-app.js` (colores + fondo `--art`). La carpeta `mastil/` y la clave de `localStorage` no cambian, para no romper links ni perder progreso.
 
 ### Pulso a la Vista (batería)
 - `4-drums.js` sonidos de batería y la cuadrícula de grooves. `5-content.js` 29 grooves (`G`) y 12 lecciones.
