@@ -349,7 +349,7 @@ function viewSongPlay(id){
         if(k<0){if(s%4===0)tick(t,s===0?'acc':'beat');return}
         const a=startK+k;if(a>=N)return;
         const spb=60/st.bpm,rel=a-Math.round(P.pickup*4),L=bt*4,i=((rel%L)+L)%L,bar=Math.floor(rel/L);
-        if(KAR.met&&i%4===0)tick(t,i===0?'acc':'sub');
+        if(KAR.met&&i%4===0)tick(t,i===0?'acc':'sub',i===0?'bar':'beat');
         if(KAR.band&&TL.chAt[a])bandStep(st.style,i,L,TL.chAt[a],st.shift,t,spb,bar);
         if(KAR.voice&&BK[a])BK[a].forEach(e=>{if(e.type==='note')leadNote(e.m+st.shift,t,e.d*spb,.2)});
       },s=>{

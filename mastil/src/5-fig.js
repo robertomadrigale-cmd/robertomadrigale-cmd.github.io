@@ -56,7 +56,7 @@ function figStart(x,preview){
       if(s<count){if(s%per===0)tick(t,s===0?'acc':'beat');return}
       const k=s-count;if(preview&&k>=order.length)return;
       const i=k%order.length;
-      if(!preview&&k%per===0)tick(t,i===0?'acc':'beat');
+      if(!preview&&k%per===0)tick(t,(k/per)%4===0?'acc':'beat');
       if(preview||st.guide)pluck(midiOf(order[i][0],order[i][1]),t,preview?.6:60/figBpm(x)/per*1.5,.22);
     },s=>{
       if(s<count){figLight(x.id,null);figStatus(x.id,'Cuenta: '+(Math.floor(s/per)+1));return}

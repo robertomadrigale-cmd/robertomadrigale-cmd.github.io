@@ -20,6 +20,9 @@ const IC={
  next:sv('<path d="M5 5l9 7-9 7z" fill="currentColor"/><path d="M19 5v14"/>'),
  x:sv('<path d="M6 6l12 12M18 6L6 18"/>'),
  voice:sv('<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'),
+ pulseflash:sv('<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/>'),
+ sound:sv('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/>'),
+ mute:sv('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/>'),
  pick:sv('<path d="M12 2.5c4 0 7.5 2 7.5 6 0 5-4 10-7.5 13-3.5-3-7.5-8-7.5-13 0-4 3.5-6 7.5-6z"/>'),
  down:sv('<path d="M12 4v12M6 11l6 6 6-6M5 20h14"/>')};
 const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -28,7 +31,7 @@ let OWNER='';
 /* ---------- metrónomo ---------- */
 const TAPS=[];
 function viewMetronome(){
-  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i class="${m.acc.includes(i)?'acc':''}"></i>`).join('')};
+  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i class="${(i===0?acc1():m.acc.includes(i))?'acc':''}"></i>`).join('')};
   return{title:'Metrónomo',back:'#/practicar',html:`
   <div class="card center">
     <div class="beats" id="beats">${beats()}</div>
@@ -44,6 +47,7 @@ function viewMetronome(){
   <div class="card" style="display:flex;flex-direction:column;gap:14px">
     ${chipRow('meter','Compás',Object.keys(METERS).map(v=>({v,l:v})),MET.meter)}
     ${chipRow('sub','Subdivisión',[{v:1,l:'Negras'},{v:2,l:'Corcheas'},{v:3,l:'Tresillos'},{v:4,l:'Semicorcheas'}],MET.sub)}
+    ${pulseOptions()}
   </div>
   <p class="cap">Consejo: empieza 20 bpm por debajo de tu velocidad cómoda y sube de 5 en 5 solo cuando salga limpio tres veces seguidas.</p>`,
   mount(r){

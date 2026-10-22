@@ -132,7 +132,7 @@ function retoPlay(host,S,onExit){
   function frame(){
     if(!G.run)return;
     const now=c.currentTime;
-    while(G.nextTick<now+.12&&G.nextTick<G.end-1){tick(G.nextTick,G.tickN%4===0?'acc':mic?'sub':'beat');G.nextTick+=spb;G.tickN++}
+    while(G.nextTick<now+.12&&G.nextTick<G.end-1){tick(G.nextTick,G.tickN%4===0?'acc':mic?'sub':'beat',G.tickN%4===0?'bar':'beat');G.nextTick+=spb;G.tickN++}
     N.forEach(n=>{if(!n.hit&&!n.miss&&now-n.t>(mic?.5:.22))missN(n)});
     draw(now);
     $('#hpr',host).style.width=Math.max(0,Math.min(100,(now-G.t0)/(G.end-G.t0)*100))+'%';

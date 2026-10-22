@@ -76,7 +76,7 @@ function snare(t,v){
 }
 const hat=(t,v,open)=>noise(t,open?.22:.045,'highpass',7500,v||.16);
 const guiro=(t,long)=>{if(long){for(let i=0;i<5;i++)noise(t+i*.022,.02,'bandpass',3600,.11,2)}else noise(t,.03,'bandpass',3600,.13,2)};
-function tick(t,kind){
+function tickSound(t,kind){
   const o=AC.createOscillator(),g=AC.createGain();
   o.type='sine';o.frequency.value=kind==='acc'?1760:kind==='beat'?1180:880;
   const v=kind==='acc'?.55:kind==='beat'?.38:.18;
@@ -123,7 +123,7 @@ function metStart(opts,ui){
   Object.assign(MET,opts||{});
   return seqStart('met','Metrónomo '+MET.bpm,()=>60/MET.bpm/MET.sub,(s,t)=>{
     const m=METERS[MET.meter],isBeat=s%MET.sub===0,b=Math.floor(s/MET.sub)%m.b;
-    tick(t,isBeat?(m.acc.includes(b)?'acc':'beat'):'sub');
+    tick(t,isBeat?(m.acc.includes(b)?'acc':'beat'):'sub',isBeat?(b===0?'bar':'beat'):null);
   },s=>{if(ui)ui(Math.floor(s/MET.sub)%METERS[MET.meter].b,s%MET.sub===0)});
 }
 /* ---------- pistas para improvisar ---------- */

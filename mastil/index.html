@@ -582,6 +582,29 @@ html.arty .lhead,html.arty p.prose,html.arty div.prose{background-color:color-mi
 .thm .thp{background:var(--timg,none) center/cover,var(--tart),var(--tb)}
 @media (prefers-reduced-transparency:reduce){#artbg{opacity:.25}}
 
+/* barra de pulso y destello */
+#pulsebar{position:fixed;z-index:38;left:50%;top:calc(env(safe-area-inset-top,0px) + 62px);transform:translate(-50%,-140%);display:flex;align-items:center;gap:12px;padding:8px 10px 8px 14px;border-radius:999px;background:color-mix(in srgb,var(--surface2) 86%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1px solid var(--line);box-shadow:0 10px 28px rgba(0,0,0,.35);transition:transform .25s ease;max-width:calc(100% - 24px)}
+#pulsebar.show{transform:translate(-50%,0)}
+@media (min-width:900px){#pulsebar{left:calc(50% + 118px)}}
+#pulsebar .pnum{font:700 26px/1 var(--font-body);font-variant-numeric:tabular-nums;min-width:22px;text-align:center}
+#pulsebar.isone .pnum{color:var(--root)}
+#pulsebar .pdots{display:flex;gap:8px;align-items:center}
+#pulsebar .pdots i{width:14px;height:14px;border-radius:50%;background:var(--line);transition:transform .06s,background .06s}
+#pulsebar .pdots i.one{width:18px;height:18px;box-shadow:0 0 0 2px color-mix(in srgb,var(--root) 55%,transparent)}
+#pulsebar .pdots i.on{background:var(--accent);transform:scale(1.25)}
+#pulsebar .pdots i.on.one{background:var(--root)}
+#pulsebar .ptog{display:flex;gap:4px;margin-left:4px;padding-left:8px;border-left:1px solid var(--line)}
+#pulsebar .ptog button{width:32px;height:32px;border-radius:50%;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;font:700 14px var(--font-body);cursor:pointer}
+#pulsebar .ptog button svg{width:17px;height:17px}
+#pulsebar .ptog button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+#flash{position:fixed;inset:0;z-index:37;pointer-events:none;background:var(--accent);opacity:0}
+#flash.go{animation:flashb .22s ease-out}
+#flash.go.strong{background:var(--root);animation:flashs .28s ease-out}
+@keyframes flashb{0%{opacity:.10}100%{opacity:0}}
+@keyframes flashs{0%{opacity:.2}100%{opacity:0}}
+.beats i.acc{outline:2px solid var(--root);outline-offset:2px}
+.beats i.on.acc{background:var(--root)}
+
 </style>
 </head>
 <body>
@@ -897,7 +920,7 @@ function snare(t,v){
 }
 const hat=(t,v,open)=>noise(t,open?.22:.045,'highpass',7500,v||.16);
 const guiro=(t,long)=>{if(long){for(let i=0;i<5;i++)noise(t+i*.022,.02,'bandpass',3600,.11,2)}else noise(t,.03,'bandpass',3600,.13,2)};
-function tick(t,kind){
+function tickSound(t,kind){
   const o=AC.createOscillator(),g=AC.createGain();
   o.type='sine';o.frequency.value=kind==='acc'?1760:kind==='beat'?1180:880;
   const v=kind==='acc'?.55:kind==='beat'?.38:.18;
@@ -944,7 +967,7 @@ function metStart(opts,ui){
   Object.assign(MET,opts||{});
   return seqStart('met','Metrónomo '+MET.bpm,()=>60/MET.bpm/MET.sub,(s,t)=>{
     const m=METERS[MET.meter],isBeat=s%MET.sub===0,b=Math.floor(s/MET.sub)%m.b;
-    tick(t,isBeat?(m.acc.includes(b)?'acc':'beat'):'sub');
+    tick(t,isBeat?(m.acc.includes(b)?'acc':'beat'):'sub',isBeat?(b===0?'bar':'beat'):null);
   },s=>{if(ui)ui(Math.floor(s/MET.sub)%METERS[MET.meter].b,s%MET.sub===0)});
 }
 /* ---------- pistas para improvisar ---------- */
@@ -1343,7 +1366,7 @@ function retoPlay(host,S,onExit){
   function frame(){
     if(!G.run)return;
     const now=c.currentTime;
-    while(G.nextTick<now+.12&&G.nextTick<G.end-1){tick(G.nextTick,G.tickN%4===0?'acc':mic?'sub':'beat');G.nextTick+=spb;G.tickN++}
+    while(G.nextTick<now+.12&&G.nextTick<G.end-1){tick(G.nextTick,G.tickN%4===0?'acc':mic?'sub':'beat',G.tickN%4===0?'bar':'beat');G.nextTick+=spb;G.tickN++}
     N.forEach(n=>{if(!n.hit&&!n.miss&&now-n.t>(mic?.5:.22))missN(n)});
     draw(now);
     $('#hpr',host).style.width=Math.max(0,Math.min(100,(now-G.t0)/(G.end-G.t0)*100))+'%';
@@ -1565,7 +1588,7 @@ function figStart(x,preview){
       if(s<count){if(s%per===0)tick(t,s===0?'acc':'beat');return}
       const k=s-count;if(preview&&k>=order.length)return;
       const i=k%order.length;
-      if(!preview&&k%per===0)tick(t,i===0?'acc':'beat');
+      if(!preview&&k%per===0)tick(t,(k/per)%4===0?'acc':'beat');
       if(preview||st.guide)pluck(midiOf(order[i][0],order[i][1]),t,preview?.6:60/figBpm(x)/per*1.5,.22);
     },s=>{
       if(s<count){figLight(x.id,null);figStatus(x.id,'Cuenta: '+(Math.floor(s/per)+1));return}
@@ -1772,6 +1795,60 @@ document.addEventListener('click',e=>{
   else if(a==='stop')narrStop();
   else if(a==='rate'){DB.narrRate=+b.dataset.v;save();paintNarr();if(NARR.on&&!NARR.paused){narrCancel();narrRun()}}
 });
+
+/* ---------- pulso visual: barra de tiempos, acento en el 1, destello y modo silencioso ---------- */
+const PULSE={n:4,beat:0,count:0,hideT:null,el:null};
+const acc1=()=>DB.acc1!==false;
+/* Todos los clicks de la app pasan por aquí. v: 'bar' (tiempo 1), 'beat' o null (subdivisión). */
+function tick(t,kind,v){
+  if(v===undefined)v=kind==='acc'?'bar':kind==='beat'?'beat':null;
+  if(!DB.metMute){
+    const k=kind==='acc'&&!acc1()?'beat':kind;
+    tickSound(t,k);
+  }
+  if(!v||!AC)return;
+  const lat=((AC.outputLatency||0)+(AC.baseLatency||0))*1000;
+  setTimeout(()=>pulseBeat(v==='bar'),Math.max(0,(t-AC.currentTime)*1000+lat));
+}
+function pulseBeat(isBar){
+  if(isBar){if(PULSE.count>0&&PULSE.count<=12)PULSE.n=PULSE.count;PULSE.count=1;PULSE.beat=0}
+  else{PULSE.count++;PULSE.beat=Math.min(PULSE.beat+1,11);if(PULSE.beat>=PULSE.n)PULSE.n=PULSE.beat+1}
+  paintPulse();
+  if(DB.flash)flash(isBar&&acc1());
+  clearTimeout(PULSE.hideT);PULSE.hideT=setTimeout(hidePulse,1700);
+}
+function pulseHTML(){
+  return`<span class="pnum">${PULSE.beat+1}</span><span class="pdots">${Array.from({length:PULSE.n},(_,i)=>`<i class="${i===PULSE.beat?'on':''}${i===0&&acc1()?' one':''}"></i>`).join('')}</span>
+  <span class="ptog"><button data-pulse="acc1" aria-pressed="${acc1()}" title="Resaltar el tiempo 1">1</button><button data-pulse="flash" aria-pressed="${!!DB.flash}" title="Destello en cada pulso">${IC.pulseflash}</button><button data-pulse="mute" aria-pressed="${!!DB.metMute}" title="Solo visual, sin click">${DB.metMute?IC.mute:IC.sound}</button></span>`;
+}
+function paintPulse(){
+  if(/metronomo/.test(location.hash))return hidePulse();
+  let el=document.getElementById('pulsebar');
+  if(!el){el=document.createElement('div');el.id='pulsebar';el.setAttribute('aria-hidden','true');document.body.appendChild(el)}
+  el.innerHTML=pulseHTML();el.classList.add('show');
+  el.classList.toggle('isone',PULSE.beat===0&&acc1());
+}
+function hidePulse(){const el=document.getElementById('pulsebar');if(el)el.classList.remove('show');PULSE.count=0}
+function flash(strong){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  let f=document.getElementById('flash');
+  if(!f){f=document.createElement('div');f.id='flash';document.body.appendChild(f)}
+  f.classList.remove('go','strong');void f.offsetWidth;f.classList.add('go');if(strong)f.classList.add('strong');
+}
+document.addEventListener('playstate',()=>{if(!SEQ.id)hidePulse()});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-pulse]');if(!b)return;
+  const k=b.dataset.pulse;
+  if(k==='acc1')DB.acc1=!acc1();else if(k==='flash')DB.flash=!DB.flash;else if(k==='mute')DB.metMute=!DB.metMute;
+  save();
+  $$(`[data-pulse="${k}"]`).forEach(x=>{x.setAttribute('aria-pressed',String(k==='acc1'?acc1():k==='flash'?!!DB.flash:!!DB.metMute));if(k==='mute')x.innerHTML=x.closest('#pulsebar')?(DB.metMute?IC.mute:IC.sound):(DB.metMute?IC.mute+'Solo visual':IC.sound+'Con sonido')});
+  if(k==='acc1')$$('#beats i').forEach((x,i)=>x.classList.toggle('acc',i===0&&acc1()));
+});
+function pulseOptions(){return`<div><span class="cl">Ver el pulso</span><div class="chips">
+  <button class="chip" data-pulse="acc1" aria-pressed="${acc1()}">Resaltar el tiempo 1</button>
+  <button class="chip" data-pulse="flash" aria-pressed="${!!DB.flash}">Destello en cada pulso</button>
+  <button class="chip" data-pulse="mute" aria-pressed="${!!DB.metMute}">${DB.metMute?IC.mute+'Solo visual':IC.sound+'Con sonido'}</button></div>
+  <p class="cap" style="margin:6px 0 0">La barra de pulso aparece arriba en cualquier ejercicio con metrónomo. «Solo visual» quita el click y deja las luces.</p></div>`}
 
 /* ---------- cancionero: acordes ---------- */
 const LAT={Do:0,Re:2,Mi:4,Fa:5,Sol:7,La:9,Si:11},ANG={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
@@ -2124,7 +2201,7 @@ function viewSongPlay(id){
         if(k<0){if(s%4===0)tick(t,s===0?'acc':'beat');return}
         const a=startK+k;if(a>=N)return;
         const spb=60/st.bpm,rel=a-Math.round(P.pickup*4),L=bt*4,i=((rel%L)+L)%L,bar=Math.floor(rel/L);
-        if(KAR.met&&i%4===0)tick(t,i===0?'acc':'sub');
+        if(KAR.met&&i%4===0)tick(t,i===0?'acc':'sub',i===0?'bar':'beat');
         if(KAR.band&&TL.chAt[a])bandStep(st.style,i,L,TL.chAt[a],st.shift,t,spb,bar);
         if(KAR.voice&&BK[a])BK[a].forEach(e=>{if(e.type==='note')leadNote(e.m+st.shift,t,e.d*spb,.2)});
       },s=>{
@@ -2587,6 +2664,9 @@ const IC={
  next:sv('<path d="M5 5l9 7-9 7z" fill="currentColor"/><path d="M19 5v14"/>'),
  x:sv('<path d="M6 6l12 12M18 6L6 18"/>'),
  voice:sv('<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'),
+ pulseflash:sv('<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/>'),
+ sound:sv('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/>'),
+ mute:sv('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/>'),
  pick:sv('<path d="M12 2.5c4 0 7.5 2 7.5 6 0 5-4 10-7.5 13-3.5-3-7.5-8-7.5-13 0-4 3.5-6 7.5-6z"/>'),
  down:sv('<path d="M12 4v12M6 11l6 6 6-6M5 20h14"/>')};
 const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -2595,7 +2675,7 @@ let OWNER='';
 /* ---------- metrónomo ---------- */
 const TAPS=[];
 function viewMetronome(){
-  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i class="${m.acc.includes(i)?'acc':''}"></i>`).join('')};
+  const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i class="${(i===0?acc1():m.acc.includes(i))?'acc':''}"></i>`).join('')};
   return{title:'Metrónomo',back:'#/practicar',html:`
   <div class="card center">
     <div class="beats" id="beats">${beats()}</div>
@@ -2611,6 +2691,7 @@ function viewMetronome(){
   <div class="card" style="display:flex;flex-direction:column;gap:14px">
     ${chipRow('meter','Compás',Object.keys(METERS).map(v=>({v,l:v})),MET.meter)}
     ${chipRow('sub','Subdivisión',[{v:1,l:'Negras'},{v:2,l:'Corcheas'},{v:3,l:'Tresillos'},{v:4,l:'Semicorcheas'}],MET.sub)}
+    ${pulseOptions()}
   </div>
   <p class="cap">Consejo: empieza 20 bpm por debajo de tu velocidad cómoda y sube de 5 en 5 solo cuando salga limpio tres veces seguidas.</p>`,
   mount(r){
