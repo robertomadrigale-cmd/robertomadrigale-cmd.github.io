@@ -587,3 +587,25 @@ html.arty .lhead,html.arty p.prose,html.arty div.prose{background-color:color-mi
 @keyframes flashs{0%{opacity:.2}100%{opacity:0}}
 .beats i.acc{outline:2px solid var(--root);outline-offset:2px}
 .beats i.on.acc{background:var(--root)}
+
+/* detalles de márgenes: botones sin partirse, íconos alineados, nada se sale */
+.chips{align-items:center}
+.btn,.chip{white-space:nowrap;align-items:center;max-width:100%}
+.btn svg,.chip svg{width:18px;height:18px;flex:none}
+.chip svg{width:16px;height:16px}
+.row>*,.exbar>*,.figbar>*{min-width:0}
+.rt-step>div{min-width:0;overflow-wrap:anywhere}
+.strs{grid-template-columns:repeat(6,minmax(0,1fr))}
+.strs button{min-width:0;padding:0 2px}
+.kwrap>*{min-width:0}
+#pulsebar .pdots{flex-wrap:wrap;min-width:0}
+.narrbar .pl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+p,li,h1,h2,h3,.cap,.sub{overflow-wrap:anywhere}
+
+.karaoke{min-width:0;max-width:100%}
+.karaoke .kl{min-width:0;max-width:100%}
+.seg{flex-wrap:wrap;max-width:100%}
+.seg button{white-space:nowrap}
+.minimet{flex-wrap:wrap;max-width:100%}
+@media (max-width:360px){.minimet .v{min-width:52px;font-size:13px}.minimet .icon-btn{width:32px;height:32px}.exbar{gap:6px}}
+.strs button{font-size:clamp(13px,3.6vw,16px)}

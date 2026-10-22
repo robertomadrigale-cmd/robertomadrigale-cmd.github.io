@@ -5,6 +5,7 @@ const SUF_OK=/^(m|M|min|maj|dim|aug|sus|add|°|ø|\+|-|\(|\)|[0-9]|b|#|♯|♭)*
 const accOf=a=>a==='#'||a==='♯'?1:a==='b'||a==='♭'?-1:0;
 // "SOL", "LAm", "rem" → "Sol", "Lam", "Rem"
 const latCase=c=>String(c).trim().replace(/^(sol|do|re|mi|fa|la|si)(?=[^a-z]|m|$)/i,w=>w[0].toUpperCase()+w.slice(1).toLowerCase()).replace(/\/(sol|do|re|mi|fa|la|si)/i,(_,w)=>'/'+w[0].toUpperCase()+w.slice(1).toLowerCase());
+function fitKar(kar){if(!kar||!kar.isConnected)return;let z=KAR.size;kar.style.setProperty('--kz',z);const over=()=>kar.scrollWidth>kar.clientWidth+1||[...kar.querySelectorAll('.kl')].some(l=>l.scrollWidth>l.clientWidth+1);let n=0;while(over()&&z>.6&&n++<24){z=+(z-.05).toFixed(2);kar.style.setProperty('--kz',z)}}
 function chParse(c){
   const m=CH_RX.exec(latCase(c));if(!m||!SUF_OK.test(m[3]))return null;
   const r=(m[1] in LAT?LAT[m[1]]:ANG[m[1]])+accOf(m[2]);
@@ -313,6 +314,7 @@ function viewSongPlay(id){
   <div class="kbar"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${P.time} · ${BSTYLES[st.style]} · listo</span><button class="btn sm" id="kreset" aria-label="Desde el inicio">${IC.back}</button><button class="btn pri" id="kgo">${IC.play}Empezar</button></div>`,
   mount(r){
     const kar=$('#kar',r);let pos=0,TL=null,BK=null,curCh=P.chords[0]||null;
+    requestAnimationFrame(()=>fitKar(kar));const onRs=()=>fitKar(kar);window.addEventListener('resize',onRs);setTimeout(()=>{if(!document.body.contains(kar))window.removeEventListener('resize',onRs)},0);
     // panel lateral: tono, rasgueo sugerido y acorde que suena
     const side=()=>{const s=$('#kside',r);if(!s)return;
       s.innerHTML=`<div class="ks-row"><div><span class="cl">Tono</span><b class="ks-key">${esc(keyLbl())}</b></div><div><span class="cl">Tempo</span><b class="ks-num">${st.bpm}</b><small>bpm · ${P.time}</small></div></div>
@@ -370,7 +372,7 @@ function viewSongPlay(id){
     $('#kgo',r).onclick=go;
     $('#kreset',r).onclick=()=>{if(running())seqStop();pos=0;clearHL();window.scrollTo({top:0,behavior:'smooth'});paint()};
     kar.addEventListener('click',e=>{const l=e.target.closest('.kl');if(!l)return;const g=lineIdx(+l.dataset.li);if(g<0)return;const was=running();if(was)seqStop();pos=g;clearHL();setLine(+l.dataset.li);if(was)go();paint()});
-    const rerender=()=>{kar.innerHTML=P.lines.map(lineHTML).join('');$('#kchips',r).innerHTML=chips();$('#kkey',r).textContent=keyLbl();$('#kcapo',r).textContent=capoHint(P.key,st.shift);side()};
+    const rerender=()=>{kar.innerHTML=P.lines.map(lineHTML).join('');requestAnimationFrame(()=>fitKar(kar));$('#kchips',r).innerHTML=chips();$('#kkey',r).textContent=keyLbl();$('#kcapo',r).textContent=capoHint(P.key,st.shift);side()};
     r.addEventListener('click',e=>{
       const k=e.target.closest('[data-k]');if(k){const v=+k.dataset.k;st.shift=v?((st.shift+v+18)%12)-6:0;DB.kt[id]=st.shift;save();rerender();return}
       const b=e.target.closest('[data-b]');if(b){st.bpm=Math.max(40,Math.min(220,st.bpm+ +b.dataset.b));DB.kbpm[id]=st.bpm;save();$('#kbpm',r).textContent=st.bpm;side();return}
@@ -378,7 +380,7 @@ function viewSongPlay(id){
       const n=e.target.closest('[data-not]');if(n){DB.notation=n.dataset.not;save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===n)));rerender();return}
       const t=e.target.closest('[data-t]');if(t){KAR[t.dataset.t]=!KAR[t.dataset.t];t.classList.toggle('on',KAR[t.dataset.t]);DB.kar=Object.assign({},KAR);save();return}
       const y=e.target.closest('[data-sty]');if(y){st.style=y.dataset.sty;DB.kst[id]=st.style;save();$$('[data-sty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===y)));side();return}
-      const z=e.target.closest('[data-z]');if(z){KAR.size=Math.max(.8,Math.min(1.8,+(KAR.size+ +z.dataset.z*.15).toFixed(2)));kar.style.setProperty('--kz',KAR.size);DB.kar=Object.assign({},KAR);save();return}
+      const z=e.target.closest('[data-z]');if(z){KAR.size=Math.max(.8,Math.min(1.8,+(KAR.size+ +z.dataset.z*.15).toFixed(2)));kar.style.setProperty('--kz',KAR.size);fitKar(kar);DB.kar=Object.assign({},KAR);save();return}
       const c=e.target.closest('[data-kc]');if(c){const p=chParse(c.dataset.kc);if(p&&ac())gtrStrum(voicing(p,0),AC.currentTime+.02,'d',.09,2)}
     });
     const sel=$('#kbpl',r);if(sel)sel.onchange=e=>{const was=running();if(was)seqStop();st.bpl=+e.target.value;build();if(pos>=TL.lines.length)pos=0;paint()};

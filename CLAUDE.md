@@ -42,6 +42,7 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 ## Antes de publicar
 1. Reconstruye y revisa que el JavaScript compile: `node -e "new Function(require('fs').readFileSync('index.html','utf8').split('<script>')[1].split('</script>')[0])"`.
 2. Prueba en el navegador: que todos los botones respondan y no haya errores en consola, en ancho de teléfono (400 px) y de escritorio.
+   Revisa márgenes con `tools/revisar-margenes.js` en `390 1.25`, `360 1.15`, `320 1` y `1280 1` (Roberto usa letra grande en Android): ningún botón partido, nada fuera del margen. Los botones llevan `white-space:nowrap`; si un texto es largo, acórtalo en vez de dejar que se parta.
 3. Commit y push a `main`.
 
 ## Ideas pendientes que Roberto vio con buenos ojos
