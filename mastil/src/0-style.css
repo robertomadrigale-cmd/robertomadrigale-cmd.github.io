@@ -499,3 +499,44 @@ select,textarea{border-color:var(--hair);background:var(--surface2);border-radiu
 .nt small,.pchip small,.fn,.strs button small,.steps label{font-family:var(--font-body)}
 @media (min-width:900px){.side a[aria-current="page"]{background:var(--surface2);color:var(--fg)}.side a[aria-current="page"] svg{color:var(--accent-text)}}
 .tab[aria-current="page"]{color:var(--accent-text)}
+
+/* cancionero: panel de tono, rasgueo y acorde */
+.kwrap{display:flex;flex-direction:column;gap:12px}
+.kside{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--hair);box-shadow:0 1px 2px rgba(0,0,0,.18),0 8px 24px -18px rgba(0,0,0,.5)}
+.ks-row{display:flex;gap:20px;align-items:flex-end}
+.ks-row>div{display:flex;flex-direction:column;gap:2px}
+.ks-row .cl{margin:0}
+.ks-key{font:700 28px/1 var(--font-display);letter-spacing:-.02em;color:var(--accent-text)}
+.ks-num{font:600 22px/1 var(--font-display);font-variant-numeric:tabular-nums}
+.ks-row small{font-size:12px;color:var(--muted)}
+.ks-capo,.ks-tip{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
+.kpat{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;margin:8px 0 6px}
+.kpat .sl{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 6px;border-radius:10px;background:var(--surface2);color:var(--fg);transition:background .08s,color .08s,transform .08s}
+.kpat .sl svg{width:22px;height:22px}
+.kpat .sl.acc{color:var(--accent-text)}
+.kpat .sl small{font:500 11px var(--font-body);color:var(--muted)}
+.kpat .sl .rest{height:22px;line-height:22px;color:var(--muted);font-weight:700}
+.kpat .sl .bass,.kpat .sl .str{height:22px;min-width:22px;display:grid;place-items:center;border-radius:50%;font:700 12px var(--font-body);border:1.5px solid currentColor}
+.kpat .sl .bass{color:var(--accent-text)}
+.kpat .sl.on{background:var(--accent);color:var(--accent-ink);transform:translateY(-2px)}
+.kpat .sl.on small,.kpat .sl.on .rest{color:var(--accent-ink)}
+.ks-chord{display:flex;align-items:center;gap:12px}
+.ks-chord .mch{width:64px;height:66px}
+.ks-chord b{font:700 26px/1 var(--font-display);letter-spacing:-.02em}
+/* teléfono: el panel queda arriba de la letra y se queda fijo mientras bajas */
+@media (max-width:899px){
+  .kside{order:-1;position:sticky;top:calc(56px + env(safe-area-inset-top,0px) + 6px);z-index:6;padding:10px 12px;gap:6px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3)}
+  .kside .ks-tip,.kside .ks-capo{display:none}
+  .kside .kpat{margin:4px 0 0}
+  .kside .kpat .sl{padding:5px 0 4px}
+  .kside .kpat .sl svg{width:18px;height:18px}
+  .kside .ks-row{gap:16px}
+  .kside .ks-key{font-size:22px}.kside .ks-num{font-size:18px}
+  .kside .ks-ch{position:absolute;top:8px;right:12px}
+  .kside .ks-ch .cl{display:none}
+  .kside .ks-chord{gap:8px}.kside .ks-chord .mch{width:40px;height:42px}.kside .ks-chord b{font-size:20px}
+}
+@media (min-width:900px){
+  .kwrap{display:grid;grid-template-columns:minmax(0,1fr) 270px;align-items:start;gap:16px}
+  .kside{position:sticky;top:76px}
+}
