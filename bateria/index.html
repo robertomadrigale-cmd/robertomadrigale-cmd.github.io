@@ -1374,7 +1374,7 @@ function showUpdate(){
 }
 if('serviceWorker' in navigator&&location.protocol!=='file:'){
   let hadCtl=!!navigator.serviceWorker.controller;
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtl){hadCtl=true;return}showUpdate()});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtl){hadCtl=true;return}if(!SEQ.id&&!TMR.id)location.reload();else showUpdate()});
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
       const chk=()=>reg.update().catch(()=>{});
