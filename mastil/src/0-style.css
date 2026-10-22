@@ -771,3 +771,5 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .sbopts{display:flex;flex-wrap:wrap;gap:14px 18px;padding:14px;border-radius:14px;background:var(--surface2)}
 .sbopts > div{min-width:0}
 .sbopts select{width:auto;max-width:100%}
+.ksnd{gap:8px;flex-wrap:wrap}
+.ksnd .btn{flex:1 1 auto;justify-content:center}
