@@ -43,6 +43,7 @@ function pluck(m,t,d,v){
   const vol=Math.min(1,(v||.2)*3.2),end=t+Math.min(d,2.3);
   g.gain.setValueAtTime(vol,t);g.gain.setValueAtTime(vol,Math.max(t,end-.12));g.gain.linearRampToValueAtTime(.0001,end);
   src.connect(lp);lp.connect(g);g.connect(out());src.start(t);src.stop(end+.02);
+  return{g,end};
 }
 function bassNote(m,t,d,v){
   const c=AC,f=440*Math.pow(2,(m-69)/12),o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();
