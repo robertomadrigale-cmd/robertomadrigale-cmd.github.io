@@ -924,3 +924,26 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .kplay .ks-row,.kplay .ks-capo{display:none}
 .kplay .kbar{z-index:8}
 @media (max-width:899px){.kplay .kside{padding-right:86px}}
+/* ===================== herramientas con la misma estructura del reproductor ===================== */
+.ktools{grid-template-columns:repeat(var(--nt,6),minmax(0,1fr))}
+@media(max-width:420px){.ktools{grid-template-columns:repeat(var(--ntm,3),minmax(0,1fr))}}
+.tamb{background:radial-gradient(circle at 28% 30%,hsl(var(--th) 85% 55%),transparent 58%),radial-gradient(circle at 78% 55%,hsl(calc(var(--th) + 44) 85% 55%),transparent 55%);opacity:.45}
+.tplay .khead .sart.big{width:88px;height:88px}
+.tcov svg{width:100%;height:100%;display:block}
+@media(max-width:380px){.tplay .khead .sart.big{width:72px;height:72px}}
+.tdock .kbrow{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.tdock .kbrow > span:last-child{min-width:0}
+.kplayb.rec{background:#ff3b30;color:#fff;box-shadow:0 10px 26px -10px rgba(255,59,48,.8)}
+.kplayb .rec-i{width:20px;height:20px;border-radius:50%;background:currentColor;display:block}
+.chips.hscroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;justify-content:flex-start;margin:0 -16px;padding:2px 16px;max-width:calc(100% + 32px)}
+.chips.hscroll::-webkit-scrollbar{display:none}
+.chips.hscroll .chip{flex:none}
+.tstage{gap:10px}
+.rtstage{gap:8px}
+.rtstage .big{font-size:clamp(56px,16vw,76px);line-height:1;font-variant-numeric:tabular-nums}
+.slplayer{display:flex;flex-direction:column;gap:12px}
+.kamb{left:-18px;right:-18px}
+/* barra de abajo: en teléfonos angostos las 5 pestañas caben sin cortarse */
+.tabs .tab{min-width:0}
+@media(max-width:360px){.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.tabs .tab{font-size:10px}.tabs .tab svg{width:42px;padding:3px 9px}}
+.kamb{-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 35%,transparent 100%);mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 35%,transparent 100%)}

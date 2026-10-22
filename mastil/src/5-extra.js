@@ -199,15 +199,15 @@ async function takesAll(){try{const d=await idb();return await new Promise(ok=>{
 async function takePut(t){const d=await idb();return new Promise((ok,ko)=>{const tx=d.transaction('takes','readwrite');tx.objectStore('takes').add(t);tx.oncomplete=ok;tx.onerror=()=>ko(tx.error);tx.onabort=()=>ko(tx.error)})}
 async function takeDel(id){const d=await idb();return new Promise(ok=>{const tx=d.transaction('takes','readwrite');tx.objectStore('takes').delete(id);tx.oncomplete=ok;tx.onerror=ok})}
 function viewRecorder(){
-  return{title:'Grabadora',back:'#/practicar',html:`<div class="lhead"><span class="eyebrow">Escúchate</span><h1>Grabadora</h1><p class="sub">Grábate tocando y escúchate después. Lo que suena mal se oye mucho más claro afuera de la guitarra.</p></div>
+  return{title:'Grabadora',back:'#/practicar',html:`<div class="kplay tplay">${toolHead('rec','Grabadora','Escúchate')}
   <div class="card center"><div class="recdot" id="rdot"></div><div class="big" id="rtime" style="font-size:72px">0:00</div>
    <div><span class="cl">Acompañamiento mientras grabas</span><div class="seg" id="racc">${[['none','Ninguno'],['met','Metrónomo'],['trk','Pista']].map(([v,l])=>`<button data-acc="${v}" aria-pressed="${(DB.recAcc||'none')===v}">${l}</button>`).join('')}</div></div>
-   <div id="raccopt" class="raccopt"></div>
-   <button class="btn pri" id="rgo" style="min-width:200px"></button><div id="rmsg"></div></div>
-  <div class="card"><span class="cl">Tus tomas · se guardan en este dispositivo</span><div id="rlist" class="takes"></div></div>`,
+   <div id="raccopt" class="raccopt"></div><div id="rmsg"></div></div>
+  <div class="card"><span class="cl">Tus tomas · se guardan en este dispositivo</span><div id="rlist" class="takes"></div></div>
+  ${toolDock(`<span class="tm" id="rdm"></span><div class="ktrans"><button class="kplayb rec" id="rgo"></button></div><span></span>`)}</div>`,
   mount(r){
     const go=$('#rgo',r);
-    const paint=()=>{go.innerHTML=REC.mr?IC.stop+'Detener y guardar':'<span class="rec-i"></span>Grabar';$('#rdot',r).classList.toggle('on',!!REC.mr)};
+    const paint=()=>{go.innerHTML=playLbl(!!REC.mr,'Grabar','Detener y guardar','<i class="rec-i"></i>');go.setAttribute('aria-label',REC.mr?'Detener y guardar':'Grabar');$('#rdot',r).classList.toggle('on',!!REC.mr);$('#rdm',r).textContent=REC.mr?'Grabando…':'Lista para grabar';const m=$('#tmeta',r);if(m)m.textContent='Grábate y escúchate después'};
     const list=async()=>{REC.urls.forEach(u=>URL.revokeObjectURL(u));REC.urls=[];const ts=await takesAll();const el=$('#rlist',r);if(!el)return;
       el.innerHTML=ts.length?ts.map(t=>{const u=URL.createObjectURL(t.blob);REC.urls.push(u);const d=new Date(t.date);return`<div class="take"><div class="row" style="justify-content:space-between"><b>Toma del ${d.toLocaleDateString('es-MX',{day:'numeric',month:'short'})} · ${d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}</b><span class="tm">${fmt(t.dur)}</span></div><audio controls preload="metadata" src="${u}"></audio><div class="row"><a class="btn sm" href="${u}" download="mades-toma-${t.id}.${t.type.includes('mp4')?'m4a':'webm'}">${IC.down}Descargar</a><span data-dw="${t.id}"><button class="btn sm" data-del="${t.id}">${IC.x}Borrar</button></span></div></div>`}).join(''):'<p class="cap">Todavía no tienes tomas. Graba la primera.</p>'};
     const accOn=()=>SEQ.id&&(OWNER==='rec'||OWNER==='recprev');

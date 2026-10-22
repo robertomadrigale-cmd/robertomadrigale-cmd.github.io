@@ -28,11 +28,40 @@ const IC={
 const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const chipRow=(k,label,opts,cur)=>`<div><span class="cl">${label}</span><div class="chips">${opts.map(o=>`<button class="chip" data-set="${k}" data-v="${o.v}" aria-pressed="${String(o.v)===String(cur)}">${o.l}${o.s?`<i>${o.s}</i>`:''}</button>`).join('')}</div></div>`;
 let OWNER='';
+/* ---------- estructura común de las herramientas (como el reproductor de canciones) ----------
+   portada y título; barra de íconos con su valor que abre un panel; lo principal al centro; dock con botón redondo */
+const TI=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const TKIC={meter:TI('<path d="M4 6h16M4 12h16M4 18h16"/><path d="M9 4v16"/>'),sub:TI('<path d="M8 18V6l8-2v12"/><circle cx="6" cy="18" r="2"/><circle cx="14" cy="16" r="2"/>'),eye:TI('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'),
+  key:TI('<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'),prog:TI('<path d="M5 19V9M10 19V5M15 19v-7M20 19v-9"/>'),style:TI('<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'),tempo:TI('<path d="M8 21h8l-1.5-15h-5z"/><path d="M12 14l5-9"/>'),
+  mode:TI('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'),frets:TI('<path d="M3 8h18M3 12h18M3 16h18M8 5v14M15 5v14"/>'),strs:TI('<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>'),abc:TI('<path d="M4 19l5-14 5 14M6 14h6"/><path d="M17 5v14h3"/>'),
+  mic:TI('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),speed:TI('<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/>'),ab:TI('<path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>'),
+  back5:TI('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),fwd5:TI('<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>')};
+const TART={metro:[352,'<path d="M34 84h32l-8-62H42z"/><path d="M50 64l18-34"/><circle cx="68" cy="30" r="4" fill="#fff" stroke="none"/>'],tuner:[150,'<path d="M16 72a34 34 0 0 1 68 0"/><path d="M50 72l14-28"/><circle cx="50" cy="72" r="4" fill="#fff" stroke="none"/>'],
+  trk:[28,'<path d="M8 50c8-18 14-18 20 0s12 18 20 0 14-26 22-8 10 22 22 4"/>'],game:[200,'<path d="M10 30h80M10 46h80M10 62h80M10 78h80M30 24v60M54 24v60M76 24v60"/><circle cx="54" cy="46" r="6" fill="#fff" stroke="none"/>'],
+  rt:[205,'<circle cx="50" cy="48" r="28"/><path d="M50 30v18l12 8"/>'],slow:[265,'<path d="M16 66a34 34 0 0 1 68 0"/><path d="M50 66l-16-20"/><circle cx="50" cy="66" r="4" fill="#fff" stroke="none"/>'],rec:[330,'<circle cx="50" cy="48" r="14" fill="#fff" fill-opacity=".9" stroke="none"/><circle cx="50" cy="48" r="28"/>']};
+function toolHead(k,title,eyebrow){const[h,m]=TART[k];return`<div class="kamb tamb" style="--th:${h}" aria-hidden="true"></div><div class="khead"><span class="sart big tcov">${coverArt(h,m,null,'t'+k)}</span><div class="kht"><span class="eyebrow">${eyebrow}</span><h2>${title}</h2><small class="kmeta" id="tmeta"></small></div></div>`}
+function toolBar(items){const n=items.length;return`<div class="ktools" role="toolbar" style="--nt:${n};--ntm:${n<=3?n:n===4?2:3}">${items.map(([k,l,ic])=>`<button class="ktool" data-panel="${k}" aria-pressed="false">${ic}<b id="tv-${k}"></b><small>${l}</small></button>`).join('')}</div>`}
+function toolPanels(ps){return`<div class="kpanels card kctl" hidden>${ps.map(([k,t,h])=>`<div class="kpanel" data-p="${k}" hidden><div class="kph"><b>${t}</b><button class="kic" data-pclose aria-label="Cerrar">${IC.x}</button></div>${h}</div>`).join('')}</div>`}
+const toolDock=inner=>`<div class="kbar tdock"><div class="kbrow">${inner}</div></div>`;
+const playLbl=(on,l1,l2,i1,i2)=>`${on?(i2||IC.stop):(i1||IC.play)}<span>${on?l2:l1}</span>`;
+// abre y cierra paneles y repinta los valores de la barra tras cada toque
+function toolMount(r,vals){
+  const openP=k=>{const box=$('.kpanels',r);if(!box)return;const cur=box.hidden?null:box.dataset.open;$$('.ktool',r).forEach(b=>b.setAttribute('aria-pressed','false'));
+    if(!k||cur===k){box.hidden=true;box.dataset.open='';return}box.hidden=false;box.dataset.open=k;$$('.kpanel',r).forEach(p=>p.hidden=p.dataset.p!==k);$(`.ktool[data-panel="${k}"]`,r).setAttribute('aria-pressed','true')};
+  const paint=()=>{const v=vals();for(const k in v){const e=k==='meta'?$('#tmeta',r):$('#tv-'+k,r);if(e)e.textContent=v[k]}};
+  r.addEventListener('click',e=>{const pb=e.target.closest('[data-panel]');if(pb){openP(pb.dataset.panel);return}if(e.target.closest('[data-pclose]')){openP(null);return}setTimeout(paint,0)});
+  paint();return paint;
+}
+
 /* ---------- metrónomo ---------- */
 const TAPS=[];
 function viewMetronome(){
   const beats=()=>{const m=METERS[MET.meter];return Array.from({length:m.b},(_,i)=>`<i style="--k:${i}" class="${(i===0?acc1():m.acc.includes(i))?'acc':''}"></i>`).join('')};
-  return{title:'Metrónomo',back:'#/practicar',html:`
+  const SUBN={1:'Negras',2:'Corcheas',3:'Tresillos',4:'Semicorch.'};
+  return{title:'Metrónomo',back:'#/practicar',html:`<div class="kplay tplay">
+  ${toolHead('metro','Metrónomo','Pulso')}
+  ${toolBar([['meter','Compás',TKIC.meter],['sub','Subdivisión',TKIC.sub],['pulse','Ver el pulso',TKIC.eye]])}
+  ${toolPanels([['meter','Compás',chipRow('meter','Compás',Object.keys(METERS).map(v=>({v,l:v})),MET.meter)],['sub','Subdivisión',chipRow('sub','Subdivisión',[{v:1,l:'Negras'},{v:2,l:'Corcheas'},{v:3,l:'Tresillos'},{v:4,l:'Semicorcheas'}],MET.sub)],['pulse','Ver el pulso',pulseOptions()]])}
   <div class="card center metstage">
     <div class="dial"><div class="beats" id="beats" style="--n:${METERS[MET.meter].b}">${beats()}</div>
      <div class="dc"><div class="big" id="bpmv">${MET.bpm}</div><div class="cl" style="margin:0">BPM</div></div></div>
@@ -40,21 +69,17 @@ function viewMetronome(){
       <button class="btn sm" data-m="-5">−5</button><button class="btn sm" data-m="-1">−1</button>
       <button class="btn sm" data-m="1">+1</button><button class="btn sm" data-m="5">+5</button></div>
     <input type="range" id="bpmr" min="30" max="240" value="${MET.bpm}" aria-label="Tempo en BPM">
-    <div class="row" style="justify-content:center">
-      <button class="btn pri" id="metgo" style="min-width:160px"></button>
-      <button class="btn" id="tap">Marcar tempo</button></div>
+    <button class="btn" id="tap">Marcar tempo</button>
   </div>
-  <div class="card" style="display:flex;flex-direction:column;gap:14px">
-    ${chipRow('meter','Compás',Object.keys(METERS).map(v=>({v,l:v})),MET.meter)}
-    ${chipRow('sub','Subdivisión',[{v:1,l:'Negras'},{v:2,l:'Corcheas'},{v:3,l:'Tresillos'},{v:4,l:'Semicorcheas'}],MET.sub)}
-    ${pulseOptions()}
-  </div>
-  <p class="cap">Consejo: empieza 20 bpm por debajo de tu velocidad cómoda y sube de 5 en 5 solo cuando salga limpio tres veces seguidas.</p>`,
+  <p class="cap">Consejo: empieza 20 bpm por debajo de tu velocidad cómoda y sube de 5 en 5 solo cuando salga limpio tres veces seguidas.</p>
+  ${toolDock(`<span class="tm" id="tdm"></span><div class="ktrans"><button class="kic" data-m="-1" aria-label="Bajar 1 bpm">${IC.minus}</button><button class="kplayb" id="metgo"></button><button class="kic" data-m="1" aria-label="Subir 1 bpm">${IC.plus}</button></div><span></span>`)}
+  </div>`,
   mount(r){
     const go=$('#metgo',r),bv=$('#bpmv',r),rg=$('#bpmr',r);
     const light=(b,isBeat)=>{if(!isBeat)return;$$('#beats i',r).forEach((x,i)=>x.classList.toggle('on',i===b))};
     const running=()=>SEQ.id==='met'&&OWNER==='tool';
-    const paint=()=>{go.innerHTML=running()?IC.stop+'Detener':IC.play+'Iniciar';bv.textContent=MET.bpm;rg.value=MET.bpm;if(!running())$$('#beats i',r).forEach(x=>x.classList.remove('on'))};
+    const tv=toolMount(r,()=>({meter:MET.meter,sub:SUBN[MET.sub],pulse:DB.metMute?'Solo vista':DB.flash?'Destello':'Barra',meta:`${MET.bpm} bpm · ${MET.meter} · ${SUBN[MET.sub].toLowerCase()}`}));
+    const paint=()=>{go.innerHTML=playLbl(running(),'Iniciar','Detener');bv.textContent=MET.bpm;rg.value=MET.bpm;$('#tdm',r).textContent=running()?`Sonando · ${MET.bpm} bpm`:`${MET.meter} · listo`;tv();if(!running())$$('#beats i',r).forEach(x=>x.classList.remove('on'))};
     const setBpm=v=>{MET.bpm=Math.max(30,Math.min(240,Math.round(v)));DB.met=MET.bpm;save();if(SEQ.id==='met')SEQ.label='Metrónomo '+MET.bpm;paint();emitState()};
     if(SEQ.id==='met'){OWNER='tool';SEQ.ui=s=>light(Math.floor(s/MET.sub)%METERS[MET.meter].b,s%MET.sub===0)}
     go.onclick=()=>{if(running())seqStop();else{OWNER='tool';metStart({},light)}paint()};
@@ -104,23 +129,25 @@ function tunerStop(){
 }
 function viewTuner(){
   const ticks=[-50,-25,0,25,50].map(c=>{const a=(c/50)*60*Math.PI/180,x1=150+Math.sin(a)*112,y1=150-Math.cos(a)*112,x2=150+Math.sin(a)*126,y2=150-Math.cos(a)*126;return`<line class="tickm" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/><text class="lab" x="${(150+Math.sin(a)*142).toFixed(1)}" y="${(154-Math.cos(a)*142).toFixed(1)}">${c>0?'+'+c:c}</text>`}).join('');
-  return{title:'Afinador',back:'#/practicar',html:`
-  <div class="card center">
+  return{title:'Afinador',back:'#/practicar',html:`<div class="kplay tplay">
+  ${toolHead('tuner','Afinador','Afinación · '+(TUNINGS[DB.tuning||'std']||TUNINGS.std).n)}
+  <div class="card center tstage">
     <svg class="gauge" id="gauge" viewBox="0 0 300 170" role="img" aria-label="Desviación en cents"><path d="M ${150-120*Math.sin(Math.PI/3)} ${150-120*Math.cos(Math.PI/3)} A 120 120 0 0 1 ${150+120*Math.sin(Math.PI/3)} ${150-120*Math.cos(Math.PI/3)}" fill="none" stroke="var(--line)" stroke-width="6"/>${ticks}<line class="needle" id="needle" x1="150" y1="150" x2="150" y2="44" style="transform-origin:150px 150px"/><circle cx="150" cy="150" r="7" fill="var(--accent)"/></svg>
     <div class="tnote" id="tn">—</div>
     <div class="cap" id="thz" style="margin:0">Toca una cuerda al aire</div>
-    <button class="btn pri" id="tgo" style="min-width:200px"></button>
     <div id="tmsg"></div>
   </div>
   <div class="card center">
-    <span class="cl">Afinación · toca una cuerda para escuchar su nota</span>
-    <div class="chips" style="justify-content:center">${Object.entries(TUNINGS).map(([k,v])=>`<button class="chip" data-tun="${k}" aria-pressed="${(DB.tuning||'std')===k}">${v.n}</button>`).join('')}</div>
+    <span class="cl">Toca una cuerda para escuchar su nota</span>
     <div class="strs" id="tstrs"></div>
+    <div class="chips hscroll">${Object.entries(TUNINGS).map(([k,v])=>`<button class="chip" data-tun="${k}" aria-pressed="${(DB.tuning||'std')===k}">${v.n}</button>`).join('')}</div>
   </div>
-  <p class="cap">Afina siempre subiendo hacia la nota: si te pasas, baja un poco la cuerda y vuelve a subir. Dentro de ±5 cents la aguja se pone verde.</p>`,
+  <p class="cap">Afina siempre subiendo hacia la nota: si te pasas, baja un poco la cuerda y vuelve a subir. Dentro de ±5 cents la aguja se pone verde.</p>
+  ${toolDock(`<span class="tm" id="tdst"></span><div class="ktrans"><button class="kplayb" id="tgo"></button></div><span></span>`)}
+  </div>`,
   mount(r){
     const go=$('#tgo',r),tn=$('#tn',r),hz=$('#thz',r),nd=$('#needle',r),g=$('#gauge',r),msg=$('#tmsg',r);
-    const paint=()=>{go.innerHTML=TUN.stream?IC.stop+'Detener micrófono':IC.tuner+'Activar micrófono'};
+    const paint=()=>{go.innerHTML=playLbl(!!TUN.stream,'Activar micrófono','Detener micrófono',TKIC.mic);$('#tdst',r).textContent=TUN.stream?'Escuchando tu guitarra…':'Micrófono apagado';const m=$('#tmeta',r);if(m)m.textContent='Afinación '+((TUNINGS[DB.tuning||'std']||TUNINGS.std).n).toLowerCase()};
     const show=f=>{
       if(!f){g.classList.remove('in');return}
       const m=69+12*Math.log2(f/440),n=Math.round(m),c=Math.round((m-n)*100);
@@ -134,7 +161,7 @@ function viewTuner(){
     go.onclick=async()=>{msg.innerHTML='';if(TUN.stream){tunerStop();tn.textContent='—';hz.textContent='Toca una cuerda al aire';g.classList.remove('in');nd.style.transform='rotate(0)'}else{seqStop();await tunerStart(show,err)}paint()};
     const strs=()=>{$('#tstrs',r).innerHTML=tuningStrings().map(s=>`<button data-ref="${s.m}" data-s="${s.s}"><span>${s.n}</span><small>${s.s}ª</small></button>`).join('')};strs();
     r.addEventListener('click',e=>{const b=e.target.closest('[data-ref]');if(b){if(!ac())return;pluck(+b.dataset.ref,AC.currentTime+.02,2.6,.3);return}
-      const u=e.target.closest('[data-tun]');if(u){DB.tuning=u.dataset.tun;save();$$('[data-tun]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===u)));strs()}});
+      const u=e.target.closest('[data-tun]');if(u){DB.tuning=u.dataset.tun;save();$$('[data-tun]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===u)));strs();paint()}});
     paint();
     return()=>tunerStop();
   }};
@@ -194,16 +221,15 @@ function gameComponent(host,opts){
 }
 let GAMEON=false;
 function viewGame(){
-  return{title:'Juego del mástil',back:'#/practicar',html:`
-  <div class="card" style="display:flex;flex-direction:column;gap:14px">
-   ${chipRow('mode','Modo',[{v:'find',l:'Encuentra la nota'},{v:'name',l:'¿Qué nota es?'}],GAME.mode)}
-   ${chipRow('range','Trastes',[{v:5,l:'0 a 5'},{v:12,l:'0 a 12'}],GAME.range)}
-   ${chipRow('str','Cuerdas',[{v:0,l:'Todas'},...[6,5,4,3,2,1].map(v=>({v,l:'Cuerda '+v}))],GAME.str)}
-   ${chipRow('nat','Notas',[{v:1,l:'Solo naturales'},{v:0,l:'Las 12'}],GAME.nat)}
-  </div>
-  <div class="card" id="gamehost"></div>`,
+  return{title:'Juego del mástil',back:'#/practicar',html:`<div class="kplay tplay">
+  ${toolHead('game','Juego del mástil','Contra reloj')}
+  ${toolBar([['mode','Modo',TKIC.mode],['range','Trastes',TKIC.frets],['str','Cuerdas',TKIC.strs],['nat','Notas',TKIC.abc]])}
+  ${toolPanels([['mode','Modo',chipRow('mode','Modo',[{v:'find',l:'Encuentra la nota'},{v:'name',l:'¿Qué nota es?'}],GAME.mode)],['range','Trastes',chipRow('range','Trastes',[{v:5,l:'0 a 5'},{v:12,l:'0 a 12'}],GAME.range)],
+    ['str','Cuerdas',chipRow('str','Cuerdas',[{v:0,l:'Todas'},...[6,5,4,3,2,1].map(v=>({v,l:'Cuerda '+v}))],GAME.str)],['nat','Notas',chipRow('nat','Notas',[{v:1,l:'Solo naturales'},{v:0,l:'Las 12'}],GAME.nat)]])}
+  <div class="card" id="gamehost"></div></div>`,
   mount(r){
     let stop=gameComponent($('#gamehost',r));
+    toolMount(r,()=>({mode:GAME.mode==='find'?'Encontrar':'Nombrar',range:'0 a '+GAME.range,str:GAME.str?'Cuerda '+GAME.str:'Todas',nat:GAME.nat?'Naturales':'Las 12',meta:`Récord: ${DB.game[gameKey()]||0} aciertos en un minuto`}));
     $$('[data-set]',r).forEach(b=>b.onclick=()=>{const k=b.dataset.set;GAME[k]=k==='mode'?b.dataset.v:+b.dataset.v;$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));stop();stop=gameComponent($('#gamehost',r))});
     return()=>stop();
   }};
@@ -219,23 +245,23 @@ function trkScaleBoard(ci){
 }
 function trkChips(cur){return PROG2[TRK.p].it.map((_,i)=>`<div class="pchip ${i===cur?'cur':''}"><b>${trkName(i)}</b><small>${i+1}</small></div>`).join('')}
 function viewTracks(){
-  return{title:'Pistas para improvisar',back:'#/practicar',html:`
-  <div class="card" style="display:flex;flex-direction:column;gap:14px">
-    ${chipRow('k','Tonalidad',KEYS.map((x,i)=>({v:i,l:x.es,s:x.us})),TRK.k)}
-    ${chipRow('p','Progresión',Object.keys(PROG2).map(v=>({v,l:PROG2[v].n})),TRK.p)}
-    ${chipRow('st','Estilo',Object.keys(STYLES).map(v=>({v,l:STYLES[v].n})),TRK.st)}
-    <div><span class="cl">Tempo</span><div class="row"><button class="btn sm" data-b="-5">−5</button><span class="tm" id="tbpm" style="min-width:70px;text-align:center">${TRK.bpm} bpm</span><button class="btn sm" data-b="5">+5</button></div></div>
-    <div class="row"><button class="btn pri" id="tgo" style="min-width:170px"></button></div>
-  </div>
+  return{title:'Pistas para improvisar',back:'#/practicar',html:`<div class="kplay tplay">
+  ${toolHead('trk','Pistas para improvisar','Improvisa')}
+  ${toolBar([['k','Tono',TKIC.key],['p','Progresión',TKIC.prog],['st','Estilo',TKIC.style],['bpm','Tempo',TKIC.tempo]])}
+  ${toolPanels([['k','Tonalidad',chipRow('k','Tonalidad',KEYS.map((x,i)=>({v:i,l:x.es,s:x.us})),TRK.k)],['p','Progresión',chipRow('p','Progresión',Object.keys(PROG2).map(v=>({v,l:PROG2[v].n})),TRK.p)],
+    ['st','Estilo',chipRow('st','Estilo',Object.keys(STYLES).map(v=>({v,l:STYLES[v].n})),TRK.st)],['bpm','Tempo',`<div class="row"><button class="btn sm" data-b="-5">−5</button><span class="kkey" id="tbpm" style="min-width:90px;text-align:center">${TRK.bpm} bpm</span><button class="btn sm" data-b="5">+5</button></div>`]])}
   <div class="card"><span class="cl">Acordes · <span id="tstat">detenida</span></span><div class="strip" id="tchips">${trkChips(-1)}</div>
    <p class="cap" style="margin:0 0 10px" id="ttip"></p><div id="tboard">${trkScaleBoard(-1)}</div>
-   <p class="cap">Rojo: raíz del acorde que suena. Ámbar: notas del acorde. Tenue: el resto de la escala sugerida.</p></div>`,
+   <p class="cap">Rojo: raíz del acorde que suena. Ámbar: notas del acorde. Tenue: el resto de la escala sugerida.</p></div>
+  ${toolDock(`<span class="tm" id="tdm"></span><div class="ktrans"><button class="kic" data-b="-5" aria-label="Más lento">${IC.minus}</button><button class="kplayb" id="tgo"></button><button class="kic" data-b="5" aria-label="Más rápido">${IC.plus}</button></div><span></span>`)}
+  </div>`,
   mount(r){
     const go=$('#tgo',r);
     const ui=(ci,lab)=>{$('#tchips',r).innerHTML=trkChips(ci);$('#tboard',r).innerHTML=trkScaleBoard(ci);$('#tstat',r).textContent=lab==='cuenta'?'cuenta inicial':ci>=0?'sonando '+trkName(ci):'detenida'};
     const running=()=>SEQ.id==='trk'&&OWNER==='tool';
     const tip=()=>{$('#ttip',r).innerHTML=`<b>Escala sugerida:</b> ${SCALES2[PROG2[TRK.p].sc].n} de ${KEYS[TRK.k].es}. ${PROG2[TRK.p].tip}`};
-    const paint=()=>{go.innerHTML=running()?IC.stop+'Detener':IC.play+'Tocar pista';$('#tbpm',r).textContent=TRK.bpm+' bpm';if(!running())ui(-1,'')};
+    const tv=toolMount(r,()=>({k:KEYS[TRK.k].es,p:PROG2[TRK.p].n,st:STYLES[TRK.st].n,bpm:TRK.bpm,meta:`${KEYS[TRK.k].es} · ${PROG2[TRK.p].n} · ${STYLES[TRK.st].n} · ${TRK.bpm} bpm`}));
+    const paint=()=>{go.innerHTML=playLbl(running(),'Tocar pista','Detener');$('#tbpm',r).textContent=TRK.bpm+' bpm';$('#tdm',r).textContent=running()?'Sonando':'Lista';tv();if(!running())ui(-1,'')};
     const restart=()=>{if(running()){trkStart(ui)}};
     if(SEQ.id==='trk'){OWNER='tool';SEQ.ui=s=>{const L=STYLES[TRK.st].steps,bar=Math.floor(s/L)-1;if(s%L===0)ui(bar<0?-1:bar%PROG2[TRK.p].it.length,bar<0?'cuenta':'')}}
     go.onclick=()=>{if(running())seqStop();else{OWNER='tool';trkStart(ui)}paint()};
@@ -256,20 +282,25 @@ function rtBlocks(){
    {t:'Improvisar',d:'Blues en La: pentatónica menor, frases cortas y silencios.',min:sc[3],trk:{k:3,p:'blues',st:'rock',bpm:84}}];
 }
 function viewRoutine(){
-  return{title:'Rutina diaria',back:'#/practicar',html:`
-  <div class="card" style="display:flex;flex-direction:column;gap:14px">
-    <div class="row" style="justify-content:space-between"><div><span class="cl">Duración</span><div class="seg" id="rtlen">${[10,15,30].map(v=>`<button data-len="${v}" aria-pressed="${v===RT.len}">${v} min</button>`).join('')}</div></div>
-    <div class="center" style="gap:0"><div class="big" id="rttime" style="font-size:64px">${fmt(RT.len*60)}</div><span class="cl" id="rtlab" style="margin:0">Lista para empezar</span></div></div>
-    <div class="row" id="rtctl"></div>
+  return{title:'Rutina diaria',back:'#/practicar',html:`<div class="kplay tplay">
+  ${toolHead('rt','Rutina diaria','Plan de hoy')}
+  <div class="card center rtstage">
+    <div class="seg" id="rtlen">${[10,15,30].map(v=>`<button data-len="${v}" aria-pressed="${v===RT.len}">${v} min</button>`).join('')}</div>
+    <div class="big" id="rttime">${fmt(RT.len*60)}</div><span class="cl" id="rtlab" style="margin:0">Lista para empezar</span>
   </div>
   <div class="card"><div id="rtsteps"></div></div>
-  <div id="rtbody"></div>`,
+  <div id="rtbody"></div>
+  <div class="kbar tdock"><div class="kbrow" id="rtctl"></div></div>
+  </div>`,
   mount(r){
     const B=()=>rtBlocks();
     const steps=()=>{$('#rtsteps',r).innerHTML=B().map((b,i)=>`<div class="rt-step ${i===RT.i?'cur':i<RT.i?'past':''}"><span class="n">${i+1}</span><div><b>${b.t} · ${b.min} min</b><span>${esc(b.d)}</span></div></div>`).join('')};
     const ctl=()=>{
       const on=RT.i>=0;
-      $('#rtctl',r).innerHTML=on?`<button class="btn" data-rt="pause">${TMR.paused?IC.play+'Reanudar':IC.pause+'Pausa'}</button><button class="btn" data-rt="next">${IC.next}Siguiente</button><button class="btn" data-rt="end">${IC.x}Terminar</button>`:`<button class="btn pri" data-rt="start" style="min-width:200px">${IC.play}Empezar rutina</button>`;
+      const b=B()[RT.i];
+      $('#rtctl',r).innerHTML=on?`<span class="tm">${b?esc(b.t):''}</span><div class="ktrans"><button class="kic" data-rt="end" aria-label="Terminar">${IC.x}</button><button class="kplayb" data-rt="pause">${playLbl(!TMR.paused,'Reanudar','Pausa',IC.play,IC.pause)}</button><button class="kic" data-rt="next" aria-label="Siguiente bloque">${IC.next}</button></div><span></span>`
+        :`<span class="tm">${RT.len} min · 4 bloques</span><div class="ktrans"><button class="kplayb" data-rt="start">${playLbl(false,'Empezar rutina','')}</button></div><span></span>`;
+      const m=$('#tmeta',r);if(m)m.textContent=`${RT.len} minutos: calentamiento, mástil, lección e improvisación`;
       $('#rtlen',r).style.display=on?'none':'';
     };
     const body=()=>{
