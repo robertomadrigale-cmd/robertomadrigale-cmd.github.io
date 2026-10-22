@@ -17,18 +17,23 @@ function chordBoard(F,i){
   return fretboard({to,dots:d,muted:m,label:'Acorde '+name});
 }
 const chordMidiF=frets=>frets.map((f,j)=>f==null?null:OPEN_MIDI[6-j]+f).filter(v=>v!=null);
+// cada opción del ejercicio es un interruptor: ícono, valor actual y qué es; al tocarlo cambia al otro valor
+const FTOG={updown:[['Ida y vuelta',true],['Solo ida',false],'Recorrido','<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],per:[['1 por pulso',1],['2 por pulso',2],'Notas','<path d="M8 18V6l8-2v12"/><circle cx="6" cy="18" r="2"/><circle cx="14" cy="16" r="2"/>'],
+  guide:[['Con guía',true],['Solo click',false],'Guía','<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'],mic:[['Sin calificar',false],['Con micrófono',true],'Calificar','<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'],
+  beats:[['4 pulsos',4],['2 pulsos',2],'Por acorde','<path d="M4 6h16M4 12h16M4 18h16"/><path d="M9 4v16"/>']};
+function figTog(x,k){const st=figState(x),[a,b,lab,ic]=FTOG[k],cur=String(st[k])===String(a[1])?a:b,nxt=cur===a?b:a,on=k==='mic'?st.mic:null;
+  return`<button class="ftog${on?' on':''}" data-fx="opt" data-k="${k}" data-v="${nxt[1]}" data-id="${x.id}" aria-label="${lab}: ${cur[0]}. Toca para cambiar a ${nxt[0]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ic}</svg><b>${k==='guide'&&x.fig.type!=='seq'&&cur[1]?'Con rasgueo':cur[0]}</b><small>${lab}</small></button>`}
 function figHTML(x){
   const F=x.fig,st=figState(x),ownBpm=!x.bpm;
   const bpmCtl=ownBpm?`<span class="minimet"><button class="icon-btn" data-fx="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-fx="bpmv" data-id="${x.id}">${figBpm(x)} bpm</span><button class="icon-btn" data-fx="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button></span>`:'';
-  const opt=(k,v,l)=>`<button class="chip" data-fx="opt" data-k="${k}" data-v="${v}" data-id="${x.id}" aria-pressed="${String(st[k])===String(v)}">${l}</button>`;
-  const opts=F.type==='seq'
-    ?`${opt('updown',true,'Ida y vuelta')}${opt('updown',false,'Solo ida')}<span class="sep"></span>${opt('per',1,'1 nota por pulso')}${opt('per',2,'2 notas por pulso')}<span class="sep"></span>${opt('guide',true,'Con nota guía')}${opt('guide',false,'Solo click')}<span class="sep"></span>${opt('mic',false,'Sin calificar')}${opt('mic',true,'Calificar con micrófono')}`
-    :`${opt('beats',2,'2 pulsos por acorde')}${opt('beats',4,'4 pulsos por acorde')}<span class="sep"></span>${opt('guide',true,'Con rasgueo guía')}${opt('guide',false,'Solo click')}`;
+  const opts=(F.type==='seq'?['updown','per','guide','mic']:['beats','guide']).map(k=>figTog(x,k)).join('');
   const board=F.type==='seq'?(()=>{const{dots}=seqData(F);return fretboard(Object.assign({dots,label:'Diagrama del ejercicio'},F.o))})():
     `<div class="chnow"><b data-fx="chname" data-id="${x.id}">${F.list[0][0]}</b><span data-fx="chnext" data-id="${x.id}">${F.list.length>1?'Sigue: '+F.list[1][0]:''}</span></div><div data-fx="chboard" data-id="${x.id}">${chordBoard(F,0)}</div><div class="chlist">${F.list.map((c,i)=>`<span class="pchip sm" data-fx="chip" data-i="${i}" data-id="${x.id}"><b>${c[0]}</b></span>`).join('')}</div>`;
+  // transporte: escuchar, botón redondo «seguir al pulso» y tempo; abajo el estado
   return`<div class="fig" data-fig="${x.id}">${board}
-   <div class="figbar"><button class="btn sm" data-fx="preview" data-id="${x.id}"></button><button class="btn sm pri" data-fx="follow" data-id="${x.id}"></button>${bpmCtl}<span class="figst" data-fx="st" data-id="${x.id}"></span></div>
-   <div class="chips figopts">${opts}</div></div>`;
+   <div class="figbar"><button class="kic" data-fx="preview" data-id="${x.id}"></button><button class="kplayb" data-fx="follow" data-id="${x.id}"></button>${bpmCtl}</div>
+   <span class="figst" data-fx="st" data-id="${x.id}"></span>
+   <div class="figopts" style="--n:${F.type==='seq'?4:2}">${opts}</div></div>`;
 }
 function figLight(id,s,f){
   const el=document.querySelector(`[data-fig="${id}"]`);if(!el)return;
@@ -86,6 +91,7 @@ function figStart(x,preview){
   }
   paintFig();
 }
+const FIGHEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>';
 function paintFig(root){
   if(FM.ownMic&&!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.ownMic=false;fmFinish();tunerStop()}
   $$('[data-fx="preview"],[data-fx="follow"],[data-fx="bpmv"]',root||document).forEach(b=>{
@@ -93,7 +99,8 @@ function paintFig(root){
     const k=b.dataset.fx;
     if(k==='bpmv'){b.textContent=figBpm(x)+' bpm';return}
     const on=SEQ.id==='fig'&&OWNER==='fig:'+id+(k==='preview'?':p':'');
-    b.innerHTML=on?IC.stop+'Detener':k==='preview'?IC.play+'Escuchar':IC.timer+'Seguir al pulso';
+    const lab=on?'Detener':k==='preview'?'Escuchar el ejercicio':'Seguir al pulso';
+    b.innerHTML=k==='preview'?(on?IC.stop:FIGHEAR):(on?IC.stop:IC.play)+`<span>${lab}</span>`;b.setAttribute('aria-label',lab);b.title=lab;
     b.classList.toggle('on',on&&k==='preview');
   });
   $$('.fig').forEach(el=>{
@@ -107,7 +114,7 @@ document.addEventListener('click',e=>{
   const id=b.dataset.id,x=ALLEX.find(z=>z.id===id),k=b.dataset.fx;if(!x)return;
   if(k==='preview'||k==='follow'){const own='fig:'+id+(k==='preview'?':p':'');if(SEQ.id==='fig'&&OWNER===own){figStop()}else if(k==='follow'&&figState(x).mic&&x.fig.type==='seq'){fmStart(x)}else figStart(x,k==='preview');paintFig()}
   else if(k==='bpm'){DB.bpm[id]=Math.max(30,Math.min(220,figBpm(x)+ +b.dataset.d));save();paintFig()}
-  else if(k==='opt'){const st=figState(x),key=b.dataset.k,v=b.dataset.v;st[key]=v==='true'?true:v==='false'?false:+v;$$(`[data-fx="opt"][data-k="${key}"][data-id="${id}"]`).forEach(c=>c.setAttribute('aria-pressed',String(c===b)));if(SEQ.id==='fig'&&OWNER==='fig:'+id)figStart(x,false)}
+  else if(k==='opt'){const st=figState(x),key=b.dataset.k,v=b.dataset.v;st[key]=v==='true'?true:v==='false'?false:+v;b.outerHTML=figTog(x,key);if(SEQ.id==='fig'&&OWNER==='fig:'+id)figStart(x,false)}
   else if(k==='chip'&&x.fig.type==='chords'){const i=+b.dataset.i;if(!(SEQ.id==='fig'&&OWNER.startsWith('fig:'+id))){figChord(id,x.fig,i);if(ac())chordMidiF(x.fig.list[i][1]).forEach((m,j)=>pluck(m,AC.currentTime+.02+j*.022,1.2,.17))}}
 });
 /* ---------- iluminar notas al escuchar en los diagramas interactivos ---------- */

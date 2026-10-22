@@ -977,6 +977,61 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .karaoke.live .kl.cur .pc .kc{color:var(--accent-text)}
 .karaoke.live .klab,.karaoke.live .kgap{opacity:.3}
 @media(prefers-reduced-motion:reduce){.karaoke.live .kl{filter:none}.karaoke .kl{transition:none}}
+/* ===================== interior de las lecciones con el mismo estilo =====================
+   ejercicio como una pista: número en círculo, el diagrama al centro, transporte con botón redondo,
+   opciones como interruptores con su valor, pasos numerados y la meta en verde */
+.ex{border:1px solid var(--hair,var(--line));border-radius:20px;padding:18px;gap:14px;background:var(--surface)}
+.ex.done{border-color:color-mix(in srgb,var(--good) 45%,var(--hair,var(--line)))}
+.ex .eh{align-items:center;gap:14px}
+.exn{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;font:700 17px var(--font-body);color:var(--accent-text,var(--accent));background:color-mix(in srgb,var(--accent) 14%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 45%,transparent)}
+.exn svg{width:20px;height:20px}
+.ex.done .exn{color:#04130b;background:var(--good);box-shadow:none}
+.eht{min-width:0}
+.ex .tag{color:var(--muted);letter-spacing:.02em;text-transform:none;font:600 12.5px var(--font-body)}
+.ex.done .tag{color:var(--good)}
+.ex h3{margin:2px 0 0;font-size:19px;line-height:1.25;letter-spacing:-.01em}
+/* diagrama y transporte */
+.fig{display:flex;flex-direction:column;gap:12px}
+.fig .figbar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.fig .figbar .kplayb{width:60px;height:60px}
+.fig .figbar .kplayb > span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.fig .figbar .kic.on{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent-text,var(--accent))}
+.fig .minimet{border:0;background:color-mix(in srgb,var(--fg) 7%,transparent);border-radius:999px;padding:4px}
+.fig .minimet .icon-btn{border-radius:50%}
+.figst{text-align:center;font:600 13px var(--font-body);min-height:18px;color:var(--accent-text,var(--accent))}
+.figst:empty{display:none}
+/* opciones como interruptores */
+.figopts{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:6px;padding:6px;border-radius:16px;background:color-mix(in srgb,var(--fg) 5%,transparent)}
+.ftog{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 7px;border:0;border-radius:12px;background:none;color:var(--fg);cursor:pointer;font:inherit;min-width:0}
+.ftog svg{width:20px;height:20px;color:var(--muted)}
+.ftog b{font-size:13px;font-weight:700;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ftog small{font-size:11px;color:var(--muted);white-space:nowrap}
+.ftog:hover{background:color-mix(in srgb,var(--fg) 7%,transparent)}
+.ftog.on{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.ftog.on svg{color:var(--accent-text,var(--accent))}
+@media(max-width:420px){.figopts[style*="--n:4"]{grid-template-columns:repeat(2,minmax(0,1fr))}.ftog{flex-direction:row;justify-content:flex-start;display:grid;grid-template-columns:20px minmax(0,1fr);column-gap:8px;padding:8px 10px;text-align:left}.ftog svg{grid-row:1/3;align-self:center}}
+/* pasos numerados en círculos */
+.ex ol.steps{list-style:none;padding:0;margin:0;counter-reset:st;display:flex;flex-direction:column;gap:10px}
+.ex ol.steps li{counter-increment:st;display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;line-height:1.45}
+.ex ol.steps li::before{content:counter(st);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--font-body);color:var(--muted);background:color-mix(in srgb,var(--fg) 8%,transparent);margin-top:-1px}
+/* meta */
+.goal{display:flex;gap:10px;align-items:flex-start;border:0;border-radius:14px;padding:12px 14px;background:color-mix(in srgb,var(--good) 11%,transparent)}
+.goal .gi{width:22px;height:22px;border-radius:50%;flex:none;background:var(--good);color:#04130b;display:grid;place-items:center;margin-top:1px}
+.goal .gi svg{width:13px;height:13px}
+/* barra del ejercicio: temporizador y «hecho» como píldoras */
+.exbar{padding-top:12px;border-top:1px solid var(--hair,var(--line))}
+.exbar .btn{border-radius:999px}
+.exbar .btn.ok.on{background:var(--good);color:#04130b;border-color:transparent}
+/* bloques de la lección */
+.widget{border-radius:20px;border-color:var(--hair,var(--line));padding:16px}
+.box{border-radius:20px;border-color:var(--hair,var(--line));background:var(--surface)}
+.box li{line-height:1.5}
+.trick{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 14%,var(--surface)),var(--surface));border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.prose{line-height:1.6}
+.prose .blockh{font-size:12px}
+/* botones de escuchar de los diagramas: píldora rellena, como el resto */
+.pbtn{border:0;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-text,var(--accent));padding:8px 16px 8px 14px;gap:8px;min-height:40px}
+.pbtn:hover{background:color-mix(in srgb,var(--accent) 26%,transparent)}
 
 </style>
 </head>
@@ -2113,18 +2168,23 @@ function chordBoard(F,i){
   return fretboard({to,dots:d,muted:m,label:'Acorde '+name});
 }
 const chordMidiF=frets=>frets.map((f,j)=>f==null?null:OPEN_MIDI[6-j]+f).filter(v=>v!=null);
+// cada opción del ejercicio es un interruptor: ícono, valor actual y qué es; al tocarlo cambia al otro valor
+const FTOG={updown:[['Ida y vuelta',true],['Solo ida',false],'Recorrido','<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],per:[['1 por pulso',1],['2 por pulso',2],'Notas','<path d="M8 18V6l8-2v12"/><circle cx="6" cy="18" r="2"/><circle cx="14" cy="16" r="2"/>'],
+  guide:[['Con guía',true],['Solo click',false],'Guía','<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'],mic:[['Sin calificar',false],['Con micrófono',true],'Calificar','<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'],
+  beats:[['4 pulsos',4],['2 pulsos',2],'Por acorde','<path d="M4 6h16M4 12h16M4 18h16"/><path d="M9 4v16"/>']};
+function figTog(x,k){const st=figState(x),[a,b,lab,ic]=FTOG[k],cur=String(st[k])===String(a[1])?a:b,nxt=cur===a?b:a,on=k==='mic'?st.mic:null;
+  return`<button class="ftog${on?' on':''}" data-fx="opt" data-k="${k}" data-v="${nxt[1]}" data-id="${x.id}" aria-label="${lab}: ${cur[0]}. Toca para cambiar a ${nxt[0]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ic}</svg><b>${k==='guide'&&x.fig.type!=='seq'&&cur[1]?'Con rasgueo':cur[0]}</b><small>${lab}</small></button>`}
 function figHTML(x){
   const F=x.fig,st=figState(x),ownBpm=!x.bpm;
   const bpmCtl=ownBpm?`<span class="minimet"><button class="icon-btn" data-fx="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-fx="bpmv" data-id="${x.id}">${figBpm(x)} bpm</span><button class="icon-btn" data-fx="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button></span>`:'';
-  const opt=(k,v,l)=>`<button class="chip" data-fx="opt" data-k="${k}" data-v="${v}" data-id="${x.id}" aria-pressed="${String(st[k])===String(v)}">${l}</button>`;
-  const opts=F.type==='seq'
-    ?`${opt('updown',true,'Ida y vuelta')}${opt('updown',false,'Solo ida')}<span class="sep"></span>${opt('per',1,'1 nota por pulso')}${opt('per',2,'2 notas por pulso')}<span class="sep"></span>${opt('guide',true,'Con nota guía')}${opt('guide',false,'Solo click')}<span class="sep"></span>${opt('mic',false,'Sin calificar')}${opt('mic',true,'Calificar con micrófono')}`
-    :`${opt('beats',2,'2 pulsos por acorde')}${opt('beats',4,'4 pulsos por acorde')}<span class="sep"></span>${opt('guide',true,'Con rasgueo guía')}${opt('guide',false,'Solo click')}`;
+  const opts=(F.type==='seq'?['updown','per','guide','mic']:['beats','guide']).map(k=>figTog(x,k)).join('');
   const board=F.type==='seq'?(()=>{const{dots}=seqData(F);return fretboard(Object.assign({dots,label:'Diagrama del ejercicio'},F.o))})():
     `<div class="chnow"><b data-fx="chname" data-id="${x.id}">${F.list[0][0]}</b><span data-fx="chnext" data-id="${x.id}">${F.list.length>1?'Sigue: '+F.list[1][0]:''}</span></div><div data-fx="chboard" data-id="${x.id}">${chordBoard(F,0)}</div><div class="chlist">${F.list.map((c,i)=>`<span class="pchip sm" data-fx="chip" data-i="${i}" data-id="${x.id}"><b>${c[0]}</b></span>`).join('')}</div>`;
+  // transporte: escuchar, botón redondo «seguir al pulso» y tempo; abajo el estado
   return`<div class="fig" data-fig="${x.id}">${board}
-   <div class="figbar"><button class="btn sm" data-fx="preview" data-id="${x.id}"></button><button class="btn sm pri" data-fx="follow" data-id="${x.id}"></button>${bpmCtl}<span class="figst" data-fx="st" data-id="${x.id}"></span></div>
-   <div class="chips figopts">${opts}</div></div>`;
+   <div class="figbar"><button class="kic" data-fx="preview" data-id="${x.id}"></button><button class="kplayb" data-fx="follow" data-id="${x.id}"></button>${bpmCtl}</div>
+   <span class="figst" data-fx="st" data-id="${x.id}"></span>
+   <div class="figopts" style="--n:${F.type==='seq'?4:2}">${opts}</div></div>`;
 }
 function figLight(id,s,f){
   const el=document.querySelector(`[data-fig="${id}"]`);if(!el)return;
@@ -2182,6 +2242,7 @@ function figStart(x,preview){
   }
   paintFig();
 }
+const FIGHEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>';
 function paintFig(root){
   if(FM.ownMic&&!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.ownMic=false;fmFinish();tunerStop()}
   $$('[data-fx="preview"],[data-fx="follow"],[data-fx="bpmv"]',root||document).forEach(b=>{
@@ -2189,7 +2250,8 @@ function paintFig(root){
     const k=b.dataset.fx;
     if(k==='bpmv'){b.textContent=figBpm(x)+' bpm';return}
     const on=SEQ.id==='fig'&&OWNER==='fig:'+id+(k==='preview'?':p':'');
-    b.innerHTML=on?IC.stop+'Detener':k==='preview'?IC.play+'Escuchar':IC.timer+'Seguir al pulso';
+    const lab=on?'Detener':k==='preview'?'Escuchar el ejercicio':'Seguir al pulso';
+    b.innerHTML=k==='preview'?(on?IC.stop:FIGHEAR):(on?IC.stop:IC.play)+`<span>${lab}</span>`;b.setAttribute('aria-label',lab);b.title=lab;
     b.classList.toggle('on',on&&k==='preview');
   });
   $$('.fig').forEach(el=>{
@@ -2203,7 +2265,7 @@ document.addEventListener('click',e=>{
   const id=b.dataset.id,x=ALLEX.find(z=>z.id===id),k=b.dataset.fx;if(!x)return;
   if(k==='preview'||k==='follow'){const own='fig:'+id+(k==='preview'?':p':'');if(SEQ.id==='fig'&&OWNER===own){figStop()}else if(k==='follow'&&figState(x).mic&&x.fig.type==='seq'){fmStart(x)}else figStart(x,k==='preview');paintFig()}
   else if(k==='bpm'){DB.bpm[id]=Math.max(30,Math.min(220,figBpm(x)+ +b.dataset.d));save();paintFig()}
-  else if(k==='opt'){const st=figState(x),key=b.dataset.k,v=b.dataset.v;st[key]=v==='true'?true:v==='false'?false:+v;$$(`[data-fx="opt"][data-k="${key}"][data-id="${id}"]`).forEach(c=>c.setAttribute('aria-pressed',String(c===b)));if(SEQ.id==='fig'&&OWNER==='fig:'+id)figStart(x,false)}
+  else if(k==='opt'){const st=figState(x),key=b.dataset.k,v=b.dataset.v;st[key]=v==='true'?true:v==='false'?false:+v;b.outerHTML=figTog(x,key);if(SEQ.id==='fig'&&OWNER==='fig:'+id)figStart(x,false)}
   else if(k==='chip'&&x.fig.type==='chords'){const i=+b.dataset.i;if(!(SEQ.id==='fig'&&OWNER.startsWith('fig:'+id))){figChord(id,x.fig,i);if(ac())chordMidiF(x.fig.list[i][1]).forEach((m,j)=>pluck(m,AC.currentTime+.02+j*.022,1.2,.17))}}
 });
 /* ---------- iluminar notas al escuchar en los diagramas interactivos ---------- */
@@ -4327,10 +4389,10 @@ function exCard(x,inRoutine){
   const bpm=DB.bpm[x.id]||x.bpm;
   const tr=x.track?`<button class="btn sm" data-x="trk" data-id="${x.id}"></button>`:'';
   return`<article class="ex ${DB.done[x.id]?'done':''}" id="ex-${x.id}" data-ex="${x.id}">
-   <div class="eh"><div><span class="tag">${inRoutine?'Lección '+x.lesson+' · ':''}Haz esto ahora · ${idx} de ${tot}</span><h3>${x.t}</h3></div><span class="meta">${x.min} min</span></div>
+   <div class="eh"><span class="exn">${DB.done[x.id]?IC.check:idx}</span><div class="eht"><span class="tag">${inRoutine?'Lección '+x.lesson+' · ':''}Ejercicio ${idx} de ${tot} · ${x.min} min</span><h3>${x.t}</h3></div></div>
    ${x.fig?figHTML(x):''}
-   <ol>${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
-   <p class="goal"><b>Lo logras cuando:</b> ${x.goal}</p>
+   <ol class="steps">${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+   <p class="goal"><span class="gi">${IC.check}</span><span><b>Lo logras cuando:</b> ${x.goal}</span></p>
    ${x.track?`<p class="cap" style="margin:0">Pista: <b>${PROG2[x.track.p].n}</b> en ${KEYS[x.track.k].es} · ${STYLES[x.track.st].n} · <span data-x="trkcur" data-id="${x.id}"></span></p>`:''}
    <div class="exbar">
     ${x.bpm?`<span class="minimet"><button class="icon-btn" data-x="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-x="bpmv" data-id="${x.id}">${bpm} bpm</span><button class="icon-btn" data-x="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button><button class="btn sm" data-x="met" data-id="${x.id}"></button><span class="bd" data-bd="${x.id}" aria-hidden="true"></span></span>`:''}
@@ -4350,7 +4412,7 @@ function paintEx(root){
     else if(k==='trkcur'){if(!(SEQ.id==='trk'&&OWNER==='ex:'+id))b.textContent='detenida'}
     else if(k==='bpmv')b.textContent=(DB.bpm[id]||x.bpm)+' bpm';
     else if(k==='tmr'){const on=TMR.id==='ex:'+id;b.innerHTML=IC.timer+`<span class="tm">${on?fmt(TMR.paused?TMR.paused/1000:(TMR.end-Date.now())/1000)+(TMR.paused?' · en pausa':''):fmt(x.min*60)}</span>`;b.classList.toggle('on',on)}
-    else if(k==='done'){const d=!!DB.done[id];b.innerHTML=IC.check+(d?'Hecho':'Marcar como hecho');b.classList.toggle('on',d);b.setAttribute('aria-pressed',String(d));const card=b.closest('.ex');if(card)card.classList.toggle('done',d)}
+    else if(k==='done'){const d=!!DB.done[id];b.innerHTML=IC.check+(d?'Hecho':'Marcar como hecho');b.classList.toggle('on',d);b.setAttribute('aria-pressed',String(d));const card=b.closest('.ex');if(card){card.classList.toggle('done',d);const n=$('.exn',card);if(n){const l=LESSONS.find(z=>z.id===x.lesson);n.innerHTML=d?IC.check:l.blocks.filter(q=>q.ex).findIndex(q=>q.ex.id===id)+1}}}
   });
 }
 document.addEventListener('playstate',()=>{paintEx();paintPlayer()});

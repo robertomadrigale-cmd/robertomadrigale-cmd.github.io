@@ -91,10 +91,10 @@ function exCard(x,inRoutine){
   const bpm=DB.bpm[x.id]||x.bpm;
   const tr=x.track?`<button class="btn sm" data-x="trk" data-id="${x.id}"></button>`:'';
   return`<article class="ex ${DB.done[x.id]?'done':''}" id="ex-${x.id}" data-ex="${x.id}">
-   <div class="eh"><div><span class="tag">${inRoutine?'Lección '+x.lesson+' · ':''}Haz esto ahora · ${idx} de ${tot}</span><h3>${x.t}</h3></div><span class="meta">${x.min} min</span></div>
+   <div class="eh"><span class="exn">${DB.done[x.id]?IC.check:idx}</span><div class="eht"><span class="tag">${inRoutine?'Lección '+x.lesson+' · ':''}Ejercicio ${idx} de ${tot} · ${x.min} min</span><h3>${x.t}</h3></div></div>
    ${x.fig?figHTML(x):''}
-   <ol>${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
-   <p class="goal"><b>Lo logras cuando:</b> ${x.goal}</p>
+   <ol class="steps">${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+   <p class="goal"><span class="gi">${IC.check}</span><span><b>Lo logras cuando:</b> ${x.goal}</span></p>
    ${x.track?`<p class="cap" style="margin:0">Pista: <b>${PROG2[x.track.p].n}</b> en ${KEYS[x.track.k].es} · ${STYLES[x.track.st].n} · <span data-x="trkcur" data-id="${x.id}"></span></p>`:''}
    <div class="exbar">
     ${x.bpm?`<span class="minimet"><button class="icon-btn" data-x="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-x="bpmv" data-id="${x.id}">${bpm} bpm</span><button class="icon-btn" data-x="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button><button class="btn sm" data-x="met" data-id="${x.id}"></button><span class="bd" data-bd="${x.id}" aria-hidden="true"></span></span>`:''}
@@ -114,7 +114,7 @@ function paintEx(root){
     else if(k==='trkcur'){if(!(SEQ.id==='trk'&&OWNER==='ex:'+id))b.textContent='detenida'}
     else if(k==='bpmv')b.textContent=(DB.bpm[id]||x.bpm)+' bpm';
     else if(k==='tmr'){const on=TMR.id==='ex:'+id;b.innerHTML=IC.timer+`<span class="tm">${on?fmt(TMR.paused?TMR.paused/1000:(TMR.end-Date.now())/1000)+(TMR.paused?' · en pausa':''):fmt(x.min*60)}</span>`;b.classList.toggle('on',on)}
-    else if(k==='done'){const d=!!DB.done[id];b.innerHTML=IC.check+(d?'Hecho':'Marcar como hecho');b.classList.toggle('on',d);b.setAttribute('aria-pressed',String(d));const card=b.closest('.ex');if(card)card.classList.toggle('done',d)}
+    else if(k==='done'){const d=!!DB.done[id];b.innerHTML=IC.check+(d?'Hecho':'Marcar como hecho');b.classList.toggle('on',d);b.setAttribute('aria-pressed',String(d));const card=b.closest('.ex');if(card){card.classList.toggle('done',d);const n=$('.exn',card);if(n){const l=LESSONS.find(z=>z.id===x.lesson);n.innerHTML=d?IC.check:l.blocks.filter(q=>q.ex).findIndex(q=>q.ex.id===id)+1}}}
   });
 }
 document.addEventListener('playstate',()=>{paintEx();paintPlayer()});

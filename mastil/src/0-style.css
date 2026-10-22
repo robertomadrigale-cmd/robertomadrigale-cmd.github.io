@@ -960,3 +960,58 @@ html.arty .lhead h1,html.arty .lhead .sub,html.arty .lhead .eyebrow{text-shadow:
 .karaoke.live .kl.cur .pc .kc{color:var(--accent-text)}
 .karaoke.live .klab,.karaoke.live .kgap{opacity:.3}
 @media(prefers-reduced-motion:reduce){.karaoke.live .kl{filter:none}.karaoke .kl{transition:none}}
+/* ===================== interior de las lecciones con el mismo estilo =====================
+   ejercicio como una pista: número en círculo, el diagrama al centro, transporte con botón redondo,
+   opciones como interruptores con su valor, pasos numerados y la meta en verde */
+.ex{border:1px solid var(--hair,var(--line));border-radius:20px;padding:18px;gap:14px;background:var(--surface)}
+.ex.done{border-color:color-mix(in srgb,var(--good) 45%,var(--hair,var(--line)))}
+.ex .eh{align-items:center;gap:14px}
+.exn{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;font:700 17px var(--font-body);color:var(--accent-text,var(--accent));background:color-mix(in srgb,var(--accent) 14%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 45%,transparent)}
+.exn svg{width:20px;height:20px}
+.ex.done .exn{color:#04130b;background:var(--good);box-shadow:none}
+.eht{min-width:0}
+.ex .tag{color:var(--muted);letter-spacing:.02em;text-transform:none;font:600 12.5px var(--font-body)}
+.ex.done .tag{color:var(--good)}
+.ex h3{margin:2px 0 0;font-size:19px;line-height:1.25;letter-spacing:-.01em}
+/* diagrama y transporte */
+.fig{display:flex;flex-direction:column;gap:12px}
+.fig .figbar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.fig .figbar .kplayb{width:60px;height:60px}
+.fig .figbar .kplayb > span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.fig .figbar .kic.on{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent-text,var(--accent))}
+.fig .minimet{border:0;background:color-mix(in srgb,var(--fg) 7%,transparent);border-radius:999px;padding:4px}
+.fig .minimet .icon-btn{border-radius:50%}
+.figst{text-align:center;font:600 13px var(--font-body);min-height:18px;color:var(--accent-text,var(--accent))}
+.figst:empty{display:none}
+/* opciones como interruptores */
+.figopts{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:6px;padding:6px;border-radius:16px;background:color-mix(in srgb,var(--fg) 5%,transparent)}
+.ftog{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 7px;border:0;border-radius:12px;background:none;color:var(--fg);cursor:pointer;font:inherit;min-width:0}
+.ftog svg{width:20px;height:20px;color:var(--muted)}
+.ftog b{font-size:13px;font-weight:700;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ftog small{font-size:11px;color:var(--muted);white-space:nowrap}
+.ftog:hover{background:color-mix(in srgb,var(--fg) 7%,transparent)}
+.ftog.on{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.ftog.on svg{color:var(--accent-text,var(--accent))}
+@media(max-width:420px){.figopts[style*="--n:4"]{grid-template-columns:repeat(2,minmax(0,1fr))}.ftog{flex-direction:row;justify-content:flex-start;display:grid;grid-template-columns:20px minmax(0,1fr);column-gap:8px;padding:8px 10px;text-align:left}.ftog svg{grid-row:1/3;align-self:center}}
+/* pasos numerados en círculos */
+.ex ol.steps{list-style:none;padding:0;margin:0;counter-reset:st;display:flex;flex-direction:column;gap:10px}
+.ex ol.steps li{counter-increment:st;display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;line-height:1.45}
+.ex ol.steps li::before{content:counter(st);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--font-body);color:var(--muted);background:color-mix(in srgb,var(--fg) 8%,transparent);margin-top:-1px}
+/* meta */
+.goal{display:flex;gap:10px;align-items:flex-start;border:0;border-radius:14px;padding:12px 14px;background:color-mix(in srgb,var(--good) 11%,transparent)}
+.goal .gi{width:22px;height:22px;border-radius:50%;flex:none;background:var(--good);color:#04130b;display:grid;place-items:center;margin-top:1px}
+.goal .gi svg{width:13px;height:13px}
+/* barra del ejercicio: temporizador y «hecho» como píldoras */
+.exbar{padding-top:12px;border-top:1px solid var(--hair,var(--line))}
+.exbar .btn{border-radius:999px}
+.exbar .btn.ok.on{background:var(--good);color:#04130b;border-color:transparent}
+/* bloques de la lección */
+.widget{border-radius:20px;border-color:var(--hair,var(--line));padding:16px}
+.box{border-radius:20px;border-color:var(--hair,var(--line));background:var(--surface)}
+.box li{line-height:1.5}
+.trick{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 14%,var(--surface)),var(--surface));border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.prose{line-height:1.6}
+.prose .blockh{font-size:12px}
+/* botones de escuchar de los diagramas: píldora rellena, como el resto */
+.pbtn{border:0;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-text,var(--accent));padding:8px 16px 8px 14px;gap:8px;min-height:40px}
+.pbtn:hover{background:color-mix(in srgb,var(--accent) 26%,transparent)}
