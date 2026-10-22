@@ -195,12 +195,13 @@ function retoPlay(host,S,onExit){
 const REC={stream:null,mr:null,chunks:[],t0:0,iv:null,urls:[]};
 function idb(){return new Promise((ok,ko)=>{try{const q=indexedDB.open('mades-guitar-hero',1);q.onupgradeneeded=()=>q.result.createObjectStore('takes',{keyPath:'id',autoIncrement:true});q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)}catch(e){ko(e)}})}
 async function takesAll(){try{const d=await idb();return await new Promise(ok=>{const r=d.transaction('takes').objectStore('takes').getAll();r.onsuccess=()=>ok(r.result.reverse());r.onerror=()=>ok([])})}catch(e){return[]}}
-async function takePut(t){const d=await idb();return new Promise(ok=>{const tx=d.transaction('takes','readwrite');tx.objectStore('takes').add(t);tx.oncomplete=ok;tx.onerror=ok})}
+async function takePut(t){const d=await idb();return new Promise((ok,ko)=>{const tx=d.transaction('takes','readwrite');tx.objectStore('takes').add(t);tx.oncomplete=ok;tx.onerror=()=>ko(tx.error);tx.onabort=()=>ko(tx.error)})}
 async function takeDel(id){const d=await idb();return new Promise(ok=>{const tx=d.transaction('takes','readwrite');tx.objectStore('takes').delete(id);tx.oncomplete=ok;tx.onerror=ok})}
 function viewRecorder(){
   return{title:'Grabadora',back:'#/practicar',html:`<div class="lhead"><span class="eyebrow">Escúchate</span><h1>Grabadora</h1><p class="sub">Grábate tocando y escúchate después. Lo que suena mal se oye mucho más claro afuera de la guitarra.</p></div>
   <div class="card center"><div class="recdot" id="rdot"></div><div class="big" id="rtime" style="font-size:72px">0:00</div>
    <div><span class="cl">Acompañamiento mientras grabas</span><div class="seg" id="racc">${[['none','Ninguno'],['met','Metrónomo'],['trk','Pista']].map(([v,l])=>`<button data-acc="${v}" aria-pressed="${(DB.recAcc||'none')===v}">${l}</button>`).join('')}</div></div>
+   <div id="raccopt" class="raccopt"></div>
    <button class="btn pri" id="rgo" style="min-width:200px"></button><div id="rmsg"></div></div>
   <div class="card"><span class="cl">Tus tomas · se guardan en este dispositivo</span><div id="rlist" class="takes"></div></div>`,
   mount(r){
@@ -208,7 +209,22 @@ function viewRecorder(){
     const paint=()=>{go.innerHTML=REC.mr?IC.stop+'Detener y guardar':'<span class="rec-i"></span>Grabar';$('#rdot',r).classList.toggle('on',!!REC.mr)};
     const list=async()=>{REC.urls.forEach(u=>URL.revokeObjectURL(u));REC.urls=[];const ts=await takesAll();const el=$('#rlist',r);if(!el)return;
       el.innerHTML=ts.length?ts.map(t=>{const u=URL.createObjectURL(t.blob);REC.urls.push(u);const d=new Date(t.date);return`<div class="take"><div class="row" style="justify-content:space-between"><b>Toma del ${d.toLocaleDateString('es-MX',{day:'numeric',month:'short'})} · ${d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}</b><span class="tm">${fmt(t.dur)}</span></div><audio controls preload="metadata" src="${u}"></audio><div class="row"><a class="btn sm" href="${u}" download="mades-toma-${t.id}.${t.type.includes('mp4')?'m4a':'webm'}">${IC.down}Descargar</a><span data-dw="${t.id}"><button class="btn sm" data-del="${t.id}">${IC.x}Borrar</button></span></div></div>`}).join(''):'<p class="cap">Todavía no tienes tomas. Graba la primera.</p>'};
-    const stopRec=()=>{if(REC.mr&&REC.mr.state!=='inactive')REC.mr.stop();clearInterval(REC.iv);if(SEQ.id&&OWNER==='rec')seqStop()};
+    const accOn=()=>SEQ.id&&(OWNER==='rec'||OWNER==='recprev');
+    const accStart=own=>{const a=DB.recAcc||'none';OWNER=own;if(a==='met')metStart({bpm:MET.bpm,meter:MET.meter,sub:1});else if(a==='trk')trkStart()};
+    // opciones del acompañamiento: tempo y compás del metrónomo, o tono, progresión, estilo y tempo de la pista
+    const opts=()=>{
+      const a=DB.recAcc||'none',el=$('#raccopt',r);
+      if(a==='none'){el.innerHTML='';return}
+      const bpm=a==='met'?MET.bpm:TRK.bpm;
+      el.innerHTML=`<div class="row" style="justify-content:center"><button class="btn sm" data-rb="-5" aria-label="Bajar 5">−5</button><button class="btn sm" data-rb="-1" aria-label="Bajar 1">−1</button><b class="kkey" id="rbpm">${bpm}</b><span class="cl" style="margin:0">bpm</span><button class="btn sm" data-rb="1" aria-label="Subir 1">+1</button><button class="btn sm" data-rb="5" aria-label="Subir 5">+5</button></div>
+       <input type="range" id="rbr" min="${a==='met'?30:50}" max="${a==='met'?240:200}" value="${bpm}" aria-label="Tempo">
+       ${a==='met'?chipRow('meter','Compás',Object.keys(METERS).map(v=>({v,l:v})),MET.meter)
+        :chipRow('k','Tonalidad',KEYS.map((x,i)=>({v:i,l:x.es,s:x.us})),TRK.k)+chipRow('p','Progresión',Object.keys(PROG2).map(v=>({v,l:PROG2[v].n})),TRK.p)+chipRow('st','Estilo',Object.keys(STYLES).map(v=>({v,l:STYLES[v].n})),TRK.st)}
+       <div class="row" style="justify-content:center"><button class="btn sm" id="rprev">${accOn()&&OWNER==='recprev'?IC.stop+'Detener':IC.play+'Escuchar antes de grabar'}</button></div>`;
+    };
+    const setBpm=v=>{const a=DB.recAcc;if(a==='met'){MET.bpm=Math.max(30,Math.min(240,Math.round(v)));DB.met=MET.bpm;if(SEQ.id==='met')SEQ.label='Metrónomo '+MET.bpm}else{TRK.bpm=Math.max(50,Math.min(200,Math.round(v)))}save();const b=$('#rbpm',r);if(b)b.textContent=a==='met'?MET.bpm:TRK.bpm;const g=$('#rbr',r);if(g)g.value=a==='met'?MET.bpm:TRK.bpm};
+    const restartAcc=()=>{if(accOn()){const own=OWNER;seqStop();accStart(own)}};
+    const stopRec=()=>{if(REC.mr&&REC.mr.state!=='inactive')REC.mr.stop();clearInterval(REC.iv);if(SEQ.id&&(OWNER==='rec'||OWNER==='recprev'))seqStop()};
     go.onclick=async()=>{
       $('#rmsg',r).innerHTML='';
       if(REC.mr){stopRec();return}
@@ -218,17 +234,25 @@ function viewRecorder(){
       REC.mr=new MediaRecorder(REC.stream,type?{mimeType:type}:{});REC.chunks=[];REC.t0=Date.now();
       REC.mr.ondataavailable=e=>{if(e.data&&e.data.size)REC.chunks.push(e.data)};
       REC.mr.onstop=async()=>{const blob=new Blob(REC.chunks,{type:REC.mr.mimeType||type||'audio/webm'}),dur=(Date.now()-REC.t0)/1000;REC.stream.getTracks().forEach(t=>t.stop());REC.mr=null;REC.stream=null;paint();
-        if(dur>.8){await takePut({date:Date.now(),dur,blob,type:blob.type});DB.recs=(DB.recs||0)+1;save();toast(logo()+'<span>Toma guardada</span>')}list()};
+        if(dur>.8){try{await takePut({date:Date.now(),dur,blob,type:blob.type});DB.recs=(DB.recs||0)+1;save();toast(logo()+'<span>Toma guardada</span>')}catch(e){const m=$('#rmsg',r);if(m)m.innerHTML='<p class="msg err">No se pudo guardar la toma en este dispositivo. Revisa que el navegador no esté en modo privado y que tenga espacio.</p>'}}
+        else{const m=$('#rmsg',r);if(m)m.innerHTML='<p class="msg">La toma fue muy corta y no se guardó.</p>'}
+        if(!blob.size){const m=$('#rmsg',r);if(m)m.innerHTML='<p class="msg err">El micrófono no entregó sonido. Revisa que no lo esté usando otra app.</p>'}
+        list();opts()};
       REC.mr.start(500);
-      const acc=DB.recAcc||'none';if(acc==='met'){OWNER='rec';metStart({})}else if(acc==='trk'){OWNER='rec';trkStart()}
+      if(SEQ.id)seqStop();accStart('rec');opts();
       REC.iv=setInterval(()=>{const t=$('#rtime',r);if(t)t.textContent=fmt((Date.now()-REC.t0)/1000)},250);paint();
     };
     r.addEventListener('click',async e=>{
-      const a=e.target.closest('[data-acc]');if(a){DB.recAcc=a.dataset.acc;save();$$('[data-acc]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===a)));return}
+      const a=e.target.closest('[data-acc]');if(a){const was=accOn()?OWNER:null;if(was)seqStop();DB.recAcc=a.dataset.acc;save();$$('[data-acc]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===a)));if(was==='rec')accStart('rec');opts();return}
+      const rb=e.target.closest('[data-rb]');if(rb){setBpm((DB.recAcc==='met'?MET.bpm:TRK.bpm)+ +rb.dataset.rb);if(DB.recAcc==='trk')restartAcc();return}
+      const cs=e.target.closest('[data-set]');if(cs){const k=cs.dataset.set;if(k==='meter'){MET.meter=cs.dataset.v;DB.meter=MET.meter}else{TRK[k]=k==='k'?+cs.dataset.v:cs.dataset.v;if(k==='st')TRK.bpm=STYLES[TRK.st].bpm}save();restartAcc();opts();return}
+      if(e.target.closest('#rprev')){if(accOn()&&OWNER==='recprev')seqStop();else if(!REC.mr){if(SEQ.id)seqStop();accStart('recprev')}opts();return}
       const d=e.target.closest('[data-del]');if(d){d.parentNode.innerHTML=`<button class="btn sm" data-delok="${d.dataset.del}" style="border-color:var(--bad);color:var(--bad)">Sí, borrar</button>`;return}
       const k=e.target.closest('[data-delok]');if(k){await takeDel(+k.dataset.delok);list()}
     });
-    paint();list();
+    r.addEventListener('input',e=>{if(e.target.id==='rbr'){setBpm(+e.target.value)}});
+    r.addEventListener('change',e=>{if(e.target.id==='rbr'&&DB.recAcc==='trk')restartAcc()});
+    paint();list();opts();
     return()=>{stopRec();REC.urls.forEach(u=>URL.revokeObjectURL(u));REC.urls=[]};
   }};
 }
