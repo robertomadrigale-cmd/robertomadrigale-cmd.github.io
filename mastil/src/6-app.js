@@ -2,7 +2,8 @@
 const DBK='mastil-a-la-vista:v2';
 let DB={done:{},secs:{},days:{},game:{},bpm:{},theme:'auto',last:1,met:80,meter:'4/4',sub:1};
 try{Object.assign(DB,JSON.parse(localStorage.getItem(DBK)||'{}'))}catch(e){}
-function save(){try{localStorage.setItem(DBK,JSON.stringify(DB))}catch(e){}}
+function persist(){try{localStorage.setItem(DBK,JSON.stringify(DB))}catch(e){}}
+function save(){persist();if(checkAch())persist()}
 MET.bpm=DB.met||80;MET.meter=DB.meter||'4/4';MET.sub=DB.sub||1;
 const today=(d)=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 function markDay(){DB.days[today()]=true;save()}
@@ -142,37 +143,44 @@ const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||na
 function viewHome(){
   const nx=nextEx(),[d,t]=doneCount();
   const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
-  return{title:'Madrigal Guitar Hero',html:`
-  <div class="lhead"><span class="eyebrow">${greet()}</span><h1 class="glow">Tu práctica de hoy</h1></div>
+  return{title:'Mades Guitar Hero',html:`
+  <div class="brandhero"><span class="logo">${logo()}</span><div><span class="eyebrow">${greet()}</span><h1 class="glow">Tu práctica de hoy</h1></div></div>
   <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
     <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
     <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
     <div class="stat"><b>${d}<small style="font-size:18px;color:var(--muted)">/${t}</small></b><span>ejercicios</span></div>
   </div>
   ${nx?`<a class="card tool" href="#/leccion/${nx.lesson}/${nx.id}"><span class="ic">${IC.play}</span><span style="flex:1;min-width:0"><b>Continuar: ${nx.t}</b><span>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</span></span></a>`:`<div class="card"><h3>Completaste todos los ejercicios</h3><p class="cap">Repite los que más te costaron con un tempo más alto.</p></div>`}
-  <a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación con temporizador.</span></span></a>
+  <a class="card cta" href="#/practicar/reto"><span><span class="eyebrow">Nuevo · modo reto</span><b>Sube al escenario</b><span>Notas que bajan por el mástil, combos y estrellas. Con toques o con tu guitarra real.</span></span><span class="ic">${IC.game}</span></a>
+  <div class="grid2"><a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina de 15 minutos</b><span>Calentamiento, mástil, lección e improvisación.</span></span></a>
+  <a class="card tool" href="#/logros"><span class="ic medal-ic">★</span><span><b>Logros · ${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length}</b><span>Rachas, récords y retos superados.</span></span></a></div>
   ${inst}
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
   <div><p class="eyebrow" style="margin-bottom:10px">Estilo · elige tu época</p><div class="thgrid">${themeCards()}</div></div>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Mano</span><div class="seg">${[[0,'Diestro'],[1,'Zurdo']].map(([v,l])=>`<button data-lefty="${v}" aria-pressed="${!!DB.lefty===!!v}">${l}</button>`).join('')}</div></div>
+    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Respaldo · llévate tu progreso a otro teléfono</span><span class="row"><button class="btn sm" data-h="bk-copy">${IC.down}Copiar código</button><button class="btn sm" data-h="bk-paste">Pegar código</button></span></div>
+    <div id="bkw" hidden><textarea id="bkt" rows="3" placeholder="Pega aquí el código que copiaste en tu otro dispositivo"></textarea><div class="row" style="margin-top:8px"><button class="btn sm pri" data-h="bk-load">Restaurar progreso</button><span class="cap" id="bkm" style="margin:0"></span></div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
   </div>
-  <p class="foot">Madrigal Guitar Hero · funciona sin conexión</p>`,
+  <p class="foot">Mades Guitar Hero · funciona sin conexión</p>`,
   mount(r){
     r.addEventListener('click',async e=>{
       const lf=e.target.closest('[data-lefty]');if(lf){DB.lefty=lf.dataset.lefty==='1';LEFTY=DB.lefty;save();$$('[data-lefty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lf)));return}
-      const th=e.target.closest('[data-theme-set]');if(th){DB.theme=th.dataset.themeSet;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)));return}
+      const th=e.target.closest('[data-theme-set]');if(th){DB.theme=th.dataset.themeSet;DB.tried=DB.tried||{};DB.tried[DB.theme]=1;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)));return}
       const b=e.target.closest('[data-h]');if(!b)return;const a=b.dataset.h;
       if(a==='install'&&DEFERRED){DEFERRED.prompt();try{await DEFERRED.userChoice}catch(_){}DEFERRED=null;route()}
       else if(a==='hideinst'){DB.hideInstall=true;save();route()}
       else if(a==='reset'){$('#rstw',r).innerHTML='<span class="row"><span class="cap" style="margin:0">¿Borrar todo?</span><button class="btn sm" data-h="reset-yes" style="border-color:var(--bad);color:var(--bad)">Sí, borrar</button><button class="btn sm" data-h="reset-no">Cancelar</button></span>'}
-      else if(a==='reset-yes'){DB.done={};DB.secs={};DB.days={};DB.game={};DB.bpm={};save();route()}
+      else if(a==='reset-yes'){DB.done={};DB.secs={};DB.days={};DB.game={};DB.bpm={};DB.reto={};DB.ach={};save();route()}
       else if(a==='reset-no')route();
+      else if(a==='bk-copy'){const c=backupCode();try{await navigator.clipboard.writeText(c);toast(logo()+'<span>Código copiado. Pégalo en tu otro dispositivo.</span>')}catch(_){$('#bkw',r).hidden=false;$('#bkt',r).value=c;$('#bkm',r).textContent='Copia este código a mano.'}}
+      else if(a==='bk-paste'){$('#bkw',r).hidden=false;$('#bkt',r).value='';$('#bkt',r).focus()}
+      else if(a==='bk-load'){if(restoreCode($('#bkt',r).value)){toast(logo()+'<span>Progreso restaurado</span>');route()}else $('#bkm',r).textContent='Ese código no es válido. Revisa que esté completo.'}
     });
   }};
 }
-const TOOLS=[['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
+const TOOLS=[['reto','Modo reto','Toca canciones con notas que caen.',IC.game],['grabar','Grabadora','Grábate y escúchate.',IC.wave],['metronomo','Metrónomo','Tempo, compás, subdivisión y marcar tempo.',IC.play2],['afinador','Afinador','Afina con el micrófono o de oído.',IC.tuner],['juego','Juego del mástil','Encuentra notas contra reloj.',IC.game],['pistas','Pistas para improvisar','Rock, balada, cumbia y ranchera en cualquier tono.',IC.wave]];
 const toolCards=()=>TOOLS.map(([k,n,d,ic])=>`<a class="card tool" href="#/practicar/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('');
 function viewLessons(){
   return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">11 lecciones · ${ALLEX.length} ejercicios</span><h1>Lecciones</h1><p class="sub">Cada lección se apoya en la anterior. Lee la idea, mira el mástil y haz los ejercicios con la guitarra en la mano.</p></div>
@@ -207,10 +215,11 @@ function viewLesson(id,exId){
 function viewPractice(){
   return{title:'Practicar',html:`<div class="lhead"><span class="eyebrow">Herramientas</span><h1>Practicar</h1></div>
   <a class="card tool" href="#/practicar/rutina"><span class="ic">${IC.cal}</span><span><b>Rutina diaria</b><span>10, 15 o 30 minutos guiados con temporizador.</span></span></a>
-  <div class="grid2">${toolCards()}</div>`};
+  <div class="grid2">${toolCards()}</div>
+  <a class="card tool" href="#/logros"><span class="ic medal-ic">★</span><span><b>Logros</b><span>${ACH.filter(a=>(DB.ach||{})[a[0]]).length} de ${ACH.length} desbloqueados.</span></span></a>`};
 }
 function viewReference(){
-  const R=[['notas','Mapa de notas','Todas las notas del mástil, del traste 0 al 12.',IC.grid],['acordes','Acordes abiertos','26 acordes con digitación y sonido.',IC.book],['explorar','Explorador','Escalas, modos, acordes, CAGED y más en las 12 tonalidades.',IC.play2],['glosario','Glosario','Los términos de la teoría en idioma humano.',IC.book]];
+  const R=[['canciones','Canciones','Progresiones famosas para tocar con pista.',IC.wave],['notas','Mapa de notas','Todas las notas del mástil, del traste 0 al 12.',IC.grid],['acordes','Acordes abiertos','26 acordes con digitación y sonido.',IC.book],['explorar','Explorador','Escalas, modos, acordes, CAGED y más en las 12 tonalidades.',IC.play2],['glosario','Glosario','Los términos de la teoría en idioma humano.',IC.book]];
   return{title:'Referencia',html:`<div class="lhead"><span class="eyebrow">Consulta rápida</span><h1>Referencia</h1></div><div class="grid2">${R.map(([k,n,d,ic])=>`<a class="card tool" href="#/referencia/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('')}</div>`};
 }
 let NOTENAT=0;
@@ -239,17 +248,18 @@ function route(){
   if(!p[0])v=viewHome();
   else if(p[0]==='lecciones')v=viewLessons();
   else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
-  else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine}[p[1]]||viewPractice)();
-  else if(p[0]==='referencia')v=({notas:viewNotes,acordes:viewChords,explorar:viewExplore,glosario:viewGlossary}[p[1]]||viewReference)();
+  else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder}[p[1]]||viewPractice)();
+  else if(p[0]==='logros')v=viewAch();
+  else if(p[0]==='referencia')v=({canciones:viewSongs,notas:viewNotes,acordes:viewChords,explorar:viewExplore,glosario:viewGlossary}[p[1]]||viewReference)();
   else v=viewHome();
   if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}
   if(SEQ.id==='fig')seqStop();
-  const sec=p[0]===''?'':p[0]==='lecciones'?'leccion':p[0];
+  const sec=p[0]===''?'':p[0]==='lecciones'?'leccion':p[0]==='logros'?'practicar':p[0];
   $$('[data-nav]').forEach(a=>{const on=a.dataset.nav===sec;if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   $('#ttl').textContent=v.title;
   const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
   const pg=$('#page');pg.innerHTML=v.html;
-  document.title=v.title==='Madrigal Guitar Hero'?v.title:v.title+' · Madrigal Guitar Hero';
+  document.title=v.title==='Mades Guitar Hero'?v.title:v.title+' · Mades Guitar Hero';
   if(v.mount)UNMOUNT=v.mount(pg)||null;
   if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);
   paintPlayer();
@@ -264,10 +274,11 @@ document.addEventListener('click',e=>{
 });
 /* ---------- arranque ---------- */
 document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
- <nav class="side" aria-label="Secciones"><div class="brand">${IC.pick}Madrigal Guitar Hero</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
+ <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Mades<br>Guitar Hero</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
  <main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main>
 </div>
 <nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
+checkAch(true);persist();
 window.addEventListener('hashchange',route);
 route();
 if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}

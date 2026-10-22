@@ -63,7 +63,6 @@ function viewMetronome(){
 }
 /* ---------- afinador ---------- */
 const TUN={stream:null,an:null,src:null,iv:null,buf:null,hist:[]};
-const STD=[{m:40,n:'Mi',s:6},{m:45,n:'La',s:5},{m:50,n:'Re',s:4},{m:55,n:'Sol',s:3},{m:59,n:'Si',s:2},{m:64,n:'Mi',s:1}];
 function detectPitch(buf,sr){
   let n=buf.length,rms=0;for(let i=0;i<n;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/n);
   if(rms<.01)return -1;
@@ -109,8 +108,9 @@ function viewTuner(){
     <div id="tmsg"></div>
   </div>
   <div class="card center">
-    <span class="cl">Afinación estándar · toca una cuerda para escuchar su nota</span>
-    <div class="strs">${STD.map(s=>`<button data-ref="${s.m}" data-s="${s.s}"><span>${s.n}</span><small>${s.s}ª</small></button>`).join('')}</div>
+    <span class="cl">Afinación · toca una cuerda para escuchar su nota</span>
+    <div class="chips" style="justify-content:center">${Object.entries(TUNINGS).map(([k,v])=>`<button class="chip" data-tun="${k}" aria-pressed="${(DB.tuning||'std')===k}">${v.n}</button>`).join('')}</div>
+    <div class="strs" id="tstrs"></div>
   </div>
   <p class="cap">Afina siempre subiendo hacia la nota: si te pasas, baja un poco la cuerda y vuelve a subir. Dentro de ±5 cents la aguja se pone verde.</p>`,
   mount(r){
@@ -122,12 +122,14 @@ function viewTuner(){
       tn.innerHTML=`${PCS[((n%12)+12)%12][0]}<small>${Math.floor(n/12)-1}</small>`;
       hz.textContent=f.toFixed(1)+' Hz · '+(c>0?'+':'')+c+' cents'+(Math.abs(c)<=5?' · afinada':c<0?' · sube':' · baja');
       nd.style.transform=`rotate(${Math.max(-60,Math.min(60,c/50*60))}deg)`;g.classList.toggle('in',Math.abs(c)<=5);
-      const near=STD.reduce((a,s)=>Math.abs(s.m-m)<Math.abs(a.m-m)?s:a,STD[0]);
+      const TS=tuningStrings(),near=TS.reduce((a,s)=>Math.abs(s.m-m)<Math.abs(a.m-m)?s:a,TS[0]);
       $$('.strs button',r).forEach(b=>b.classList.toggle('on',+b.dataset.ref===near.m&&Math.abs(near.m-m)<1.5));
     };
     const err=k=>{msg.innerHTML=`<p class="msg err">${{denied:'El micrófono está bloqueado. Permite el acceso al micrófono para este sitio en los ajustes del navegador y vuelve a intentarlo.',nomic:'No se encontró un micrófono en este dispositivo.',nosupport:'Este navegador no permite usar el micrófono aquí. Abre la app instalada o el sitio en Chrome o Safari.',other:'No se pudo iniciar el micrófono. Vuelve a intentarlo.'}[k]}</p>`;paint()};
     go.onclick=async()=>{msg.innerHTML='';if(TUN.stream){tunerStop();tn.textContent='—';hz.textContent='Toca una cuerda al aire';g.classList.remove('in');nd.style.transform='rotate(0)'}else{seqStop();await tunerStart(show,err)}paint()};
-    $$('[data-ref]',r).forEach(b=>b.onclick=()=>{if(!ac())return;pluck(+b.dataset.ref,AC.currentTime+.02,2.6,.3)});
+    const strs=()=>{$('#tstrs',r).innerHTML=tuningStrings().map(s=>`<button data-ref="${s.m}" data-s="${s.s}"><span>${s.n}</span><small>${s.s}ª</small></button>`).join('')};strs();
+    r.addEventListener('click',e=>{const b=e.target.closest('[data-ref]');if(b){if(!ac())return;pluck(+b.dataset.ref,AC.currentTime+.02,2.6,.3);return}
+      const u=e.target.closest('[data-tun]');if(u){DB.tuning=u.dataset.tun;save();$$('[data-tun]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===u)));strs()}});
     paint();
     return()=>tunerStop();
   }};

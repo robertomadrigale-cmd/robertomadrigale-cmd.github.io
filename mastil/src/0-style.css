@@ -274,3 +274,77 @@ input[type=range]{width:100%;accent-color:var(--accent);height:32px}
 .bd{width:12px;height:12px;border-radius:50%;background:var(--line);margin:0 6px 0 2px;flex:none;transition:background .05s}
 .bd.on{background:var(--accent)}
 .bd.on.acc{background:var(--root)}
+
+/* ---------- Mades Guitar Hero: marca y pulido ---------- */
+.page>*{animation:rise .32s cubic-bezier(.2,.7,.2,1) both}
+.page>*:nth-child(2){animation-delay:.03s}.page>*:nth-child(3){animation-delay:.06s}.page>*:nth-child(4){animation-delay:.09s}.page>*:nth-child(5){animation-delay:.12s}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.logo{display:inline-grid;flex:none}.logo svg{width:100%;height:100%}
+.brandhero{display:flex;align-items:center;gap:14px}
+.brandhero .logo{width:64px;height:64px;filter:drop-shadow(0 6px 18px color-mix(in srgb,var(--root) 45%,transparent))}
+.side .brand .logo{width:34px;height:34px}
+.side .brand{line-height:1.25}
+.cta{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--fg);padding:20px;border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 26%,var(--surface)),color-mix(in srgb,var(--root) 22%,var(--surface)));position:relative;overflow:hidden}
+.cta>span:first-child{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.cta b{font:800 30px/1 var(--font-display);text-transform:uppercase}
+.cta span span{color:var(--muted);font-size:15px}
+.cta .ic{width:60px;height:60px;border-radius:18px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none;box-shadow:0 8px 24px -6px var(--accent)}
+.cta .ic svg{width:32px;height:32px}
+.cta:hover{transform:translateY(-1px)}
+.medal-ic{font-size:24px;font-weight:800}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:420px;text-align:center}
+.grid3 .stat{align-items:center}
+textarea{width:100%;font:500 13px var(--font-mono);padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);resize:vertical}
+/* aviso flotante */
+#toast{position:fixed;z-index:60;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translate(-50%,-140%);display:flex;align-items:center;gap:12px;max-width:calc(100% - 24px);padding:10px 16px 10px 10px;border-radius:16px;background:var(--surface2);border:1px solid var(--accent);box-shadow:0 14px 40px rgba(0,0,0,.45);transition:transform .35s cubic-bezier(.2,.9,.3,1.2);font-weight:600}
+#toast.show{transform:translate(-50%,0)}
+#toast>svg{width:34px;height:34px;flex:none}
+#toast small{display:block;font:600 10px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-text)}
+#toast b{display:block}
+/* logros */
+.achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ach{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:16px 12px;border-radius:16px;border:1px solid var(--line);background:var(--surface);opacity:.62}
+.ach.on{opacity:1;border-color:color-mix(in srgb,var(--accent) 60%,var(--line))}
+.ach b{font-size:15px;line-height:1.2}.ach span{font-size:13px;color:var(--muted);line-height:1.3}.ach small{font:500 11px var(--font-mono);color:var(--accent-text)}
+.medal{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font:800 20px var(--font-display);background:var(--surface2);color:var(--muted);border:2px dashed var(--line);margin-bottom:4px}
+.medal.on{background:radial-gradient(circle at 35% 30%,#fff6 0,transparent 40%),linear-gradient(140deg,var(--accent),var(--root));color:var(--accent-ink);border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);box-shadow:0 6px 18px -6px var(--accent)}
+.medal.sm{width:40px;height:40px;font-size:15px;margin:0}
+/* canciones */
+.song{display:flex;flex-direction:column;gap:12px}
+.song-h{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.song-h b{display:block;font:800 24px/1.05 var(--font-display);text-transform:uppercase}
+.song-h span{font-size:15px;color:var(--muted)}
+.songs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.songs li{font-size:15px;padding-left:16px;position:relative}
+.songs li::before{content:"♪";position:absolute;left:0;color:var(--accent-text)}
+.songs li span{color:var(--muted)}
+/* modo reto */
+.hero-reto{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+.songgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:22px}
+.song-pick{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;cursor:pointer;font:inherit;color:var(--fg)}
+.song-pick:hover{border-color:var(--accent);transform:translateY(-1px)}
+.song-pick b{font:800 22px/1.05 var(--font-display);text-transform:uppercase}
+.lv{font:600 10px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:99px;border:1px solid}
+.lv.l1{color:var(--good)}.lv.l2{color:var(--accent-text)}.lv.l3{color:var(--root)}
+.stars{display:inline-flex;gap:2px;font-size:18px;line-height:1}
+.stars i{font-style:normal;color:var(--line)}.stars i.on{color:var(--accent);text-shadow:0 0 10px color-mix(in srgb,var(--accent) 60%,transparent)}
+.result .stars{font-size:30px}
+.stage{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--accent) 10%,var(--bg)));user-select:none;-webkit-user-select:none}
+.stage canvas{display:block;width:100%;height:min(68vh,620px);touch-action:none;cursor:pointer}
+.stage.fire{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 0 40px -6px var(--accent)}
+.hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:12px 14px;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent)}
+.hud small{display:block;font:600 10px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:#fffc}
+.hud b{font:800 30px/1 var(--font-display);color:#fff;font-variant-numeric:tabular-nums}
+.hud .mid{text-align:center}.hud .mid b{color:var(--accent)}
+.prog{position:absolute;left:0;right:0;top:0;height:3px;background:#fff2}.prog i{display:block;height:100%;width:0;background:var(--accent)}
+.judge{position:absolute;left:0;right:0;top:40%;text-align:center;font:800 46px/1 var(--font-display);text-transform:uppercase;pointer-events:none;opacity:0;transform:scale(.8);transition:opacity .12s,transform .12s;text-shadow:0 4px 18px rgba(0,0,0,.6)}
+.judge.show{opacity:1;transform:scale(1)}
+.judge.p{color:var(--accent)}.judge.g{color:var(--good)}.judge.m{color:var(--bad)}
+
+/* grabadora */
+.recdot{width:18px;height:18px;border-radius:50%;background:var(--line)}
+.recdot.on{background:var(--bad);animation:pulse 1s infinite;box-shadow:0 0 0 6px color-mix(in srgb,var(--bad) 25%,transparent)}
+.rec-i{width:14px;height:14px;border-radius:50%;background:currentColor}
+.takes{display:flex;flex-direction:column;gap:12px}
+.take{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.take audio{width:100%;height:40px}
