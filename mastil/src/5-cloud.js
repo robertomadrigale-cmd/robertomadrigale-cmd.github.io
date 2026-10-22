@@ -11,8 +11,8 @@ async function cloudInit(){
   try{
     const [A,U,F]=await Promise.all([import(FBU('app')),import(FBU('auth')),import(FBU('firestore'))]);
     CLOUD.M={...A,...U,...F};const M=CLOUD.M;
-    const host=location.hostname,ownHost=/\.(web\.app|firebaseapp\.com)$/.test(host);
-    CLOUD.app=M.initializeApp(ownHost?Object.assign({},FIREBASE_CONFIG,{authDomain:host}):FIREBASE_CONFIG);CLOUD.auth=M.getAuth(CLOUD.app);CLOUD.db=M.getFirestore(CLOUD.app);
+    // el inicio de sesión va por rokaguitarrall.firebaseapp.com: es la dirección que Google tiene registrada (otra da «redirect_uri_mismatch»)
+    CLOUD.app=M.initializeApp(FIREBASE_CONFIG);CLOUD.auth=M.getAuth(CLOUD.app);CLOUD.db=M.getFirestore(CLOUD.app);
     if(window.__FB_EMU){M.connectAuthEmulator(CLOUD.auth,window.__FB_EMU.auth,{disableWarnings:true});M.connectFirestoreEmulator(CLOUD.db,window.__FB_EMU.host,window.__FB_EMU.port)}
     try{await M.getRedirectResult(CLOUD.auth)}catch(e){}
     M.onAuthStateChanged(CLOUD.auth,async u=>{CLOUD.user=u;CLOUD.ready=true;CLOUD.groups=null;if(u){welcomeClose(true);try{await cloudPull()}catch(e){CLOUD.err=cloudMsg(e)}}else{CLOUD.group=null;welcomeShow()}cloudRefresh()});
