@@ -14,6 +14,7 @@ setInterval(()=>{
   if(document.hidden)return;
   if(SEQ.id||(TMR.id&&!TMR.paused)||TUN.stream||GAMEON){const k=today();DB.secs[k]=(DB.secs[k]||0)+1;if(DB.secs[k]>=60)DB.days[k]=true;if(DB.secs[k]%10===0)save()}
 },1000);
+LEFTY=!!DB.lefty;
 function applyTheme(){if(DB.theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',DB.theme)}
 applyTheme();
 /* ---------- widgets interactivos ---------- */
@@ -40,12 +41,12 @@ function exCard(x,inRoutine){
   const tr=x.track?`<button class="btn sm" data-x="trk" data-id="${x.id}"></button>`:'';
   return`<article class="ex ${DB.done[x.id]?'done':''}" id="ex-${x.id}" data-ex="${x.id}">
    <div class="eh"><div><span class="tag">${inRoutine?'Lección '+x.lesson+' · ':''}Haz esto ahora · ${idx} de ${tot}</span><h3>${x.t}</h3></div><span class="meta">${x.min} min</span></div>
-   ${x.fig?`<div>${x.fig()}</div>`:''}
+   ${x.fig?figHTML(x):''}
    <ol>${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
    <p class="goal"><b>Lo logras cuando:</b> ${x.goal}</p>
    ${x.track?`<p class="cap" style="margin:0">Pista: <b>${PROG2[x.track.p].n}</b> en ${KEYS[x.track.k].es} · ${STYLES[x.track.st].n} · <span data-x="trkcur" data-id="${x.id}"></span></p>`:''}
    <div class="exbar">
-    ${x.bpm?`<span class="minimet"><button class="icon-btn" data-x="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-x="bpmv" data-id="${x.id}">${bpm} bpm</span><button class="icon-btn" data-x="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button><button class="btn sm" data-x="met" data-id="${x.id}"></button></span>`:''}
+    ${x.bpm?`<span class="minimet"><button class="icon-btn" data-x="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-x="bpmv" data-id="${x.id}">${bpm} bpm</span><button class="icon-btn" data-x="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button><button class="btn sm" data-x="met" data-id="${x.id}"></button><span class="bd" data-bd="${x.id}" aria-hidden="true"></span></span>`:''}
     ${tr}
     ${x.game?`<button class="btn sm" data-x="game" data-id="${x.id}">${IC.game}Abrir juego</button>`:''}
     <button class="btn sm" data-x="tmr" data-id="${x.id}"></button>
@@ -77,8 +78,8 @@ document.addEventListener('tmrdone',e=>{
 function exAction(b){
   const id=b.dataset.id,x=ALLEX.find(z=>z.id===id),k=b.dataset.x;if(!x)return false;
   if(k==='done'){if(DB.done[id])delete DB.done[id];else{DB.done[id]=true;markDay()}save();paintEx();refreshProgress();return true}
-  if(k==='met'){if(SEQ.id==='met'&&OWNER==='ex:'+id)seqStop();else{OWNER='ex:'+id;metStart({bpm:DB.bpm[id]||x.bpm,meter:'4/4',sub:1})}paintEx();return true}
-  if(k==='bpm'){const v=Math.max(30,Math.min(240,(DB.bpm[id]||x.bpm)+ +b.dataset.d));DB.bpm[id]=v;save();if(SEQ.id==='met'&&OWNER==='ex:'+id){MET.bpm=v;SEQ.label='Metrónomo '+v;emitState()}paintEx();return true}
+  if(k==='met'){if(SEQ.id==='met'&&OWNER==='ex:'+id)seqStop();else{OWNER='ex:'+id;metStart({bpm:DB.bpm[id]||x.bpm,meter:'4/4',sub:1},(bt,isB)=>{if(!isB)return;const d=document.querySelector(`[data-bd="${id}"]`);if(!d)return;d.classList.toggle('acc',bt===0);d.classList.add('on');setTimeout(()=>d.classList.remove('on'),110)})}paintEx();return true}
+  if(k==='bpm'){const v=Math.max(30,Math.min(240,(DB.bpm[id]||x.bpm)+ +b.dataset.d));DB.bpm[id]=v;save();if(SEQ.id==='met'&&OWNER==='ex:'+id){MET.bpm=v;SEQ.label='Metrónomo '+v;emitState()}paintEx();paintFig();return true}
   if(k==='trk'){
     if(SEQ.id==='trk'&&OWNER==='ex:'+id)seqStop();
     else{OWNER='ex:'+id;Object.assign(TRK,x.track);const cur=document.querySelector(`[data-x="trkcur"][data-id="${id}"]`);trkStart((ci,lab)=>{if(cur)cur.textContent=lab==='cuenta'?'cuenta inicial':'sonando '+trkName(ci)})}
@@ -121,11 +122,13 @@ function viewHome(){
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Tema</span><div class="seg">${[['auto','Automático'],['dark','Oscuro'],['light','Claro']].map(([v,l])=>`<button data-theme-set="${v}" aria-pressed="${DB.theme===v}">${l}</button>`).join('')}</div></div>
+    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Mano</span><div class="seg">${[[0,'Diestro'],[1,'Zurdo']].map(([v,l])=>`<button data-lefty="${v}" aria-pressed="${!!DB.lefty===!!v}">${l}</button>`).join('')}</div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
   </div>
   <p class="foot">Mástil a la Vista · funciona sin conexión</p>`,
   mount(r){
     r.addEventListener('click',async e=>{
+      const lf=e.target.closest('[data-lefty]');if(lf){DB.lefty=lf.dataset.lefty==='1';LEFTY=DB.lefty;save();$$('[data-lefty]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lf)));return}
       const th=e.target.closest('[data-theme-set]');if(th){DB.theme=th.dataset.themeSet;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)));return}
       const b=e.target.closest('[data-h]');if(!b)return;const a=b.dataset.h;
       if(a==='install'&&DEFERRED){DEFERRED.prompt();try{await DEFERRED.userChoice}catch(_){}DEFERRED=null;route()}
@@ -164,7 +167,7 @@ function viewLesson(id,exId){
   <div class="row" style="justify-content:space-between">${prev?`<a class="btn" href="#/leccion/${prev.id}">${IC.back}Lección ${prev.id}</a>`:'<span></span>'}${next?`<a class="btn pri" href="#/leccion/${next.id}">Lección ${next.id}</a>`:''}</div>`,
   mount(r){
     $$('.widget[data-wi]',r).forEach(w=>mountWidget(w,ws[+w.dataset.wi]));
-    paintEx(r);
+    paintEx(r);paintFig(r);
     if(exId){const el=$('#ex-'+exId,r);if(el)setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),60)}
   }};
 }
@@ -207,6 +210,7 @@ function route(){
   else if(p[0]==='referencia')v=({notas:viewNotes,acordes:viewChords,explorar:viewExplore,glosario:viewGlossary}[p[1]]||viewReference)();
   else v=viewHome();
   if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}
+  if(SEQ.id==='fig')seqStop();
   const sec=p[0]===''?'':p[0]==='lecciones'?'leccion':p[0];
   $$('[data-nav]').forEach(a=>{const on=a.dataset.nav===sec;if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   $('#ttl').textContent=v.title;
@@ -222,7 +226,7 @@ document.addEventListener('click',e=>{
   const x=e.target.closest('[data-x]');if(x&&exAction(x))return;
   const dg=e.target.closest('.dg');
   if(dg&&dg.dataset.s&&!e.target.closest('#gamehost,#rtgame')){playNotes([OPEN_MIDI[+dg.dataset.s]+ +dg.dataset.f],'chord');return}
-  const pl=e.target.closest('[data-play]');if(pl){playNotes(pl.dataset.play.split(',').map(Number),pl.dataset.mode,+pl.dataset.step||.5);return}
+  const pl=e.target.closest('[data-play]');if(pl){const L=pl.dataset.play.split(',').map(Number),st=+pl.dataset.step||.5;playNotes(L,pl.dataset.mode,st);lightSequence(pl,L,pl.dataset.mode,st);return}
   const sq=e.target.closest('[data-seq]');if(sq){playSeq(sq.dataset.seq.split('|').map(c=>c.split('.').map(Number)),+sq.dataset.beat||1)}
 });
 /* ---------- arranque ---------- */

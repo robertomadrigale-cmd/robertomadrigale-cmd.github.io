@@ -1,4 +1,4 @@
-const CACHE='mastil-20261021164522';
+const CACHE='mastil-20261021173325';
 const SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png',
 'fonts/barlow-condensed-latin-800-normal.woff2','fonts/source-sans-3-latin-400-normal.woff2','fonts/source-sans-3-latin-600-normal.woff2','fonts/source-sans-3-latin-700-normal.woff2','fonts/ibm-plex-mono-latin-500-normal.woff2','fonts/ibm-plex-mono-latin-600-normal.woff2'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});

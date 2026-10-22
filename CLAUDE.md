@@ -1,0 +1,42 @@
+# Apps de práctica musical de Roberto
+
+Este repositorio publica en GitHub Pages (rama `main`, se despliega solo al hacer push):
+
+| Carpeta | App | URL |
+|---|---|---|
+| `mastil/` | **Mástil a la Vista** — teoría visual para guitarra (PWA) | https://robertomadrigale-cmd.github.io/mastil/ |
+| `bateria/` | **Pulso a la Vista** — pulso y tiempo para baterista de banda (PWA) | https://robertomadrigale-cmd.github.io/bateria/ |
+
+Roberto no es programador: entrégale cambios terminados y publicados, sin pedirle que edite código. Todo el texto de las apps va en español de México, tuteando.
+
+## Cómo está armada cada app
+
+- El código fuente vive en `<app>/src/`. **No edites `<app>/index.html` a mano**: se genera.
+- `src/0-style.css` + los `src/[1-9]-*.js` se concatenan (en orden) dentro de `src/index.tpl.html` → `index.html` de una sola pieza. `src/sw.tpl.js` → `sw.js` con versión nueva en cada build (eso hace que los teléfonos reciban la actualización).
+- Para reconstruir: el `build.sh` espera la estructura `src/` y `dist/`. Lo más simple desde este repo:
+  ```sh
+  cd mastil && mkdir -p /tmp/b/src /tmp/b/dist && cp src/* /tmp/b/src/ && cp src/build.sh /tmp/b/ && cp -r fonts icons manifest.webmanifest /tmp/b/dist/ && sh /tmp/b/build.sh && cp /tmp/b/dist/index.html /tmp/b/dist/sw.js .
+  ```
+  (igual para `bateria`).
+- Sin dependencias ni frameworks: JavaScript puro, audio con Web Audio API (sonidos sintetizados), fuentes locales en `fonts/`, funciona sin conexión.
+- Datos del usuario: solo `localStorage` del dispositivo (claves `mastil-a-la-vista:v2` y `pulso-a-la-vista:v1`).
+
+### Mástil a la Vista (guitarra)
+- `1-theory.js` notas, escalas, acordes y el dibujo del mástil `fretboard()` (soporta modo zurdo con `LEFTY`).
+- `2-widgets.js` diagramas interactivos (`WID`), `3-engine.js` audio (cuerda Karplus-Strong), secuenciador, metrónomo, pistas, temporizador.
+- `4-content.js` las 11 lecciones; cada ejercicio `E({...})` puede tener `fig` (`pts(...)` = notas en orden, `chords(ch(...))` = acordes que cambian al pulso), `bpm`, `track`, `game`.
+- `5-fig.js` diagramas que suenan y siguen el pulso. `5-tools.js` metrónomo, afinador, juego, pistas, rutina. `6-app.js` inicio, navegación, tarjetas de ejercicio, progreso.
+
+### Pulso a la Vista (batería)
+- `4-drums.js` sonidos de batería y la cuadrícula de grooves. `5-content.js` 29 grooves (`G`) y 12 lecciones.
+- `7-tools.js` metrónomo avanzado (2 y 4, contratiempo, click intermitente, entrenador), **medidor de precisión** con micrófono (AudioWorklet de detección de golpes, calibración de latencia), tocar con la banda, setlist y rutina. `8-app.js` inicio con perfil de tiempo y navegación.
+
+## Antes de publicar
+1. Reconstruye y revisa que el JavaScript compile: `node -e "new Function(require('fs').readFileSync('index.html','utf8').split('<script>')[1].split('</script>')[0])"`.
+2. Prueba en el navegador: que todos los botones respondan y no haya errores en consola, en ancho de teléfono (400 px) y de escritorio.
+3. Commit y push a `main`.
+
+## Ideas pendientes que Roberto vio con buenos ojos
+- Canciones de práctica por lección (reutilizar ROKA Studio).
+- Grabarse desde la app y escucharse.
+- Sincronizar el progreso entre dispositivos con Firebase.

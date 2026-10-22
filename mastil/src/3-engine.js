@@ -23,13 +23,26 @@ function unlockAudio(){
 ['pointerdown','touchend','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC&&AC.state!=='running')AC.resume()});
 const out=()=>MASTER;
+/* Cuerda pulsada (Karplus-Strong): un ruido corto que circula por un retardo filtrado suena como cuerda. */
+const KS={};
+function ksBuffer(m){
+  if(KS[m])return KS[m];
+  const sr=AC.sampleRate,f=440*Math.pow(2,(m-69)/12),N=Math.max(2,Math.round(sr/f)),len=Math.floor(sr*2.4);
+  const b=AC.createBuffer(1,len,sr),d=b.getChannelData(0),ring=new Float32Array(N);
+  for(let i=0;i<N;i++)ring[i]=Math.random()*2-1;
+  for(let p=0;p<2;p++)for(let i=1;i<N;i++)ring[i]=(ring[i]+ring[i-1])*.5;
+  const damp=m<52?.9993:m<64?.9988:.998;let idx=0,peak=0;
+  for(let i=0;i<len;i++){const a=ring[idx],nx=ring[(idx+1)%N];ring[idx]=(a+nx)*.5*damp;d[i]=a;if(Math.abs(a)>peak)peak=Math.abs(a);idx=(idx+1)%N}
+  const k=.6/(peak||1);for(let i=0;i<len;i++)d[i]*=k;
+  return KS[m]={b,rate:(sr/N)/f};
+}
 function pluck(m,t,d,v){
-  const c=AC,f=440*Math.pow(2,(m-69)/12),o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();
-  o.type='triangle';o2.type='sine';o.frequency.value=f;o2.frequency.value=f*2;
-  lp.type='lowpass';lp.frequency.setValueAtTime(3600,t);lp.frequency.exponentialRampToValueAtTime(650,t+d);
-  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v||.2,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
-  o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(out());
-  o.start(t);o2.start(t);o.stop(t+d+.05);o2.stop(t+d+.05);
+  const c=AC,K=ksBuffer(Math.round(m)),src=c.createBufferSource(),g=c.createGain(),lp=c.createBiquadFilter();
+  src.buffer=K.b;src.playbackRate.value=K.rate;
+  lp.type='lowpass';lp.frequency.value=m<55?3200:5200;lp.Q.value=.4;
+  const vol=Math.min(1,(v||.2)*3.2),end=t+Math.min(d,2.3);
+  g.gain.setValueAtTime(vol,t);g.gain.setValueAtTime(vol,Math.max(t,end-.12));g.gain.linearRampToValueAtTime(.0001,end);
+  src.connect(lp);lp.connect(g);g.connect(out());src.start(t);src.stop(end+.02);
 }
 function bassNote(m,t,d,v){
   const c=AC,f=440*Math.pow(2,(m-69)/12),o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();

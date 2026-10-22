@@ -241,3 +241,22 @@ input[type=range]{width:100%;accent-color:var(--accent);height:32px}
 .seg button{border:0;background:none;padding:7px 12px;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--surface2);color:var(--fg)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* diagramas que siguen el pulso */
+.fig{display:flex;flex-direction:column;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+.figbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.figst{font:600 13px var(--font-mono);color:var(--accent-text);min-height:18px}
+.figopts .chip{min-height:34px;padding:5px 10px;font-size:13px}
+.figopts .sep{width:1px;align-self:stretch;background:var(--line);margin:0 2px}
+.fig.playing .dg,.widget.lighting .dg{opacity:.3;transition:opacity .12s}
+.fig .dg.on,.widget .dg.lit{opacity:1}
+.fig .dg.on circle,.widget .dg.lit circle{transform:scale(1.32);transform-box:fill-box;transform-origin:center;stroke:var(--fg);stroke-width:2.2;transition:transform .08s}
+.chnow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.chnow b{font:800 40px/1 var(--font-display)}
+.chnow span{font:500 13px var(--font-mono);color:var(--muted)}
+.chlist{display:flex;flex-wrap:wrap;gap:6px}
+.pchip.sm{min-width:0;padding:4px 10px;cursor:pointer}
+.pchip.sm b{font-size:14px}
+.bd{width:12px;height:12px;border-radius:50%;background:var(--line);margin:0 6px 0 2px;flex:none;transition:background .05s}
+.bd.on{background:var(--accent)}
+.bd.on.acc{background:var(--root)}

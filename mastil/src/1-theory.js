@@ -47,19 +47,21 @@ const pos=(pcs,from,to)=>{const r=[];for(let s=1;s<=6;s++)for(let f=from;f<=to;f
 const ACC_N=[0,1,2,3,4,5,6,-5,-4,-3,-2,-1];
 const SHARPS=['Fa♯','Do♯','Sol♯','Re♯','La♯','Mi♯'],FLATS=['Si♭','Mi♭','La♭','Re♭','Sol♭','Do♭'];
 /* ---------- mástil (SVG) ---------- */
+let LEFTY=false;
 function fretboard(o){
   const from=o.from||0,to=o.to==null?12:o.to,W=o.w||42,H=25,top=20,left=32,lane=from===0?24:0;
   const start=from===0?1:from,cols=to-start+1,x0=left+lane,wood=cols*W,totalW=x0+wood+10,bottom=top+5*H,totalH=bottom+36;
-  const y=s=>top+(s-1)*H,cx=f=>f===0?x0-lane/2-1:x0+(f-start+.5)*W;
-  let g=`<rect class="wood" x="${x0}" y="${top-10}" width="${wood}" height="${5*H+20}" rx="4"/>`;
-  (o.zones||[]).forEach(z=>{const a=Math.max(z[0],start),b=Math.min(z[1],to);if(b>=a)g+=`<rect class="zone" x="${x0+(a-start)*W}" y="${top-10}" width="${(b-a+1)*W}" height="${5*H+20}"/>`});
+  const X=x=>LEFTY?totalW-x:x,R=(x,w)=>LEFTY?totalW-x-w:x;
+  const y=s=>top+(s-1)*H,cx=f=>X(f===0?x0-lane/2-1:x0+(f-start+.5)*W);
+  let g=`<rect class="wood" x="${R(x0,wood)}" y="${top-10}" width="${wood}" height="${5*H+20}" rx="4"/>`;
+  (o.zones||[]).forEach(z=>{const a=Math.max(z[0],start),b=Math.min(z[1],to);if(b>=a)g+=`<rect class="zone" x="${R(x0+(a-start)*W,(b-a+1)*W)}" y="${top-10}" width="${(b-a+1)*W}" height="${5*H+20}"/>`});
   for(let f=start;f<=to;f++){
     const m=f%12;
     if([3,5,7,9].includes(m))g+=`<circle class="inlay" cx="${cx(f)}" cy="${top+2.5*H}" r="5"/>`;
     if(m===0)g+=`<circle class="inlay" cx="${cx(f)}" cy="${top+1.5*H}" r="5"/><circle class="inlay" cx="${cx(f)}" cy="${top+3.5*H}" r="5"/>`;
   }
-  for(let i=0;i<=cols;i++){const x=x0+i*W;g+=`<line class="${i===0&&from===0?'nut':'fret'}" x1="${x}" y1="${top-10}" x2="${x}" y2="${bottom+10}"/>`}
-  for(let s=1;s<=6;s++){g+=`<line class="str" x1="${x0}" x2="${x0+wood}" y1="${y(s)}" y2="${y(s)}" stroke-width="${(.8+(s-1)*.45).toFixed(2)}"/><text class="slab" x="14" y="${y(s)}">${'eBGDAE'[s-1]}</text>`}
+  for(let i=0;i<=cols;i++){const x=X(x0+i*W);g+=`<line class="${i===0&&from===0?'nut':'fret'}" x1="${x}" y1="${top-10}" x2="${x}" y2="${bottom+10}"/>`}
+  for(let s=1;s<=6;s++){g+=`<line class="str" x1="${X(x0)}" x2="${X(x0+wood)}" y1="${y(s)}" y2="${y(s)}" stroke-width="${(.8+(s-1)*.45).toFixed(2)}"/><text class="slab" x="${X(14)}" y="${y(s)}">${'eBGDAE'[s-1]}</text>`}
   for(let f=start;f<=to;f++)g+=`<text class="num" x="${cx(f)}" y="${bottom+30}">${f}</text>`;
   if(from===0)(o.muted||[]).forEach(s=>{g+=`<text class="mute" x="${cx(0)}" y="${y(s)}">×</text>`});
   (o.dots||[]).forEach(d=>{
@@ -70,8 +72,8 @@ function fretboard(o){
   if(o.tap)for(let s=1;s<=6;s++)for(let f=from;f<=to;f++){
     if(f===0&&from>0)continue;
     const x=f===0?left:x0+(f-start)*W,w=f===0?lane:W;
-    g+=`<rect class="cell" data-s="${s}" data-f="${f}" x="${x}" y="${y(s)-H/2}" width="${w}" height="${H}"/>`;
+    g+=`<rect class="cell" data-s="${s}" data-f="${f}" x="${R(x,w)}" y="${y(s)-H/2}" width="${w}" height="${H}"/>`;
   }
-  const hint=totalW*.78>360?'<p class="hint">Desliza para ver todo el mástil →</p>':'';
-  return`${hint}<div class="fbwrap"><svg class="fb" viewBox="0 0 ${totalW} ${totalH}" style="min-width:${Math.round(totalW*.78)}px;max-width:${Math.round(totalW*1.7)}px" role="img" aria-label="${esc(o.label||'Diagrama del mástil de guitarra')}">${g}</svg></div>`;
+  const hint=totalW*.78>360?`<p class="hint">Desliza para ver todo el mástil ${LEFTY?'←':'→'}</p>`:'';
+  return`${hint}<div class="fbwrap"${LEFTY?' dir="rtl"':''}><svg class="fb" viewBox="0 0 ${totalW} ${totalH}" style="min-width:${Math.round(totalW*.78)}px;max-width:${Math.round(totalW*1.7)}px" role="img" aria-label="${esc(o.label||'Diagrama del mástil de guitarra')}">${g}</svg></div>`;
 }
