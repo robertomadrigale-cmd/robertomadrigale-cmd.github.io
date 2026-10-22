@@ -500,7 +500,7 @@ function viewSongPlay(id,slow){
   <div class="ksync" id="ksync" hidden></div><div class="kbar"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${st.beats}/4 · ${BSTYLES[gid()]} · listo</span><button class="btn sm" id="kreset" aria-label="Desde el inicio">${IC.back}</button><button class="btn pri" id="kgo">${IC.play}Empezar</button></div>`,
   mount(r){
     const sumK=()=>{const m=$('.kmore summary small',r);if(m)m.textContent=`${BSTYLES[gid()]} · ${st.beats}/4`};
-    const O={blob:null,name:'',fname:'',type:'',el:null,url:null,use:false,playing:false,syncing:false,busy:false,prog:0,grid:null,recK:0,raf:0,last:-1,lastBeat:null};
+    const O={blob:null,name:'',fname:'',type:'',el:null,url:null,use:false,playing:false,syncing:false,busy:false,prog:0,grid:null,voc:null,recK:0,raf:0,last:-1,lastBeat:null};
     let LP=null;
     const spdTxt=()=>{const m=$('#kspd',r);if(m)m.textContent=st.sp<1?`La banda va a ${Math.round(st.bpm*st.sp)} bpm (de ${st.bpm}). El tono no cambia.`:'';const kb=$('#kbpm',r);if(kb)kb.textContent=st.sp<1?Math.round(st.bpm*st.sp):st.bpm};
     const kar=$('#kar',r);let pos=0,TL=null,BK=null,curCh=P.chords[0]||null;
@@ -615,11 +615,11 @@ function viewSongPlay(id,slow){
     const mediaEl=()=>{if(O.el)return O.el;const v=!!O.forceVideo;const el=document.createElement(v?'video':'audio');el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');
       if(v){el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;left:0';document.body.appendChild(el)}
       el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
-    const recIDB=()=>slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,k:O.recK},'orig:'+id)).catch(()=>{});
+    const recIDB=()=>slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK},'orig:'+id)).catch(()=>{});
     const semis=k=>Math.abs(k)===1?'medio tono':Math.abs(k)%2?Math.abs(k)+' semitonos':Math.abs(k)/2+(Math.abs(k)===2?' tono':' tonos');
     const origUI=()=>{const k=$('#korig',r);if(!k)return;
       if(!O.blob){k.innerHTML=`<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La app la escucha y la letra sigue a la canción real.</span></div>`;
-        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.recK=0;DB.kuse[id]=true;delete DB.ksync[id];save();
+        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.voc=null;O.recK=0;DB.kuse[id]=true;delete DB.ksync[id];save();
           recIDB();if(O.el){O.el.remove&&O.el.remove();O.el=null}build();origUI();autoSync()};return}
       const T=synced(),B=O.busy;
       k.innerHTML=`<div class="seg">${[[0,'Banda de la app'],[1,'Mi grabación']].map(([v,l])=>`<button data-ou="${v}" aria-pressed="${O.use===!!v}">${l}</button>`).join('')}</div>
@@ -636,7 +636,17 @@ function viewSongPlay(id,slow){
       if(h<0)for(let i=g+1;i<TL.lines.length;i++)if(T[TL.lines[i].li]!=null){h=i;break}
       return h<0?null:beatT(T[TL.lines[h].li],L.start-TL.lines[h].start)};
     const lineT=g=>{const t=lineRaw(g);return t==null?null:t+off()};
-    const buildO=()=>{OEV=[];OLT=TL.lines.map((_,g)=>lineT(g));TL.ev.forEach(e=>{if(e.type==='note')return;const g=lineIdx(e.li);if(g<0)return;const t0=lineRaw(g);if(t0==null)return;let t=beatT(t0,e.b-TL.lines[g].start)+off();const n=OLT[g+1];if(n!=null&&e.type!=='line')t=Math.min(t,n-.05);OEV.push({t,e})});OEV.sort((a,b)=>a.t-b.t)};
+    // sílabas: se reparten en lo que de verdad se canta del renglón (hasta donde se apaga la voz, sin pasarse del
+    // siguiente renglón), para que se iluminen todas una por una aunque el renglón dure distinto de lo estimado
+    const sylSpan=g=>{const L=TL.lines[g],t0=lineRaw(g);if(t0==null)return null;const b=TL.ev.filter(e=>e.type==='lit'&&e.li===L.li).map(e=>e.b);if(!b.length)return null;
+      const s0=Math.min(...b),s1=Math.max(...b)+1,a=beatT(t0,s0-L.start)+off(),nat=beatT(t0,s1-L.start)+off(),nx=OLT[g+1]!=null?OLT[g+1]-.25:1e9;let z=Math.min(nat,nx);
+      if(O.voc&&O.grid){const j0=Math.max(0,Math.ceil(gridIdx(O.grid,a-off()))),j1=Math.min(O.voc.length-1,Math.floor(gridIdx(O.grid,Math.min(nx,a+60)-off())));let last=-1;
+        for(let j=j0;j<=j1;j++)if(O.voc[j]>=.5)last=j;if(last>=j0){const ve=gridT(O.grid,last+1)+off();if(ve>a+.6)z=Math.min(ve,nx)}}
+      return z>a+.3?{s0,s1,a,z}:null};
+    const buildO=()=>{OEV=[];OLT=TL.lines.map((_,g)=>lineT(g));const SP=TL.lines.map((_,g)=>sylSpan(g));
+      TL.ev.forEach(e=>{if(e.type==='note')return;const g=lineIdx(e.li);if(g<0)return;const t0=lineRaw(g);if(t0==null)return;let t=beatT(t0,e.b-TL.lines[g].start)+off();
+        const sp=SP[g];if(e.type==='lit'&&sp)t=sp.a+(e.b-sp.s0)/(sp.s1-sp.s0)*(sp.z-sp.a);
+        const n=OLT[g+1];if(n!=null&&e.type!=='line')t=Math.min(t,n-.05);OEV.push({t,e})});OEV.sort((a,b)=>a.t-b.t)};
     const curLine=now=>{let g=-1;for(let i=0;i<OLT.length;i++){const t=OLT[i];if(t!=null&&t<=now+.02)g=i}return g};
     const applyUntil=(from,now)=>{OEV.forEach(({t,e})=>{if(t<=from||t>now)return;
       if(e.type==='line'){setLine(e.li);pos=Math.max(0,lineIdx(e.li));$('#kpos',r).textContent=(st.loop?'Repitiendo · ':'')+`Renglón ${pos+1} de ${TL.lines.length}`}
@@ -664,11 +674,11 @@ function viewSongPlay(id,slow){
       if(O.playing)origStop();if(O.syncing){O.syncing=false;if(O.el)O.el.pause();syncPaint()}
       O.busy=true;O.prog=0;origUI();paint();
       const show=p=>{O.prog=p;const s=$('.koname',r);if(s)s.textContent=`Escuchando la canción… ${Math.round(p*100)} %`};
-      try{const{x,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;
-        const A=await syncAnalyze(x,sr,DB.kbpm[id]||(P.set.bpm?P.bpm:0),show);if(!document.body.contains(r))return;
+      try{const{x,xs,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;
+        const A=await syncAnalyze(x,sr,DB.kbpm[id]||(P.set.bpm?P.bpm:0),show,xs);if(!document.body.contains(r))return;
         const bpm=Math.max(40,Math.min(220,Math.round(A.bpm)));O.grid=A.beats;st.bpm=bpm;DB.kbpm[id]=bpm;build();
         const R=syncAlign(A,TL,st.beats);if(!R)throw new Error('sin acordes');
-        O.grid=R.grid;O.recK=R.k;DB.ksync[id]=R.T;if(DB.ksyncOff)delete DB.ksyncOff[id];save();recIDB();
+        O.grid=R.grid;O.voc=R.voc;O.recK=R.k;DB.ksync[id]=R.T;if(DB.ksyncOff)delete DB.ksyncOff[id];save();recIDB();
         $('#kbpm',r).textContent=bpm;side();spdTxt();pos=0;clearHL();buildO();
         toast(logo()+`<span>Listo: la letra sigue a tu grabación (${bpm} bpm). Toca Empezar.</span>`,4000)}
       catch(e){toast('No pude escuchar este archivo. Usa «A mano».',4000)}
@@ -699,9 +709,9 @@ function viewSongPlay(id,slow){
       else if(k==='sync'){if(O.playing)origStop();syncStart()}
       else if(k==='tk'){st.shift=((O.recK+18)%12)-6;DB.kt[id]=st.shift;save();rerender();origUI()}
       else if(k==='del'){if(O.playing)origStop();slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
-        O.blob=null;O.el=null;O.use=false;O.grid=null;O.recK=0;delete DB.ksync[id];DB.kuse[id]=false;save();build();origUI();paint()}
+        O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.recK=0;delete DB.ksync[id];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[id]=+(((+DB.ksyncOff[id]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[id]>0?'+':''}${DB.ksyncOff[id]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.recK=rec.k||0;build()}origUI();paint()}).catch(()=>origUI());
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;build()}origUI();paint()}).catch(()=>origUI());
     origUI();
     side();paint();spdTxt();
     return()=>{document.removeEventListener('playstate',onState);if(SEQ.id==='kar')seqStop();bandStop();origStop();O.syncing=false;if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url)};

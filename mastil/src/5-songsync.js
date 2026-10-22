@@ -2,7 +2,10 @@
    1) decodifica a ~11 kHz mono; 2) flujo espectral → tempo (autocorrelación, prefiere el bpm esperado) y pulsos
    (programación dinámica, Ellis 2007); 3) croma por pulso; 4) alinea con DTW la sucesión de acordes de la canción,
    pulso a pulso, contra los pulsos reales (probando los tonos más probables: capo o afinación medio tono abajo).
-   Resultado: el tiempo real donde empieza cada renglón y la rejilla de pulsos de la grabación. */
+   5) voz: en las mezclas de estudio la voz va al centro y las guitarras a los lados; cuando (L+R) sube contra (L−R)
+   en la banda de la voz, alguien canta. Así la letra espera en las partes solo musicales y las sílabas se reparten
+   en lo que de verdad se canta. En grabaciones mono no hay pista y se usa solo lo demás.
+   Resultado: el tiempo real donde empieza cada renglón, la rejilla de pulsos y la voz por pulso. */
 const SR_AN=11025,SYNC_OFS=.018;
 function fftRI(re,im){
   const n=re.length;
@@ -18,11 +21,11 @@ async function syncDecode(blob){
   // el contexto de 11 kHz ya entrega el audio remuestreado (si el navegador no lo permite, se usa el normal)
   try{buf=await decodeAB(new OAC(1,1,SR_AN),ab.slice(0))}catch(e){}
   if(!buf){ac();buf=await decodeAB(AC,ab)}
-  const sr=buf.sampleRate,d=Math.max(1,Math.round(sr/SR_AN)),n=Math.floor(buf.length/d),x=new Float32Array(n),C=buf.numberOfChannels;
-  for(let c=0;c<C;c++){const s=buf.getChannelData(c);for(let i=0;i<n;i++){let a=0;const o=i*d;for(let k=0;k<d;k++)a+=s[o+k];x[i]+=a/(d*C)}}
-  return{x,sr:sr/d};
+  const sr=buf.sampleRate,d=Math.max(1,Math.round(sr/SR_AN)),n=Math.floor(buf.length/d),x=new Float32Array(n),C=buf.numberOfChannels,xs=C>1?new Float32Array(n):null;
+  for(let c=0;c<C;c++){const s=buf.getChannelData(c);for(let i=0;i<n;i++){let a=0;const o=i*d;for(let k=0;k<d;k++)a+=s[o+k];x[i]+=a/(d*C);if(xs&&c<2)xs[i]+=(c?-a:a)/(2*d)}}
+  return{x,xs,sr:sr/d};
 }
-async function syncAnalyze(x,sr,bpm0,prog){
+async function syncAnalyze(x,sr,bpm0,prog,xs){
   prog=prog||(()=>{});
   // 1) flujo espectral: ventana 1024, salto 128 (≈ 11.6 ms)
   const N1=1024,H1=128,nf=Math.max(8,Math.floor((x.length-N1)/H1)),w1=hannW(N1),fr=sr/H1;
@@ -61,22 +64,33 @@ async function syncAnalyze(x,sr,bpm0,prog){
   const N2=4096,H2=1024,nc=Math.max(1,Math.floor((x.length-N2)/H2)+1),w2=hannW(N2),pcOf=new Int8Array(N2/2).fill(-1),lowB=new Uint8Array(N2/2);
   for(let k=1;k<N2/2;k++){const f=k*sr/N2;if(f>=55&&f<=2200){pcOf[k]=((Math.round(12*Math.log2(f/440))+69)%12+12)%12;lowB[k]=f<180?1:0}}
   re=new Float32Array(N2);im=new Float32Array(N2);const chroma=new Float32Array(nc*12),bassC=new Float32Array(nc*12),en=new Float32Array(nc);
+  // banda de la voz (300 Hz – 3 kHz) en el centro (vm) y en los lados (vs)
+  const k1=Math.round(300*N2/sr),k2=Math.round(3000*N2/sr),vm=new Float32Array(nc),vs=xs?new Float32Array(nc):null;
   for(let f=0;f<nc;f++){const o=f*H2;for(let i=0;i<N2;i++){re[i]=(x[o+i]||0)*w2[i];im[i]=0}fftRI(re,im);
-    for(let k=1;k<N2/2;k++){const p=pcOf[k];const m=Math.sqrt(re[k]*re[k]+im[k]*im[k]);en[f]+=m;if(p>=0)(lowB[k]?bassC:chroma)[f*12+p]+=m}
+    for(let k=1;k<N2/2;k++){const p=pcOf[k];const m=Math.sqrt(re[k]*re[k]+im[k]*im[k]);en[f]+=m;if(p>=0)(lowB[k]?bassC:chroma)[f*12+p]+=m;if(k>=k1&&k<=k2)vm[f]+=m}
+    if(vs){for(let i=0;i<N2;i++){re[i]=(xs[o+i]||0)*w2[i];im[i]=0}fftRI(re,im);for(let k=k1;k<=k2;k++)vs[f]+=Math.sqrt(re[k]*re[k]+im[k]*im[k])}
     if(f%400===0){prog(.8+.2*f/nc);await syncIdle()}}
   prog(1);
-  return{beats,bpm:60*fr/per,chroma,bassC,en,nc,ct:f=>(f*H2+N2/2)/sr,cq:N2/4/sr};
+  return{beats,bpm:60*fr/per,chroma,bassC,en,vm,vs,nc,ct:f=>(f*H2+N2/2)/sr,cq:N2/4/sr};
 }
 // croma promedio de cada tramo de la rejilla (normalizado), con su energía
 // solo las ventanas que caen casi enteras dentro del tramo, para no «oír» el acorde antes de que suene
 function gridChroma(A,grid){
-  const out=[],BS=[],E=[];let f=0;
-  for(let j=0;j<grid.length;j++){const a0=grid[j],b0=j+1<grid.length?grid[j+1]:a0+(grid[j]-(grid[j-1]||a0-.5)),q=Math.min(A.cq,(b0-a0)/3),a=a0+q,b=b0-q,v=new Float32Array(12),u=new Float32Array(12);let e=0,n=0;
+  const out=[],BS=[],E=[],R=[],MS=[];let f=0;
+  for(let j=0;j<grid.length;j++){const a0=grid[j],b0=j+1<grid.length?grid[j+1]:a0+(grid[j]-(grid[j-1]||a0-.5)),q=Math.min(A.cq,(b0-a0)/3),a=a0+q,b=b0-q,v=new Float32Array(12),u=new Float32Array(12);let e=0,n=0,m=0,s2=0;
     while(f<A.nc&&A.ct(f)<a)f++;
-    for(let g=f;g<A.nc&&A.ct(g)<b;g++){for(let p=0;p<12;p++){v[p]+=A.chroma[g*12+p];u[p]+=A.bassC[g*12+p]}e+=A.en[g];n++}
+    for(let g=f;g<A.nc&&A.ct(g)<b;g++){for(let p=0;p<12;p++){v[p]+=A.chroma[g*12+p];u[p]+=A.bassC[g*12+p]}e+=A.en[g];m+=A.vm[g];if(A.vs)s2+=A.vs[g];n++}
     if(!n){const g=Math.min(A.nc-1,f);for(let p=0;p<12;p++){v[p]=A.chroma[g*12+p];u[p]=A.bassC[g*12+p]}e=A.en[g];n=1}
-    nrm(v);nrm(u);out.push(v);BS.push(u);E.push(e/n)}
-  return{C:out,BS,E};
+    nrm(v);nrm(u);out.push(v);BS.push(u);E.push(e/n);R.push(Math.log((m/n+1e-3)/(s2/n+1e-3)));MS.push(s2/(m||1))}
+  // casi sin lados = grabación mono (o casi): no hay forma de oír la voz aparte
+  const side=MS.slice().sort((a,b)=>a-b)[MS.length>>1]||0;
+  return{C:out,BS,E,V:A.vs&&side>.04?vocalOf(R,E):null};
+}
+// voz por pulso (0 a 1), relativa a la misma canción; null si no se distingue (mono o mezcla muy angosta)
+function vocalOf(R,E){
+  const eMed=E.slice().sort((a,b)=>a-b)[E.length>>1]||1,ok=R.filter((r,j)=>E[j]>eMed*.1).sort((a,b)=>a-b);if(ok.length<16)return null;
+  const lo=ok[Math.floor(ok.length*.15)],hi=ok[Math.floor(ok.length*.85)];if(hi-lo<.3)return null;
+  return R.map((r,j)=>E[j]<eMed*.1?0:Math.max(0,Math.min(1,(r-lo)/(hi-lo))));
 }
 const nrm=v=>{let s=0;for(let i=0;i<v.length;i++)s+=v[i]*v[i];s=Math.sqrt(s)||1;for(let i=0;i<v.length;i++)v[i]/=s;return v};
 // qué tanto suena el acorde en el pulso j: 72 % los medios (tipo de acorde) y 28 % los graves (raíz, algo de quinta)
@@ -96,15 +110,20 @@ function chordTpl(p,k){
 }
 /* DTW con inicio y final libres en la grabación (intro y final sin letra no cuestan).
    Diagonal = la canción y la grabación avanzan juntas; los otros pasos estiran o encogen y cuestan un poco. */
-function syncDTW(X,C,BS,E,k,pen){
+function syncDTW(X,C,BS,E,k,pen,LY,V){
   const M=X.length,N=C.length,eMed=E.slice().sort((a,b)=>a-b)[N>>1]||1,P0=[...new Set(X.filter(Boolean))],S=new Map(P0.map(p=>[p,new Float32Array(N)]));
   // cada acorde distinto contra cada pulso, una sola vez
   P0.forEach(p=>{const a=S.get(p);for(let j=0;j<N;j++)a[j]=chordMatch(p,k,C[j],BS[j])});
-  const cost=(i,j)=>{if(E[j]<eMed*.06)return .6;const p=X[i];return p?1-S.get(p)[j]:.5};
+  // con voz: la letra cae donde se canta, lo instrumental donde no, y estirar sobre partes sin voz cuesta poco
+  const cost0=(i,j)=>{if(E[j]<eMed*.06)return .6;const p=X[i];return p?1-S.get(p)[j]:.5};
+  // esperar (la grabación avanza y la canción no): sobre una parte sin voz casi no cuesta, aunque el acorde no coincida
+  const cost=V?(i,j)=>cost0(i,j)+(LY[i]?.3*(1-V[j]):.18*V[j]):cost0,wait=V?(i,j)=>pen*.3+.1+.6*V[j]:(i,j)=>pen+cost0(i,j);
+  // encoger dentro de la letra cuesta menos: lo que dura cada renglón cantado es lo más incierto de la estimación
+  const squeeze=V?i=>LY[i]&&LY[i-1]?pen*.4:pen:()=>pen;
   const D=new Float32Array(M*N),B=new Uint8Array(M*N);
   for(let j=0;j<N;j++)D[j]=cost(0,j)-.005*Math.min(j,64); // en empates (intro con el mismo acorde) entra lo más tarde
   for(let i=1;i<M;i++){const r=i*N,rp=r-N;D[r]=D[rp]+pen+cost(i,0);B[r]=2;
-    for(let j=1;j<N;j++){const a=D[rp+j-1],b=D[r+j-1]+pen,c=D[rp+j]+pen;let m=a,s=0;if(b<m){m=b;s=1}if(c<m){m=c;s=2}D[r+j]=m+cost(i,j);B[r+j]=s}}
+    for(let j=1;j<N;j++){const ci=cost(i,j),a=D[rp+j-1]+ci,b=D[r+j-1]+wait(i,j),c=D[rp+j]+squeeze(i)+ci;let m=a,s=0;if(b<m){m=b;s=1}if(c<m){m=c;s=2}D[r+j]=m;B[r+j]=s}}
   let jb=0;const L=(M-1)*N;for(let j=1;j<N;j++)if(D[L+j]<D[L+jb])jb=j;
   // de atrás hacia adelante: F[i] se queda con el primer pulso de la grabación que le tocó a cada pulso de la canción
   let i=M-1,j=jb;const F=new Int32Array(M).fill(-1);
@@ -117,9 +136,12 @@ function syncAlign(A,TL,bt){
   const grid=A.beats;if(grid.length<8||!TL.lines.length)return null;
   const M=Math.max(1,Math.ceil(TL.total)),X=[];for(let i=0;i<M;i++)X.push(TL.chAt[Math.round(i*TL.res)]||null);
   if(!X.some(Boolean))return null;
-  const{C,BS,E}=gridChroma(A,grid);
+  const{C,BS,E,V}=gridChroma(A,grid);
+  // pulsos de la canción con letra: de la primera a la última sílaba de cada renglón
+  const LY=new Uint8Array(M);TL.lines.forEach(L=>{const b=TL.ev.filter(e=>e.type==='lit'&&e.li===L.li).map(e=>e.b);if(!b.length)return;
+    for(let i=Math.max(0,Math.floor(Math.min(...b)));i<=Math.min(M-1,Math.floor(Math.max(...b)));i++)LY[i]=1});
   // los 12 tonos (capo, afinación medio tono abajo…): gana el que mejor alinea; el escrito tiene una pequeña ventaja
-  const all=[];for(let k=-5;k<=6;k++){const r=syncDTW(X,C,BS,E,k,.18);r.k=k;if(k)r.cost+=.01;all.push(r)}
+  const all=[];for(let k=-5;k<=6;k++){const r=syncDTW(X,C,BS,E,k,.18,LY,V);r.k=k;if(k)r.cost+=.01;all.push(r)}
   all.sort((a,b)=>a.cost-b.cost);const best=all[0],sure=all[1].cost-best.cost>.015;
   const F=best.J,at=b=>{const i=Math.max(0,Math.min(M-1,Math.floor(b))),fr=Math.max(0,b-i),j=F[i],a=grid[j],n=grid[j+1]??a+60/A.bpm;return a+fr*(n-a)};
   const T={};TL.lines.forEach(L=>{T[L.li]=+at(Math.max(0,L.start)).toFixed(3)});
@@ -134,7 +156,11 @@ function syncAlign(A,TL,bt){
     let bd=0,bs=df(jc,0,w)-df(jc,-w,0);for(let d=-4;d<=4;d++){const s=df(jc+d,0,w)-df(jc+d,-w,0)-.03*Math.abs(d);if(s>bs+.05){bs=s;bd=d}}
     if(!bd)return;const nt=+gridT(grid,gridIdx(grid,T[L.li])+bd).toFixed(3),pr=g?T[TL.lines[g-1].li]:-1e9,nx=TL.lines[g+1]?T[TL.lines[g+1].li]:1e9;
     if(nt>pr+.2&&nt<nx-.2)T[L.li]=nt});
-  return{T,grid:grid.map(t=>+t.toFixed(3)),bpm:Math.round(A.bpm),k:best.k,sure,cost:best.cost};
+  // con voz: el primer renglón con letra empieza donde entra la voz (si la intro toca el mismo acorde, los acordes no lo dicen)
+  const L0=TL.lines.find(L=>TL.ev.some(e=>e.type==='lit'&&e.li===L.li));
+  if(V&&L0){const j0=Math.round(gridIdx(grid,T[L0.li]));let bj=-1;for(let d=0;d<=12&&bj<0;d++)for(const j of d?[j0-d,j0+d]:[j0])if(bj<0&&j>=0&&j+1<V.length&&V[j]>=.5&&V[j+1]>=.5&&((V[j-1]??0)+(V[j-2]??0)+(V[j-3]??0))/3<.4)bj=j; // antes, ~3 pulsos sin voz (no una pausa entre sílabas)
+    const g=TL.lines.indexOf(L0),nx=TL.lines[g+1]?T[TL.lines[g+1].li]:1e9;if(bj>=0&&grid[bj]<nx-.2)T[L0.li]=+grid[bj].toFixed(3)}
+  return{T,grid:grid.map(t=>+t.toFixed(3)),voc:V?V.map(v=>+v.toFixed(2)):null,bpm:Math.round(A.bpm),k:best.k,sure,cost:best.cost};
 }
 // posición (en pulsos, con fracción) de un tiempo dentro de la rejilla, y su inversa
 function gridIdx(g,t){const n=g.length;if(n<2)return 0;if(t<=g[0])return(t-g[0])/(g[1]-g[0]);if(t>=g[n-1])return n-1+(t-g[n-1])/(g[n-1]-g[n-2]);
