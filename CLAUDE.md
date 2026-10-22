@@ -4,7 +4,7 @@ Este repositorio publica en GitHub Pages (rama `main`, se despliega solo al hace
 
 | Carpeta | App | URL |
 |---|---|---|
-| `mastil/` | **Roka Guitar for All** (antes Mástil a la Vista) — teoría visual para guitarra (PWA) | https://robertomadrigale-cmd.github.io/mastil/ |
+| `mastil/` | **Roka Guitar for All** (antes Mástil a la Vista) — teoría visual para guitarra (PWA) | **https://rokaguitarrall.web.app** (principal, Firebase Hosting) · también https://robertomadrigale-cmd.github.io/mastil/ |
 | `bateria/` | **Pulso a la Vista** — pulso y tiempo para baterista de banda (PWA) | https://robertomadrigale-cmd.github.io/bateria/ |
 
 Roberto no es programador: entrégale cambios terminados y publicados, sin pedirle que edite código. Todo el texto de las apps va en español de México, tuteando.
@@ -54,7 +54,8 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 1. Reconstruye y revisa que el JavaScript compile: `node -e "new Function(require('fs').readFileSync('index.html','utf8').split('<script>')[1].split('</script>')[0])"`.
 2. Prueba en el navegador: que todos los botones respondan y no haya errores en consola, en ancho de teléfono (400 px) y de escritorio.
    Revisa márgenes con `tools/revisar-margenes.js` en `390 1.25`, `360 1.15`, `320 1` y `1280 1` (Roberto usa letra grande en Android): ningún botón partido, nada fuera del margen. Los botones llevan `white-space:nowrap`; si un texto es largo, acórtalo en vez de dejar que se parta.
-3. Commit y push a `main`.
+3. Commit y push a `main` (GitHub Pages).
+4. Publica también en Firebase Hosting (Roberto ya tiene sesión en esta computadora): `npx -y firebase-tools@13.29.1 deploy --only hosting --project rokaguitarrall` desde la raíz del repo (`firebase.json` sirve la carpeta `mastil/` sin `src/`).
 
 ## Ideas pendientes que Roberto vio con buenos ojos
 - Canciones de práctica por lección (reutilizar ROKA Studio).
