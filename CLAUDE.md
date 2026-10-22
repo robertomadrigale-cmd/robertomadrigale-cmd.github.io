@@ -32,7 +32,7 @@ Roberto no es programador: entrégale cambios terminados y publicados, sin pedir
 - `5-songlib.js` datos: `TRAD` (dominio público con letra; validar que sílabas = notas en las que tienen `{mel}`) y `TOP100` (solo tono, BPM y progresión: sus letras tienen derechos de autor, no las incluyas; el usuario las pega y se guardan en `DB.songs`).
 - `route()` reemplaza `#page` en cada vista para que no se acumulen listeners. La animación de entrada solo mueve (nunca usa opacidad 0) para que el contenido no quede invisible si el navegador la pausa.
 - **Diseño (v3, sobrio estilo Apple):** la capa final de `0-style.css` ("acabado sobrio") manda: tipografía del sistema, títulos en minúsculas con peso, bordes `--hair`, íconos de trazo 1.7, medallas con íconos SVG (`ACHIC` en `5-extra.js`), sin emojis ni símbolos. Tema por defecto "Grafito" (claro: "Aluminio"). Ícono de la app: púa ámbar sobre grafito, sin texto (Pillow).
-- Temas de color por épocas del rock: lista `THEMES` en `6-app.js` (colores + fondo `--art`). La carpeta `mastil/` y la clave de `localStorage` no cambian, para no romper links ni perder progreso.
+- Temas de color por épocas del rock: lista `THEMES` en `6-app.js` (colores + fondo `--art`). Cada época tiene además una ilustración original en SVG (`5-themeart.js`, `ART[id]` → `ARTURL`) que se pinta en la capa fija `#artbg` (`--artimg`, `--arto`); con arte, `html.arty` vuelve las tarjetas y el texto de vidrio translúcido. No uses fotos ni dibujos de músicos reales ni logotipos de bandas. La carpeta `mastil/` y la clave de `localStorage` no cambian, para no romper links ni perder progreso.
 
 ### Pulso a la Vista (batería)
 - `4-drums.js` sonidos de batería y la cuadrícula de grooves. `5-content.js` 29 grooves (`G`) y 12 lecciones.

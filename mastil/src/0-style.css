@@ -555,3 +555,12 @@ li.narr{box-shadow:none;background:color-mix(in srgb,var(--accent) 16%,transpare
 .narrbar .icon-btn{width:40px;height:40px}
 .narrbar .icon-btn.pri{background:var(--accent);color:var(--accent-ink)}
 .narrbar .seg button{padding:5px 9px;font-size:13px}
+
+/* arte de época: capa fija semitransparente detrás del contenido + tarjetas de vidrio */
+#artbg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:var(--artimg,none);background-size:cover;background-position:center top;opacity:var(--arto,.6)}
+.shell{position:relative;z-index:1}
+html.arty .card,html.arty .widget,html.arty .ex,html.arty .box,html.arty .gl div,html.arty .kside,html.arty .cta,html.arty .lrow{background-color:color-mix(in srgb,var(--surface) 74%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.35);backdrop-filter:blur(14px) saturate(1.35)}
+html.arty .fig{background-color:color-mix(in srgb,var(--bg) 70%,transparent)}
+html.arty .lhead,html.arty p.prose,html.arty div.prose{background-color:color-mix(in srgb,var(--bg) 66%,transparent);-webkit-backdrop-filter:blur(12px) saturate(1.3);backdrop-filter:blur(12px) saturate(1.3);padding:14px 16px;border-radius:16px}
+.thm .thp{background:var(--timg,none) center/cover,var(--tart),var(--tb)}
+@media (prefers-reduced-transparency:reduce){#artbg{opacity:.25}}

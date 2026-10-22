@@ -40,17 +40,18 @@ const themeById=id=>THEMES.find(t=>t[0]===id);
 if(DB.theme==='dark')DB.theme='clasico';else if(DB.theme==='light')DB.theme='claro';
 document.head.insertAdjacentHTML('beforeend','<style>'+THEMES.map(([id,,,dark,c,art])=>{
   const v=c.split(' ');
-  return`:root[data-theme="${id}"]{${TVARS.map((k,i)=>`--${k}:${v[i]}`).join(';')};--art:${art};--glass:color-mix(in srgb,${v[0]} 80%,transparent);color-scheme:${dark?'dark':'light'}}`;
+  return`:root[data-theme="${id}"]{${TVARS.map((k,i)=>`--${k}:${v[i]}`).join(';')};--art:${art};--artimg:${ARTURL[id]||'none'};--arto:${dark?.62:.75};--glass:color-mix(in srgb,${v[0]} 80%,transparent);color-scheme:${dark?'dark':'light'}}`;
 }).join('')+'</style>');
 function applyTheme(){
   const id=DB.theme!=='auto'&&themeById(DB.theme)?DB.theme:matchMedia('(prefers-color-scheme: light)').matches?'claro':'clasico';
-  document.documentElement.setAttribute('data-theme',id);
+  document.documentElement.setAttribute('data-theme',id);document.documentElement.classList.toggle('arty',!!ARTURL[id]);
+  if(!document.getElementById('artbg'))document.body.insertAdjacentHTML('afterbegin','<div id="artbg" aria-hidden="true"></div>');
   $$('meta[name="theme-color"]').forEach(m=>{m.removeAttribute('media');m.content=themeById(id)[4].split(' ')[0]});
 }
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(DB.theme==='auto')applyTheme()});
 applyTheme();
 function themeCards(){
-  const sw=([id,n,era,,c,art])=>{const v=c.split(' ');return`<button class="thm" data-theme-set="${id}" aria-pressed="${DB.theme===id}" style="--tb:${v[0]};--ts:${v[1]};--tf:${v[3]};--tm:${v[4]};--ta:${v[6]};--tr:${v[9]};--tart:${art}"><span class="thp"><i></i><i></i><i></i></span><b>${n}</b><small>${era}</small></button>`};
+  const sw=([id,n,era,,c,art])=>{const v=c.split(' ');return`<button class="thm" data-theme-set="${id}" aria-pressed="${DB.theme===id}" style="--tb:${v[0]};--ts:${v[1]};--tf:${v[3]};--tm:${v[4]};--ta:${v[6]};--tr:${v[9]};--tart:${art};--timg:${ARTURL[id]||'none'}"><span class="thp"><i></i><i></i><i></i></span><b>${n}</b><small>${era}</small></button>`};
   return`<button class="thm auto" data-theme-set="auto" aria-pressed="${DB.theme==='auto'}"><span class="thp"><i></i><i></i><i></i></span><b>Automático</b><small>Sigue a tu teléfono</small></button>`+THEMES.map(sw).join('');
 }
 /* ---------- widgets interactivos ---------- */
