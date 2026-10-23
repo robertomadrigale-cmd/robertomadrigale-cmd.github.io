@@ -58,6 +58,8 @@ function chordSVG(v){
   for(let i=0;i<6;i++)s+=`<line x1="${i*W}" y1="0" x2="${i*W}" y2="${4*H}"/>`;
   for(let f=0;f<=4;f++)s+=`<line x1="0" y1="${f*H}" x2="${5*W}" y2="${f*H}" ${f===0&&base===1?'stroke-width="2.5"':''}/>`;
   if(base>1)s+=`<text x="${5*W+8}" y="${H*.8}" class="fr">${base}</text>`;
+  // cejilla: barra de la cuerda grave a la aguda que pisa el dedo 1
+  const cb=chordFing(F).barre;if(cb)s+=`<rect class="bar" x="${(6-cb.s2)*W-4}" y="${(cb.f-base+.5)*H-3.8}" width="${(cb.s2-cb.s1)*W+8}" height="7.6" rx="3.8"/>`;
   F.forEach((f,i)=>{const x=i*W;if(f==null)s+=`<text x="${x}" y="-4">×</text>`;else if(f===0)s+=`<circle cx="${x}" cy="-6" r="3" class="o"/>`;else s+=`<circle cx="${x}" cy="${(f-base+.5)*H}" r="3.8"/>`});
   return s+'</svg>';
 }

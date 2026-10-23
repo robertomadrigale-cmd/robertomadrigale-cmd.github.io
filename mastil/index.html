@@ -1081,6 +1081,18 @@ html.welcome-on{overflow:hidden}
 .box.chk summary::before{content:'+';flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--surface2);color:var(--accent-text)}
 .box.chk details[open] summary::before{content:'−';background:var(--accent);color:var(--accent-ink)}
 .box.chk details p{margin:8px 0 0 32px;color:var(--muted)}
+/* ===================== dedos, cejilla y paso a paso en los diagramas ===================== */
+.fb .barre{fill:color-mix(in srgb,var(--accent) 55%,transparent);stroke:var(--accent);stroke-width:1.5}
+.fb .barret{fill:var(--accent-text,var(--accent));font:700 9px var(--font-body);text-anchor:middle;letter-spacing:.04em;text-transform:uppercase}
+.fb .fgb{fill:var(--fg);stroke:var(--bg);stroke-width:1.5}
+.fb .fgt{fill:var(--bg);font:800 9.5px var(--font-body);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.fb .dg.on .fgb{fill:var(--good)}
+.fglegend{margin:6px 0 0;font-size:12.5px;color:var(--muted);line-height:1.4}
+.fglegend b{color:var(--fg)}
+.mch .bar{fill:var(--accent);opacity:.85}
+.figstep{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px;border-radius:16px;background:color-mix(in srgb,var(--fg) 5%,transparent)}
+.figstep .kic{width:40px;height:40px}
+.fsl{font-size:14px;line-height:1.35;text-align:center;color:var(--fg)}
 
 </style>
 </head>
@@ -1145,6 +1157,23 @@ const ACC_N=[0,1,2,3,4,5,6,-5,-4,-3,-2,-1];
 const SHARPS=['Fa♯','Do♯','Sol♯','Re♯','La♯','Mi♯'],FLATS=['Si♭','Mi♭','La♭','Re♭','Sol♭','Do♭'];
 /* ---------- mástil (SVG) ---------- */
 let LEFTY=false;
+/* dedos: un dedo por traste dentro de la posición (índice en el traste más bajo). Si el patrón abarca más de 5 trastes
+   hay que mover la mano y no se ponen números. Las cuerdas al aire no llevan dedo. */
+function autoFingers(dots){
+  const fr=dots.filter(x=>x.f>0).map(x=>x.f);if(!fr.length)return dots;const lo=Math.min(...fr),hi=Math.max(...fr);if(hi-lo>4)return dots;
+  dots.forEach(x=>{if(x.fg==null&&x.f>0)x.fg=Math.min(4,x.f-lo+1)});return dots;
+}
+/* acorde: frets[0] = cuerda 6 … frets[5] = cuerda 1 (null = no suena).
+   Cejilla cuando ninguna cuerda que suena va al aire, hay 4+ notas pisadas y el traste más bajo se repite: el dedo 1 las pisa todas.
+   Los demás dedos van por traste (del más bajo al más alto) y, en el mismo traste, de la cuerda grave a la aguda. */
+function chordFing(frets){
+  const fr=frets.map((f,j)=>({f,s:6-j})).filter(x=>x.f!=null&&x.f>0),fg={};if(!fr.length)return{fg,barre:null};
+  const lo=Math.min(...fr.map(x=>x.f)),atLo=fr.filter(x=>x.f===lo),open=frets.some(f=>f===0);let barre=null;
+  if(!open&&fr.length>=4&&atLo.length>=2){const ss=atLo.map(x=>x.s);barre={f:lo,s1:Math.min(...ss),s2:Math.max(...ss)};atLo.forEach(x=>fg[x.s]=1)}
+  // un dedo por traste a partir del más bajo; si dos notas caen en el mismo traste, la siguiente toma el dedo de al lado
+  let last=barre?1:0;fr.filter(x=>fg[x.s]==null).sort((a,b)=>a.f-b.f||b.s-a.s).forEach(x=>{fg[x.s]=Math.min(4,Math.max(last+1,x.f-lo+1));last=fg[x.s]});
+  return{fg,barre};
+}
 function fretboard(o){
   const from=o.from||0,to=o.to==null?12:o.to,W=o.w||42,H=25,top=20,left=32,lane=from===0?24:0;
   const start=from===0?1:from,cols=to-start+1,x0=left+lane,wood=cols*W,totalW=x0+wood+10,bottom=top+5*H,totalH=bottom+36;
@@ -1161,18 +1190,24 @@ function fretboard(o){
   for(let s=1;s<=6;s++){g+=`<line class="str" x1="${X(x0)}" x2="${X(x0+wood)}" y1="${y(s)}" y2="${y(s)}" stroke-width="${(.8+(s-1)*.45).toFixed(2)}"/><text class="slab" x="${X(14)}" y="${y(s)}">${'eBGDAE'[s-1]}</text>`}
   for(let f=start;f<=to;f++)g+=`<text class="num" x="${cx(f)}" y="${bottom+30}">${f}</text>`;
   if(from===0)(o.muted||[]).forEach(s=>{g+=`<text class="mute" x="${cx(0)}" y="${y(s)}">×</text>`});
+  // cejilla: una barra sobre las cuerdas que pisa el dedo 1, con su nombre arriba
+  (o.barre?[].concat(o.barre):[]).forEach(b=>{if(!b||b.f<start||b.f>to)return;const x=cx(b.f),y1=y(Math.min(b.s1,b.s2)),y2=y(Math.max(b.s1,b.s2));
+    g+=`<rect class="barre" x="${x-11}" y="${y1-12}" width="22" height="${y2-y1+24}" rx="11"/><text class="barret" x="${x}" y="${top-13}">cejilla</text>`});
   (o.dots||[]).forEach(d=>{
     if(d.f<from||(d.f===0&&from>0)||d.f>to)return;
     const t=d.t==null?'':String(d.t),k=d.k||'note';
-    g+=`<g class="dg" data-s="${d.s}" data-f="${d.f}"><circle class="dot ${k}" cx="${cx(d.f)}" cy="${y(d.s)}" r="10"/>${t?`<text class="dtxt${t.length>2?' sm':''}${k==='root'?' r':''}${k==='dim'?' dm':''}" x="${cx(d.f)}" y="${y(d.s)}">${esc(t)}</text>`:''}</g>`;
+    // el número de dedo va en una insignia en la esquina del punto
+    const fgb=d.fg&&d.f>0?`<circle class="fgb" cx="${cx(d.f)+10}" cy="${y(d.s)-9}" r="7"/><text class="fgt" x="${cx(d.f)+10}" y="${y(d.s)-9}">${d.fg}</text>`:'';
+    g+=`<g class="dg" data-s="${d.s}" data-f="${d.f}"><circle class="dot ${k}" cx="${cx(d.f)}" cy="${y(d.s)}" r="10"/>${t?`<text class="dtxt${t.length>2?' sm':''}${k==='root'?' r':''}${k==='dim'?' dm':''}" x="${cx(d.f)}" y="${y(d.s)}">${esc(t)}</text>`:''}${fgb}</g>`;
   });
   if(o.tap)for(let s=1;s<=6;s++)for(let f=from;f<=to;f++){
     if(f===0&&from>0)continue;
     const x=f===0?left:x0+(f-start)*W,w=f===0?lane:W;
     g+=`<rect class="cell" data-s="${s}" data-f="${f}" x="${R(x,w)}" y="${y(s)-H/2}" width="${w}" height="${H}"/>`;
   }
+  const fgLegend=(o.dots||[]).some(x=>x.fg&&x.f>0)?`<p class="fglegend">Dedos: <b>1</b> índice · <b>2</b> medio · <b>3</b> anular · <b>4</b> meñique${o.barre?' · la barra es <b>cejilla</b> con el dedo 1':''}</p>`:'';
   const hint=totalW*.78>360?`<p class="hint">Desliza para ver todo el mástil ${LEFTY?'←':'→'}</p>`:'';
-  return`${hint}<div class="fbwrap"${LEFTY?' dir="rtl"':''}><svg class="fb" viewBox="0 0 ${totalW} ${totalH}" style="min-width:${Math.round(totalW*.78)}px;max-width:${Math.round(totalW*1.7)}px" role="img" aria-label="${esc(o.label||'Diagrama del mástil de guitarra')}">${g}</svg></div>`;
+  return`${hint}<div class="fbwrap"${LEFTY?' dir="rtl"':''}><svg class="fb" viewBox="0 0 ${totalW} ${totalH}" style="min-width:${Math.round(totalW*.78)}px;max-width:${Math.round(totalW*1.7)}px" role="img" aria-label="${esc(o.label||'Diagrama del mástil de guitarra')}">${g}</svg></div>${fgLegend}`;
 }
 
 /* ---------- widgets ---------- */
@@ -1778,7 +1813,7 @@ const ocDots=c=>{const d=[],m=[];c[2].forEach((f,i)=>{const s=6-i;if(f==null){m.
 const ocMidi=c=>c[2].map((f,i)=>f==null?null:OPEN_MIDI[6-i]+f).filter(x=>x!=null);
 WID.openchords={
   init:{i:0},controls:[{k:'i',label:'Acorde',opts:OC.map((c,i)=>({v:i,l:c[0]}))}],
-  view:s=>{const c=OC[s.i],{d,m}=ocDots(c);return fretboard({to:5,dots:d,muted:m,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
+  view:s=>{const c=OC[s.i],{d,m}=ocDots(c),cf=chordFing(c[2]);d.forEach(x=>{x.fg=cf.fg[x.s]});return fretboard({to:5,dots:d,muted:m,barre:cf.barre,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
 
 /* ---------- cuenta en la nube (Firebase) y modo maestro ----------
    Se activa solo cuando 1-firebase-config.js trae una configuración. Sin configuración, nada de esto aparece. */
@@ -2276,8 +2311,9 @@ function seqData(F){
 }
 function chordBoard(F,i){
   const [name,frets]=F.list[i],to=Math.max(5,...F.list.map(c=>Math.max(...c[1].filter(v=>v!=null))+1)),d=[],m=[];
-  frets.forEach((f,j)=>{const s=6-j;if(f==null){m.push(s);return}d.push({s,f,t:nm((OPEN_PC[s]+f)%12),k:'note'})});
-  return fretboard({to,dots:d,muted:m,label:'Acorde '+name});
+  const{fg,barre}=chordFing(frets);
+  frets.forEach((f,j)=>{const s=6-j;if(f==null){m.push(s);return}d.push({s,f,t:nm((OPEN_PC[s]+f)%12),k:'note',fg:fg[s]})});
+  return fretboard({to,dots:d,muted:m,barre,label:'Acorde '+name});
 }
 const chordMidiF=frets=>frets.map((f,j)=>f==null?null:OPEN_MIDI[6-j]+f).filter(v=>v!=null);
 // cada opción del ejercicio es un interruptor: ícono, valor actual y qué es; al tocarlo cambia al otro valor
@@ -2290,11 +2326,12 @@ function figHTML(x){
   const F=x.fig,st=figState(x),ownBpm=!x.bpm;
   const bpmCtl=ownBpm?`<span class="minimet"><button class="icon-btn" data-fx="bpm" data-d="-5" data-id="${x.id}" aria-label="Bajar tempo">${IC.minus}</button><span class="v" data-fx="bpmv" data-id="${x.id}">${figBpm(x)} bpm</span><button class="icon-btn" data-fx="bpm" data-d="5" data-id="${x.id}" aria-label="Subir tempo">${IC.plus}</button></span>`:'';
   const opts=(F.type==='seq'?['updown','per','guide','mic']:['beats','guide']).map(k=>figTog(x,k)).join('');
-  const board=F.type==='seq'?(()=>{const{dots}=seqData(F);return fretboard(Object.assign({dots,label:'Diagrama del ejercicio'},F.o))})():
+  const board=F.type==='seq'?(()=>{const{dots}=seqData(F);if(!F.nofg)autoFingers(dots);return fretboard(Object.assign({dots,label:'Diagrama del ejercicio'},F.o))})():
     `<div class="chnow"><b data-fx="chname" data-id="${x.id}">${F.list[0][0]}</b><span data-fx="chnext" data-id="${x.id}">${F.list.length>1?'Sigue: '+F.list[1][0]:''}</span></div><div data-fx="chboard" data-id="${x.id}">${chordBoard(F,0)}</div><div class="chlist">${F.list.map((c,i)=>`<span class="pchip sm" data-fx="chip" data-i="${i}" data-id="${x.id}"><b>${c[0]}</b></span>`).join('')}</div>`;
   // transporte: escuchar, botón redondo «seguir al pulso» y tempo; abajo el estado
   return`<div class="fig" data-fig="${x.id}">${board}
    <div class="figbar"><button class="kic" data-fx="preview" data-id="${x.id}"></button><button class="kplayb" data-fx="follow" data-id="${x.id}"></button>${bpmCtl}</div>
+   <div class="figstep"><button class="kic" data-fx="stp" data-d="-1" data-id="${x.id}" aria-label="Paso anterior">${FIGPREV}</button><span class="fsl" data-fx="stl" data-id="${x.id}">Paso a paso: toca › para ver ${F.type==='seq'?'cada nota con su dedo':'cada acorde'}</span><button class="kic" data-fx="stp" data-d="1" data-id="${x.id}" aria-label="Paso siguiente">${FIGNEXT}</button></div>
    <span class="figst" data-fx="st" data-id="${x.id}"></span>
    <div class="figopts" style="--n:${F.type==='seq'?4:2}">${opts}</div></div>`;
 }
@@ -2320,7 +2357,7 @@ function figStart(x,preview){
     const {seq}=seqData(F);
     const order=preview||!st.updown||seq.length<3?seq:seq.concat(seq.slice(1,-1).reverse());
     const per=preview?1:st.per,count=preview?0:4*per;
-    seqStart('fig',(preview?'Escuchando · ':'Siguiendo · ')+x.t,()=>preview?.34:60/figBpm(x)/per,(s,t)=>{
+    seqStart('fig',(preview?'Escuchando · ':'Siguiendo · ')+x.t,()=>preview?.75:60/figBpm(x)/per,(s,t)=>{
       if(s<count){if(s%per===0)tick(t,s===0?'acc':'beat');return}
       const k=s-count;if(preview&&k>=order.length)return;
       const i=k%order.length;
@@ -2333,11 +2370,11 @@ function figStart(x,preview){
       const i=k%order.length;
       if(!preview&&st.mic)fmStep(x,i,order);
       figLight(x.id,order[i][0],order[i][1]);
-      figStatus(x.id,preview?'Nota '+(i+1)+' de '+order.length:'Nota '+(i+1)+' de '+order.length+(st.mic&&FM.total?` · aciertos ${FM.hits} de ${FM.total}`:'')+(st.updown&&order.length>seq.length&&!st.mic?(i<seq.length?' · subiendo':' · bajando'):''));
+      figStatus(x.id,preview?'Nota '+(i+1)+' de '+order.length+' · '+figWhere(F,order[i][0],order[i][1]):'Nota '+(i+1)+' de '+order.length+' · '+figWhere(F,order[i][0],order[i][1])+(st.mic&&FM.total?` · aciertos ${FM.hits} de ${FM.total}`:'')+(st.updown&&order.length>seq.length&&!st.mic?(i<seq.length?' · subiendo':' · bajando'):''));
     });
   }else{
     const L=F.list.length,beats=preview?1:st.beats,count=preview?0:4;
-    seqStart('fig',(preview?'Escuchando · ':'Siguiendo · ')+x.t,()=>preview?1.1:60/figBpm(x),(s,t)=>{
+    seqStart('fig',(preview?'Escuchando · ':'Siguiendo · ')+x.t,()=>preview?1.8:60/figBpm(x),(s,t)=>{
       if(s<count){tick(t,s===0?'acc':'beat');return}
       const k=s-count;if(preview&&k>=L)return;
       const ci=Math.floor(k/beats)%L,first=k%beats===0;
@@ -2348,12 +2385,17 @@ function figStart(x,preview){
       const k=s-count;
       if(preview&&k>=L){if(OWNER===own)seqStop();return}
       const ci=Math.floor(k/beats)%L;
-      if(k%beats===0)figChord(x.id,F,ci);
+      if(k%beats===0){figChord(x.id,F,ci);const sl=document.querySelector(`[data-fx="stl"][data-id="${x.id}"]`);if(sl)sl.textContent=figChordWhere(F,ci)}
       figStatus(x.id,'Acorde '+(ci+1)+' de '+L+(preview?'':' · pulso '+(k%beats+1)));
     });
   }
   paintFig();
 }
+const FIGPREV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',FIGNEXT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+// dónde va cada nota: cuerda, traste y dedo (para leerlo sin adivinar)
+function figWhere(F,s,f){if(f===0)return`cuerda ${s} al aire`;const{dots}=seqData(F);if(!F.nofg)autoFingers(dots);const d=dots.find(x=>x.s===s&&x.f===f);return`cuerda ${s}, traste ${f}${d&&d.fg?', dedo '+d.fg:''}`}
+function figChordWhere(F,i){const[name,frets]=F.list[i],{fg,barre}=chordFing(frets);const parts=frets.map((f,j)=>({f,s:6-j})).filter(x=>x.f!=null&&x.f>0&&!(barre&&x.f===barre.f&&fg[x.s]===1)).map(x=>`dedo ${fg[x.s]} en cuerda ${x.s} traste ${x.f}`);
+  return`${name}: ${barre?`cejilla en el traste ${barre.f} (cuerdas ${barre.s2} a ${barre.s1})${parts.length?', ':''}`:''}${parts.join(', ')}`}
 const FIGHEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>';
 function paintFig(root){
   if(FM.ownMic&&!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.ownMic=false;fmFinish();tunerStop()}
@@ -2376,6 +2418,9 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-fx]');if(!b)return;
   const id=b.dataset.id,x=ALLEX.find(z=>z.id===id),k=b.dataset.fx;if(!x)return;
   if(k==='preview'||k==='follow'){const own='fig:'+id+(k==='preview'?':p':'');if(SEQ.id==='fig'&&OWNER===own){figStop()}else if(k==='follow'&&figState(x).mic&&x.fig.type==='seq'){fmStart(x)}else figStart(x,k==='preview');paintFig()}
+  else if(k==='stp'){if(SEQ.id==='fig'&&OWNER.startsWith('fig:'+id))figStop();const F=x.fig,st=figState(x),d=+b.dataset.d,sl=document.querySelector(`[data-fx="stl"][data-id="${id}"]`);ac();
+    if(F.type==='seq'){const{seq}=seqData(F),n=seq.length;st.si=st.si==null?(d>0?0:n-1):(st.si+d+n)%n;const[ss,ff]=seq[st.si];figLight(id,ss,ff);pluck(midiOf(ss,ff),AC.currentTime+.02,1.2,.24);if(sl)sl.textContent=`Nota ${st.si+1} de ${n}: ${figWhere(F,ss,ff)}`}
+    else{const n=F.list.length;st.si=st.si==null?(d>0?0:n-1):(st.si+d+n)%n;figChord(id,F,st.si);chordMidiF(F.list[st.si][1]).forEach((m,j)=>pluck(m,AC.currentTime+.02+j*.03,1.6,.17));if(sl)sl.textContent=`Acorde ${st.si+1} de ${n} · ${figChordWhere(F,st.si)}`}}
   else if(k==='bpm'){DB.bpm[id]=Math.max(30,Math.min(220,figBpm(x)+ +b.dataset.d));save();paintFig()}
   else if(k==='opt'){const st=figState(x),key=b.dataset.k,v=b.dataset.v;st[key]=v==='true'?true:v==='false'?false:+v;b.outerHTML=figTog(x,key);if(SEQ.id==='fig'&&OWNER==='fig:'+id)figStart(x,false)}
   else if(k==='chip'&&x.fig.type==='chords'){const i=+b.dataset.i;if(!(SEQ.id==='fig'&&OWNER.startsWith('fig:'+id))){figChord(id,x.fig,i);if(ac())chordMidiF(x.fig.list[i][1]).forEach((m,j)=>pluck(m,AC.currentTime+.02+j*.022,1.2,.17))}}
@@ -2815,6 +2860,8 @@ function chordSVG(v){
   for(let i=0;i<6;i++)s+=`<line x1="${i*W}" y1="0" x2="${i*W}" y2="${4*H}"/>`;
   for(let f=0;f<=4;f++)s+=`<line x1="0" y1="${f*H}" x2="${5*W}" y2="${f*H}" ${f===0&&base===1?'stroke-width="2.5"':''}/>`;
   if(base>1)s+=`<text x="${5*W+8}" y="${H*.8}" class="fr">${base}</text>`;
+  // cejilla: barra de la cuerda grave a la aguda que pisa el dedo 1
+  const cb=chordFing(F).barre;if(cb)s+=`<rect class="bar" x="${(6-cb.s2)*W-4}" y="${(cb.f-base+.5)*H-3.8}" width="${(cb.s2-cb.s1)*W+8}" height="7.6" rx="3.8"/>`;
   F.forEach((f,i)=>{const x=i*W;if(f==null)s+=`<text x="${x}" y="-4">×</text>`;else if(f===0)s+=`<circle cx="${x}" cy="-6" r="3" class="o"/>`;else s+=`<circle cx="${x}" cy="${(f-base+.5)*H}" r="3.8"/>`});
   return s+'</svg>';
 }

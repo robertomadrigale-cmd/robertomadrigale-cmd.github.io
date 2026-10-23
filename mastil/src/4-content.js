@@ -194,4 +194,4 @@ const ocDots=c=>{const d=[],m=[];c[2].forEach((f,i)=>{const s=6-i;if(f==null){m.
 const ocMidi=c=>c[2].map((f,i)=>f==null?null:OPEN_MIDI[6-i]+f).filter(x=>x!=null);
 WID.openchords={
   init:{i:0},controls:[{k:'i',label:'Acorde',opts:OC.map((c,i)=>({v:i,l:c[0]}))}],
-  view:s=>{const c=OC[s.i],{d,m}=ocDots(c);return fretboard({to:5,dots:d,muted:m,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
+  view:s=>{const c=OC[s.i],{d,m}=ocDots(c),cf=chordFing(c[2]);d.forEach(x=>{x.fg=cf.fg[x.s]});return fretboard({to:5,dots:d,muted:m,barre:cf.barre,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
