@@ -5,7 +5,11 @@
       "firebase.json",
       "src/**",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "voz/src/**",
+      "voz/tools/**",
+      "voz/build.sh",
+      "voz/CLAUDE.md"
     ],
     "headers": [
       {
@@ -37,6 +41,42 @@
       },
       {
         "source": "/manifest.webmanifest",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/voz/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/voz/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/voz/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/voz/manifest.webmanifest",
         "headers": [
           {
             "key": "Cache-Control",
