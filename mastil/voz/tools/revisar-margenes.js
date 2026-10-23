@@ -22,7 +22,7 @@ while(true){const r=[...R].find(x=>!visited.has(x));if(!r)break;visited.add(r);
   document.querySelectorAll('#page button,#page .btn,#page .chip').forEach(el=>{const cs=getComputedStyle(el);if(cs.display==='none')return;const rc=el.getBoundingClientRect();if(!rc.width)return;
    const lh=parseFloat(cs.fontSize)*1.45,pad=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
    if(el.scrollWidth>el.clientWidth+2)out.push('texto cortado: '+el.textContent.trim().slice(0,40));
-   if(rc.height-pad>lh*1.6&&!el.matches('.tool,.card,.ktool,.kplayb,.kic'))out.push('botón en 2+ renglones o estirado: «'+el.textContent.trim().slice(0,40)+'» ('+Math.round(rc.height)+'px)');
+   if(rc.height-pad>lh*1.6&&!el.matches('.tool,.card,.ktool,.kplayb,.kic,.icon-btn'))out.push('botón en 2+ renglones o estirado: «'+el.textContent.trim().slice(0,40)+'» ('+Math.round(rc.height)+'px)');
   });
   return [...new Set(out)];},{W,Z});
  found.forEach(f=>issues.push(r+' → '+f));}

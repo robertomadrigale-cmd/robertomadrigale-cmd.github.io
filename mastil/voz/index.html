@@ -1157,6 +1157,75 @@ a.kplayb{text-decoration:none}
 .tstage .gauge{max-width:230px;margin:0 auto}
 .tstage .tnote{font-size:clamp(44px,13vw,64px)}
 @media(min-width:760px){.tstage .gauge{max-width:300px}}
+/* ===================== Roka Couch Vocal (v2 coach) ===================== */
+button,.btn,.kplayb{white-space:nowrap}
+.coach-greeting{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.coach-greeting h1,.coach-greeting p{flex-basis:100%;margin:0}
+.coach-greeting h1{font-size:clamp(32px,5vw,52px);letter-spacing:-.045em}
+.coach-greeting p{color:var(--muted)}
+.coach-pill{margin-left:auto;border:1px solid var(--line);border-radius:99px;padding:6px 12px;color:var(--good);font-size:12px}
+.session-card{padding:0;overflow:hidden;display:grid;grid-template-columns:38% minmax(0,1fr);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.session-art{min-height:100%;overflow:hidden;background:var(--surface2)}
+.session-art>svg{width:100%;height:100%;object-fit:cover;display:block}
+.session-content{padding:30px;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.session-content h2{font-size:clamp(23px,3vw,34px);line-height:1.1;letter-spacing:-.03em;margin:10px 0}
+.session-steps{padding:0;list-style:none;display:grid;gap:10px;margin:24px 0 0;order:2;width:100%}
+.session-steps li{display:flex;align-items:center;gap:10px;font-size:14px;min-width:0}
+.session-steps li>span{display:grid;place-items:center;flex-shrink:0;width:24px;height:24px;border:1px solid var(--line);border-radius:50%;font-size:11px;color:var(--muted)}
+.session-steps li.done>span{background:var(--good);color:var(--bg);border-color:var(--good)}
+.session-steps b{font-weight:500;line-height:1.3}.session-steps small{color:var(--muted);margin-left:auto}
+.session-steps svg{width:16px;height:16px}.session-steps a{display:grid;place-items:center;min-width:32px;min-height:32px;margin-left:auto;color:var(--accent-text)}
+.session-start{display:flex;align-items:center;gap:18px;margin-top:16px}.session-start>span{font-size:13px;color:var(--muted);max-width:160px}
+.session-start .kplayb{width:92px;height:92px;flex-shrink:0}.session-start .kplayb span{font-size:11px}
+.session-start .kplayb,.coach-center>.kplayb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.coach-center>.kplayb{width:88px;height:88px}
+.session-start .kplayb>span,.coach-center>.kplayb>span{position:static;width:auto;height:auto;overflow:visible;clip:auto;font-size:11px;line-height:1.2}
+.coach-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;width:100%}
+.coach-stats.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.coach-stats>div{border:1px solid var(--line);border-radius:18px;padding:20px 12px;background:var(--surface);display:flex;flex-direction:column;gap:6px;text-align:center;min-width:0}
+.coach-stats b{font-size:clamp(24px,3vw,36px);font-variant-numeric:tabular-nums;letter-spacing:-.04em}.coach-stats span{font-size:12px;color:var(--muted);line-height:1.35}
+.coach-stats .range-stat{font-size:clamp(16px,2vw,23px);line-height:1.6}
+.coach-quick{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.coach-quick .btn{min-height:46px}
+.level-section .sech{align-items:center}.level-section .sech>span{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+.level-section .sech svg,.alb small svg{width:14px;height:14px;vertical-align:middle}
+.level-section .albs{gap:20px}.alb.locked .acov{filter:saturate(.25);opacity:.6}.alb.locked small{color:var(--muted)}
+.coach-lock svg{width:44px;height:44px}.coach-link{color:var(--accent-text)}
+.coach-settings{width:100%;max-width:540px;text-align:left}.coach-settings summary{cursor:pointer;font-size:14px;padding:8px 0;color:var(--muted)}
+.coach-settings label{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:14px 0;font-size:14px}
+.coach-settings select,.coach-settings input{max-width:100%;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--fg);padding:10px;font:inherit}
+.coach-settings input[type=number]{width:105px}.coach-settings input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.coach-dialog{color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:24px;max-width:420px;width:calc(100% - 32px);padding:28px;box-shadow:0 30px 120px #0008}
+.coach-dialog::backdrop{background:#000a;backdrop-filter:blur(8px)}.coach-dialog .logo{display:block;width:48px;height:48px}.coach-dialog p{color:var(--muted);line-height:1.6}.coach-dialog button{min-height:44px}
+html.fs .topbar,html.fs .tabs,html.fs .side{display:none!important}
+html.fs .shell{display:block;max-width:none;margin:0;padding:0}html.fs main{margin:0;padding:0;min-width:0}
+html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-height:100svh;gap:0}
+.coach{min-height:100svh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);width:100%;min-width:0}
+.coach-head{display:flex;align-items:center;gap:12px;min-height:64px;flex-shrink:0;color:var(--muted);font-size:12px}
+.coach-head .icon-btn{flex-shrink:0;width:44px;height:44px}.coach-head>span{min-width:0}.coach-mic{margin-left:auto;font-size:11px;text-align:right}
+.coach-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px 0 40px;min-width:0}
+.coach-center h1{font-size:clamp(28px,5vw,48px);line-height:1.12;letter-spacing:-.035em;margin:0;max-width:700px}
+.coach-center p{margin:0;max-width:490px;line-height:1.5}.coach-center .cap{color:var(--muted);font-size:13px}
+.coach-cover{width:clamp(110px,22vh,200px);height:clamp(110px,22vh,200px);flex-shrink:0;border-radius:24px;overflow:hidden;margin-bottom:6px}
+.coach-syllable{color:var(--accent-text);font-weight:600}.coach-tip{color:var(--muted);font-size:clamp(15px,2vw,18px);max-width:560px;line-height:1.55}
+.coach-count{font-size:72px;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--accent-text)}
+.coach-hud{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:90px;padding:8px 0 14px}.coach-hud h1{margin:6px 0;font-size:clamp(30px,4vw,44px);line-height:1}.coach-hud #round{color:var(--muted);font-size:13px}
+#live-note{font-size:clamp(23px,4vw,38px);color:var(--root);white-space:nowrap}#live-note.hit{color:var(--good)}
+.coach .coach-lane{height:62svh;min-height:200px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+.coach-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 0;flex-shrink:0;margin-top:auto}.coach-controls .btn{min-height:46px}
+.coach-hint{color:var(--muted);font-size:13px;text-align:center;margin:10px 0;min-height:20px}
+.coach .concert{min-height:80px;text-align:center;padding:14px 8px 0;gap:5px}.coach .concert .lyl{font-size:clamp(18px,3vw,26px);transform:none}.coach .concert .lyl[hidden]{display:none}
+.coach.is-paused .coach-lane{opacity:.45}.coach.is-paused .syl{transition:none;animation-play-state:paused}
+.coach-pause{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);padding:18px 24px;border-radius:20px;background:var(--surface2);color:var(--fg);border:1px solid var(--line);font-weight:700;display:flex;align-items:center;gap:18px;z-index:10}
+.coach-result{gap:20px}.coach-center .coach-score{font-size:clamp(64px,15vw,120px);letter-spacing:-.065em;line-height:1.05}.coach-score small{font-size:.4em;color:var(--muted)}
+.coach-stars{display:flex;gap:12px;font-size:44px;color:var(--line);line-height:1.1}.coach-stars .earned{color:var(--accent-text);animation:coach-star .5s calc(var(--i)*.15s) both}.coach-good{color:var(--good)}
+@keyframes coach-star{from{opacity:0;transform:scale(.55) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.next-ring{--progress:0deg;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-size:12px;background:conic-gradient(var(--fg) var(--progress),#ffffff35 0);color:var(--accent-ink);position:relative;isolation:isolate}.next-ring:before{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--accent);z-index:-1}
+.coach #coach-range .kplay{margin:0}.coach #coach-range .tdock{position:static}.coach #coach-range .khead{display:none}.coach #coach-range .rstage{padding:18px}
+.progress-chart{display:flex;gap:12px;align-items:flex-end;padding:18px 0 4px;min-width:0}.chart-column{display:flex;flex:1;min-width:0;flex-direction:column;align-items:center;gap:10px;text-align:center}.chart-column b{font-size:12px;font-weight:600}.chart-column small{font-size:11px;color:var(--muted);line-height:1.4}.chart-track{height:135px;width:100%;max-width:42px;display:flex;align-items:flex-end;border-radius:9px;background:var(--surface2);overflow:hidden}.chart-track i{display:block;width:100%;background:linear-gradient(0deg,var(--accent),var(--accent-text));border-radius:8px}
+.coach-range-title{font-size:28px;letter-spacing:-.03em}.level-progress{margin-top:22px}.level-progress>div{display:flex;justify-content:space-between;gap:12px}.level-progress span{color:var(--accent-text);white-space:nowrap}.level-progress progress{width:100%;height:9px;margin-top:12px;border:0;border-radius:8px;accent-color:var(--accent)}.level-progress progress::-webkit-progress-bar{background:var(--surface2);border-radius:8px}.level-progress progress::-webkit-progress-value{background:var(--accent);border-radius:8px}
+@media(max-width:600px){.session-card{grid-template-columns:1fr}.session-art{height:140px;min-height:0}.session-art>svg{width:100%;height:100%}.session-content{padding:22px}.session-content h2{max-width:270px}.session-steps{gap:9px}.session-start .kplayb{width:82px;height:82px}.coach-stats.four{grid-template-columns:repeat(2,minmax(0,1fr))}.coach-stats{gap:8px}.coach-stats>div{padding:16px 8px}.coach-quick{gap:8px}.coach-quick .btn{font-size:13px;padding:10px 12px}.level-section .sech{flex-wrap:wrap;gap:8px}.level-section .sech h2{font-size:22px}.coach-greeting .coach-pill{padding:5px 8px;font-size:11px}html.fs .page{padding:0 16px}.coach-head{gap:8px;font-size:11px}.coach-mic{max-width:80px}.coach-controls{gap:8px}.coach-controls .btn{font-size:12px;padding:10px 12px}.coach-controls svg{width:16px;height:16px}.coach-center .coach-score{font-size:72px}.coach-result .coach-stats{max-width:440px}.progress-chart{gap:7px}.chart-column b{font-size:10px}.chart-column small{font-size:10px}.coach .coach-lane{height:60svh}.coach-center{padding-top:16px}.coach-settings summary{font-size:13px}}
+@media(max-height:650px){.coach-cover{width:100px;height:100px}.coach-center{gap:12px}.coach-count{font-size:52px}.coach .coach-lane{height:55svh}.coach-hud{min-height:75px}}
+@media(prefers-reduced-motion:reduce){.coach-stars .earned{animation:none}.brdisc{transition:none}}
 
 </style>
 </head>
@@ -1184,11 +1253,11 @@ function parseNote(s){const m=String(s).match(/^([A-G])([#b♯♭]?)(-?\d)$/);if
 /* ---------- tipos de voz (rangos típicos de coro; cada persona es distinta) ---------- */
 const VOICES=[
  {k:'bajo',n:'Bajo',lo:40,hi:64,d:'La voz más grave. Mi2 a Mi4.'},
- {k:'bar',n:'Barítono',lo:45,hi:69,d:'La voz masculina más común. La2 a La4.'},
- {k:'ten',n:'Tenor',lo:48,hi:72,d:'Voz masculina aguda. Do3 a Do5.'},
- {k:'con',n:'Contralto',lo:53,hi:77,d:'La voz femenina más grave. Fa3 a Fa5.'},
- {k:'mez',n:'Mezzosoprano',lo:57,hi:81,d:'Voz femenina media. La3 a La5.'},
- {k:'sop',n:'Soprano',lo:60,hi:84,d:'Voz femenina aguda. Do4 a Do6.'}];
+ {k:'bar',n:'Barítono',lo:45,hi:69,d:'Zona media grave. La2 a La4.'},
+ {k:'ten',n:'Tenor',lo:48,hi:72,d:'Zona media aguda. Do3 a Do5.'},
+ {k:'con',n:'Contralto',lo:53,hi:77,d:'Zona grave. Fa3 a Fa5.'},
+ {k:'mez',n:'Mezzosoprano',lo:57,hi:81,d:'Zona media. La3 a La5.'},
+ {k:'sop',n:'Soprano',lo:60,hi:84,d:'Zona aguda. Do4 a Do6.'}];
 function voiceGuess(lo,hi){
   let best=null,bs=-1;
   VOICES.forEach(v=>{const ov=Math.max(0,Math.min(hi,v.hi)-Math.max(lo,v.lo)),cover=ov/(v.hi-v.lo),miss=Math.abs((lo+hi)/2-(v.lo+v.hi)/2)/24,s=cover-miss;if(s>bs){bs=s;best=v}});
@@ -1196,7 +1265,7 @@ function voiceGuess(lo,hi){
 }
 /* ---------- datos locales ---------- */
 const DBK='roka-couch-vocal:v1';
-let DB={done:{},secs:{},days:{},best:{},last:{},today:{},range:null,vt:null,breath:0,tol:50,mode:'eco',theme:'auto'};
+let DB={done:{},secs:{},days:{},best:{},last:{},today:{},range:null,vt:null,breath:0,tol:50,mode:'eco',theme:'estudio'};
 try{Object.assign(DB,JSON.parse(localStorage.getItem(DBK)||'{}'))}catch(e){}
 function save(){try{localStorage.setItem(DBK,JSON.stringify(DB))}catch(e){}}
 const today=(d)=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -1205,7 +1274,7 @@ function streak(){let n=0;const d=new Date();if(!DB.days[today(d)])d.setDate(d.g
 function weekMins(){let s=0;const d=new Date();for(let i=0;i<7;i++){s+=DB.secs[today(d)]||0;d.setDate(d.getDate()-1)}return Math.round(s/60)}
 // zona cómoda para los ejercicios: tu rango medido (sin los extremos) o una voz grave/aguda de referencia
 function comfy(){
-  if(DB.range)return{lo:DB.range.lo+2,hi:DB.range.hi-2,measured:true};
+  if(DB.range){const pad=Math.min(2,Math.max(0,Math.floor((DB.range.hi-DB.range.lo-2)/2)));return{lo:DB.range.lo+pad,hi:DB.range.hi-pad,measured:true}}
   return DB.vt==='aguda'?{lo:57,hi:74,measured:false}:{lo:45,hi:62,measured:false};
 }
 const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -1479,32 +1548,33 @@ function micStop(){
 const MICERR={denied:'El micrófono está bloqueado. Permite el acceso al micrófono para este sitio en los ajustes del navegador y vuelve a intentarlo.',nomic:'No se encontró un micrófono en este dispositivo.',nosupport:'Este navegador no permite usar el micrófono aquí. Abre la app instalada o el sitio en Chrome o Safari.',other:'No se pudo iniciar el micrófono. Vuelve a intentarlo.'};
 const micErrHTML=k=>`<p class="msg err">${MICERR[k]||MICERR.other}</p>`;
 
-/* ---------- ejercicios de calentamiento ----------
-   pat: [semitonos desde la nota base, pulsos]; null = silencio. glide: la voz se desliza entre notas (sirena).
-   Cada ronda la app toca el patrón («Escucha») y luego lo cantas tú («Ahora tú»); la siguiente ronda sube medio tono. */
+/* Patrones: [semitonos, pulsos]; null es silencio. */
+const DLINE='<path d="M12 68L30 52 48 32 66 52 88 68"/>';
 const DRILLS=[
- {id:'larga',t:'Nota larga',sub:'Afinación y aire parejo',syl:'«ma»',bpm:66,pat:[[0,4]],hue:218,
-  tip:'Canta la nota y sostenla sin que suba ni baje. Piensa en una línea recta: el mismo volumen del principio al final.',
-  motif:'<path d="M12 48h76"/><circle cx="12" cy="48" r="5" fill="#fff" stroke="none"/>'},
- {id:'trino',t:'Trino de labios',sub:'Relaja y conecta el aire',syl:'«brrr»',bpm:92,pat:[[0,.5],[2,.5],[4,.5],[5,.5],[7,.5],[5,.5],[4,.5],[2,.5],[0,1.5]],hue:180,
-  tip:'Junta los labios sueltos y sopla para que vibren como motor: «brrr». Si no vibran, empuja suave las mejillas con dos dedos.',
-  motif:'<path d="M10 70c6-8 8-8 12 0s8 8 12-8 8-14 12-16 8 6 12 14 8 10 12 6 8-10 12-14"/>'},
- {id:'sirena',t:'Sirena',sub:'Une tu voz grave y aguda',syl:'«uuu»',bpm:72,glide:true,pat:[[0,2],[12,2],[0,1]],hue:262,
-  tip:'Desliza la voz como sirena de ambulancia, sin saltos. Al subir, no levantes la barbilla ni empujes más fuerte: deja que el sonido se haga más ligero.',
-  motif:'<path d="M10 76C30 76 36 22 50 22S70 76 90 76"/>'},
- {id:'arpegio',t:'Arpegio 1-3-5-8',sub:'Saltos afinados',syl:'«ia»',bpm:80,pat:[[0,1],[4,1],[7,1],[12,1],[7,1],[4,1],[0,2]],hue:328,
-  tip:'Imagina cada nota antes de cantarla. El salto grande (de la 5 a la 8) se prepara desde abajo: misma boca, mismo aire.',
-  motif:'<path d="M14 78h14v-14h14v-12h14v-18h14v18h14"/>'},
- {id:'escala',t:'Escala de cinco notas',sub:'Paso a paso, legato',syl:'«no»',bpm:96,pat:[[0,1],[2,1],[4,1],[5,1],[7,1],[5,1],[4,1],[2,1],[0,2]],hue:26,
-  tip:'Une cada nota con la siguiente sin cortar el aire (legato). Que la «o» quede redonda en todas las notas.',
-  motif:'<path d="M14 80h12v-9h12v-9h12v-6h12v-9h12"/>'},
- {id:'staccato',t:'Staccato',sub:'Ataque limpio con el apoyo',syl:'«ja ja ja»',bpm:84,pat:[[0,.5],[null,.5],[4,.5],[null,.5],[7,.5],[null,.5],[4,.5],[null,.5],[0,.5],[null,1.5]],hue:44,
-  tip:'Notas cortas como risa de Santa Claus. Cada «ja» sale de un empujoncito del abdomen, no de la garganta.',
-  motif:'<circle cx="22" cy="64" r="6" fill="#fff" stroke="none"/><circle cx="44" cy="48" r="6" fill="#fff" stroke="none"/><circle cx="66" cy="34" r="6" fill="#fff" stroke="none"/>'}];
+ {id:'respira',lvl:1,t:'Respiración 4-4-8',syl:'sss',bpm:60,pat:[],rounds:3,hue:180,motif:'<circle cx="50" cy="50" r="28"/>',tip:'Inhala sin subir los hombros. Suelta el aire parejo en «sss».',breath:true},
+ {id:'eco',lvl:1,t:'Repite la nota',syl:'ma',bpm:60,pat:[[0,2]],rounds:5,hue:205,tip:'Escucha, imagina la nota y repítela con suavidad.'},
+ {id:'larga',lvl:1,t:'Nota larga',syl:'ma',bpm:60,pat:[[0,4]],rounds:5,hue:218,tip:'Mantén el aire y el volumen parejos hasta el final.'},
+ {id:'trino',lvl:1,t:'Trino de labios',syl:'brrr',bpm:72,pat:[[0,1],[2,1],[4,1],[5,1],[7,1],[5,1],[4,1],[2,1],[0,2]],rounds:5,hue:180,tip:'Deja los labios sueltos. Si no vibran, ayuda con dos dedos en las mejillas.'},
+ {id:'sirena',lvl:1,t:'Sirena',syl:'uuu',bpm:60,glide:true,pat:[[0,3],[12,3],[0,2]],rounds:5,hue:262,tip:'Desliza la voz sin levantar la barbilla. Arriba, deja el sonido ligero.'},
+ {id:'tres',lvl:1,t:'Tres notas',syl:'nu',bpm:60,pat:[[0,1],[2,1],[4,1],[2,1],[0,2]],rounds:5,hue:240,tip:'Une las tres notas con el mismo aire y una «u» suave.'},
+ {id:'escala',lvl:2,t:'Escala de cinco notas',syl:'no',bpm:80,pat:[[0,1],[2,1],[4,1],[5,1],[7,1],[5,1],[4,1],[2,1],[0,2]],rounds:5,hue:26,tip:'Une las notas sin cortar el aire. Conserva la misma vocal.'},
+ {id:'arpegio3',lvl:2,t:'Saltos 1-3-5',syl:'ia',bpm:72,pat:[[0,1],[4,1],[7,1],[4,1],[0,2]],rounds:5,hue:310,tip:'Escucha el salto antes de hacerlo. Mantén la mandíbula suelta.'},
+ {id:'terceras',lvl:2,t:'Saltos de tercera',syl:'mi',bpm:80,pat:[[0,1],[4,1],[2,1],[5,1],[4,1],[7,1],[5,1],[2,1],[0,2]],rounds:5,hue:285,tip:'Imagina la siguiente nota sin empujar el volumen.'},
+ {id:'staccato',lvl:2,t:'Notas cortas',syl:'ja',bpm:72,pat:[[0,.5],[null,.5],[4,.5],[null,.5],[7,.5],[null,.5],[4,.5],[null,.5],[0,.5],[null,1.5]],rounds:5,hue:44,tip:'Haz cada «ja» corto y ligero, sin golpear con la garganta.'},
+ {id:'crescendo',lvl:2,t:'Crece el sonido',syl:'aaa',bpm:60,pat:[[0,6]],rounds:5,hue:350,tip:'Empieza suave y crece un poco sin subir de tono ni apretar.'},
+ {id:'arpegio',lvl:3,t:'Arpegio 1-3-5-8',syl:'ia',bpm:80,pat:[[0,1],[4,1],[7,1],[12,1],[7,1],[4,1],[0,2]],rounds:5,hue:328,tip:'Prepara el salto agudo desde abajo. Conserva la boca y el aire suaves.'},
+ {id:'quintas',lvl:3,t:'Saltos de quinta',syl:'mo',bpm:80,pat:[[0,1],[7,1],[0,1],[7,1],[12,1],[7,1],[0,2]],rounds:5,hue:290,tip:'Escucha la distancia entre las notas. Salta con ligereza, sin gritar.'},
+ {id:'nueve',lvl:3,t:'Escala de nueve notas',syl:'li',bpm:120,pat:[0,2,4,5,7,9,11,12,14,12,11,9,7,5,4,2,0].map(n=>[n,.5]),rounds:5,hue:20,tip:'Deja que el aire continúe mientras la lengua cambia de nota.'},
+ {id:'agilidad',lvl:3,t:'Agilidad',syl:'na',bpm:140,pat:[0,2,4,5,7,5,4,2,0].map(n=>[n,.5]),rounds:5,hue:195,tip:'Haz movimientos pequeños con la boca. Prioriza claridad antes que volumen.'},
+ {id:'extensor',lvl:3,t:'Amplía tu rango',syl:'uuu',bpm:72,pat:[[0,2],[4,2],[7,2],[12,2],[7,2],[0,2]],rounds:3,hue:265,tip:'Prueba la nota nueva con voz ligera. Si cuesta o molesta, salta este paso.'}
+].map(d=>{
+  const notes=d.pat.filter(p=>p[0]!=null),span=Math.max(1,...notes.map(p=>p[0]));
+  const contour=notes.map(([n],i)=>`${i?'L':'M'}${12+i*76/Math.max(1,notes.length-1)} ${76-n/span*52}`).join(' ');
+  const motif=d.id==='eco'?'<circle cx="50" cy="48" r="9"/><path d="M28 48H14M72 48h14"/>':d.id==='crescendo'?'<path d="M86 24L14 48 86 72"/>':d.glide?'<path d="M12 76C32 76 38 22 50 22S70 76 88 76"/>':notes.length===1?'<path d="M12 48h76"/>':`<path d="${contour}"/>`;
+  return {...d,motif:d.motif||motif,sub:d.tip};
+});
 const drillById=id=>DRILLS.find(d=>d.id===id);
 const drillArt=d=>coverArt(d.hue,d.motif,null,'d'+d.id);
-// calentamiento de hoy: respiración, cuerpo de la voz y afinación
-const WARMUP=['respira','trino','sirena','escala','arpegio','larga'];
 /* ---------- canciones para cantar (dominio público o escritas para la app) ----------
    ChordPro como en Roka Guitar: sílabas con ~, _ une dos palabras en una sílaba, {mel: G4/1 +A4/.5 r/1} da nota y pulsos
    de cada sílaba (+ = la misma sílaba sigue en otra nota, r = silencio). */
@@ -1583,84 +1653,199 @@ function songParse(src){
 const SONGLIST=SONGS.map(songParse);
 const songById=id=>SONGLIST.find(s=>s.id===id);
 const songArt=s=>coverArt(SONGHUE[s.id]||218,SONGM[s.id],null,'s'+s.id);
-/* ---------- lecciones de técnica ----------
-   Mismo método que las lecciones de Roka Guitar: objetivos → pasos con ejemplo → idea clave → ejercicios → compruébalo → errores → hoja de trucos.
-   Nunca usar un término sin definirlo antes. */
-const ALLEX=[];
-function E(x){ALLEX.push(x);return{ex:x}}
-const LESSONS=[
-{id:1,title:'Postura y respiración',sub:'El aire es el motor',hue:180,lead:'Antes de afinar hay que tener con qué sonar. Cantar es soplar aire a través de las cuerdas vocales; si el aire llega parejo, la voz sale pareja. En esta lección aprendes a pararte y a respirar como cantante.',
- motif:'<circle cx="50" cy="48" r="12"/><circle cx="50" cy="48" r="22" stroke-opacity=".6"/><circle cx="50" cy="48" r="32" stroke-opacity=".3"/>',
- blocks:[
-  {aim:['Pararte en una postura que deje pasar el aire sin tensión.','Respirar «abajo» (con el abdomen) en lugar de subir los hombros.','Soltar el aire despacio y parejo con una «sss» de al menos 15 segundos.']},
-  {step:'Paso 1',t:'La postura de cantante',p:'Pies separados al ancho de tus hombros, rodillas sueltas (no trabadas), hombros abajo y hacia atrás sin forzar, y la cabeza como si un hilo la jalara hacia el techo. La barbilla queda paralela al piso: ni levantada ni pegada al pecho. <b>Ejemplo resuelto:</b> párate frente a un espejo, sube los hombros hasta las orejas, suéltalos de golpe y deja que caigan solos: esa es su altura correcta.'},
-  {step:'Paso 2',t:'Qué es el diafragma',p:'El <b>diafragma</b> es un músculo en forma de cúpula que está debajo de tus pulmones, separando el pecho de la panza. Cuando inhalas, baja y empuja tus órganos hacia afuera: por eso la panza y los costados se inflan. No lo puedes ver, pero sí sentir: pon una mano en tu ombligo y otra en tus costillas de abajo.'},
-  {step:'Paso 3',t:'Inhalar abajo',p:'Inhala por la nariz, despacio, en 4 tiempos. La mano del ombligo y las costillas de los costados se mueven hacia afuera; el pecho y los hombros casi no se mueven. <b>Ejemplo:</b> acostado boca arriba con un libro sobre la panza, al inhalar el libro sube y al exhalar baja. Si el libro no se mueve y tus hombros sí, estás respirando arriba.'},
-  {step:'Paso 4',t:'Soltar con control: la «sss»',p:'Exhala diciendo una «sss» suave y pareja, como llanta que se desinfla poco a poco. Lo importante no es la fuerza sino que el sonido sea igual del principio al final. Mientras sale el aire, intenta que tus costillas no se cierren de golpe: ciérralas despacio. A esa resistencia suave se le llama <b>apoyo</b>, y la verás en la lección 2.'},
-  {key:'Respira como si llenaras un globo en tu cintura, no en tu pecho. Los hombros no participan: si suben, el aire se queda arriba y la garganta se tensa.'},
-  E({id:'l1-resp',lesson:1,t:'Respiración 4-4-8',min:3,go:'#/practicar/respiracion',goL:'Abrir respiración',steps:['Abre la herramienta Respiración en modo «4-4-8».','Inhala 4 tiempos por la nariz con la mano en el ombligo.','Sostén 4 tiempos sin cerrar la garganta (como si siguieras inhalando).','Suelta 8 tiempos con una «sss» pareja. Haz 5 ciclos.'],goal:'haces 5 ciclos seguidos sin subir los hombros y sin quedarte sin aire antes del 8.'}),
-  E({id:'l1-sss',lesson:1,t:'La «sss» más larga',min:3,go:'#/practicar/respiracion',goL:'Medir mi «sss»',steps:['En Respiración, elige «Sss medida» y activa el micrófono.','Inhala abajo en 4 tiempos.','Di «sss» parejo cerca del teléfono; la app cuenta los segundos mientras suene.','Descansa 30 segundos y repite 3 veces.'],goal:'sostienes la «sss» 15 segundos o más con el mismo volumen. Con práctica llegarás a 25–30.'}),
-  {check:[['¿Qué se mueve cuando inhalas bien?','La panza y los costados, hacia afuera. El pecho y los hombros casi no se mueven.'],['¿Qué es el diafragma?','Un músculo en forma de cúpula debajo de los pulmones. Al inhalar baja y hace espacio para el aire.'],['¿Qué importa más en la «sss»: la fuerza o lo parejo?','Lo parejo. Una «sss» suave y constante vale más que una fuerte que se acaba en 5 segundos.']]},
-  {box:'Errores comunes',ul:['Subir los hombros al inhalar: el aire se queda arriba y aprieta la garganta.','Meter la panza al inhalar (lo contrario de lo que se busca).','Inhalar con ruido por la boca: hazlo por la nariz y sin prisa.','Soltar todo el aire al principio de la «sss».']},
-  {trick:['Pies al ancho de hombros, rodillas sueltas, barbilla paralela al piso.','Inhala en 4 por la nariz, panza y costados hacia afuera.','Suelta en «sss» pareja; cierra las costillas despacio.','Meta: 15 segundos de «sss» hoy, 25 en un mes.']}]},
-{id:2,title:'Apoyo y emisión',sub:'Sonar sin lastimarte',hue:205,lead:'Ya sabes respirar abajo. Ahora conviertes ese aire en sonido sin apretar la garganta: el apoyo controla el aire y la resonancia hace que la voz suene más sin gritar.',
- motif:'<path d="M14 66c12-16 24-16 36 0s24 16 36 0"/><path d="M14 46c12-16 24-16 36 0s24 16 36 0" stroke-opacity=".5"/>',
- blocks:[
-  {aim:['Sostener el sonido con el abdomen (apoyo) y no con la garganta.','Encontrar la resonancia en la cara con el «ng».','Usar el trino de labios para calentar sin esfuerzo.']},
-  {step:'Paso 1',t:'Qué es el apoyo',p:'El <b>apoyo</b> es frenar la salida del aire con los músculos del abdomen y las costillas, para que salga despacio y parejo. Es lo que hiciste con la «sss» de la lección 1, pero ahora con voz. <b>Ejemplo resuelto:</b> tose suave una vez con la mano en el ombligo: ese empujoncito que sientes es el músculo del apoyo. Cantar con apoyo es usar ese músculo de forma lenta y constante, no de golpe.'},
-  {step:'Paso 2',t:'Garganta abierta',p:'La garganta debe sentirse como al inicio de un bostezo: la parte de atrás de la boca se levanta y la lengua queda relajada, tocando por dentro los dientes de abajo. Si al cantar sientes que «raspa» o se cierra, estás empujando con la garganta en lugar de con el apoyo.'},
-  {step:'Paso 3',t:'Resonancia con «ng»',p:'La <b>resonancia</b> es cómo los huecos de tu cara y tu pecho amplifican el sonido, como la caja de una guitarra. Di «ng» (el final de «tengo» sostenido, con la boca cerrada atrás): debes sentir un cosquilleo en la nariz y los labios. <b>Ejemplo:</b> canta «nnnggg» en una nota cómoda y luego abre a «aaa» sin cambiar ese cosquilleo: la «a» sale más brillante sin más fuerza.'},
-  {step:'Paso 4',t:'El trino de labios',p:'El <b>trino de labios</b> es soplar con los labios sueltos para que vibren («brrr») mientras haces una nota. Obliga a que el aire salga parejo (si empujas, los labios se detienen; si aflojas, también), y por eso es el calentamiento favorito de los maestros de canto.'},
-  {key:'La fuerza sale del abdomen, el brillo sale de la cara. La garganta solo deja pasar: si aprieta, algo está mal.'},
-  E({id:'l2-trino',lesson:2,t:'Trino de labios en escala',min:4,go:'#/practicar/ej/trino',goL:'Abrir trino',steps:['Abre el ejercicio «Trino de labios».','Escucha el patrón de cinco notas y repítelo con «brrr».','Si los labios se traban, presiona suave tus mejillas con dos dedos.','Haz todas las rondas: cada una sube medio tono.'],goal:'los labios vibran sin cortarse en todo el patrón y la app marca la mayoría de las notas en verde.'}),
-  E({id:'l2-stac',lesson:2,t:'Staccato con apoyo',min:3,go:'#/practicar/ej/staccato',goL:'Abrir staccato',steps:['Abre el ejercicio «Staccato».','Pon una mano en el ombligo.','Canta cada «ja» corto, sintiendo un empujoncito del abdomen en cada uno.','La garganta queda quieta: el movimiento es de la panza.'],goal:'sientes el abdomen en cada «ja» y las notas salen cortas y limpias, sin golpe de garganta.'}),
-  {check:[['¿Qué es el apoyo?','Frenar la salida del aire con el abdomen y las costillas para que salga lento y parejo.'],['¿Dónde debes sentir el «ng»?','En la nariz y los labios, como cosquilleo. Es la resonancia en la cara.'],['¿Por qué sirve el trino de labios?','Porque solo funciona con aire parejo: si empujas o aflojas, los labios dejan de vibrar.']]},
-  {box:'Errores comunes',ul:['Empujar con la garganta para que suene más fuerte: cansa y lastima.','Apretar la quijada; déjala colgar suelta.','Cantar con la lengua hacia atrás: queda un sonido opaco y «de papa en la boca».']},
-  {trick:['Tos suave = el músculo del apoyo.','Garganta como inicio de bostezo.','«ng» antes de abrir la vocal para encontrar la resonancia.','Trino de labios para calentar todos los días.']}]},
-{id:3,title:'Afinación: escucha y repite',sub:'Cantar justo en la nota',hue:218,lead:'Afinar es cantar exactamente la nota que suena. No es un don: es oído más práctica. Aquí aprendes a escuchar, imitar y corregir viendo tu voz en la pantalla.',
- motif:'<path d="M12 48h76"/><path d="M12 60c14-20 24 6 38-12s24 6 38-4" stroke-opacity=".6"/>',
- blocks:[
-  {aim:['Saber qué significa estar afinado, alto o bajo.','Leer tu voz en la línea de tono del afinador.','Igualar una nota que suena y sostenerla sin que se mueva.']},
-  {step:'Paso 1',t:'Notas y semitonos',p:'Cada nota tiene una altura: más grave o más aguda. Entre Do y Do hay 12 notas, y la distancia entre una y la siguiente es un <b>semitono</b>. Cada semitono se divide en 100 <b>cents</b> (centésimas). <b>Ejemplo:</b> si cantas un La y el afinador dice «−20 cents», estás un poquito abajo del La, todavía lejos de llegar al Sol♯.'},
-  {step:'Paso 2',t:'Cómo leer el afinador',p:'El afinador de voz muestra la nota más cercana a lo que cantas, una aguja (al centro = afinado) y una línea que dibuja tu voz en el tiempo. Si la aguja se va a la derecha estás <b>alto</b> (más agudo): relaja y baja tantito. Si se va a la izquierda estás <b>bajo</b>: sube con más aire, no con más garganta. Dentro de ±10 cents se pone verde.'},
-  {step:'Paso 3',t:'Escucha, imagina, canta',p:'Para igualar una nota: 1) escúchala completa, 2) imagínala en tu cabeza sin cantar, 3) cántala suave en «u» o «ma». <b>Ejemplo resuelto:</b> suena un Sol. Lo cantas y la línea queda abajo de la barra. Subes poco a poco (como sirena corta) hasta que la línea entra en la barra y la sostienes ahí 3 segundos.'},
-  {step:'Paso 4',t:'Si la nota está muy alta o muy baja',p:'Si la nota que suena es demasiado grave o aguda para ti, puedes cantarla una <b>octava</b> arriba o abajo: es la misma nota con otra altura (12 semitonos). La app pone los ejercicios en tu zona cómoda cuando mides tu rango vocal.'},
-  {key:'Afinar es escuchar primero y cantar después. Cuando la línea se sale de la barra, no la persigas a jalones: desliza la voz despacio hasta entrar.'},
-  E({id:'l3-afin',lesson:3,t:'Sostén la nota en el afinador',min:3,go:'#/practicar/afinador',goL:'Abrir afinador',steps:['Abre el afinador de voz y activa el micrófono.','Toca «Escuchar» en la nota de referencia y cántala en «u».','Mira la línea: llévala dentro de la franja de la nota.','Sostenla 5 segundos sin que se mueva.'],goal:'la aguja se queda en verde 5 segundos seguidos en tres notas distintas.'}),
-  E({id:'l3-larga',lesson:3,t:'Nota larga, ronda por ronda',min:4,go:'#/practicar/ej/larga',goL:'Abrir nota larga',steps:['Abre el ejercicio «Nota larga».','En cada ronda escucha la nota y luego cántala con «ma».','Sostenla los 4 pulsos con el mismo volumen.','Revisa tu calificación al final.'],goal:'logras 70 % o más en el resultado final.'}),
-  {check:[['¿Cuántos cents tiene un semitono?','100 cents.'],['La aguja se va a la derecha. ¿Estás alto o bajo?','Alto (más agudo). Relaja y baja tantito.'],['¿Qué haces antes de cantar una nota nueva?','La escuchas completa y la imaginas en tu cabeza.']]},
-  {box:'Errores comunes',ul:['Empezar a cantar mientras la nota todavía suena, sin escucharla.','Corregir a jalones: la voz sube y baja de más.','Cantar fuerte para «llegar»: más volumen suele subir el tono de más.','Probar sin audífonos con la guía al mismo tiempo: el micrófono también oye a la app.']},
-  {trick:['Escucha → imagina → canta.','Derecha = alto, izquierda = bajo.','Verde = ±10 cents.','Si no alcanzas, prueba una octava arriba o abajo.']}]},
-{id:4,title:'Tu rango y tus registros',sub:'Voz de pecho y de cabeza',hue:262,lead:'Tu rango vocal es de la nota más grave a la más aguda que cantas con buen sonido. Conocerlo te dice qué canciones te quedan y en qué tono cantarlas.',
- motif:'<path d="M50 14v68"/><path d="M38 26l12-12 12 12M38 70l12 12 12-12"/>',
- blocks:[
-  {aim:['Medir tu rango vocal con la app.','Distinguir la voz de pecho y la voz de cabeza.','Pasar de una a otra sin «quiebre» con la sirena.']},
-  {step:'Paso 1',t:'Qué es el rango vocal',p:'El <b>rango vocal</b> va de tu nota más grave a tu nota más aguda <i>con sonido sano</i> (sin gritar ni susurrar). La zona del medio, donde cantas cómodo mucho rato, se llama <b>tesitura</b>. <b>Ejemplo:</b> si tu rango es de La2 a Mi4, tu tesitura será más o menos de Do3 a Do4.'},
-  {step:'Paso 2',t:'Los tipos de voz',p:'Según dónde cae tu rango, tu voz se parece a un tipo: <b>bajo, barítono o tenor</b> (de grave a agudo, normalmente voces de hombre) y <b>contralto, mezzosoprano o soprano</b> (normalmente voces de mujer). Es una guía, no una etiqueta: el rango crece con práctica.'},
-  {step:'Paso 3',t:'Registros: pecho y cabeza',p:'Un <b>registro</b> es una zona de la voz con el mismo «color». La <b>voz de pecho</b> es la de hablar: se siente vibrar en el pecho y suena llena. La <b>voz de cabeza</b> es más ligera y aguda: vibra en la cabeza, como imitar a un búho («uuu»). El punto donde cambias de una a otra se llama <b>pasaje</b>; ahí la voz a veces se quiebra.'},
-  {step:'Paso 4',t:'Unir los registros con la sirena',p:'La <b>sirena</b> desliza la voz de grave a agudo sin saltos. Al pasar por el pasaje, no empujes: deja que la voz se haga más ligera. <b>Ejemplo resuelto:</b> en «uuu» subes desde una nota grave; cerca de tu pasaje sientes que algo «cambia de marcha». En vez de forzar, bajas el volumen un poco y sigues: así el quiebre se vuelve una curva suave.'},
-  {key:'Tu rango no es fijo: se mide hoy para elegir ejercicios y canciones a tu medida, y crece si calientas y practicas sin forzar.'},
-  E({id:'l4-rango',lesson:4,t:'Mide tu rango vocal',min:4,go:'#/practicar/rango',goL:'Medir mi rango',steps:['Abre «Rango vocal» y activa el micrófono.','Canta de cómodo hacia lo grave en «a» y sostén la nota más grave con buen sonido 1 segundo.','Haz lo mismo hacia lo agudo (puedes usar voz de cabeza).','Guarda el resultado.'],goal:'la app muestra tu rango y tu tipo de voz aproximado.'}),
-  E({id:'l4-sirena',lesson:4,t:'Sirenas por tu pasaje',min:4,go:'#/practicar/ej/sirena',goL:'Abrir sirena',steps:['Abre el ejercicio «Sirena».','Desliza en «u» siguiendo la curva de la pantalla.','Al pasar por el pasaje, baja un poco el volumen en lugar de empujar.','Haz todas las rondas.'],goal:'la línea de tu voz sigue la curva sin cortes en la mayoría de las rondas.'}),
-  {check:[['¿Qué es la tesitura?','La zona cómoda del medio de tu rango, donde puedes cantar mucho rato.'],['¿Cómo se siente la voz de pecho?','Como la de hablar: llena y vibrando en el pecho.'],['¿Qué haces al llegar al pasaje?','No empujar: aligerar la voz y bajar un poco el volumen.']]},
-  {box:'Errores comunes',ul:['Medir el rango con notas gritadas o susurradas: solo cuentan las de buen sonido.','Querer llevar la voz de pecho lo más alto posible a fuerza.','Compararte con otros: cada voz es distinta.']},
-  {trick:['Rango = grave a agudo con buen sonido.','Tesitura = tu zona cómoda.','Pecho = hablar; cabeza = búho.','En el pasaje, más ligero, no más fuerte.']}]},
-{id:5,title:'Calentar y cuidar tu voz',sub:'Una rutina diaria',hue:26,lead:'La voz es un músculo pequeño y delicado. Calentarla antes de cantar y cuidarla el resto del día evita ronqueras y te deja avanzar más rápido.',
- motif:'<circle cx="50" cy="48" r="28"/><path d="M50 30v18l12 8"/>',
- blocks:[
-  {aim:['Hacer un calentamiento completo en 10 minutos.','Saber qué ayuda y qué lastima a tu voz.','Reconocer cuándo parar.']},
-  {step:'Paso 1',t:'El orden de un calentamiento',p:'De lo más suave a lo más exigente: 1) respiración, 2) trino de labios, 3) sirena, 4) escalas, 5) arpegios, 6) notas largas. Así primero despiertas el aire, luego la voz en todo su rango y al final la afinación fina. La pantalla «Calentamiento de hoy» de la app sigue este orden.'},
-  {step:'Paso 2',t:'Hidratación',p:'Las cuerdas vocales vibran cientos de veces por segundo y necesitan estar húmedas. Toma agua a lo largo del día (no solo al cantar); el agua tarda horas en llegar a ellas. El café y el alcohol resecan. <b>Ejemplo:</b> si vas a cantar a las 7 de la noche, toma agua desde la mañana.'},
-  {step:'Paso 3',t:'Qué evitar',p:'Gritar, carraspear (aclarar la garganta con fuerza), susurrar mucho rato y cantar enfermo o ronco. En vez de carraspear, traga saliva o toma agua. Si te duele al cantar, para: el dolor no es normal.'},
-  {step:'Paso 4',t:'Descanso',p:'Igual que en el gimnasio, la voz mejora al descansar. Mejor 15 minutos diarios que 2 horas un solo día. Después de cantar mucho, haz unas sirenas suaves hacia abajo para «enfriar».'},
-  {key:'Calienta siempre de suave a fuerte y de cómodo a extremo. Si algo duele o raspa, detente: cantar no debe doler.'},
-  E({id:'l5-calent',lesson:5,t:'Calentamiento de hoy completo',min:10,go:'#/practicar/calentamiento',goL:'Abrir calentamiento',steps:['Abre «Calentamiento de hoy».','Haz los ejercicios en orden; cada uno se palomea al terminarlo.','Descansa 20 segundos entre ejercicios.','Al final, canta una canción a tu gusto.'],goal:'terminas los 6 pasos del calentamiento sin sentir la garganta cansada.'}),
-  {check:[['¿Qué va primero en un calentamiento?','La respiración, y después el trino de labios.'],['¿Por qué tomar agua desde la mañana?','Porque el agua tarda horas en hidratar las cuerdas vocales.'],['¿Qué haces en vez de carraspear?','Tragar saliva o tomar agua.']]},
-  {box:'Errores comunes',ul:['Empezar directo con las notas más agudas.','Cantar a todo volumen para calentar.','Seguir cantando con dolor o ronquera.']},
-  {trick:['Respiración → trino → sirena → escala → arpegio → nota larga.','Agua todo el día.','Nada de gritar ni carraspear.','15 minutos diarios valen más que 2 horas un día.']}]}];
-const lessonArt=i=>{const l=LESSONS.find(x=>x.id===i);return coverArt(l.hue,l.motif,i,'l'+i)};
-const doneCount=l=>{const xs=ALLEX.filter(x=>!l||x.lesson===l);return[xs.filter(x=>DB.done[x.id]).length,xs.length]};
-const nextEx=()=>ALLEX.find(x=>!DB.done[x.id]);
+
+/* Estado v2: migración aditiva sobre la misma clave de la v1. */
+for(const k of ['stars','best','today','secs','days'])if(!DB[k]||typeof DB[k]!=='object')DB[k]={};
+for(const k of ['hist','rangeHist'])if(!Array.isArray(DB[k]))DB[k]=[];
+DB.hist=DB.hist.slice(-400);
+const starsFor=s=>s>=.85?3:s>=.7?2:s>=.5?1:0;
+Object.entries(DB.best).forEach(([id,s])=>{if(Number.isFinite(s))DB.stars[id]=Math.max(DB.stars[id]||0,starsFor(s))});
+if(DB.range&&!DB.rangeHist.length)DB.rangeHist.push({d:DB.range.at||today(),lo:DB.range.lo,hi:DB.range.hi});
+DB.sung=Number.isFinite(DB.sung)?DB.sung:DB.hist.length;
+const LEVELS=['','Base','Control','Agilidad y rango'];
+const levelStars=l=>DRILLS.filter(d=>d.lvl===l&&!d.breath).reduce((n,d)=>n+(DB.stars[d.id]||0),0);
+const levelOpen=l=>l===1||(levelOpen(l-1)&&levelStars(l-1)>=10);
+const currentLevel=()=>levelOpen(3)?3:levelOpen(2)?2:1;
+const starText=n=>'★'.repeat(n)+'☆'.repeat(3-n);
+const scoreText=s=>s==null?'Sin calificación':Math.round(s*100)+' %';
+const mean=a=>a.length?a.reduce((s,n)=>s+n,0)/a.length:null;
+function recordRange(lo,hi){
+  if(!Number.isFinite(lo)||!Number.isFinite(hi)||hi<lo)return;
+  if(DB.range&&!DB.rangeHist.length)DB.rangeHist.push({d:DB.range.at||today(),lo:DB.range.lo,hi:DB.range.hi});
+  const last=DB.rangeHist[DB.rangeHist.length-1];
+  DB.range={...(DB.range||{}),lo,hi,at:today()};
+  if(!last||last.lo!==lo||last.hi!==hi)DB.rangeHist.push({d:today(),lo,hi});
+  save();
+}
+function growRange(spec){
+  if(!DB.range||!spec)return false;
+  let {lo,hi}=DB.range;
+  // En sirenas se evalúa cada altura por separado; no se atribuye el acierto al extremo.
+  spec.targets.filter(g=>g.ph==='S').forEach(g=>Object.entries(g.bins||{}).forEach(([m,b])=>{
+    if(b.n>=3&&b.h/b.n>=.6){lo=Math.min(lo,+m);hi=Math.max(hi,+m)}
+  }));
+  if(lo===DB.range.lo&&hi===DB.range.hi)return false;
+  recordRange(lo,hi);return true;
+}
+function recordResult(id,spec){
+  const s=spec?specScore(spec):null,prev=DB.best[id],before=DB.stars[id]||0;
+  DB.today[id]=today();
+  if(id!=='respira'&&id!=='rango')DB.sung++;
+  if(s!=null){DB.best[id]=Math.max(prev||0,s);DB.stars[id]=Math.max(before,starsFor(s));DB.hist.push({d:today(),id,s});DB.hist=DB.hist.slice(-400)}
+  const grew=growRange(spec);markDay();
+  return{id,s,stars:s==null?0:starsFor(s),gained:(DB.stars[id]||0)-before,record:s!=null&&(prev==null||s>prev),grew,tip:spec?coachTip(spec):id==='respira'?'Buen aire. Mantén esa suavidad al cantar.':'Tu voz marca el ritmo; sigue sin forzar.'};
+}
+function shortSong(S){
+  const duration=S.lines.reduce((n,l)=>n+(l.mel||[]).reduce((s,m)=>s+m.d,0),0)*60/S.bpm;
+  return duration<=50?S:{...S,lines:S.lines.slice(0,Math.ceil(S.lines.length/2))};
+}
+function stepInfo(id){
+  if(id==='rango')return{id,t:'Mide tu rango',tip:'Canta suave de grave a agudo. Quédate donde tu voz se sienta cómoda.',syl:'aaa',hue:262,motif:TART.range[1]};
+  if(id.startsWith('song:')){const s=songById(id.slice(5));return{id,t:s.title,syl:'la letra',tip:'Escucha la guía y canta con suavidad. Usa audífonos para medir mejor.',hue:SONGHUE[s.id],motif:SONGM[s.id],song:s}}
+  return drillById(id);
+}
+function buildSession(d=today()){
+  if(DB.sess&&DB.sess.d===d&&Array.isArray(DB.sess.steps)&&DB.sess.steps.every(id=>id==='rango'||drillById(id)||id.startsWith('song:')&&songById(id.slice(5))))return DB.sess;
+  const lvl=currentLevel(),seed=Number(d.replaceAll('-','')),pool=DRILLS.filter(x=>x.lvl===lvl&&!x.breath);
+  const middle=lvl===1?['eco','larga','tres']:Array.from({length:3},(_,i)=>pool[(seed+i)%pool.length].id);
+  const steps=[...(!DB.range?['rango']:[]),'respira','trino','sirena',...middle,'song:'+SONGLIST[seed%SONGLIST.length].id];
+  let seconds=32+(steps.length*9),gaps=0;
+  steps.forEach(id=>{const x=stepInfo(id);if(id==='rango')seconds+=120;else if(x.song){const s=shortSong(x.song);seconds+=(s.beats+s.lines.reduce((n,l)=>n+(l.mel||[]).reduce((n,m)=>n+m.d,0),0))*60/s.bpm}else if(!x.breath){seconds+=x.rounds*(2*x.pat.reduce((n,p)=>n+p[1],0)+2)*60/x.bpm;gaps+=x.rounds-1}});
+  const rest=Math.max(4,Math.min(30,Math.ceil((660-seconds)/Math.max(1,gaps))));
+  DB.sess={d,i:0,res:[],steps,rest,minutes:Math.ceil((seconds+gaps*rest)/60),secs:0,lvl,startRange:DB.range?{...DB.range}:null,startStreak:streak(),hadDay:!!DB.days[d],gained:0};save();return DB.sess;
+}
+function bestStreak(){let best=0,n=0,prev=null;Object.keys(DB.days).filter(d=>DB.days[d]).sort().forEach(d=>{const t=new Date(d+'T12:00:00');if(prev){const next=new Date(prev);next.setDate(next.getDate()+1);n=today(next)===d?n+1:1}else n=1;prev=t;best=Math.max(best,n)});return best}
+let COACH=null,COACH_AUTOSTART=false;
+/* Un controlador por vista: el micrófono pertenece a toda la sesión. */
+function viewCoach(options={}){
+  const daily=!options.id,sess=daily?buildSession():null,steps=daily?sess.steps:[options.id];
+  return{title:daily?'Tu sesión de hoy':stepInfo(options.id).t,fs:true,html:'<section class="coach" aria-label="Coach de voz"></section>',mount(page){
+    const root=$('.coach',page);let alive=true,started=false,micOK=false,run=null,rangeCleanup=null,index=daily?sess.i:0,stage='ready',paused=false,clock=null,previous=performance.now(),pauseBusy=false;
+    let rangeElapsed=0,rangePhase=0,spec=null,result=null,rangeMic=null;
+    const state={get active(){return started&&!paused&&['exercise','breath','range'].includes(stage)},addTime(s){if(daily)sess.secs+=s}};COACH=state;
+    const header=()=>`<header class="coach-head"><button class="icon-btn" data-coach="exit" aria-label="Salir">${IC.x}</button><span>${daily?'Tu sesión de hoy':'Práctica'} · ${Math.min(index+1,steps.length)} de ${steps.length}</span><span class="coach-mic">${started?(micOK?'Micrófono activo':'Sin calificación'):''}</span></header>`;
+    const shell=html=>{root.innerHTML=header()+html};
+    const controls=()=>`<footer class="coach-controls"><button class="btn" data-coach="pause">${IC.pause}<span>Pausa</span></button><button class="btn" data-coach="repeat">${IC.redo}<span>Repetir</span></button><button class="btn" data-coach="skip">${IC.next}<span>Saltar</span></button></footer>`;
+    const clearStep=()=>{clock=null;paused=false;root.classList.remove('is-paused');$('.coach-pause',root)?.remove();if(run){const old=run;run=null;old.stop()}if(rangeCleanup){rangeCleanup();rangeCleanup=null}MIC.on=null;rangeMic=null};
+    function timer(seconds,paint,done){clock={left:seconds,paint,done};paint(seconds)}
+    function ready(){
+      const x=stepInfo(steps[Math.min(index,steps.length-1)]);
+      shell(`<div class="coach-center"><span class="acov coach-cover">${coverArt(x.hue,x.motif,null,'coach')}</span><span class="eyebrow">${daily?sess.minutes+' min · a tu ritmo':'Práctica guiada'}</span><h1>${daily?'Tu sesión de hoy':esc(x.t)}</h1><p>${daily?'Calienta, afina y termina cantando.':esc(x.tip)}</p><p class="cap">Usa audífonos para que la guía no se confunda con tu voz.</p><button class="kplayb" data-coach="begin">${IC.play}<span>${index?'Continuar':'Empezar'}</span></button>${settings(x)}</div>`);
+    }
+    function settings(x){return `<details class="coach-settings"><summary>Ajustes de práctica</summary><label>Tolerancia<select data-setting="tol">${[[25,'Estricta'],[50,'Normal'],[75,'Relajada']].map(([v,t])=>`<option value="${v}" ${DB.tol===v?'selected':''}>${t}</option>`).join('')}</select></label>${!daily&&!x.song&&!x.breath?`<label>Rondas<select data-setting="dir"><option value="up">Subir</option><option value="ud" ${DB.dir==='ud'?'selected':''}>Subir y bajar</option></select></label><label>Modo<select data-setting="mode"><option value="eco">Escucha y repite</option><option value="junto" ${DB.mode==='junto'?'selected':''}>Canta junto</option></select></label><label>Tempo<input type="number" data-setting="bpm:${x.id}" min="40" max="160" value="${DB['bpm:'+x.id]||x.bpm}"></label>`:''}${x.song&&!daily?`<label>Velocidad<select data-setting="songSpeed"><option value="1" ${(DB.songSpeed||1)===1?'selected':''}>Normal</option><option value="0.9" ${DB.songSpeed===.9?'selected':''}>90 %</option><option value="0.75" ${DB.songSpeed===.75?'selected':''}>75 %</option></select></label><label>Tono (semitonos)<input type="number" data-setting="shift:${x.song.id}" min="-36" max="36" value="${DB['shift:'+x.song.id]??songShift(x.song)}"></label><label>Voz guía<input type="checkbox" data-setting="sguide" ${DB.sguide!==false?'checked':''}></label><label>Acordes<input type="checkbox" data-setting="schords" ${DB.schords!==false?'checked':''}></label>`:''}</details>`}
+    async function begin(){
+      if(started)return;
+      if(daily&&index>=steps.length){summary();return}
+      started=true;stage='loading';shell('<div class="coach-center"><h1>Prepara tu voz</h1><p>Activa el micrófono para ver tu afinación.</p></div>');
+      if(!ac()){started=false;stage='ready';ready();toast('No se pudo iniciar el audio. Vuelve a intentar.');return}
+      await AC.resume();micOK=await micStart(null,()=>{});
+      if(!alive){micStop();return}
+      if(!micOK)toast('Seguimos sin micrófono y sin calificación. Puedes practicar con la guía.',6500);
+      if(daily&&sess.res[index]){result=sess.res[index];showResult();return}
+      intro();
+    }
+    function intro(){
+      clearStep();paused=false;const x=stepInfo(steps[index]);stage='intro';
+      shell(`<div class="coach-center"><span class="acov coach-cover">${coverArt(x.hue,x.motif,null,'intro')}</span><span class="eyebrow">Paso ${index+1} de ${steps.length}</span><h1>${esc(x.t)}</h1><p class="coach-syllable">${x.song?'Canta la letra':'En «'+esc(x.syl)+'»'}</p><p class="coach-tip">${esc(x.tip)}</p><b class="coach-count" id="count" aria-live="polite">3</b><button class="btn" data-coach="now">Ya</button></div>`);
+      timer(3,n=>{$('#count',root).textContent=Math.max(1,Math.ceil(n))},exercise);
+    }
+    function exercise(){
+      clearStep();const x=stepInfo(steps[index]);paused=false;
+      if(x.id==='rango'){rangeStep();return}
+      if(x.breath){breathStep();return}
+      stage='exercise';
+      const song=x.song?(daily?shortSong(x.song):x.song):null;
+      shell(`<div class="coach-hud"><div><span class="eyebrow">${esc(x.t)}</span><h1 id="phase">Escucha</h1><span id="round"></span></div><b id="live-note" aria-label="Nota que cantas">—</b></div><canvas class="lane coach-lane" id="coach-lane" aria-label="Notas objetivo y línea de tu voz"></canvas>${song?`<div class="lyrics concert" id="lyr">${lyricHTML(song)}</div>`:'<p id="rest-label" class="coach-hint">La línea verde sigue tu voz.</p>'}${controls()}`);
+      spec=song?songSpec(song,{shift:daily?songShift(song):(DB['shift:'+song.id]??songShift(song)),speed:daily?1:(DB.songSpeed||1),guide:DB.sguide!==false,chords:DB.schords!==false}):drillSpec(x,{rounds:x.rounds,bpm:daily?x.bpm:DB['bpm:'+x.id]||x.bpm,dir:daily?'up':DB.dir,mode:daily?'eco':DB.mode,rest:daily?sess.rest:2});
+      if(spec.adapted)$('#rest-label',root).textContent='Patrón ajustado a tu zona cómoda.';
+      let last=null;
+      run=practiceRun($('#coach-lane',root),spec,{sec:5,onSeg(s){
+        $('#phase',root).textContent=!s?'Respira':({L:'Escucha',S:'Ahora tú',J:'Canta junto',C:'Prepárate',R:'Respira'})[s.ph];
+        const hint=$('#rest-label',root);if(hint&&(!s||s.ph!=='R'))hint.textContent=spec.adapted?'Patrón ajustado a tu zona cómoda.':'La línea verde sigue tu voz.';
+        $('#round',root).textContent=s&&s.ri!=null?`Ronda ${s.ri+1} de ${spec.rounds}`:song?'Sigue la letra':'';
+      },onPitch(d,g){const n=$('#live-note',root);n.textContent=d.m==null?'—':nnTxt(d.m);n.classList.toggle('hit',d.m!=null&&g&&g.ph==='S'&&Math.abs(d.m-tgtAt(g,d.t))<=(DB.tol||50)/100)},onNote(g){
+        if(!song)return;const ly=$('#lyr',root);
+        if(last&&last.n){const el=$(`[data-li="${last.li}"] [data-si="${last.si}"]`,ly);if(el)el.classList.add(last.h/last.n>=.6?'hit':'miss')}
+        last=g;if(!g)return;ly.classList.add('live');$$('.lyl',ly).forEach(l=>{l.hidden=+l.dataset.li!==g.li&&+l.dataset.li!==g.li+1;l.classList.toggle('cur',+l.dataset.li===g.li);l.classList.toggle('nxt',+l.dataset.li===g.li+1)});
+        const el=$(`[data-li="${g.li}"] [data-si="${g.si}"]`,ly);if(el&&g.syl!==''){const end=Math.max(...spec.targets.filter(t=>t.li===g.li&&t.si===g.si).map(t=>t.t1));el.style.setProperty('--sd',(end-g.t0)+'s');el.classList.add('go')}
+      },onEnd(sp){run=null;if(sp&&alive)finish(sp)}});
+      if(song){$$('.lyl',root).forEach((el,i)=>el.hidden=i>1)}
+    }
+    function breathStep(){
+      stage='breath';shell(`<div class="coach-center"><h1>Respiración 4-4-8</h1><div class="brc"><div class="brdisc" id="breath-disc"></div><div class="brin"><b id="breath-count">4</b><span id="breath-phase">Inhala</span></div></div><p id="breath-cycle">Ciclo 1 de 2</p><p class="coach-tip">Suelta el aire parejo, sin subir los hombros.</p></div>${controls()}`);
+      timer(32,left=>{const elapsed=32-left,p=elapsed%16,phase=p<4?'Inhala':p<8?'Sostén':'Suelta «sss»',n=p<4?4-p:p<8?8-p:16-p,s=p<4?.55+.45*p/4:p<8?1:1-.45*(p-8)/8;
+        $('#breath-disc',root).style.transform=`scale(${s})`;$('#breath-count',root).textContent=Math.ceil(n);$('#breath-phase',root).textContent=phase;$('#breath-cycle',root).textContent=`Ciclo ${Math.min(2,Math.floor(elapsed/16)+1)} de 2`;
+      },()=>finish(null));
+    }
+    function rangeStep(){
+      if(!micOK){
+        result={id:'rango',s:null,skipped:true,gained:0,tip:'Seguimos con una zona de referencia. Puedes medir tu rango después.'};
+        if(daily){sess.res[index]=result;save()}showResult();return;
+      }
+      stage='range';rangeElapsed=0;rangePhase=0;
+      const v=viewRange({session:true,onDone:()=>finish(null)});shell('<div id="coach-range">'+v.html+'</div>'+controls());
+      rangeCleanup=v.mount($('#coach-range',root));$('#rgo',root).click();
+      // La prueba conserva sus botones y avanza sola a los 45 y 90 segundos.
+      timer(100,left=>{rangeElapsed=100-left;if(rangeElapsed>=45&&rangePhase===0){rangePhase=1;if($('#rph',root).textContent==='Paso 2 de 3')$('#rgo',root).click()}if(rangeElapsed>=90&&rangePhase===1){rangePhase=2;if($('#rph',root).textContent==='Paso 3 de 3')$('#rgo',root).click()}},()=>{$('#rgo',root).click();if(stage==='range')toast('No se registró un rango suficiente. Puedes repetir o saltar este paso.')});
+    }
+    function finish(sp){
+      clearStep();result=recordResult(steps[index],sp);
+      if(daily){sess.res[index]=result;sess.gained+=result.gained;save()}
+      showResult();
+    }
+    function showResult(){
+      clearStep();stage='result';paused=false;const x=stepInfo(steps[index]);
+      const noScore=result.s==null,stars=noScore?'':`<div class="coach-stars" aria-label="${result.stars} de 3 estrellas">${[0,1,2].map(i=>`<span style="--i:${i}" class="${i<result.stars?'earned':''}">${i<result.stars?'★':'☆'}</span>`).join('')}</div>`;
+      shell(`<div class="coach-center coach-result"><span class="eyebrow">${esc(x.t)} · terminado</span><h1 class="coach-score">${noScore?(x.breath?'Buen aire':x.id==='rango'&&DB.range?'A tu medida':'Hecho'):Math.round(result.s*100)+'<small>%</small>'}</h1>${stars}<p>${noScore?(x.breath?'Dos ciclos completos':x.id==='rango'&&DB.range?nnTxt(DB.range.lo)+' a '+nnTxt(DB.range.hi):'Sin calificación'):(result.record?'Nueva mejor marca':'Mejor marca')+' · '+scoreText(DB.best[x.id])}</p><p class="coach-tip">${esc(noScore&&!x.breath&&!DB.range?'Sigue la guía a tu ritmo. Mide tu rango cuando puedas activar el micrófono.':result.tip)}</p>${result.grew?'<p class="coach-good">Tu rango creció.</p>':''}<div class="row"><button class="btn" data-coach="repeat">${IC.redo}Repetir</button><button class="btn pri" data-coach="next">${daily?'Siguiente':'Volver'}${daily?'<span class="next-ring" id="next-ring">6</span>':''}</button></div></div>`);
+      if(result.skipped){$('.coach-score',root).textContent='Seguimos';$('.coach-result>.eyebrow',root).textContent='Rango · pendiente de medir';$('.coach-tip',root).textContent=result.tip}
+      if(daily)timer(6,n=>{const el=$('#next-ring',root);el.textContent=Math.ceil(n);el.style.setProperty('--progress',((6-n)/6*360)+'deg')},next);
+    }
+    function next(){
+      clearStep();if(!daily){location.hash=steps[0].startsWith('song:')?'#/canciones':'#/ejercicios';return}
+      index++;sess.i=index;save();if(index>=steps.length)summary();else intro();
+    }
+    function skip(){
+      if(daily){sess.res[index]={id:steps[index],s:null,skipped:true,gained:0};save()}
+      next();
+    }
+    function summary(){
+      clearStep();stage='summary';micStop();started=false;
+      const completed=sess.res.filter(r=>r&&!r.skipped),scores=completed.map(r=>r.s).filter(s=>s!=null),avg=mean(scores),old=sess.startRange,now=DB.range;
+      sess.finished=true;save();
+      const growth=old&&now?(now.hi-now.lo)-(old.hi-old.lo):0;
+      shell(`<div class="coach-center coach-result"><span class="eyebrow">${completed.length===steps.length?'Sesión completa':'Sesión terminada'} · ${completed.length} de ${steps.length} pasos</span><h1>Hoy le diste voz a tu día</h1><div class="coach-score">${avg==null?'—':Math.round(avg*100)+'<small>%</small>'}</div><p>${avg==null?'Sin calificaciones guardadas':'Afinación promedio'}</p><div class="coach-stats"><div><b>+${sess.gained}</b><span>estrellas nuevas</span></div><div><b>${Math.round(sess.secs/60)}</b><span>min de práctica</span></div><div><b>${streak()}</b><span>días de racha${!sess.hadDay&&completed.length?' · +1 hoy':''}</span></div></div>${growth>0?`<p class="coach-good">Tu rango creció ${growth} semitonos.</p>`:!old&&now?'<p class="coach-good">Ya tienes tu primer rango medido.</p>':''}${currentLevel()>sess.lvl?`<p class="coach-good">Desbloqueaste el nivel ${currentLevel()} · ${LEVELS[currentLevel()]}.</p>`:''}<a class="btn pri" href="#/">Listo</a><a class="coach-link" href="#/progreso">Ver mi progreso</a></div>`);
+    }
+    async function setPaused(value){
+      if(paused===value||pauseBusy)return;pauseBusy=true;paused=value;
+      if(run){if(value)await run.pause();else run.resume()}
+      if(!alive){pauseBusy=false;return}
+      if(stage==='range'){$('#coach-range',root).inert=value;if(value){rangeMic=MIC.on;MIC.on=null}else MIC.on=rangeMic}
+      root.classList.toggle('is-paused',value);
+      $('.coach-pause',root)?.remove();if(value)root.insertAdjacentHTML('beforeend','<div class="coach-pause"><span>En pausa</span><button class="btn pri" data-coach="resume">Seguir</button></div>');
+      const b=$('[data-coach="pause"]',root);if(b)b.innerHTML=(value?IC.play:IC.pause)+'<span>'+(value?'Seguir':'Pausa')+'</span>';
+      pauseBusy=false;
+    }
+    async function exit(){
+      if($('dialog[open]',root))return;
+      const was=paused;await setPaused(true);if(!alive)return;
+      const dialog=document.createElement('dialog');dialog.className='coach-dialog';dialog.innerHTML='<h2>¿Salir de la sesión?</h2><p>Tu avance queda guardado. Puedes continuar después.</p><div class="row"><button class="btn" data-stay>Seguir</button><button class="btn pri" data-leave>Salir</button></div>';root.appendChild(dialog);dialog.showModal();
+      const stay=()=>{dialog.close();dialog.remove();if(!was)setPaused(false)};
+      $('[data-stay]',dialog).onclick=stay;$('[data-leave]',dialog).onclick=()=>{dialog.close();location.hash=daily?'#/':steps[0].startsWith('song:')?'#/canciones':'#/ejercicios'};dialog.oncancel=e=>{e.preventDefault();stay()};
+    }
+    root.addEventListener('change',e=>{const k=e.target.dataset.setting;if(!k)return;DB[k]=e.target.type==='checkbox'?e.target.checked:['mode','dir'].includes(k)?e.target.value:Number(e.target.value);if(k.startsWith('bpm:'))DB[k]=Math.max(40,Math.min(160,DB[k]||60));if(k.startsWith('shift:'))DB[k]=Math.max(-36,Math.min(36,DB[k]||0));save()});
+    root.addEventListener('click',e=>{const b=e.target.closest('[data-coach]');if(!b)return;const action=b.dataset.coach;
+      if(pauseBusy)return;
+      if(action==='begin')begin();else if(action==='exit')exit();else if(action==='pause')setPaused(!paused);else if(action==='resume')setPaused(false);else if(action==='repeat'){if(daily){sess.res[index]=null;save()}intro()}else if(action==='skip')skip();else if(action==='now'&&stage==='intro')exercise();else if(action==='next')next();
+    });
+    const iv=setInterval(()=>{const now=performance.now(),dt=Math.min(.25,(now-previous)/1000);previous=now;if(!alive||paused||document.hidden)return;
+      if(clock){const c=clock;c.left-=dt;if(c.left<=0){clock=null;c.done()}else c.paint(c.left)}
+      if(stage==='exercise'&&run){const seg=spec.segs.find(s=>AC.currentTime-outLat()>=s.t0&&AC.currentTime-outLat()<s.t1);if(seg&&seg.ph==='R'){const el=$('#rest-label',root);if(el)el.textContent=`Suelta los hombros · siguiente ronda en ${Math.ceil(seg.t1-AC.currentTime+outLat())} s`}}
+    },80);
+    const visibility=()=>{if(document.hidden&&started&&!paused)setPaused(true);else if(!document.hidden&&paused&&run&&AC)AC.suspend()};document.addEventListener('visibilitychange',visibility);
+    ready();if(COACH_AUTOSTART){COACH_AUTOSTART=false;begin()}
+    return()=>{alive=false;clearStep();clearInterval(iv);document.removeEventListener('visibilitychange',visibility);if(COACH===state)COACH=null;micStop();if(AC&&AC.state==='suspended')AC.resume();save()};
+  }};
+}
 
 /* ---------- carril de tono: barras de las notas que vienen y la línea de tu voz ----------
    Todo va en «tiempo de audio» (AC.currentTime). Lo que se ve va retrasado outLat() para coincidir con lo que se oye,
@@ -1711,23 +1896,36 @@ function laneDraw(cv,st,now){
   if(last&&last.m!=null&&now-last.t<.2){const yy=Y(last.m);x.fillStyle=last.hit?C.good:C.fg;x.shadowColor=x.fillStyle;x.shadowBlur=12;x.beginPath();x.arc(PH,Math.max(6,Math.min(H-6,yy)),6,0,7);x.fill();x.shadowBlur=0}
 }
 /* Arma una sesión con barras (targets), sonidos programados (ev) y tramos con letrero (segs). */
-function drillSpec(d,o){
-  const c=comfy(),span=Math.max(...d.pat.map(p=>p[0]==null?0:p[0])),beat=60/(o.bpm||d.bpm);
-  const roots=[];for(let r=c.lo;r+span<=c.hi&&roots.length<8;r++)roots.push(r);
-  if(!roots.length)roots.push(c.lo);
-  if(o.dir==='ud')for(let i=roots.length-2;i>=0&&roots.length<14;i--)roots.push(roots[i]);
+function drillSpec(d,o={}){
+  const extend=d.id==='extensor'&&DB.range,c=extend?{lo:DB.range.lo,hi:DB.range.hi+2}:comfy();
+  const rawSpan=Math.max(0,...d.pat.map(p=>p[0]||0));
+  const span=Math.min(rawSpan,Math.max(0,c.hi-c.lo-(extend?2:0)));
+  const pattern=d.pat.map(([m,b])=>[m==null?null:rawSpan?Math.round(m*span/rawSpan):0,b]);
+  const beat=60/(o.bpm||d.bpm),count=Math.min(d.rounds,o.rounds||d.rounds),roots=[];
+  const low=extend?DB.range.hi-span:c.lo,high=c.hi-span;
+  let root=low,dir=1;
+  for(let i=0;i<count;i++){
+    if(d.id==='eco'){
+      const choices=Array.from({length:high-low+1},(_,j)=>low+j).filter(n=>n!==roots[roots.length-1]);
+      root=choices.length?choices[Math.floor(Math.random()*choices.length)]:low;
+    }
+    roots.push(root);
+    if(d.id==='eco')continue;
+    if(o.dir==='ud'&&i>=Math.floor((count-1)/2))dir=-1;
+    root=Math.max(low,Math.min(high,root+dir));
+  }
   const T0=AC.currentTime+.6,targets=[],ev=[],segs=[];let t=T0;
-  const plen=d.pat.reduce((a,p)=>a+p[1],0)*beat;
+  const plen=pattern.reduce((a,p)=>a+p[1],0)*beat;
   roots.forEach((R,ri)=>{
     ['L','S'].forEach(ph=>{
       if(ph==='S'&&o.mode==='junto')return;
       const s0=t;segs.push({t0:s0-(ph==='S'?beat:0),t1:s0+plen,ph:o.mode==='junto'?'J':ph,ri,R});
       if(ph==='L'||o.mode==='junto')ev.push({t:s0,fn:tt=>chordPad(R-12,tt,plen,.05)});
-      d.pat.forEach((p,i)=>{
+      pattern.forEach((p,i)=>{
         const[off,b]=p,dur=b*beat;
         if(off!=null){
-          const m=R+off,nx=d.glide&&d.pat[i+1]?R+d.pat[i+1][0]:null;
-          targets.push({t0:t,t1:t+dur,m,m2:nx,ph:o.mode==='junto'?'S':ph,ri,n:0,h:0});
+          const m=R+off,nx=d.glide&&pattern[i+1]&&pattern[i+1][0]!=null?R+pattern[i+1][0]:null;
+          targets.push({t0:t,t1:t+dur,m,m2:nx,beats:b,ph:o.mode==='junto'?'S':ph,ri,n:0,h:0});
           if(ph==='L'||o.mode==='junto'){const tt=t,dd=dur;ev.push({t:tt,fn:z=>d.glide?guideTone(m,z,dd,ph==='L'?.2:.12,nx):o.mode==='junto'?guideTone(m,z,dd*.95,.12):piano(m,z,dd*.95,.24)})}
         }
         t+=dur;
@@ -1736,10 +1934,11 @@ function drillSpec(d,o){
       if(ph==='L'){ev.push({t,fn:z=>{tick(z,'acc',null);chordPad(R-12,z,beat*.9,.04)}})}
       t+=beat;
     });
+    if(o.rest&&ri<roots.length-1){segs.push({t0:t,t1:t+o.rest,ph:'R',ri,R});t+=o.rest}
   });
   // clicks suaves en cada pulso mientras cantas
-  segs.filter(s=>s.ph!=='L').forEach(s=>{for(let b=s.t0+beat;b<s.t1-.01;b+=beat)ev.push({t:b,fn:z=>tickSound(z,'sub')})});
-  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,rounds:roots.length,beat};
+  segs.filter(s=>s.ph==='S'||s.ph==='J').forEach(s=>{for(let b=s.t0+beat;b<s.t1-.01;b+=beat)ev.push({t:b,fn:z=>tickSound(z,'sub')})});
+  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,rounds:roots.length,beat,tip:d.tip,id:d.id,adapted:span<rawSpan};
 }
 // transpone la melodía al centro de tu zona cómoda (de semitono en semitono)
 function songShift(S){
@@ -1757,7 +1956,7 @@ function songSpec(S,o){
       const dur=n.d*beat;
       if(n.m!=null){
         if(!n.cont)si++;const syl=L.syl[si],m=n.m+sh;
-        targets.push({t0:t,t1:t+dur,m,ph:'S',li,si,n:0,h:0,syl:n.cont?'':(syl?syl.x:'')});
+        targets.push({t0:t,t1:t+dur,m,beats:n.d,ph:'S',li,si,n:0,h:0,syl:n.cont?'':(syl?syl.x:'')});
         if(o.guide){const tt=t;ev.push({t:tt,fn:z=>guideTone(m,z,dur*.94,.13)})}
         if(!n.cont&&syl&&syl.ch&&o.chords){const ch=syl.ch.match(/^([A-G])([#b]?)(m(?!aj))?/);if(ch){let r=CHPC[ch[1]]+(ch[2]==='#'?1:ch[2]==='b'?-1:0)+sh;r=((r%12)+12)%12+48;if(r>55)r-=12;const tt=t;ev.push({t:tt,fn:z=>chordPad(r,z,beat*S.beats*.9,.05,!!ch[3])})}}
       }
@@ -1765,17 +1964,18 @@ function songSpec(S,o){
     });
     lines.push({li,t0:l0,t1:t});segs.push({t0:l0,t1:t,ph:'S',li});
   });
-  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,lines,beat};
+  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,lines,beat,tip:'Escucha la frase e imagina la primera nota antes de cantar.'};
 }
 let PRACTICE=null; // la sesión en curso (para revisarla desde la consola)
 /* Corre la sesión: programa el sonido 0.25 s adelante, dibuja y califica cada lectura del micrófono. */
 function practiceRun(cv,spec,o){
   const st={C:laneColors(),targets:spec.targets,trail:[],sec:o.sec||4,labels:o.labels,fixed:o.fixed};
-  let ei=0,raf=0,seg=-1,cur=null,alive=true;
+  let ei=0,raf=0,seg=-1,cur=null,alive=true,paused=false,pauseAt=0;
+  const master=MASTER,bus=AC.createGain();bus.connect(master);
   const tol=(DB.tol||50)/100;
   const frame=()=>{
-    if(!alive)return;
-    while(ei<spec.ev.length&&spec.ev[ei].t<AC.currentTime+.25){const e=spec.ev[ei++];if(e.t>AC.currentTime-.02)e.fn(e.t)}
+    if(!alive||paused)return;
+    while(ei<spec.ev.length&&spec.ev[ei].t<AC.currentTime+.25){const e=spec.ev[ei++];if(e.t>AC.currentTime-.02){MASTER=bus;try{e.fn(e.t)}finally{MASTER=master}}}
     const now=AC.currentTime-outLat();
     const si=spec.segs.findIndex(s=>now>=s.t0&&now<s.t1);if(si!==seg){seg=si;o.onSeg&&o.onSeg(spec.segs[si]||null)}
     const g=spec.targets.find(x=>now>=x.t0&&now<x.t1)||null;if(g!==cur){cur=g;o.onNote&&o.onNote(g,now)}
@@ -1784,122 +1984,54 @@ function practiceRun(cv,spec,o){
     raf=requestAnimationFrame(frame);
   };
   const onMic=d=>{
-    if(!alive)return;const s={t:d.t,m:d.m,hit:false,off:false};
+    if(!alive||paused)return;const s={t:d.t,m:d.m,hit:false,off:false};
     const g=spec.targets.find(x=>d.t>=x.t0&&d.t<x.t1);
     if(g&&g.ph==='S'){
+      const hit=d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol;
+      g.reads=(g.reads||0)+1;
+      if(d.m==null)g.silent=(g.silent||0)+1;
+      else{const err=d.m-tgtAt(g,d.t);g.voiced=(g.voiced||0)+1;g.sum=(g.sum||0)+err;g.sq=(g.sq||0)+err*err}
+      const part=(d.t-g.t0)/(g.t1-g.t0),which=part<.3?'early':part>.7?'late':null;
+      if(which){g[which+'N']=(g[which+'N']||0)+1;g[which+'H']=(g[which+'H']||0)+(hit?1:0)}
       const grace=Math.min(.18,(g.t1-g.t0)*.3);
-      if(d.t>=g.t0+grace&&d.t<g.t1-.03){g.n++;if(d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol){g.h++;s.hit=true}else if(d.m!=null)s.off=true}
+      if(d.t>=g.t0+grace&&d.t<g.t1-.03){g.n++;if(hit){g.h++;s.hit=true}else if(d.m!=null)s.off=true;
+        const note=Math.round(tgtAt(g,d.t));g.bins=g.bins||{};const b=g.bins[note]||(g.bins[note]={n:0,h:0});b.n++;if(hit)b.h++;
+      }
       else if(d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol)s.hit=true;
     }
     st.trail.push(s);if(st.trail.length>400)st.trail.splice(0,100);
     o.onPitch&&o.onPitch(d,g);
   };
-  const stop=fin=>{if(!alive)return;alive=false;cancelAnimationFrame(raf);if(MIC.on===onMic)MIC.on=null;o.onEnd&&o.onEnd(fin?spec:null)};
+  const stop=fin=>{if(!alive)return;alive=false;cancelAnimationFrame(raf);bus.gain.value=0;if(paused)AC.resume();if(MIC.on===onMic)MIC.on=null;o.onEnd&&o.onEnd(fin?spec:null)};
+  const pause=async()=>{if(!alive||paused)return;paused=true;cancelAnimationFrame(raf);await AC.suspend();pauseAt=AC.currentTime};
+  const resume=()=>{if(!alive||!paused)return;const delta=Math.max(0,AC.currentTime-pauseAt);
+    if(delta){spec.targets.forEach(g=>{g.t0+=delta;g.t1+=delta});spec.segs.forEach(s=>{s.t0+=delta;s.t1+=delta});(spec.lines||[]).forEach(s=>{s.t0+=delta;s.t1+=delta});spec.ev.slice(ei).forEach(e=>e.t+=delta);spec.end+=delta;st.trail.forEach(p=>p.t+=delta)}
+    paused=false;AC.resume();raf=requestAnimationFrame(frame);
+  };
   if(MIC.stream)MIC.on=onMic;
   raf=requestAnimationFrame(frame);
-  return PRACTICE={stop:()=>stop(false),st,onMic};
+  return PRACTICE={stop:()=>stop(false),pause,resume,st,onMic,spec,get paused(){return paused}};
 }
 // calificación: promedio de las notas que cantaste (cada nota = fracción del tiempo dentro de la tolerancia)
 function specScore(spec){const gs=spec.targets.filter(g=>g.ph==='S'&&g.n>0);if(!gs.length)return null;return gs.reduce((a,g)=>a+g.h/g.n,0)/gs.length}
+/* Una sola observación, calculada con lecturas reales de la voz. */
+function coachTip(spec){
+  const gs=spec.targets.filter(g=>g.ph==='S'),reads=gs.reduce((s,g)=>s+(g.reads||0),0);
+  if(reads&&gs.reduce((s,g)=>s+(g.silent||0),0)/reads>.4)return 'Casi no te oí: acércate al teléfono y canta con más aire.';
+  const notes=gs.map(g=>(g.m+(g.m2==null?g.m:g.m2))/2),lo=Math.min(...notes),hi=Math.max(...notes),third=(hi-lo)/3;
+  const average=list=>{const n=list.reduce((s,g)=>s+(g.voiced||0),0);return n?list.reduce((s,g)=>s+(g.sum||0),0)/n:0};
+  const high=average(gs.filter((g,i)=>notes[i]>=hi-third)),low=average(gs.filter((g,i)=>notes[i]<=lo+third));
+  if(hi>lo&&high<-.3)return 'Te quedaste bajo en las notas agudas: apoya más el aire y piensa la nota arriba antes de cantarla.';
+  if(hi>lo&&high>.3)return 'Te pasaste arriba en las agudas: relaja la garganta y canta un poco más suave.';
+  if(hi>lo&&low<-.3)return 'En las graves te quedaste abajo: imagina la nota y mantén el aire parejo.';
+  if(hi>lo&&low>.3)return 'En las graves te fuiste arriba: suelta la mandíbula y baja con suavidad.';
+  if(gs.some(g=>g.m2==null&&g.beats>=2&&g.voiced>2&&Math.sqrt(Math.max(0,g.sq/g.voiced-(g.sum/g.voiced)**2))>.35))return 'Tu nota se movía: sostén el aire parejo, como en la «sss».';
+  if(gs.some(g=>g.earlyN>2&&g.lateN>2&&g.earlyH/g.earlyN<.4&&g.lateH/g.lateN>.7))return 'Llegas a la nota tarde: imagínala antes de cantarla.';
+  if(specScore(spec)>=.85)return '¡Qué buena afinación! Prueba la tolerancia estricta o el siguiente nivel.';
+  return spec.tip||'Escucha la nota completa y repítela con aire parejo.';
+}
 
-/* ---------- narrador: lee la lección en voz alta (voz del dispositivo, español) ----------
-   Versión del narrador de Roka Guitar sin el mástil: lee cada bloque y lo resalta. */
-const NARR={on:false,paused:false,items:[],i:0,lesson:null,voice:null,tok:0,timers:[]};
-const HAS_TTS='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
-function pickVoice(){
-  if(!HAS_TTS)return null;const vs=speechSynthesis.getVoices();
-  const by=p=>vs.find(v=>v.lang&&v.lang.toLowerCase().replace('_','-').startsWith(p));
-  return by('es-mx')||by('es-us')||by('es-419')||by('es-es')||by('es')||null;
-}
-if(HAS_TTS){speechSynthesis.onvoiceschanged=()=>{NARR.voice=pickVoice()};NARR.voice=pickVoice()}
-function sayText(html){
-  let t=String(html).replace(/<[^>]+>/g,'').replace(/[«»“”]/g,'');
-  // «Do3» → «Do 3»; ♯/♭ y abreviaturas se leen completas
-  t=t.replace(/\b(Do|Re|Mi|Fa|Sol|La|Si)([♯♭]?)(\d)\b/g,'$1$2 $3');
-  t=t.replace(/♭/g,' bemol').replace(/♯/g,' sostenido').replace(/±/g,'más o menos ');
-  t=t.replace(/(\d)-(\d)-(\d)-(\d)/g,'$1, $2, $3, $4').replace(/(\d)-(\d)-(\d)/g,'$1, $2, $3');
-  t=t.replace(/\s*[–·→]\s*/g,', ').replace(/\bbpm\b/gi,'pulsos por minuto').replace(/%/g,' por ciento').replace(/\s+/g,' ').trim();
-  return t;
-}
-const sentences=html=>{const t=String(html).replace(/<[^>]+>/g,'');return t.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿«0-9])/).map(s=>s.trim()).filter(Boolean)};
-function buildNarration(l,root){
-  const it=[],blk=i=>root.querySelector(`[data-nb="${i}"]`),head=root.querySelector('.lhead');
-  it.push({el:head,text:`Lección ${l.id}. ${l.title}. ${l.lead}`});
-  l.blocks.forEach((b,i)=>{
-    const el=blk(i);if(!el)return;
-    if(b.step){it.push({el,text:b.step+'. '+b.t+'.'});sentences(b.p).forEach(s=>it.push({el,text:s}))}
-    else if(b.aim){const lis=$$('li',el);it.push({el,text:'Al terminar podrás:'});b.aim.forEach((t,k)=>it.push({el,li:lis[k],text:t}))}
-    else if(b.key){it.push({el,text:'La idea clave.'});sentences(b.key).forEach(s=>it.push({el,text:s}))}
-    else if(b.check){it.push({el,text:'Compruébalo. Contesta antes de ver la respuesta.'});b.check.forEach(([q])=>it.push({el,text:q}))}
-    else if(b.box||b.trick){const lis=$$('li',el),arr=b.ul||b.ol||b.trick;it.push({el,text:(b.box||'Hoja de trucos')+'.'});arr.forEach((t,k)=>it.push({el,li:lis[k],text:t}))}
-    else if(b.ex){const x=b.ex,lis=$$('ol li',el);it.push({el,text:`Ejercicio: ${x.t}.`});x.steps.forEach((s,k)=>it.push({el,li:lis[k],text:s}));it.push({el,li:el.querySelector('.goal'),text:'Lo logras cuando: '+x.goal})}
-    else if(b.p)sentences(b.p).forEach(s=>it.push({el,text:s}));
-  });
-  it.push({el:null,text:'Fin de la lección. Ahora haz los ejercicios con la app.'});
-  return it;
-}
-function speak(text){
-  return new Promise(res=>{
-    if(!HAS_TTS){setTimeout(res,600);return}
-    const u=new SpeechSynthesisUtterance(text);u.lang=(NARR.voice&&NARR.voice.lang)||'es-MX';if(NARR.voice)u.voice=NARR.voice;u.rate=DB.narrRate||1;
-    let done=false;const fin=()=>{if(!done){done=true;res()}};
-    u.onend=fin;u.onerror=fin;
-    try{speechSynthesis.speak(u)}catch(e){fin();return}
-    NARR.timers.push(setTimeout(fin,Math.max(4000,text.length/(14*(DB.narrRate||1))*1000*2.2+3000)));
-  });
-}
-const wait=ms=>new Promise(r=>NARR.timers.push(setTimeout(r,ms)));
-async function narrRun(){
-  const tok=++NARR.tok;
-  while(NARR.on&&!NARR.paused&&NARR.tok===tok&&NARR.i<NARR.items.length){
-    const item=NARR.items[NARR.i];
-    $$('.narr').forEach(e=>e.classList.remove('narr'));
-    if(item.el){item.el.classList.add('narr');if(item.li)item.li.classList.add('narr');const tgt=item.li||item.el,r=tgt.getBoundingClientRect();if(r.top<80||r.bottom>innerHeight-140)tgt.scrollIntoView({block:'center',behavior:'smooth'})}
-    paintNarr();
-    await speak(sayText(item.text));
-    if(NARR.tok!==tok)return;
-    await wait(150);
-    if(NARR.tok!==tok)return;
-    NARR.i++;
-  }
-  if(NARR.tok===tok&&NARR.i>=NARR.items.length)narrStop();
-}
-function narrStart(l,root){
-  if(!HAS_TTS){toast('Este navegador no tiene voz para leer en voz alta.');return}
-  narrStop(true);seqStop();
-  NARR.on=true;NARR.paused=false;NARR.lesson=l.id;NARR.items=buildNarration(l,root);NARR.i=0;
-  try{speechSynthesis.cancel()}catch(e){}
-  paintNarr();narrRun();
-}
-function narrCancel(){NARR.tok++;NARR.timers.forEach(t=>clearTimeout(t));NARR.timers=[];try{HAS_TTS&&speechSynthesis.cancel()}catch(e){}}
-function narrStop(silent){
-  narrCancel();NARR.on=false;NARR.paused=false;
-  $$('.narr').forEach(e=>e.classList.remove('narr'));
-  const b=$('#narrbar');if(b)b.remove();if(!silent)paintNarr();
-}
-function narrJump(d){if(!NARR.on)return;narrCancel();NARR.i=Math.max(0,Math.min(NARR.items.length-1,NARR.i+d));NARR.paused=false;narrRun()}
-function narrToggle(){if(!NARR.on)return;if(NARR.paused){NARR.paused=false;narrRun()}else{NARR.paused=true;narrCancel()}paintNarr()}
-function paintNarr(){
-  const btn=$('[data-narr="start"]');
-  if(btn)btn.innerHTML=NARR.on?IC.x+'Dejar de escuchar':IC.voice+'Escuchar la lección';
-  let bar=$('#narrbar');
-  if(!NARR.on){if(bar)bar.remove();return}
-  if(!bar){bar=document.createElement('div');bar.id='narrbar';bar.className='player narrbar';document.body.appendChild(bar)}
-  const item=NARR.items[NARR.i]||{};
-  bar.innerHTML=`<button class="icon-btn" data-narr="prev" aria-label="Anterior">${IC.back}</button><button class="icon-btn pri" data-narr="toggle" aria-label="${NARR.paused?'Continuar':'Pausar'}">${NARR.paused?IC.play:IC.pause}</button><button class="icon-btn" data-narr="next" aria-label="Siguiente">${IC.next}</button>
-   <span class="pl"><b>${NARR.paused?'En pausa':item.li?'Paso':'Leyendo'}</b> · ${NARR.i+1} de ${NARR.items.length}</span>
-   <span class="seg">${[.85,1,1.2].map(v=>`<button data-narr="rate" data-v="${v}" aria-pressed="${(DB.narrRate||1)===v}">${v===1?'1×':v+'×'}</button>`).join('')}</span>
-   <button class="icon-btn" data-narr="stop" aria-label="Cerrar">${IC.x}</button>`;
-}
-document.addEventListener('click',e=>{
-  const b=e.target.closest('[data-narr]');if(!b)return;const a=b.dataset.narr;
-  if(a==='start'){if(NARR.on){narrStop();return}const l=LESSONS.find(x=>x.id===+b.dataset.l);if(l)narrStart(l,$('#page'))}
-  else if(a==='toggle')narrToggle();
-  else if(a==='prev')narrJump(-1);
-  else if(a==='next')narrJump(1);
-  else if(a==='stop')narrStop();
-  else if(a==='rate'){DB.narrRate=+b.dataset.v;save();paintNarr();if(NARR.on&&!NARR.paused){narrCancel();narrRun()}}
-});
+/* La v2 usa tips breves en cada ejercicio. */
 
 /* ---------- pulso visual: barra de tiempos, acento en el 1, destello y modo silencioso ---------- */
 const PULSE={n:4,beat:0,count:0,hideT:null,el:null};
@@ -2015,7 +2147,7 @@ function viewTuner(){
   }};
 }
 /* ---------- rango vocal ---------- */
-function viewRange(){
+function viewRange(options={}){
   const R={ph:'idle',lo:null,hi:null,buf:[]};
   return{title:'Rango vocal',back:'#/practicar',html:`<div class="kplay tplay">
   ${toolHead('range','Rango vocal','Encuentra tu voz')}
@@ -2059,19 +2191,19 @@ function viewRange(){
     };
     go.onclick=async()=>{
       msg.innerHTML='';
-      if(R.ph==='idle'){const ok=await micStart(onMic,k=>{msg.innerHTML=micErrHTML(k)});if(!ok){set();return}R.ph='low';R.lo=R.hi=null;R.buf=[]}
+      if(R.ph==='idle'){const ok=options.session?(MIC.on=onMic,!!MIC.stream):await micStart(onMic,k=>{msg.innerHTML=micErrHTML(k)});if(!ok){set();return}R.ph='low';R.lo=R.hi=null;R.buf=[]}
       else if(R.ph==='low')R.ph='high';
-      else if(R.ph==='high'){R.ph='done';micStop()}
-      else if(R.ph==='done'){if(R.lo!=null&&R.hi-R.lo>=5){DB.range={lo:R.lo,hi:R.hi,at:today()};save();$('#rres',r).textContent=rangeText(R.lo,R.hi);r.querySelector('.vbars').outerHTML=voiceBars(R.lo,R.hi);toast(logo()+'<span>Rango guardado. Los ejercicios ya están a tu medida.</span>')}else msg.innerHTML='<p class="msg err">El rango salió muy corto (menos de 5 notas). Repite la medición con más calma.</p>'}
+      else if(R.ph==='high'){R.ph='done';if(!options.session)micStop();else MIC.on=null}
+      else if(R.ph==='done'){if(R.lo!=null&&R.hi-R.lo>=5){recordRange(R.lo,R.hi);if(options.onDone){options.onDone();return}$('#rres',r).textContent=rangeText(R.lo,R.hi);r.querySelector('.vbars').outerHTML=voiceBars(R.lo,R.hi);toast(logo()+'<span>Rango guardado. Los ejercicios ya están a tu medida.</span>')}else msg.innerHTML='<p class="msg err">El rango salió muy corto (menos de 5 notas). Repite la medición con más calma.</p>'}
       set();
     };
-    $('#rre',r).onclick=()=>{micStop();R.ph='idle';R.lo=R.hi=null;set()};
+    $('#rre',r).onclick=()=>{if(!options.session)micStop();else MIC.on=null;R.ph='idle';R.lo=R.hi=null;set()};
     set();
-    return()=>micStop();
+    return()=>{if(!options.session)micStop();else MIC.on=null};
   }};
 }
 function rangeText(lo,hi){const v=voiceGuess(lo,hi),st=hi-lo,oc=Math.floor(st/12),rest=st%12;
-  return`De ${nnTxt(lo)} a ${nnTxt(hi)}: ${oc?oc+(oc>1?' octavas':' octava')+(rest?' y '+rest+(rest>1?' semitonos':' semitono'):''):st+' semitonos'}. Tu voz se parece a la de ${['bajo','bar','ten'].includes(v.k)?'un ':'una '}${v.n.toLowerCase()} (${v.d.replace(/\.$/,'')}). Es una guía: tu rango crece con práctica.`}
+  return`De ${nnTxt(lo)} a ${nnTxt(hi)}: ${oc?oc+(oc>1?' octavas':' octava')+(rest?' y '+rest+(rest>1?' semitonos':' semitono'):''):st+' semitonos'}. Zona de referencia: ${v.n.toLowerCase()}. Es una orientación, no un límite.`}
 /* ---------- respiración ---------- */
 const BR={mode:'448',cycles:5};
 function viewBreath(){
@@ -2171,303 +2303,79 @@ function viewMetronome(){
   }};
 }
 /* ---------- ejercicio de calentamiento con calificación ---------- */
-const MODEL={eco:'Escucha y repite',junto:'Canta junto'};
-const TOLL={25:'Estricta',50:'Normal',75:'Relajada'};
-function resultHTML(score,rows,best,next){
-  const p=Math.round(score*100),msg=p>=85?'Excelente afinación.':p>=70?'Muy bien: casi todo en la nota.':p>=45?'Vas bien. Repite las rondas en rosa más despacio.':'Empieza por escuchar cada ronda completa antes de cantar.';
-  return`<div class="card center rescard"><span class="eyebrow">Resultado</span><div class="big">${p}<small>%</small></div><p class="sub" style="margin:0">${msg}</p>
-   ${rows?`<div class="rrows">${rows.map(([lab,s])=>`<span title="${esc(lab)}"><i style="height:${Math.max(6,Math.round(s*100))}%;background:${s>=.7?'var(--good)':s>=.4?'#f5b43c':'var(--root)'}"></i><small>${esc(lab)}</small></span>`).join('')}</div>`:''}
-   <p class="cap" style="margin:0">${best}</p>${next||''}</div>`;
-}
-function viewDrill(id){
-  const d=drillById(id);if(!d)return viewPractice();
-  const O={bpm:DB['bpm:'+id]||d.bpm,dir:DB.dir||'up'};
-  const wi=WARMUP.indexOf(id),nxt=wi>=0&&WARMUP[wi+1]?WARMUP[wi+1]:null;
-  return{title:d.t,back:'#/practicar',html:`<div class="kplay tplay">
-  ${toolHead('d'+id,d.t,'Calentamiento · '+d.syl,[d.hue,d.motif])}
-  ${toolBar([['mode','Modo',TKIC.guide],['tempo','Tempo',TKIC.tempo],['dir','Rondas',TKIC.dir],['tol','Tolerancia',TKIC.tol]])}
-  ${toolPanels([['mode','Modo',chipRow('mode','Modo',[{v:'eco',l:'Escucha y repite'},{v:'junto',l:'Canta junto con la guía'}],DB.mode||'eco')+'<p class="cap" style="margin:6px 0 0">«Canta junto» funciona mejor con audífonos: sin ellos el micrófono también oye la guía.</p>'],
-    ['tempo','Tempo',`<div class="row" style="justify-content:center"><button class="kic" data-bpm="-6" aria-label="Más lento">${IC.minus}</button><span class="kkey" id="dbpm" style="min-width:90px;text-align:center"></span><button class="kic" data-bpm="6" aria-label="Más rápido">${IC.plus}</button></div>`],
-    ['dir','Rondas',chipRow('dir','Rondas',[{v:'up',l:'Subir medio tono cada ronda'},{v:'ud',l:'Subir y bajar'}],O.dir)],
-    ['tol','Tolerancia',chipRow('tol','Tolerancia',[{v:25,l:'Estricta',s:'±25 cents'},{v:50,l:'Normal',s:'±50'},{v:75,l:'Relajada',s:'±75'}],DB.tol||50)]])}
-  <div class="card dstage"><div class="dhud"><b id="dph">Listo</b><span id="drd"></span></div><canvas class="lane tall" id="lane" aria-label="Notas del ejercicio y línea de tu voz"></canvas></div>
-  <div id="dres"></div>
-  <div class="box"><p class="blockh">Cómo hacerlo</p><p style="margin:0">${d.tip}</p></div>
-  <div id="dmsg"></div>
-  ${toolDock(`<span class="tm" id="ddock"></span><div class="ktrans"><button class="kplayb" id="dgo"></button></div><span class="tm" id="dbest"></span>`)}
-  </div>`,
-  mount(r){
-    const go=$('#dgo',r),cv=$('#lane',r);let run=null,spec=null,raf=0,alive=true;
-    const tv=toolMount(r,()=>({mode:MODEL[DB.mode||'eco'],tempo:O.bpm+' bpm',dir:O.dir==='ud'?'Sube y baja':'Sube',tol:TOLL[DB.tol||50],meta:`${d.sub} · ${comfy().measured?'en tu rango ':'voz '+(DB.vt==='aguda'?'aguda':'grave')+' '}${nnTxt(comfy().lo)}–${nnTxt(comfy().hi)}`}));
-    const paint=()=>{go.innerHTML=playLbl(!!run,'Empezar','Detener');$('#dbpm',r).textContent=O.bpm+' bpm';const b=DB.best[id];$('#dbest',r).textContent=b!=null?'Récord '+Math.round(b*100)+' %':'';$('#ddock',r).textContent=run?(MIC.stream?'Calificando':'Sin micrófono'):'Listo';tv()};
-    const preview=()=>{const ok=ac();if(!ok)return;spec=drillSpec(d,Object.assign({},O,{mode:DB.mode||'eco'}));const st={C:laneColors(),targets:spec.targets,trail:[],sec:5};const t=spec.targets[0].t0-.8;const p=()=>{if(!alive||run)return;laneDraw(cv,st,t)};p();setTimeout(p,60);$('#drd',r).textContent=spec.rounds+' rondas · empieza en '+nnTxt(comfy().lo)};
-    const finish=sp=>{
-      run=null;micStop();$('#dph',r).textContent='Terminado';
-      if(!sp){paint();preview();return}
-      const sc=specScore(sp);DB.today[id]=today();markDay();
-      if(sc==null){$('#dres',r).innerHTML=`<div class="card center"><p class="sub" style="margin:0">Ejercicio completo. Activa el micrófono para que la app te califique.</p>${nxt?`<a class="btn pri" href="${nxt==='respira'?'#/practicar/respiracion':'#/practicar/ej/'+nxt}">${IC.next}Siguiente</a>`:''}</div>`;paint();return}
-      const prev=DB.best[id],rec=prev==null||sc>prev;if(rec)DB.best[id]=sc;save();
-      const rows=[];for(let i=0;i<sp.rounds;i++){const gs=sp.targets.filter(g=>g.ri===i&&g.ph==='S'&&g.n>0);if(gs.length)rows.push([nnTxt(sp.segs.find(s=>s.ri===i).R),gs.reduce((a,g)=>a+g.h/g.n,0)/gs.length])}
-      $('#dres',r).innerHTML=resultHTML(sc,rows,rec?'¡Nuevo récord!':'Récord: '+Math.round(prev*100)+' %',`<div class="row" style="justify-content:center"><button class="btn" data-again>${IC.redo}Otra vez</button>${nxt?`<a class="btn pri" href="${'#/practicar/ej/'+nxt}">${IC.next}Siguiente ejercicio</a>`:wi>=0?`<a class="btn pri" href="#/practicar/calentamiento">${IC.check}Ver calentamiento</a>`:''}</div>`);
-      if(rec&&sc>=.7)bell();paint();$('#dres',r).scrollIntoView({block:'nearest',behavior:'smooth'});
-    };
-    const start=async()=>{
-      $('#dres',r).innerHTML='';$('#dmsg',r).innerHTML='';if(!ac())return;
-      await micStart(null,k=>{$('#dmsg',r).innerHTML=micErrHTML(k)+'<p class="cap">Puedes hacer el ejercicio sin calificación.</p>'});
-      spec=drillSpec(d,Object.assign({},O,{mode:DB.mode||'eco'}));
-      run=practiceRun(cv,spec,{sec:5,onSeg:s=>{if(!s){return}$('#dph',r).textContent=s.ph==='L'?'Escucha':s.ph==='J'?'Canta junto':'Ahora tú';$('#dph',r).className=s.ph==='L'?'':'sing';$('#drd',r).textContent=`Ronda ${s.ri+1} de ${spec.rounds} · ${nnTxt(s.R)}`;if(s.ph!=='L')beatPulse(r,true)},onEnd:finish});
-      paint();
-    };
-    go.onclick=()=>{if(run){run.stop();return}start()};
-    r.addEventListener('click',e=>{
-      if(e.target.closest('[data-again]')){start();return}
-      const b=e.target.closest('[data-bpm]');if(b){O.bpm=Math.max(40,Math.min(160,O.bpm+ +b.dataset.bpm));DB['bpm:'+id]=O.bpm;save();if(!run)preview();paint();return}
-      const s=e.target.closest('[data-set]');if(s){const k=s.dataset.set;if(k==='mode')DB.mode=s.dataset.v;else if(k==='dir'){O.dir=s.dataset.v;DB.dir=O.dir}else if(k==='tol')DB.tol=+s.dataset.v;save();$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===s)));if(!run)preview();paint()}
-    });
-    paint();preview();
-    return()=>{alive=false;if(run)run.stop();micStop()};
-  }};
-}
-/* ---------- canciones: carril de notas + letra en modo concierto ---------- */
-// −19 → «1 octava y 7 semitonos abajo»
-function shDesc(s){if(!s)return'Tono original';const a=Math.abs(s),o=Math.floor(a/12),k=a%12;return[o?o+(o>1?' octavas':' octava'):'',k?k+(k>1?' semitonos':' semitono'):''].filter(Boolean).join(' y ')+(s<0?' abajo':' arriba')}
 function lyricHTML(S){return S.lines.map((L,li)=>`<p class="lyl" data-li="${li}">${L.syl.map((s,si)=>`<span class="syl" data-si="${si}">${esc(s.x)}</span>${s.sp?' ':''}`).join('')}</p>`).join('')}
-function viewSing(id){
-  const S=songById(id);if(!S)return viewSongs();
-  const O={shift:DB['shift:'+id]!=null?DB['shift:'+id]:songShift(S),guide:DB.sguide!==false,chords:DB.schords!==false,speed:1};
-  return{title:S.title,back:'#/canciones',html:`<div class="kplay tplay sing">
-  ${toolHead('s'+id,S.title,S.artist,[SONGHUE[id]||218,SONGM[id]])}
-  ${toolBar([['key','Tono',TKIC.key],['guide','Voz guía',TKIC.guide],['speed','Velocidad',TKIC.tempo],['tol','Tolerancia',TKIC.tol]])}
-  ${toolPanels([['key','Tono',`<div class="row" style="justify-content:center"><button class="kic" data-sh="-1" aria-label="Medio tono abajo">${IC.minus}</button><span class="kkey" id="shv" style="min-width:110px;text-align:center;font-size:17px;line-height:1.2"></span><button class="kic" data-sh="1" aria-label="Medio tono arriba">${IC.plus}</button></div><div class="chips" style="justify-content:center;margin-top:8px"><button class="chip" data-sh="auto">Ajustar a mi voz</button></div>`],
-    ['guide','Voz guía',`<div class="chips"><button class="chip" data-tg="guide" aria-pressed="${O.guide}">Melodía guía</button><button class="chip" data-tg="chords" aria-pressed="${O.chords}">Acordes de piano</button></div><p class="cap" style="margin:6px 0 0">Con audífonos la calificación es más exacta: sin ellos el micrófono también oye la guía.</p>`],
-    ['speed','Velocidad',chipRow('speed','Velocidad',[{v:.75,l:'75 %'},{v:.9,l:'90 %'},{v:1,l:'Normal'}],1)],
-    ['tol','Tolerancia',chipRow('tol','Tolerancia',[{v:25,l:'Estricta',s:'±25 cents'},{v:50,l:'Normal',s:'±50'},{v:75,l:'Relajada',s:'±75'}],DB.tol||50)]])}
-  <div class="card dstage"><canvas class="lane" id="lane" aria-label="Notas de la melodía y línea de tu voz"></canvas></div>
-  <div class="lyrics" id="lyr">${lyricHTML(S)}</div>
-  <div id="dres"></div><div id="dmsg"></div>
-  ${toolDock(`<span class="tm" id="ddock"></span><div class="ktrans"><button class="kplayb" id="dgo"></button></div><span class="tm" id="dbest"></span>`)}
-  </div>`,
-  mount(r){
-    const go=$('#dgo',r),cv=$('#lane',r),ly=$('#lyr',r);let run=null,spec=null,alive=true;
-    const shTxt=()=>O.shift===songShift(S)?'A tu voz':(O.shift>0?'+':'')+O.shift;
-    const tv=toolMount(r,()=>({key:shTxt(),guide:O.guide?'Con guía':'Sin guía',speed:O.speed===1?'Normal':Math.round(O.speed*100)+' %',tol:TOLL[DB.tol||50],meta:`${S.bpm} bpm · ${S.beats}/4 · tono ${O.shift===0?'original':O.shift===songShift(S)?'ajustado a tu voz':(O.shift>0?'+':'')+O.shift+' semitonos'}`}));
-    const paint=()=>{go.innerHTML=playLbl(!!run,'Cantar','Detener');$('#shv',r).textContent=shDesc(O.shift);const b=DB.best['song:'+id];$('#dbest',r).textContent=b!=null?'Récord '+Math.round(b*100)+' %':'';$('#ddock',r).textContent=run?(MIC.stream?'Calificando':'Sin micrófono'):'Lista';tv()};
-    const clearLy=()=>{ly.classList.remove('live');$$('.lyl',ly).forEach(p=>p.classList.remove('cur','nxt','past'));$$('.syl',ly).forEach(s=>{s.classList.remove('go','hit','miss');s.style.removeProperty('--sd')})};
-    const setLine=li=>{ly.classList.add('live');$$('.lyl',ly).forEach(p=>{const k=+p.dataset.li;p.classList.toggle('cur',k===li);p.classList.toggle('nxt',k===li+1);p.classList.toggle('past',k<li)});const c=$(`.lyl[data-li="${li}"]`,ly);if(c){const rc=c.getBoundingClientRect();if(rc.top<innerHeight*.25||rc.bottom>innerHeight*.75)c.scrollIntoView({block:'center',behavior:'smooth'})}};
-    let lastLi=-1,lastG=null;
-    const onNote=(g)=>{
-      if(lastG&&lastG.n>0){const sp=$(`.lyl[data-li="${lastG.li}"] .syl[data-si="${lastG.si}"]`,ly);if(sp){const s=lastG.h/lastG.n;sp.classList.toggle('hit',s>=.6);sp.classList.toggle('miss',s<.3)}}
-      lastG=g;if(!g)return;
-      if(g.li!==lastLi){lastLi=g.li;setLine(g.li)}
-      if(g.syl!==''){const sp=$(`.lyl[data-li="${g.li}"] .syl[data-si="${g.si}"]`,ly);if(sp){let end=g.t1;spec.targets.forEach(x=>{if(x.li===g.li&&x.si===g.si&&x.t1>end)end=x.t1});sp.style.setProperty('--sd',(end-g.t0).toFixed(2)+'s');sp.classList.add('go')}}
-    };
-    const preview=()=>{if(!ac())return;spec=songSpec(S,O);const st={C:laneColors(),targets:spec.targets,trail:[],sec:4};const t=spec.targets[0].t0-.6;const p=()=>{if(alive&&!run)laneDraw(cv,st,t)};p();setTimeout(p,60)};
-    const finish=sp=>{
-      run=null;micStop();
-      if(!sp){clearLy();paint();preview();return}
-      const sc=specScore(sp);markDay();
-      if(sc==null){$('#dres',r).innerHTML='<div class="card center"><p class="sub" style="margin:0">Canción completa. Activa el micrófono para que la app te califique.</p></div>';paint();return}
-      const prev=DB.best['song:'+id],rec=prev==null||sc>prev;if(rec)DB.best['song:'+id]=sc;save();
-      const rows=spec.lines.map(L=>{const gs=sp.targets.filter(g=>g.li===L.li&&g.n>0);return[String(L.li+1),gs.length?gs.reduce((a,g)=>a+g.h/g.n,0)/gs.length:0]});
-      $('#dres',r).innerHTML=resultHTML(sc,rows,rec?'¡Nuevo récord!':'Récord: '+Math.round(prev*100)+' %','<p class="cap" style="margin:0">Cada barra es un renglón de la letra. Repite los renglones bajos a 75 % de velocidad.</p><button class="btn" data-again>'+IC.redo+'Otra vez</button>');
-      if(rec&&sc>=.7)bell();paint();$('#dres',r).scrollIntoView({block:'nearest',behavior:'smooth'});
-    };
-    const start=async()=>{
-      $('#dres',r).innerHTML='';$('#dmsg',r).innerHTML='';if(!ac())return;clearLy();lastLi=-1;lastG=null;
-      await micStart(null,k=>{$('#dmsg',r).innerHTML=micErrHTML(k)+'<p class="cap">Puedes cantar sin calificación.</p>'});
-      spec=songSpec(S,O);
-      run=practiceRun(cv,spec,{sec:4,onNote,onSeg:s=>{if(s&&s.ph==='C')ly.classList.add('live')},onEnd:finish});
-      paint();
-    };
-    go.onclick=()=>{if(run){run.stop();return}start()};
-    r.addEventListener('click',e=>{
-      if(e.target.closest('[data-again]')){start();return}
-      const sh=e.target.closest('[data-sh]');if(sh){O.shift=sh.dataset.sh==='auto'?songShift(S):Math.max(-12,Math.min(12,O.shift+ +sh.dataset.sh));DB['shift:'+id]=O.shift;save();if(run)run.stop();preview();paint();return}
-      const tg=e.target.closest('[data-tg]');if(tg){const k=tg.dataset.tg;O[k]=!O[k];DB[k==='guide'?'sguide':'schords']=O[k];save();tg.setAttribute('aria-pressed',String(O[k]));paint();return}
-      const s=e.target.closest('[data-set]');if(s){const k=s.dataset.set;if(k==='speed')O.speed=+s.dataset.v;else if(k==='tol')DB.tol=+s.dataset.v;save();$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===s)));if(run&&k==='speed')run.stop();preview();paint()}
-    });
-    paint();preview();
-    return()=>{alive=false;if(run)run.stop();micStop()};
-  }};
-}
+function viewDrill(id){const d=drillById(id);return d?levelOpen(d.lvl)?viewCoach({id}):viewLocked(d.lvl):viewExercises()}
+function viewSing(id){return songById(id)?viewCoach({id:'song:'+id}):viewSongs()}
 
-/* ---------- tiempo de práctica: cuenta mientras el micrófono o el metrónomo están activos ---------- */
+/* Tiempo activo, también al practicar sin micrófono. Pausas y resultados no suman. */
 setInterval(()=>{
   if(document.hidden)return;
-  if(SEQ.id||MIC.stream){const k=today();DB.secs[k]=(DB.secs[k]||0)+1;if(DB.secs[k]>=60)DB.days[k]=true;if(DB.secs[k]%10===0)save()}
+  const active=COACH?COACH.active:!!(SEQ.id||MIC.stream||BR._w);
+  if(active){const d=today();DB.secs[d]=(DB.secs[d]||0)+1;if(COACH)COACH.addTime(1);if(DB.secs[d]>=60)DB.days[d]=true;if(DB.secs[d]%5===0)save()}
 },1000);
-/* ---------- tarjeta de ejercicio de lección ---------- */
-function exCard(x){
-  const l=LESSONS.find(z=>z.id===x.lesson),idx=l.blocks.filter(b=>b.ex).findIndex(b=>b.ex.id===x.id)+1,tot=l.blocks.filter(b=>b.ex).length;
-  return`<article class="ex ${DB.done[x.id]?'done':''}" id="ex-${x.id}" data-ex="${x.id}">
-   <div class="eh"><span class="exn">${DB.done[x.id]?IC.check:idx}</span><div class="eht"><span class="tag">Ejercicio ${idx} de ${tot} · ${x.min} min</span><h3>${x.t}</h3></div></div>
-   <ol class="steps">${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
-   <p class="goal"><span class="gi">${IC.check}</span><span><b>Lo logras cuando:</b> ${x.goal}</span></p>
-   <div class="exbar"><a class="btn sm pri" href="${x.go}">${IC.play}${x.goL}</a><button class="btn sm ok" data-x="done" data-id="${x.id}"></button></div>
-  </article>`;
-}
-function paintEx(root){
-  $$('[data-x="done"]',root||document).forEach(b=>{const id=b.dataset.id,x=ALLEX.find(z=>z.id===id);if(!x)return;const d=!!DB.done[id];b.innerHTML=IC.check+(d?'Hecho':'Marcar como hecho');b.classList.toggle('on',d);b.setAttribute('aria-pressed',String(d));
-    const card=b.closest('.ex');if(card){card.classList.toggle('done',d);const n=$('.exn',card),l=LESSONS.find(z=>z.id===x.lesson);if(n)n.innerHTML=d?IC.check:l.blocks.filter(q=>q.ex).findIndex(q=>q.ex.id===id)+1}});
-}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-x="done"]');if(!b)return;const id=b.dataset.id;if(DB.done[id])delete DB.done[id];else{DB.done[id]=true;markDay()}save();paintEx();refreshProgress()});
-function blockHTML(b){
-  if(b.ex)return exCard(b.ex);
-  if(b.aim)return`<div class="box aim"><p class="blockh">Al terminar podrás</p><ul>${b.aim.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
-  if(b.step)return`<div class="prose lstep"><p class="stepk"><span>${b.step}</span>${b.t}</p><p>${b.p}</p></div>`;
-  if(b.key)return`<div class="keyi"><p class="blockh">La idea clave</p><p>${b.key}</p></div>`;
-  if(b.check)return`<div class="box chk"><p class="blockh">Compruébalo</p>${b.check.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</div>`;
-  if(b.box)return`<div class="box"><p class="blockh">${b.box}</p>${b.ul?`<ul>${b.ul.map(t=>`<li>${t}</li>`).join('')}</ul>`:`<ol>${b.ol.map(t=>`<li>${t}</li>`).join('')}</ol>`}</div>`;
-  if(b.trick)return`<div class="box trick"><p class="blockh">Hoja de trucos</p><ul>${b.trick.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
-  if(b.p)return`<p class="prose">${b.p}</p>`;
-  return'<div></div>';
-}
-/* ---------- discos ---------- */
-const lessonAlb=i=>{const l=LESSONS.find(x=>x.id===i),[d,t]=doneCount(i);return albCard(`#/leccion/${i}`,lessonArt(i),l.title,`${d} de ${t} · ${l.sub}`,d/t,d===t)};
-const drillAlb=d=>{const b=DB.best[d.id];return albCard('#/practicar/ej/'+d.id,drillArt(d),d.t,b!=null?`Récord ${Math.round(b*100)} % · ${d.syl}`:d.sub,null,DB.today[d.id]===today())};
-const songAlb=s=>{const b=DB.best['song:'+s.id];return albCard('#/canciones/'+s.id,songArt(s),esc(s.title),b!=null?`Récord ${Math.round(b*100)} %`:esc(s.artist),null,false)};
-const TOOLS=[['afinador','Afinador de voz','Ve qué nota cantas y qué tan afinado.',IC.tuner],['rango','Rango vocal','Tu nota más grave, la más aguda y tu tipo de voz.',IC.range],['respiracion','Respiración','Ciclos 4-4-8 y tu «sss» medida.',IC.lungs],['metronomo','Metrónomo','Tempo y compás para practicar frases.',IC.metro]];
-const toolCards=()=>TOOLS.map(([k,n,d,ic])=>`<a class="card tool" href="#/practicar/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('');
-const warmDone=()=>WARMUP.filter(k=>DB.today[k]===today()).length;
-function warmCard(){const n=warmDone();return`<a class="card nowp" href="#/practicar/calentamiento"><span class="acov">${coverArt(205,TART.rt[1],null,'wu')}</span><span class="np"><span class="eyebrow">Calentamiento de hoy</span><b>${n===WARMUP.length?'Completo. Tu voz está lista':n?'Vas en el paso '+(n+1)+' de '+WARMUP.length:'10 minutos, de suave a fuerte'}</b><small>Respiración, trino, sirena, escala, arpegio y nota larga.</small><span class="pg"><i style="width:${Math.round(n/WARMUP.length*100)}%"></i></span></span><span class="playc">${IC.play}</span></a>`}
-/* ---------- vistas ---------- */
+window.addEventListener('pagehide',save);
 const greet=()=>{const h=new Date().getHours();return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
-let DEFERRED=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFERRED=e;if(location.hash===''||location.hash==='#/')route()});
-const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-function rangeCard(){
-  if(DB.range){const v=voiceGuess(DB.range.lo,DB.range.hi);return`<a class="card tool" href="#/practicar/rango"><span class="ic">${IC.range}</span><span><b>Tu voz: ${v.n.toLowerCase()} · ${nnTxt(DB.range.lo)} a ${nnTxt(DB.range.hi)}</b><span>Los ejercicios y las canciones se ajustan a este rango. Toca para medir de nuevo.</span></span></a>`}
-  return`<a class="card cta" href="#/practicar/rango"><span><span class="eyebrow">Primer paso</span><b>Mide tu rango vocal</b><span>Dos minutos con el micrófono: tu nota más grave, la más aguda y tu tipo de voz. Así todo queda a tu medida.</span></span><span class="ic">${IC.range}</span></a>`;
+const LOCK=TI('<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>');
+const TOOLS=[['afinador','Afinador',IC.tuner],['rango','Rango',IC.range],['respiracion','Respiración',IC.lungs],['metronomo','Metrónomo',IC.metro]];
+const quickTools=()=>`<div class="coach-quick">${TOOLS.map(([id,t,ic])=>`<a class="btn" href="#/practicar/${id}">${ic}${t}</a>`).join('')}</div>`;
+function weekAccuracy(){const date=new Date();date.setDate(date.getDate()-6);const from=today(date);return mean(DB.hist.filter(h=>h.d>=from&&h.d<=today()).map(h=>h.s))}
+function drillAlb(d){
+  const open=levelOpen(d.lvl),best=DB.best[d.id],missing=Math.max(0,10-levelStars(d.lvl-1));
+  const sub=d.breath?'2 ciclos · sin calificación':`${starText(DB.stars[d.id]||0)} · ${best==null?'Por descubrir':scoreText(best)}`;
+  const card=albCard('#/practicar/ej/'+d.id,drillArt(d),esc(d.t),open?sub:`${LOCK} Te faltan ${missing} estrellas`,null,DB.today[d.id]===today());
+  return open?card:card.replace('class="alb','aria-label="'+esc(d.t)+': bloqueado" class="alb locked');
 }
 function viewHome(){
-  const nx=nextEx(),[d,t]=doneCount();
-  const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
-  return{title:'Roka Couch Vocal',html:`
-  <div class="brandhero"><span class="logo">${logo()}</span><div><span class="eyebrow">${greet()}</span><h1 class="glow">Tu voz de hoy</h1></div></div>
-  <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-    <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
-    <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
-    <div class="stat"><b>${d}<small style="font-size:18px;color:var(--muted)">/${t}</small></b><span>ejercicios</span></div>
-  </div>
-  ${rangeCard()}
-  ${warmCard()}
-  ${nx?(()=>{const[ld,lt]=doneCount(nx.lesson);return`<a class="card nowp" href="#/leccion/${nx.lesson}/${nx.id}"><span class="acov">${lessonArt(nx.lesson)}</span><span class="np"><span class="eyebrow">Continúa donde te quedaste</span><b>${nx.t}</b><small>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</small><span class="pg"><i style="width:${Math.round(ld/lt*100)}%"></i></span></span><span class="playc">${IC.play}</span></a>`})():''}
-  <section><div class="sech"><h2>Lecciones</h2><a href="#/lecciones">Ver todas</a></div><div class="shelf">${LESSONS.map(l=>lessonAlb(l.id)).join('')}</div></section>
-  <section><div class="sech"><h2>Calentamientos</h2><a href="#/practicar">Practicar</a></div><div class="shelf">${DRILLS.map(drillAlb).join('')}</div></section>
-  <section><div class="sech"><h2>Para cantar</h2><a href="#/canciones">Canciones</a></div><div class="shelf">${SONGLIST.map(songAlb).join('')}</div></section>
-  ${inst}
-  <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
-  <div class="card" style="display:flex;flex-direction:column;gap:12px">
-    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Tema</span><div class="seg">${[['auto','Auto'],['estudio','Estudio'],['escenario','Escenario'],['claro','Claro']].map(([v,l])=>`<button data-theme-set="${v}" aria-pressed="${(DB.theme||'auto')===v}">${l}</button>`).join('')}</div></div>
-    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Sin medir tu rango, practica con voz</span><div class="seg">${[['grave','Grave'],['aguda','Aguda']].map(([v,l])=>`<button data-vt="${v}" aria-pressed="${(DB.vt||'grave')===v}">${l}</button>`).join('')}</div></div>
-    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
-  </div>
-  <p class="foot">Roka Couch Vocal · funciona sin conexión<br>Canta sin dolor: si algo raspa o duele, descansa.</p>`,
-  mount(r){
-    if(DB.onb==null)setTimeout(()=>{if(DB.onb==null&&(!location.hash||location.hash==='#/'))onboardShow()},400);
-    r.addEventListener('click',async e=>{
-      const th=e.target.closest('[data-theme-set]');if(th){DB.theme=th.dataset.themeSet;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)));return}
-      const vt=e.target.closest('[data-vt]');if(vt){DB.vt=vt.dataset.vt;save();$$('[data-vt]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===vt)));return}
-      const b=e.target.closest('[data-h]');if(!b)return;const a=b.dataset.h;
-      if(a==='install'&&DEFERRED){DEFERRED.prompt();try{await DEFERRED.userChoice}catch(_){}DEFERRED=null;route()}
-      else if(a==='hideinst'){DB.hideInstall=true;save();route()}
-      else if(a==='reset'){$('#rstw',r).innerHTML='<span class="row"><span class="cap" style="margin:0">¿Borrar todo?</span><button class="btn sm" data-h="reset-yes" style="border-color:var(--bad);color:var(--bad)">Sí, borrar</button><button class="btn sm" data-h="reset-no">Cancelar</button></span>'}
-      else if(a==='reset-yes'){Object.assign(DB,{done:{},secs:{},days:{},best:{},today:{},range:null,breath:0});save();route()}
-      else if(a==='reset-no')route();
-    });
-  }};
+  const s=buildSession(),done=s.i>=s.steps.length,lvl=currentLevel(),label=done?'Ver resumen':s.i||s.res.some(Boolean)?'Continuar':'Empezar';
+  return{title:'Hoy',html:`<div class="coach-greeting"><span class="eyebrow">${greet()}</span><span class="coach-pill">${streak()===1?"1 día":streak()+" días"} de racha</span><h1>Tu sesión de hoy</h1><p>Nivel ${lvl} · ${LEVELS[lvl]}</p></div>
+    <section class="card session-card"><div class="session-art">${coverArt(218,DLINE,null,'session')}</div><div class="session-content"><span class="eyebrow">Tu sesión de hoy · ${s.minutes} min</span><h2>${done?'Ya le diste tiempo a tu voz':'Un poco de aire. Mucha voz.'}</h2><p class="cap">Calienta, afina y canta. Incluye descansos entre rondas.</p><ol class="session-steps">${s.steps.map((id,i)=>{const r=s.res[i],complete=r&&!r.skipped||DB.today[id]===today();return`<li class="${complete?'done':''}"><span>${complete?IC.check:i+1}</span><b>${esc(stepInfo(id).t)}</b>${r&&r.skipped?'<small>Saltado</small>':''}${id==='rango'?'<a href="#/practicar/rango" aria-label="Medir mi rango">'+IC.range+'</a>':''}</li>`}).join('')}</ol><div class="session-start"><a class="kplayb" data-start-session href="#/sesion" aria-label="${label} sesión">${done?IC.check:IC.play}<span>${label}</span></a><span>${done?'Buen trabajo por hoy.':'Yo marco el paso. Tú pon la voz.'}</span></div></div></section>
+    <div class="coach-stats four"><div><b>${streak()}</b><span>días de racha</span></div><div><b>${weekMins()}</b><span>min esta semana</span></div><div><b>${weekAccuracy()==null?'—':scoreText(weekAccuracy())}</b><span>afinación semanal</span></div><div><b class="range-stat">${DB.range?nnTxt(DB.range.lo)+'–'+nnTxt(DB.range.hi):'Por medir'}</b><span>rango actual</span></div></div>
+    <section><h2>A tu ritmo</h2><div class="coach-quick"><a class="btn" href="#/practicar/afinador">${IC.tuner}Afinador</a><a class="btn" href="#/practicar/rango">${IC.range}Rango</a><a class="btn" href="#/canciones">${IC.note}Canciones</a></div></section>
+    <details class="card coach-settings"><summary>Tu voz y apariencia</summary><label>Voz de referencia<select data-pref="vt"><option value="grave" ${DB.vt!=='aguda'?'selected':''}>Grave</option><option value="aguda" ${DB.vt==='aguda'?'selected':''}>Aguda</option></select></label><label>Tema<select data-pref="theme">${[['estudio','Estudio'],['escenario','Escenario'],['claro','Claro'],['auto','Automático']].map(([k,n])=>`<option value="${k}" ${DB.theme===k?'selected':''}>${n}</option>`).join('')}</select></label></details><p class="foot">Roka Couch Vocal · tu progreso se guarda en este dispositivo.</p>`,mount(r){
+      const t=setTimeout(()=>{if(DB.onb==null)onboardShow()},400);
+      r.addEventListener('change',e=>{const k=e.target.dataset.pref;if(k){DB[k]=e.target.value;save();if(k==='theme')applyTheme()}});
+      return()=>{clearTimeout(t);$('#onb')?.remove()};
+    }};
 }
-/* bienvenida: una pregunta para empezar con ejercicios en una zona razonable */
 function onboardShow(){
-  if($('#onb'))return;
-  const d=document.createElement('div');d.id='onb';d.className='onb';
-  d.innerHTML=`<div class="card onbc" role="dialog" aria-modal="true" aria-labelledby="onbt"><span class="logo">${logo()}</span><h2 id="onbt">Te damos la bienvenida a Roka Couch Vocal</h2>
-   <p class="sub" style="margin:0">Tu coach de canto: afinador de voz, calentamientos que te califican con el micrófono, lecciones de técnica y canciones.</p>
-   <p class="cl" style="margin:6px 0 0">¿Tu voz es más bien…?</p>
-   <div class="row" style="justify-content:center"><button class="btn" data-onb="grave">Grave</button><button class="btn" data-onb="aguda">Aguda</button></div>
-   <p class="cap" style="margin:0">Después mide tu rango para afinar los ejercicios a tu voz exacta. Recomendado: usa audífonos.</p>
-   <div class="row" style="justify-content:center"><button class="btn pri" data-onb="rango">${IC.range}Medir mi rango ahora</button><button class="btn sm" data-onb="no">Luego</button></div></div>`;
-  document.body.appendChild(d);
-  d.addEventListener('click',e=>{const b=e.target.closest('[data-onb]');if(!b)return;const k=b.dataset.onb;
-    if(k==='grave'||k==='aguda'){DB.vt=k;save();$$('[data-onb="grave"],[data-onb="aguda"]',d).forEach(x=>x.classList.toggle('pri',x===b));return}
-    DB.onb=1;save();d.remove();if(k==='rango')location.hash='#/practicar/rango';else route()});
+  if($('#onb'))return;const el=document.createElement('dialog');el.id='onb';el.className='coach-dialog';
+  el.innerHTML=`<span class="logo">${logo()}</span><h2>Te damos la bienvenida</h2><p>Vamos a calentar tu voz. Primero dime… ¿tu voz es más grave o más aguda?</p><div class="row"><button class="btn" data-voice="grave">Grave</button><button class="btn" data-voice="aguda">Aguda</button></div><p class="cap">Después medimos tu rango para ajustar cada ejercicio.</p><button class="btn pri" data-welcome>Vamos</button>`;
+  document.body.appendChild(el);el.showModal();
+  el.addEventListener('click',e=>{const v=e.target.closest('[data-voice]');if(v){DB.vt=v.dataset.voice;$$('[data-voice]',el).forEach(b=>b.setAttribute('aria-pressed',String(b===v)));save()}if(e.target.closest('[data-welcome]')){DB.onb=1;save();el.close();el.remove()}});
+  el.oncancel=()=>{DB.onb=1;save();el.remove()};
 }
-function viewLessons(){
-  return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">${LESSONS.length} lecciones · ${ALLEX.length} ejercicios</span><h1>Lecciones</h1><p class="sub">Técnica vocal paso a paso: primero el aire, luego el sonido, la afinación, tu rango y el cuidado de tu voz.</p></div>
-  <section class="albsec"><div class="albs">${LESSONS.map(l=>lessonAlb(l.id)).join('')}</div></section>`};
+function viewLocked(lvl){return{title:'Nivel '+lvl,back:'#/ejercicios',html:`<div class="card coach-center"><span class="coach-lock">${LOCK}</span><h1>Nivel ${lvl} · ${LEVELS[lvl]}</h1><p>Te faltan ${Math.max(0,10-levelStars(lvl-1))} estrellas del nivel ${lvl-1}.</p><p class="cap">Gana una estrella con 50 %, dos con 70 % y tres con 85 %.</p><a class="btn pri" href="#/ejercicios">Ver ejercicios</a></div>`}}
+function viewExercises(){return{title:'Ejercicios',html:`<div class="lhead"><span class="eyebrow">Tu estudio de voz</span><h1>Ejercicios</h1><p class="sub">Prácticas cortas. Un paso a la vez.</p></div>${quickTools()}${[1,2,3].map(l=>`<section class="level-section"><div class="sech"><h2>${l}. ${LEVELS[l]}</h2><span>${levelOpen(l)?levelStars(l)+' estrellas':LOCK+' Bloqueado'}</span></div>${!levelOpen(l)?`<p class="cap">Te faltan ${Math.max(0,10-levelStars(l-1))} estrellas del nivel ${l-1}.</p>`:''}<div class="albs">${DRILLS.filter(d=>d.lvl===l).map(drillAlb).join('')}</div></section>`).join('')}<p class="cap">50 % = ★ · 70 % = ★★ · 85 % = ★★★. Se conserva tu mejor resultado.</p>`}}
+function viewSongs(){return{title:'Canciones',html:`<div class="lhead"><span class="eyebrow">Ponle letra a tu práctica</span><h1>Canciones</h1><p class="sub">La melodía se ajusta a tu voz. Sigue la línea y canta.</p></div><div class="albs">${SONGLIST.map(s=>albCard('#/canciones/'+s.id,songArt(s),esc(s.title),starText(DB.stars['song:'+s.id]||0)+' · '+(DB.best['song:'+s.id]==null?esc(s.artist):scoreText(DB.best['song:'+s.id])),null,DB.today['song:'+s.id]===today())).join('')}</div>`}}
+function progressBars(values,labels,unit,max){
+  const ceiling=max||Math.max(1,...values.map(v=>v||0));
+  return `<div class="progress-chart" role="img" aria-label="${esc(labels.map((l,i)=>l+': '+(values[i]==null?'sin datos':Math.round(values[i])+unit)).join(', '))}">${values.map((v,i)=>`<div class="chart-column"><b>${v==null?'—':Math.round(v)+unit}</b><div class="chart-track"><i style="height:${v==null?0:v===0?0:Math.max(2,v/ceiling*100)}%"></i></div><small>${esc(labels[i])}</small></div>`).join('')}</div>`;
 }
-function refreshProgress(){const el=$('#lprog');if(!el)return;const l=+el.dataset.l,[d,t]=doneCount(l);el.querySelector('i').style.width=(d/t*100)+'%';const c=$('#lcnt');if(c)c.textContent=`${d} de ${t} ejercicios hechos`}
-function viewLesson(id,exId){
-  const l=LESSONS.find(x=>x.id===id);if(!l)return viewLessons();
-  const body=l.blocks.map((b,bi)=>blockHTML(b).replace(/^(\s*<\w+)/,`$1 data-nb="${bi}"`)).join('');
-  const prev=LESSONS.find(x=>x.id===id-1),next=LESSONS.find(x=>x.id===id+1),[d,t]=doneCount(id);
-  return{title:'Lección '+id,back:'#/lecciones',html:`
-  <div class="lhead"><div class="lhero"><span class="acov">${lessonArt(id)}</span><div><span class="eyebrow">Lección ${id} de ${LESSONS.length}</span><h1>${l.title}</h1></div></div><p class="lead">${l.lead}</p>
-  ${HAS_TTS?`<div><button class="btn pri" data-narr="start" data-l="${id}">${IC.voice}Escuchar la lección</button></div>`:''}
-  <div><div class="bar" id="lprog" data-l="${id}"><i style="width:${d/t*100}%"></i></div><p class="cap" id="lcnt" style="margin-top:6px">${d} de ${t} ejercicios hechos</p></div></div>
-  ${body}
-  <div class="row" style="justify-content:space-between">${prev?`<a class="btn" href="#/leccion/${prev.id}">${IC.back}Lección ${prev.id}</a>`:'<span></span>'}${next?`<a class="btn pri" href="#/leccion/${next.id}">Lección ${next.id}</a>`:''}</div>`,
-  mount(r){
-    paintEx(r);paintNarr();
-    if(exId){const el=$('#ex-'+exId,r);if(el)setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),60)}
-    return()=>narrStop(true);
-  }};
+function viewProgress(){
+  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d}),minutes=days.map(d=>(DB.secs[today(d)]||0)/60);
+  const monday=new Date();monday.setHours(12,0,0,0);monday.setDate(monday.getDate()-(monday.getDay()+6)%7);
+  const weeks=Array.from({length:6},(_,i)=>{const start=new Date(monday);start.setDate(start.getDate()-(5-i)*7);const end=new Date(start);end.setDate(end.getDate()+7);const v=mean(DB.hist.filter(h=>h.d>=today(start)&&h.d<today(end)).map(h=>h.s));return{date:start,v:v==null?null:v*100}});
+  const first=DB.rangeHist[0],r=DB.range,growth=first&&r?(r.hi-r.lo)-(first.hi-first.lo):0;
+  const dateLabel=d=>d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+  return{title:'Progreso',html:`<div class="lhead"><span class="eyebrow">Cada práctica cuenta</span><h1>Tu progreso</h1></div><div class="coach-stats"><div><b>${streak()}</b><span>racha actual</span></div><div><b>${bestStreak()}</b><span>mejor racha</span></div><div><b>${DB.sung}</b><span>ejercicios cantados</span></div></div><section class="card"><h2>Minutos por día</h2><p class="cap">Últimos 7 días</p>${progressBars(minutes,days.map(d=>d.toLocaleDateString('es-MX',{weekday:'short'})),' min')}</section><section class="card"><h2>Tu afinación por semana</h2><p class="cap">Promedio de prácticas calificadas · últimas 6 semanas</p>${progressBars(weeks.map(w=>w.v),weeks.map(w=>dateLabel(w.date)),' %',100)}${!DB.hist.length?'<p class="cap">Tu primera práctica con micrófono aparecerá aquí.</p>':''}</section><section class="card"><h2>Tu rango crece contigo</h2>${r?`<p class="coach-range-title">${nnTxt(r.lo)} — ${nnTxt(r.hi)}</p>${keyboardSVG(r.lo,r.hi,comfy().lo,comfy().hi)}<p class="cap">Zona de referencia: ${voiceGuess(r.lo,r.hi).n}. Tu voz puede cambiar con la práctica.</p>${first?`<p>${growth>=0?'+':''}${growth} semitonos desde el ${dateLabel(new Date(first.d+'T12:00:00'))}</p><p class="cap">Primera medición: ${nnTxt(first.lo)} — ${nnTxt(first.hi)}</p>${keyboardSVG(first.lo,first.hi)}`:''}`:'<p>Mide tu rango para ver cómo cambia con la práctica.</p>'}<a class="btn" href="#/practicar/rango">Medir rango</a></section><section class="card"><h2>Estrellas por nivel</h2>${[1,2,3].map(l=>{const stars=levelStars(l),max=DRILLS.filter(d=>d.lvl===l&&!d.breath).length*3;return`<div class="level-progress"><div><b>${l}. ${LEVELS[l]}</b><span>${stars} / ${max} ★</span></div><progress max="${l<3?10:max}" value="${Math.min(stars,l<3?10:max)}" aria-label="Estrellas del nivel ${l}"></progress><p class="cap">${l===3?'Sigue mejorando tus marcas.':stars>=10?'Siguiente nivel desbloqueado.':`Faltan ${10-stars} para abrir el nivel ${l+1}.`}</p></div>`}).join('')}</section>`};
 }
-function viewPractice(){
-  return{title:'Practicar',html:`<div class="lhead"><span class="eyebrow">Herramientas y calentamientos</span><h1>Practicar</h1></div>
-  ${warmCard()}
-  <div class="grid2">${toolCards()}</div>
-  <section><div class="sech"><h2>Calentamientos</h2></div><p class="cap" style="margin:-4px 0 12px">La app toca el patrón, tú lo repites y el micrófono te califica nota por nota. Cada ronda sube medio tono dentro de tu rango.</p><div class="albs">${DRILLS.map(drillAlb).join('')}</div></section>`};
-}
-function viewWarmup(){
-  const step=(k,i)=>{const done=DB.today[k]===today();if(k==='respira')return`<a class="srow wrow${done?' done':''}" href="#/practicar/respiracion"><span class="sart">${coverArt(180,TART.breath[1],null,'wr')}</span><span class="st"><b>${i+1}. Respiración 4-4-8</b><span>Cinco ciclos para despertar el aire</span></span><span class="wk">${done?IC.check:''}</span></a>`;
-    const d=drillById(k);return`<a class="srow wrow${done?' done':''}" href="#/practicar/ej/${k}"><span class="sart">${drillArt(d)}</span><span class="st"><b>${i+1}. ${d.t}</b><span>${d.sub} · ${d.syl}${DB.best[k]!=null?' · récord '+Math.round(DB.best[k]*100)+' %':''}</span></span><span class="wk">${done?IC.check:''}</span></a>`};
-  const nx=WARMUP.find(k=>DB.today[k]!==today());
-  return{title:'Calentamiento de hoy',back:'#/practicar',html:`<div class="kplay tplay">
-  ${toolHead('rt','Calentamiento de hoy','10 minutos · de suave a fuerte')}
-  <div class="slist">${WARMUP.map(step).join('')}</div>
-  <p class="cap">Descansa 20 segundos entre ejercicios. Cada paso se palomea al terminarlo; mañana empieza de nuevo.</p>
-  ${toolDock(`<span class="tm">${warmDone()} de ${WARMUP.length} hechos</span><div class="ktrans"><a class="kplayb" href="${nx?(nx==='respira'?'#/practicar/respiracion':'#/practicar/ej/'+nx):'#/canciones'}" aria-label="${nx?'Siguiente paso':'Cantar una canción'}">${IC.play}<span>${nx?'Siguiente':'Cantar'}</span></a></div><span></span>`)}
-  </div>`,mount(r){const m=$('#tmeta',r);if(m)m.textContent=warmDone()===WARMUP.length?'Completo por hoy':'Haz los pasos en orden'}};
-}
-function viewSongs(){
-  return{title:'Canciones',html:`<div class="lhead"><span class="eyebrow">Canta con la línea de tu voz</span><h1>Canciones</h1><p class="sub">Melodías tradicionales y ejercicios cantados. La app las pone en el tono de tu voz; la letra se ilumina sílaba por sílaba.</p></div>
-  <div class="slist">${SONGLIST.map(s=>{const b=DB.best['song:'+s.id];return`<a class="srow" href="#/canciones/${s.id}"><span class="sart">${songArt(s)}</span><span class="st"><b>${esc(s.title)}</b><span>${esc(s.artist)}${b!=null?' · récord '+Math.round(b*100)+' %':''}</span></span><span class="sk">${s.bpm} bpm</span></a>`}).join('')}</div>
-  <p class="cap">Próximamente: pega la letra de tus canciones favoritas como en el cancionero de Roka Guitar.</p>`};
-}
-/* ---------- enrutador ---------- */
-const NAV=[['#/','Inicio',IC.home,''],['#/lecciones','Lecciones',IC.book,'leccion'],['#/practicar','Practicar',IC.mic,'practicar'],['#/canciones','Canciones',IC.note,'canciones']];
+const NAV=[['#/','Hoy',IC.home,''],['#/ejercicios','Ejercicios',IC.mic,'ejercicios'],['#/canciones','Canciones',IC.note,'canciones'],['#/progreso','Progreso',IC.cal,'progreso']];
 let UNMOUNT=null;
 function route(){
-  const h=location.hash.replace(/^#\/?/,''),p=h.split('/');
-  let v;
-  if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}
-  if(!p[0])v=viewHome();
-  else if(p[0]==='lecciones')v=viewLessons();
-  else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
-  else if(p[0]==='practicar')v=p[1]==='ej'?viewDrill(p[2]):({afinador:viewTuner,rango:viewRange,respiracion:viewBreath,metronomo:viewMetronome,calentamiento:viewWarmup}[p[1]]||viewPractice)();
-  else if(p[0]==='canciones')v=p[1]?viewSing(p[1]):viewSongs();
-  else v=viewHome();
-  const sec=p[0]===''?'':p[0]==='lecciones'?'leccion':p[0];
-  $$('[data-nav]').forEach(a=>{const on=a.dataset.nav===sec;if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-  $('#ttl').textContent=v.title;
-  const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
-  // página nueva en cada vista: así no se acumulan los clics de vistas anteriores
-  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
-  document.title=v.title==='Roka Couch Vocal'?v.title:v.title+' · Roka Couch Vocal';
-  if(v.mount)UNMOUNT=v.mount(pg)||null;
-  if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);
+  const p=location.hash.replace(/^#\/?/,'').split('/');
+  if(['leccion','lecciones'].includes(p[0])){location.replace('#/');return}
+  if(UNMOUNT){UNMOUNT();UNMOUNT=null}
+  let v;if(!p[0])v=viewHome();else if(p[0]==='sesion')v=viewCoach();else if(p[0]==='ejercicios')v=viewExercises();else if(p[0]==='progreso')v=viewProgress();else if(p[0]==='practicar')v=p[1]==='ej'?viewDrill(p[2]):p[1]==='calentamiento'?viewCoach():({afinador:viewTuner,rango:viewRange,respiracion:viewBreath,metronomo:viewMetronome}[p[1]]||viewExercises)();else if(p[0]==='canciones')v=p[1]?viewSing(p[1]):viewSongs();else v=viewHome();
+  document.documentElement.classList.toggle('fs',!!v.fs);
+  const section=p[0]==='practicar'?'ejercicios':p[0]==='sesion'?'':p[0];
+  $$('[data-nav]').forEach(a=>{if(a.dataset.nav===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  $('#ttl').textContent=v.title;const back=$('#back');back.hidden=!v.back;if(v.back)back.href=v.back;
+  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;document.title=v.title+' · Roka Couch Vocal';
+  if(v.mount)UNMOUNT=v.mount(pg)||null;window.scrollTo(0,0);
 }
-/* ---------- arranque ---------- */
-document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
- <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Couch Vocal</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
- <main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main>
-</div>
-<nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
-save();
-window.addEventListener('hashchange',route);
-route();
+document.body.insertAdjacentHTML('afterbegin',`<div class="shell"><nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Couch Vocal</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav><main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main></div><nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
+document.addEventListener('click',e=>{if(e.target.closest('[data-start-session]'))COACH_AUTOSTART=true});
+save();window.addEventListener('hashchange',route);route();
 /* Actualizaciones: busca versión nueva al abrir y al volver a la app; avisa cuando está lista. */
 function showUpdate(){
   if(document.getElementById('upd'))return;

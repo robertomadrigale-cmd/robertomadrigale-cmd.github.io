@@ -47,23 +47,36 @@ function laneDraw(cv,st,now){
   if(last&&last.m!=null&&now-last.t<.2){const yy=Y(last.m);x.fillStyle=last.hit?C.good:C.fg;x.shadowColor=x.fillStyle;x.shadowBlur=12;x.beginPath();x.arc(PH,Math.max(6,Math.min(H-6,yy)),6,0,7);x.fill();x.shadowBlur=0}
 }
 /* Arma una sesión con barras (targets), sonidos programados (ev) y tramos con letrero (segs). */
-function drillSpec(d,o){
-  const c=comfy(),span=Math.max(...d.pat.map(p=>p[0]==null?0:p[0])),beat=60/(o.bpm||d.bpm);
-  const roots=[];for(let r=c.lo;r+span<=c.hi&&roots.length<8;r++)roots.push(r);
-  if(!roots.length)roots.push(c.lo);
-  if(o.dir==='ud')for(let i=roots.length-2;i>=0&&roots.length<14;i--)roots.push(roots[i]);
+function drillSpec(d,o={}){
+  const extend=d.id==='extensor'&&DB.range,c=extend?{lo:DB.range.lo,hi:DB.range.hi+2}:comfy();
+  const rawSpan=Math.max(0,...d.pat.map(p=>p[0]||0));
+  const span=Math.min(rawSpan,Math.max(0,c.hi-c.lo-(extend?2:0)));
+  const pattern=d.pat.map(([m,b])=>[m==null?null:rawSpan?Math.round(m*span/rawSpan):0,b]);
+  const beat=60/(o.bpm||d.bpm),count=Math.min(d.rounds,o.rounds||d.rounds),roots=[];
+  const low=extend?DB.range.hi-span:c.lo,high=c.hi-span;
+  let root=low,dir=1;
+  for(let i=0;i<count;i++){
+    if(d.id==='eco'){
+      const choices=Array.from({length:high-low+1},(_,j)=>low+j).filter(n=>n!==roots[roots.length-1]);
+      root=choices.length?choices[Math.floor(Math.random()*choices.length)]:low;
+    }
+    roots.push(root);
+    if(d.id==='eco')continue;
+    if(o.dir==='ud'&&i>=Math.floor((count-1)/2))dir=-1;
+    root=Math.max(low,Math.min(high,root+dir));
+  }
   const T0=AC.currentTime+.6,targets=[],ev=[],segs=[];let t=T0;
-  const plen=d.pat.reduce((a,p)=>a+p[1],0)*beat;
+  const plen=pattern.reduce((a,p)=>a+p[1],0)*beat;
   roots.forEach((R,ri)=>{
     ['L','S'].forEach(ph=>{
       if(ph==='S'&&o.mode==='junto')return;
       const s0=t;segs.push({t0:s0-(ph==='S'?beat:0),t1:s0+plen,ph:o.mode==='junto'?'J':ph,ri,R});
       if(ph==='L'||o.mode==='junto')ev.push({t:s0,fn:tt=>chordPad(R-12,tt,plen,.05)});
-      d.pat.forEach((p,i)=>{
+      pattern.forEach((p,i)=>{
         const[off,b]=p,dur=b*beat;
         if(off!=null){
-          const m=R+off,nx=d.glide&&d.pat[i+1]?R+d.pat[i+1][0]:null;
-          targets.push({t0:t,t1:t+dur,m,m2:nx,ph:o.mode==='junto'?'S':ph,ri,n:0,h:0});
+          const m=R+off,nx=d.glide&&pattern[i+1]&&pattern[i+1][0]!=null?R+pattern[i+1][0]:null;
+          targets.push({t0:t,t1:t+dur,m,m2:nx,beats:b,ph:o.mode==='junto'?'S':ph,ri,n:0,h:0});
           if(ph==='L'||o.mode==='junto'){const tt=t,dd=dur;ev.push({t:tt,fn:z=>d.glide?guideTone(m,z,dd,ph==='L'?.2:.12,nx):o.mode==='junto'?guideTone(m,z,dd*.95,.12):piano(m,z,dd*.95,.24)})}
         }
         t+=dur;
@@ -72,10 +85,11 @@ function drillSpec(d,o){
       if(ph==='L'){ev.push({t,fn:z=>{tick(z,'acc',null);chordPad(R-12,z,beat*.9,.04)}})}
       t+=beat;
     });
+    if(o.rest&&ri<roots.length-1){segs.push({t0:t,t1:t+o.rest,ph:'R',ri,R});t+=o.rest}
   });
   // clicks suaves en cada pulso mientras cantas
-  segs.filter(s=>s.ph!=='L').forEach(s=>{for(let b=s.t0+beat;b<s.t1-.01;b+=beat)ev.push({t:b,fn:z=>tickSound(z,'sub')})});
-  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,rounds:roots.length,beat};
+  segs.filter(s=>s.ph==='S'||s.ph==='J').forEach(s=>{for(let b=s.t0+beat;b<s.t1-.01;b+=beat)ev.push({t:b,fn:z=>tickSound(z,'sub')})});
+  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,rounds:roots.length,beat,tip:d.tip,id:d.id,adapted:span<rawSpan};
 }
 // transpone la melodía al centro de tu zona cómoda (de semitono en semitono)
 function songShift(S){
@@ -93,7 +107,7 @@ function songSpec(S,o){
       const dur=n.d*beat;
       if(n.m!=null){
         if(!n.cont)si++;const syl=L.syl[si],m=n.m+sh;
-        targets.push({t0:t,t1:t+dur,m,ph:'S',li,si,n:0,h:0,syl:n.cont?'':(syl?syl.x:'')});
+        targets.push({t0:t,t1:t+dur,m,beats:n.d,ph:'S',li,si,n:0,h:0,syl:n.cont?'':(syl?syl.x:'')});
         if(o.guide){const tt=t;ev.push({t:tt,fn:z=>guideTone(m,z,dur*.94,.13)})}
         if(!n.cont&&syl&&syl.ch&&o.chords){const ch=syl.ch.match(/^([A-G])([#b]?)(m(?!aj))?/);if(ch){let r=CHPC[ch[1]]+(ch[2]==='#'?1:ch[2]==='b'?-1:0)+sh;r=((r%12)+12)%12+48;if(r>55)r-=12;const tt=t;ev.push({t:tt,fn:z=>chordPad(r,z,beat*S.beats*.9,.05,!!ch[3])})}}
       }
@@ -101,17 +115,18 @@ function songSpec(S,o){
     });
     lines.push({li,t0:l0,t1:t});segs.push({t0:l0,t1:t,ph:'S',li});
   });
-  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,lines,beat};
+  return{targets,ev:ev.sort((a,b)=>a.t-b.t),segs,end:t,lines,beat,tip:'Escucha la frase e imagina la primera nota antes de cantar.'};
 }
 let PRACTICE=null; // la sesión en curso (para revisarla desde la consola)
 /* Corre la sesión: programa el sonido 0.25 s adelante, dibuja y califica cada lectura del micrófono. */
 function practiceRun(cv,spec,o){
   const st={C:laneColors(),targets:spec.targets,trail:[],sec:o.sec||4,labels:o.labels,fixed:o.fixed};
-  let ei=0,raf=0,seg=-1,cur=null,alive=true;
+  let ei=0,raf=0,seg=-1,cur=null,alive=true,paused=false,pauseAt=0;
+  const master=MASTER,bus=AC.createGain();bus.connect(master);
   const tol=(DB.tol||50)/100;
   const frame=()=>{
-    if(!alive)return;
-    while(ei<spec.ev.length&&spec.ev[ei].t<AC.currentTime+.25){const e=spec.ev[ei++];if(e.t>AC.currentTime-.02)e.fn(e.t)}
+    if(!alive||paused)return;
+    while(ei<spec.ev.length&&spec.ev[ei].t<AC.currentTime+.25){const e=spec.ev[ei++];if(e.t>AC.currentTime-.02){MASTER=bus;try{e.fn(e.t)}finally{MASTER=master}}}
     const now=AC.currentTime-outLat();
     const si=spec.segs.findIndex(s=>now>=s.t0&&now<s.t1);if(si!==seg){seg=si;o.onSeg&&o.onSeg(spec.segs[si]||null)}
     const g=spec.targets.find(x=>now>=x.t0&&now<x.t1)||null;if(g!==cur){cur=g;o.onNote&&o.onNote(g,now)}
@@ -120,20 +135,49 @@ function practiceRun(cv,spec,o){
     raf=requestAnimationFrame(frame);
   };
   const onMic=d=>{
-    if(!alive)return;const s={t:d.t,m:d.m,hit:false,off:false};
+    if(!alive||paused)return;const s={t:d.t,m:d.m,hit:false,off:false};
     const g=spec.targets.find(x=>d.t>=x.t0&&d.t<x.t1);
     if(g&&g.ph==='S'){
+      const hit=d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol;
+      g.reads=(g.reads||0)+1;
+      if(d.m==null)g.silent=(g.silent||0)+1;
+      else{const err=d.m-tgtAt(g,d.t);g.voiced=(g.voiced||0)+1;g.sum=(g.sum||0)+err;g.sq=(g.sq||0)+err*err}
+      const part=(d.t-g.t0)/(g.t1-g.t0),which=part<.3?'early':part>.7?'late':null;
+      if(which){g[which+'N']=(g[which+'N']||0)+1;g[which+'H']=(g[which+'H']||0)+(hit?1:0)}
       const grace=Math.min(.18,(g.t1-g.t0)*.3);
-      if(d.t>=g.t0+grace&&d.t<g.t1-.03){g.n++;if(d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol){g.h++;s.hit=true}else if(d.m!=null)s.off=true}
+      if(d.t>=g.t0+grace&&d.t<g.t1-.03){g.n++;if(hit){g.h++;s.hit=true}else if(d.m!=null)s.off=true;
+        const note=Math.round(tgtAt(g,d.t));g.bins=g.bins||{};const b=g.bins[note]||(g.bins[note]={n:0,h:0});b.n++;if(hit)b.h++;
+      }
       else if(d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol)s.hit=true;
     }
     st.trail.push(s);if(st.trail.length>400)st.trail.splice(0,100);
     o.onPitch&&o.onPitch(d,g);
   };
-  const stop=fin=>{if(!alive)return;alive=false;cancelAnimationFrame(raf);if(MIC.on===onMic)MIC.on=null;o.onEnd&&o.onEnd(fin?spec:null)};
+  const stop=fin=>{if(!alive)return;alive=false;cancelAnimationFrame(raf);bus.gain.value=0;if(paused)AC.resume();if(MIC.on===onMic)MIC.on=null;o.onEnd&&o.onEnd(fin?spec:null)};
+  const pause=async()=>{if(!alive||paused)return;paused=true;cancelAnimationFrame(raf);await AC.suspend();pauseAt=AC.currentTime};
+  const resume=()=>{if(!alive||!paused)return;const delta=Math.max(0,AC.currentTime-pauseAt);
+    if(delta){spec.targets.forEach(g=>{g.t0+=delta;g.t1+=delta});spec.segs.forEach(s=>{s.t0+=delta;s.t1+=delta});(spec.lines||[]).forEach(s=>{s.t0+=delta;s.t1+=delta});spec.ev.slice(ei).forEach(e=>e.t+=delta);spec.end+=delta;st.trail.forEach(p=>p.t+=delta)}
+    paused=false;AC.resume();raf=requestAnimationFrame(frame);
+  };
   if(MIC.stream)MIC.on=onMic;
   raf=requestAnimationFrame(frame);
-  return PRACTICE={stop:()=>stop(false),st,onMic};
+  return PRACTICE={stop:()=>stop(false),pause,resume,st,onMic,spec,get paused(){return paused}};
 }
 // calificación: promedio de las notas que cantaste (cada nota = fracción del tiempo dentro de la tolerancia)
 function specScore(spec){const gs=spec.targets.filter(g=>g.ph==='S'&&g.n>0);if(!gs.length)return null;return gs.reduce((a,g)=>a+g.h/g.n,0)/gs.length}
+/* Una sola observación, calculada con lecturas reales de la voz. */
+function coachTip(spec){
+  const gs=spec.targets.filter(g=>g.ph==='S'),reads=gs.reduce((s,g)=>s+(g.reads||0),0);
+  if(reads&&gs.reduce((s,g)=>s+(g.silent||0),0)/reads>.4)return 'Casi no te oí: acércate al teléfono y canta con más aire.';
+  const notes=gs.map(g=>(g.m+(g.m2==null?g.m:g.m2))/2),lo=Math.min(...notes),hi=Math.max(...notes),third=(hi-lo)/3;
+  const average=list=>{const n=list.reduce((s,g)=>s+(g.voiced||0),0);return n?list.reduce((s,g)=>s+(g.sum||0),0)/n:0};
+  const high=average(gs.filter((g,i)=>notes[i]>=hi-third)),low=average(gs.filter((g,i)=>notes[i]<=lo+third));
+  if(hi>lo&&high<-.3)return 'Te quedaste bajo en las notas agudas: apoya más el aire y piensa la nota arriba antes de cantarla.';
+  if(hi>lo&&high>.3)return 'Te pasaste arriba en las agudas: relaja la garganta y canta un poco más suave.';
+  if(hi>lo&&low<-.3)return 'En las graves te quedaste abajo: imagina la nota y mantén el aire parejo.';
+  if(hi>lo&&low>.3)return 'En las graves te fuiste arriba: suelta la mandíbula y baja con suavidad.';
+  if(gs.some(g=>g.m2==null&&g.beats>=2&&g.voiced>2&&Math.sqrt(Math.max(0,g.sq/g.voiced-(g.sum/g.voiced)**2))>.35))return 'Tu nota se movía: sostén el aire parejo, como en la «sss».';
+  if(gs.some(g=>g.earlyN>2&&g.lateN>2&&g.earlyH/g.earlyN<.4&&g.lateH/g.lateN>.7))return 'Llegas a la nota tarde: imagínala antes de cantarla.';
+  if(specScore(spec)>=.85)return '¡Qué buena afinación! Prueba la tolerancia estricta o el siguiente nivel.';
+  return spec.tip||'Escucha la nota completa y repítela con aire parejo.';
+}

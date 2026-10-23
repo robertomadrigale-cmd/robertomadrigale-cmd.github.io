@@ -19,11 +19,11 @@ function parseNote(s){const m=String(s).match(/^([A-G])([#b♯♭]?)(-?\d)$/);if
 /* ---------- tipos de voz (rangos típicos de coro; cada persona es distinta) ---------- */
 const VOICES=[
  {k:'bajo',n:'Bajo',lo:40,hi:64,d:'La voz más grave. Mi2 a Mi4.'},
- {k:'bar',n:'Barítono',lo:45,hi:69,d:'La voz masculina más común. La2 a La4.'},
- {k:'ten',n:'Tenor',lo:48,hi:72,d:'Voz masculina aguda. Do3 a Do5.'},
- {k:'con',n:'Contralto',lo:53,hi:77,d:'La voz femenina más grave. Fa3 a Fa5.'},
- {k:'mez',n:'Mezzosoprano',lo:57,hi:81,d:'Voz femenina media. La3 a La5.'},
- {k:'sop',n:'Soprano',lo:60,hi:84,d:'Voz femenina aguda. Do4 a Do6.'}];
+ {k:'bar',n:'Barítono',lo:45,hi:69,d:'Zona media grave. La2 a La4.'},
+ {k:'ten',n:'Tenor',lo:48,hi:72,d:'Zona media aguda. Do3 a Do5.'},
+ {k:'con',n:'Contralto',lo:53,hi:77,d:'Zona grave. Fa3 a Fa5.'},
+ {k:'mez',n:'Mezzosoprano',lo:57,hi:81,d:'Zona media. La3 a La5.'},
+ {k:'sop',n:'Soprano',lo:60,hi:84,d:'Zona aguda. Do4 a Do6.'}];
 function voiceGuess(lo,hi){
   let best=null,bs=-1;
   VOICES.forEach(v=>{const ov=Math.max(0,Math.min(hi,v.hi)-Math.max(lo,v.lo)),cover=ov/(v.hi-v.lo),miss=Math.abs((lo+hi)/2-(v.lo+v.hi)/2)/24,s=cover-miss;if(s>bs){bs=s;best=v}});
@@ -31,7 +31,7 @@ function voiceGuess(lo,hi){
 }
 /* ---------- datos locales ---------- */
 const DBK='roka-couch-vocal:v1';
-let DB={done:{},secs:{},days:{},best:{},last:{},today:{},range:null,vt:null,breath:0,tol:50,mode:'eco',theme:'auto'};
+let DB={done:{},secs:{},days:{},best:{},last:{},today:{},range:null,vt:null,breath:0,tol:50,mode:'eco',theme:'estudio'};
 try{Object.assign(DB,JSON.parse(localStorage.getItem(DBK)||'{}'))}catch(e){}
 function save(){try{localStorage.setItem(DBK,JSON.stringify(DB))}catch(e){}}
 const today=(d)=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -40,7 +40,7 @@ function streak(){let n=0;const d=new Date();if(!DB.days[today(d)])d.setDate(d.g
 function weekMins(){let s=0;const d=new Date();for(let i=0;i<7;i++){s+=DB.secs[today(d)]||0;d.setDate(d.getDate()-1)}return Math.round(s/60)}
 // zona cómoda para los ejercicios: tu rango medido (sin los extremos) o una voz grave/aguda de referencia
 function comfy(){
-  if(DB.range)return{lo:DB.range.lo+2,hi:DB.range.hi-2,measured:true};
+  if(DB.range){const pad=Math.min(2,Math.max(0,Math.floor((DB.range.hi-DB.range.lo-2)/2)));return{lo:DB.range.lo+pad,hi:DB.range.hi-pad,measured:true}}
   return DB.vt==='aguda'?{lo:57,hi:74,measured:false}:{lo:45,hi:62,measured:false};
 }
 const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};

@@ -1,6 +1,6 @@
 # Roka Couch Vocal — coach de canto de Roberto
 
-App hermana de **Roka Guitar for All** (`../ROKA GUITAR/mastil/`): mismo diseño «Estudio» (negro, azul eléctrico, portadas abstractas, barra de íconos con valores y dock con botón redondo) y el mismo método de lecciones. El nombre va escrito así, «Couch», por decisión de Roberto.
+App hermana de **Roka Guitar for All** (`../ROKA GUITAR/mastil/`): mismo diseño «Estudio» (negro, azul eléctrico, portadas abstractas, barra de íconos con valores y dock con botón redondo) pero pensada como **coach**: ejercicios primero, poca teoría (solo tips de 1–2 líneas) y una sesión diaria guiada que avanza sola, al estilo Vanido / Yousician Sing. Roberto rechazó la v1 (muchas lecciones largas); la v2 «modo coach» (23 oct 2026, programada con Codex) es la actual. El nombre va escrito así, «Couch», por decisión de Roberto.
 
 Roberto no es programador: entrégale cambios terminados y probados, sin pedirle que edite código. Todo el texto va en español de México, tuteando, y sin asumir el género de quien usa la app («Te damos la bienvenida», no «Bienvenido»).
 
@@ -37,8 +37,16 @@ Roberto no es programador: entrégale cambios terminados y probados, sin pedirle
 - `5-tools.js`: vistas de herramientas: **afinador de voz** (`viewTuner`: aguja ±50 cents, verde ±10, nota y Hz, carril con tu voz y franja de la nota guía `DB.ref`), **rango vocal** (`viewRange`: 3 pasos, cuenta solo notas sostenidas ~0.5 s; guarda `DB.range={lo,hi,at}`; teclado `keyboardSVG` y barras de tipos de voz `voiceBars`), **respiración** (`viewBreath`: guiada 4-4-8 con disco que respira, y «Sss medida» con el micrófono: calibra el ruido 0.7 s y cuenta mientras suene; récord `DB.breath`), **metrónomo** (copia del de la guitarra), **ejercicio** (`viewDrill`: barra de íconos Modo/Tempo/Rondas/Tolerancia, carril grande, resultado por ronda, récord `DB.best[id]`, «Siguiente ejercicio» del calentamiento) y **canción** (`viewSing`: Tono/Voz guía/Velocidad/Tolerancia, carril + letra en modo concierto que se llena sílaba por sílaba con `--sd` y se pinta verde/rosa según cómo la cantaste; récord `DB.best['song:'+id]`).
 - `6-app.js`: tiempo de práctica (cuenta con micrófono o metrónomo), tarjeta de ejercicio de lección `exCard`, `blockHTML`, discos de lecciones/ejercicios/canciones, Inicio (racha, tarjeta de rango, «Calentamiento de hoy», continuar lección, repisas, herramientas, tema, voz grave/aguda), bienvenida `onboardShow` (`DB.onb`), Lecciones, Practicar, Calentamiento de hoy (`DB.today[id]` = fecha), Canciones, enrutador `route()` (reemplaza `#page` en cada vista y desmonta la anterior: apaga el micrófono) y service worker con aviso de actualización.
 
+### v2 «modo coach» (lo que manda sobre la descripción de arriba)
+- **Ya no hay lecciones largas** (`LESSONS`, `viewLesson`, `exCard`, narrador de lecciones se quitaron; `#/lecciones` y `#/leccion/N` redirigen a `#/`). La teoría vive en el `tip` de cada ejercicio.
+- `4-content.js`: `DRILLS` = 16 ejercicios con `lvl` 1–3 («Base», «Control», «Agilidad y rango»), `rounds`, `tip`; ids: respira, eco, larga, trino, sirena, tres · escala, arpegio3, terceras, staccato, crescendo · arpegio, quintas, nueve, agilidad, extensor.
+- `5-coach.js` (nuevo): migración aditiva de `DB` (`stars`, `hist` ≤ 400, `rangeHist`, `sung`, `sess`), estrellas (`starsFor`: 50/70/85 %), niveles (`levelOpen`: 10 estrellas del nivel anterior), `growRange()` (el rango crece si aciertas ≥ 60 % notas fuera de él), `recordResult()`, `buildSession()` (sesión diaria de ~12 min: rango si falta → respira → trino → sirena → 3 del nivel, rotando por fecha → canción corta; guardada en `DB.sess` para continuar) y `viewCoach()` = reproductor a pantalla completa (`#/sesion` y cada ejercicio suelto `#/practicar/ej/<id>`): entrada con cuenta 3-2-1 → carril de tono con HUD (fase, ronda, nota en vivo) → resultado con %, estrellas, mejor marca y `coachTip` → avanza solo a los 6 s → resumen de la sesión. Micrófono abierto toda la sesión; sin micrófono sigue sin calificación.
+- `5-lane.js`: `practiceRun` guarda por nota desviación con signo, silencios, estabilidad e inicio/final; `coachTip(spec)` elige el consejo (sin voz, bajo/alto en agudas o graves, nota inestable, entrada tarde, afinadísimo). Admite pausa (`run.pause/resume`) y descansos entre rondas (fase `R`).
+- `6-app.js`: Inicio «Tu sesión de hoy», Ejercicios por nivel (candados con «Te faltan N estrellas»), Canciones, **Progreso** (racha y mejor racha, minutos por día, afinación por semana, rango que crece, estrellas por nivel). `html.fs` = pantalla completa. Se guarda en `pagehide`.
+- Pruebas de lógica: `node src/coach.test.cjs` (13 pruebas; no entra al build).
+
 ### Rutas
-`#/` · `#/lecciones` · `#/leccion/N[/idEjercicio]` · `#/practicar` · `#/practicar/afinador|rango|respiracion|metronomo|calentamiento` · `#/practicar/ej/<drill>` · `#/canciones` · `#/canciones/<id>`.
+`#/` (Hoy) · `#/sesion` · `#/ejercicios` · `#/progreso` · `#/practicar/ej/<id>` · `#/practicar/afinador|rango|respiracion|metronomo` · `#/canciones` · `#/canciones/<id>`.
 
 ## Antes de entregar
 1. `sh build.sh` y revisa que el JavaScript compile (comando de arriba).

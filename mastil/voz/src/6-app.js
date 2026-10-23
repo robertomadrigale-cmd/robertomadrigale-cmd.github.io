@@ -1,180 +1,72 @@
-/* ---------- tiempo de práctica: cuenta mientras el micrófono o el metrónomo están activos ---------- */
+/* Tiempo activo, también al practicar sin micrófono. Pausas y resultados no suman. */
 setInterval(()=>{
   if(document.hidden)return;
-  if(SEQ.id||MIC.stream){const k=today();DB.secs[k]=(DB.secs[k]||0)+1;if(DB.secs[k]>=60)DB.days[k]=true;if(DB.secs[k]%10===0)save()}
+  const active=COACH?COACH.active:!!(SEQ.id||MIC.stream||BR._w);
+  if(active){const d=today();DB.secs[d]=(DB.secs[d]||0)+1;if(COACH)COACH.addTime(1);if(DB.secs[d]>=60)DB.days[d]=true;if(DB.secs[d]%5===0)save()}
 },1000);
-/* ---------- tarjeta de ejercicio de lección ---------- */
-function exCard(x){
-  const l=LESSONS.find(z=>z.id===x.lesson),idx=l.blocks.filter(b=>b.ex).findIndex(b=>b.ex.id===x.id)+1,tot=l.blocks.filter(b=>b.ex).length;
-  return`<article class="ex ${DB.done[x.id]?'done':''}" id="ex-${x.id}" data-ex="${x.id}">
-   <div class="eh"><span class="exn">${DB.done[x.id]?IC.check:idx}</span><div class="eht"><span class="tag">Ejercicio ${idx} de ${tot} · ${x.min} min</span><h3>${x.t}</h3></div></div>
-   <ol class="steps">${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
-   <p class="goal"><span class="gi">${IC.check}</span><span><b>Lo logras cuando:</b> ${x.goal}</span></p>
-   <div class="exbar"><a class="btn sm pri" href="${x.go}">${IC.play}${x.goL}</a><button class="btn sm ok" data-x="done" data-id="${x.id}"></button></div>
-  </article>`;
-}
-function paintEx(root){
-  $$('[data-x="done"]',root||document).forEach(b=>{const id=b.dataset.id,x=ALLEX.find(z=>z.id===id);if(!x)return;const d=!!DB.done[id];b.innerHTML=IC.check+(d?'Hecho':'Marcar como hecho');b.classList.toggle('on',d);b.setAttribute('aria-pressed',String(d));
-    const card=b.closest('.ex');if(card){card.classList.toggle('done',d);const n=$('.exn',card),l=LESSONS.find(z=>z.id===x.lesson);if(n)n.innerHTML=d?IC.check:l.blocks.filter(q=>q.ex).findIndex(q=>q.ex.id===id)+1}});
-}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-x="done"]');if(!b)return;const id=b.dataset.id;if(DB.done[id])delete DB.done[id];else{DB.done[id]=true;markDay()}save();paintEx();refreshProgress()});
-function blockHTML(b){
-  if(b.ex)return exCard(b.ex);
-  if(b.aim)return`<div class="box aim"><p class="blockh">Al terminar podrás</p><ul>${b.aim.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
-  if(b.step)return`<div class="prose lstep"><p class="stepk"><span>${b.step}</span>${b.t}</p><p>${b.p}</p></div>`;
-  if(b.key)return`<div class="keyi"><p class="blockh">La idea clave</p><p>${b.key}</p></div>`;
-  if(b.check)return`<div class="box chk"><p class="blockh">Compruébalo</p>${b.check.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</div>`;
-  if(b.box)return`<div class="box"><p class="blockh">${b.box}</p>${b.ul?`<ul>${b.ul.map(t=>`<li>${t}</li>`).join('')}</ul>`:`<ol>${b.ol.map(t=>`<li>${t}</li>`).join('')}</ol>`}</div>`;
-  if(b.trick)return`<div class="box trick"><p class="blockh">Hoja de trucos</p><ul>${b.trick.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
-  if(b.p)return`<p class="prose">${b.p}</p>`;
-  return'<div></div>';
-}
-/* ---------- discos ---------- */
-const lessonAlb=i=>{const l=LESSONS.find(x=>x.id===i),[d,t]=doneCount(i);return albCard(`#/leccion/${i}`,lessonArt(i),l.title,`${d} de ${t} · ${l.sub}`,d/t,d===t)};
-const drillAlb=d=>{const b=DB.best[d.id];return albCard('#/practicar/ej/'+d.id,drillArt(d),d.t,b!=null?`Récord ${Math.round(b*100)} % · ${d.syl}`:d.sub,null,DB.today[d.id]===today())};
-const songAlb=s=>{const b=DB.best['song:'+s.id];return albCard('#/canciones/'+s.id,songArt(s),esc(s.title),b!=null?`Récord ${Math.round(b*100)} %`:esc(s.artist),null,false)};
-const TOOLS=[['afinador','Afinador de voz','Ve qué nota cantas y qué tan afinado.',IC.tuner],['rango','Rango vocal','Tu nota más grave, la más aguda y tu tipo de voz.',IC.range],['respiracion','Respiración','Ciclos 4-4-8 y tu «sss» medida.',IC.lungs],['metronomo','Metrónomo','Tempo y compás para practicar frases.',IC.metro]];
-const toolCards=()=>TOOLS.map(([k,n,d,ic])=>`<a class="card tool" href="#/practicar/${k}"><span class="ic">${ic}</span><span><b>${n}</b><span>${d}</span></span></a>`).join('');
-const warmDone=()=>WARMUP.filter(k=>DB.today[k]===today()).length;
-function warmCard(){const n=warmDone();return`<a class="card nowp" href="#/practicar/calentamiento"><span class="acov">${coverArt(205,TART.rt[1],null,'wu')}</span><span class="np"><span class="eyebrow">Calentamiento de hoy</span><b>${n===WARMUP.length?'Completo. Tu voz está lista':n?'Vas en el paso '+(n+1)+' de '+WARMUP.length:'10 minutos, de suave a fuerte'}</b><small>Respiración, trino, sirena, escala, arpegio y nota larga.</small><span class="pg"><i style="width:${Math.round(n/WARMUP.length*100)}%"></i></span></span><span class="playc">${IC.play}</span></a>`}
-/* ---------- vistas ---------- */
+window.addEventListener('pagehide',save);
 const greet=()=>{const h=new Date().getHours();return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
-let DEFERRED=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFERRED=e;if(location.hash===''||location.hash==='#/')route()});
-const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-function rangeCard(){
-  if(DB.range){const v=voiceGuess(DB.range.lo,DB.range.hi);return`<a class="card tool" href="#/practicar/rango"><span class="ic">${IC.range}</span><span><b>Tu voz: ${v.n.toLowerCase()} · ${nnTxt(DB.range.lo)} a ${nnTxt(DB.range.hi)}</b><span>Los ejercicios y las canciones se ajustan a este rango. Toca para medir de nuevo.</span></span></a>`}
-  return`<a class="card cta" href="#/practicar/rango"><span><span class="eyebrow">Primer paso</span><b>Mide tu rango vocal</b><span>Dos minutos con el micrófono: tu nota más grave, la más aguda y tu tipo de voz. Así todo queda a tu medida.</span></span><span class="ic">${IC.range}</span></a>`;
+const LOCK=TI('<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>');
+const TOOLS=[['afinador','Afinador',IC.tuner],['rango','Rango',IC.range],['respiracion','Respiración',IC.lungs],['metronomo','Metrónomo',IC.metro]];
+const quickTools=()=>`<div class="coach-quick">${TOOLS.map(([id,t,ic])=>`<a class="btn" href="#/practicar/${id}">${ic}${t}</a>`).join('')}</div>`;
+function weekAccuracy(){const date=new Date();date.setDate(date.getDate()-6);const from=today(date);return mean(DB.hist.filter(h=>h.d>=from&&h.d<=today()).map(h=>h.s))}
+function drillAlb(d){
+  const open=levelOpen(d.lvl),best=DB.best[d.id],missing=Math.max(0,10-levelStars(d.lvl-1));
+  const sub=d.breath?'2 ciclos · sin calificación':`${starText(DB.stars[d.id]||0)} · ${best==null?'Por descubrir':scoreText(best)}`;
+  const card=albCard('#/practicar/ej/'+d.id,drillArt(d),esc(d.t),open?sub:`${LOCK} Te faltan ${missing} estrellas`,null,DB.today[d.id]===today());
+  return open?card:card.replace('class="alb','aria-label="'+esc(d.t)+': bloqueado" class="alb locked');
 }
 function viewHome(){
-  const nx=nextEx(),[d,t]=doneCount();
-  const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
-  return{title:'Roka Couch Vocal',html:`
-  <div class="brandhero"><span class="logo">${logo()}</span><div><span class="eyebrow">${greet()}</span><h1 class="glow">Tu voz de hoy</h1></div></div>
-  <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-    <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
-    <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
-    <div class="stat"><b>${d}<small style="font-size:18px;color:var(--muted)">/${t}</small></b><span>ejercicios</span></div>
-  </div>
-  ${rangeCard()}
-  ${warmCard()}
-  ${nx?(()=>{const[ld,lt]=doneCount(nx.lesson);return`<a class="card nowp" href="#/leccion/${nx.lesson}/${nx.id}"><span class="acov">${lessonArt(nx.lesson)}</span><span class="np"><span class="eyebrow">Continúa donde te quedaste</span><b>${nx.t}</b><small>Lección ${nx.lesson} · ${LESSONS.find(l=>l.id===nx.lesson).title}</small><span class="pg"><i style="width:${Math.round(ld/lt*100)}%"></i></span></span><span class="playc">${IC.play}</span></a>`})():''}
-  <section><div class="sech"><h2>Lecciones</h2><a href="#/lecciones">Ver todas</a></div><div class="shelf">${LESSONS.map(l=>lessonAlb(l.id)).join('')}</div></section>
-  <section><div class="sech"><h2>Calentamientos</h2><a href="#/practicar">Practicar</a></div><div class="shelf">${DRILLS.map(drillAlb).join('')}</div></section>
-  <section><div class="sech"><h2>Para cantar</h2><a href="#/canciones">Canciones</a></div><div class="shelf">${SONGLIST.map(songAlb).join('')}</div></section>
-  ${inst}
-  <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
-  <div class="card" style="display:flex;flex-direction:column;gap:12px">
-    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Tema</span><div class="seg">${[['auto','Auto'],['estudio','Estudio'],['escenario','Escenario'],['claro','Claro']].map(([v,l])=>`<button data-theme-set="${v}" aria-pressed="${(DB.theme||'auto')===v}">${l}</button>`).join('')}</div></div>
-    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Sin medir tu rango, practica con voz</span><div class="seg">${[['grave','Grave'],['aguda','Aguda']].map(([v,l])=>`<button data-vt="${v}" aria-pressed="${(DB.vt||'grave')===v}">${l}</button>`).join('')}</div></div>
-    <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
-  </div>
-  <p class="foot">Roka Couch Vocal · funciona sin conexión<br>Canta sin dolor: si algo raspa o duele, descansa.</p>`,
-  mount(r){
-    if(DB.onb==null)setTimeout(()=>{if(DB.onb==null&&(!location.hash||location.hash==='#/'))onboardShow()},400);
-    r.addEventListener('click',async e=>{
-      const th=e.target.closest('[data-theme-set]');if(th){DB.theme=th.dataset.themeSet;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)));return}
-      const vt=e.target.closest('[data-vt]');if(vt){DB.vt=vt.dataset.vt;save();$$('[data-vt]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===vt)));return}
-      const b=e.target.closest('[data-h]');if(!b)return;const a=b.dataset.h;
-      if(a==='install'&&DEFERRED){DEFERRED.prompt();try{await DEFERRED.userChoice}catch(_){}DEFERRED=null;route()}
-      else if(a==='hideinst'){DB.hideInstall=true;save();route()}
-      else if(a==='reset'){$('#rstw',r).innerHTML='<span class="row"><span class="cap" style="margin:0">¿Borrar todo?</span><button class="btn sm" data-h="reset-yes" style="border-color:var(--bad);color:var(--bad)">Sí, borrar</button><button class="btn sm" data-h="reset-no">Cancelar</button></span>'}
-      else if(a==='reset-yes'){Object.assign(DB,{done:{},secs:{},days:{},best:{},today:{},range:null,breath:0});save();route()}
-      else if(a==='reset-no')route();
-    });
-  }};
+  const s=buildSession(),done=s.i>=s.steps.length,lvl=currentLevel(),label=done?'Ver resumen':s.i||s.res.some(Boolean)?'Continuar':'Empezar';
+  return{title:'Hoy',html:`<div class="coach-greeting"><span class="eyebrow">${greet()}</span><span class="coach-pill">${streak()===1?"1 día":streak()+" días"} de racha</span><h1>Tu sesión de hoy</h1><p>Nivel ${lvl} · ${LEVELS[lvl]}</p></div>
+    <section class="card session-card"><div class="session-art">${coverArt(218,DLINE,null,'session')}</div><div class="session-content"><span class="eyebrow">Tu sesión de hoy · ${s.minutes} min</span><h2>${done?'Ya le diste tiempo a tu voz':'Un poco de aire. Mucha voz.'}</h2><p class="cap">Calienta, afina y canta. Incluye descansos entre rondas.</p><ol class="session-steps">${s.steps.map((id,i)=>{const r=s.res[i],complete=r&&!r.skipped||DB.today[id]===today();return`<li class="${complete?'done':''}"><span>${complete?IC.check:i+1}</span><b>${esc(stepInfo(id).t)}</b>${r&&r.skipped?'<small>Saltado</small>':''}${id==='rango'?'<a href="#/practicar/rango" aria-label="Medir mi rango">'+IC.range+'</a>':''}</li>`}).join('')}</ol><div class="session-start"><a class="kplayb" data-start-session href="#/sesion" aria-label="${label} sesión">${done?IC.check:IC.play}<span>${label}</span></a><span>${done?'Buen trabajo por hoy.':'Yo marco el paso. Tú pon la voz.'}</span></div></div></section>
+    <div class="coach-stats four"><div><b>${streak()}</b><span>días de racha</span></div><div><b>${weekMins()}</b><span>min esta semana</span></div><div><b>${weekAccuracy()==null?'—':scoreText(weekAccuracy())}</b><span>afinación semanal</span></div><div><b class="range-stat">${DB.range?nnTxt(DB.range.lo)+'–'+nnTxt(DB.range.hi):'Por medir'}</b><span>rango actual</span></div></div>
+    <section><h2>A tu ritmo</h2><div class="coach-quick"><a class="btn" href="#/practicar/afinador">${IC.tuner}Afinador</a><a class="btn" href="#/practicar/rango">${IC.range}Rango</a><a class="btn" href="#/canciones">${IC.note}Canciones</a></div></section>
+    <details class="card coach-settings"><summary>Tu voz y apariencia</summary><label>Voz de referencia<select data-pref="vt"><option value="grave" ${DB.vt!=='aguda'?'selected':''}>Grave</option><option value="aguda" ${DB.vt==='aguda'?'selected':''}>Aguda</option></select></label><label>Tema<select data-pref="theme">${[['estudio','Estudio'],['escenario','Escenario'],['claro','Claro'],['auto','Automático']].map(([k,n])=>`<option value="${k}" ${DB.theme===k?'selected':''}>${n}</option>`).join('')}</select></label></details><p class="foot">Roka Couch Vocal · tu progreso se guarda en este dispositivo.</p>`,mount(r){
+      const t=setTimeout(()=>{if(DB.onb==null)onboardShow()},400);
+      r.addEventListener('change',e=>{const k=e.target.dataset.pref;if(k){DB[k]=e.target.value;save();if(k==='theme')applyTheme()}});
+      return()=>{clearTimeout(t);$('#onb')?.remove()};
+    }};
 }
-/* bienvenida: una pregunta para empezar con ejercicios en una zona razonable */
 function onboardShow(){
-  if($('#onb'))return;
-  const d=document.createElement('div');d.id='onb';d.className='onb';
-  d.innerHTML=`<div class="card onbc" role="dialog" aria-modal="true" aria-labelledby="onbt"><span class="logo">${logo()}</span><h2 id="onbt">Te damos la bienvenida a Roka Couch Vocal</h2>
-   <p class="sub" style="margin:0">Tu coach de canto: afinador de voz, calentamientos que te califican con el micrófono, lecciones de técnica y canciones.</p>
-   <p class="cl" style="margin:6px 0 0">¿Tu voz es más bien…?</p>
-   <div class="row" style="justify-content:center"><button class="btn" data-onb="grave">Grave</button><button class="btn" data-onb="aguda">Aguda</button></div>
-   <p class="cap" style="margin:0">Después mide tu rango para afinar los ejercicios a tu voz exacta. Recomendado: usa audífonos.</p>
-   <div class="row" style="justify-content:center"><button class="btn pri" data-onb="rango">${IC.range}Medir mi rango ahora</button><button class="btn sm" data-onb="no">Luego</button></div></div>`;
-  document.body.appendChild(d);
-  d.addEventListener('click',e=>{const b=e.target.closest('[data-onb]');if(!b)return;const k=b.dataset.onb;
-    if(k==='grave'||k==='aguda'){DB.vt=k;save();$$('[data-onb="grave"],[data-onb="aguda"]',d).forEach(x=>x.classList.toggle('pri',x===b));return}
-    DB.onb=1;save();d.remove();if(k==='rango')location.hash='#/practicar/rango';else route()});
+  if($('#onb'))return;const el=document.createElement('dialog');el.id='onb';el.className='coach-dialog';
+  el.innerHTML=`<span class="logo">${logo()}</span><h2>Te damos la bienvenida</h2><p>Vamos a calentar tu voz. Primero dime… ¿tu voz es más grave o más aguda?</p><div class="row"><button class="btn" data-voice="grave">Grave</button><button class="btn" data-voice="aguda">Aguda</button></div><p class="cap">Después medimos tu rango para ajustar cada ejercicio.</p><button class="btn pri" data-welcome>Vamos</button>`;
+  document.body.appendChild(el);el.showModal();
+  el.addEventListener('click',e=>{const v=e.target.closest('[data-voice]');if(v){DB.vt=v.dataset.voice;$$('[data-voice]',el).forEach(b=>b.setAttribute('aria-pressed',String(b===v)));save()}if(e.target.closest('[data-welcome]')){DB.onb=1;save();el.close();el.remove()}});
+  el.oncancel=()=>{DB.onb=1;save();el.remove()};
 }
-function viewLessons(){
-  return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">${LESSONS.length} lecciones · ${ALLEX.length} ejercicios</span><h1>Lecciones</h1><p class="sub">Técnica vocal paso a paso: primero el aire, luego el sonido, la afinación, tu rango y el cuidado de tu voz.</p></div>
-  <section class="albsec"><div class="albs">${LESSONS.map(l=>lessonAlb(l.id)).join('')}</div></section>`};
+function viewLocked(lvl){return{title:'Nivel '+lvl,back:'#/ejercicios',html:`<div class="card coach-center"><span class="coach-lock">${LOCK}</span><h1>Nivel ${lvl} · ${LEVELS[lvl]}</h1><p>Te faltan ${Math.max(0,10-levelStars(lvl-1))} estrellas del nivel ${lvl-1}.</p><p class="cap">Gana una estrella con 50 %, dos con 70 % y tres con 85 %.</p><a class="btn pri" href="#/ejercicios">Ver ejercicios</a></div>`}}
+function viewExercises(){return{title:'Ejercicios',html:`<div class="lhead"><span class="eyebrow">Tu estudio de voz</span><h1>Ejercicios</h1><p class="sub">Prácticas cortas. Un paso a la vez.</p></div>${quickTools()}${[1,2,3].map(l=>`<section class="level-section"><div class="sech"><h2>${l}. ${LEVELS[l]}</h2><span>${levelOpen(l)?levelStars(l)+' estrellas':LOCK+' Bloqueado'}</span></div>${!levelOpen(l)?`<p class="cap">Te faltan ${Math.max(0,10-levelStars(l-1))} estrellas del nivel ${l-1}.</p>`:''}<div class="albs">${DRILLS.filter(d=>d.lvl===l).map(drillAlb).join('')}</div></section>`).join('')}<p class="cap">50 % = ★ · 70 % = ★★ · 85 % = ★★★. Se conserva tu mejor resultado.</p>`}}
+function viewSongs(){return{title:'Canciones',html:`<div class="lhead"><span class="eyebrow">Ponle letra a tu práctica</span><h1>Canciones</h1><p class="sub">La melodía se ajusta a tu voz. Sigue la línea y canta.</p></div><div class="albs">${SONGLIST.map(s=>albCard('#/canciones/'+s.id,songArt(s),esc(s.title),starText(DB.stars['song:'+s.id]||0)+' · '+(DB.best['song:'+s.id]==null?esc(s.artist):scoreText(DB.best['song:'+s.id])),null,DB.today['song:'+s.id]===today())).join('')}</div>`}}
+function progressBars(values,labels,unit,max){
+  const ceiling=max||Math.max(1,...values.map(v=>v||0));
+  return `<div class="progress-chart" role="img" aria-label="${esc(labels.map((l,i)=>l+': '+(values[i]==null?'sin datos':Math.round(values[i])+unit)).join(', '))}">${values.map((v,i)=>`<div class="chart-column"><b>${v==null?'—':Math.round(v)+unit}</b><div class="chart-track"><i style="height:${v==null?0:v===0?0:Math.max(2,v/ceiling*100)}%"></i></div><small>${esc(labels[i])}</small></div>`).join('')}</div>`;
 }
-function refreshProgress(){const el=$('#lprog');if(!el)return;const l=+el.dataset.l,[d,t]=doneCount(l);el.querySelector('i').style.width=(d/t*100)+'%';const c=$('#lcnt');if(c)c.textContent=`${d} de ${t} ejercicios hechos`}
-function viewLesson(id,exId){
-  const l=LESSONS.find(x=>x.id===id);if(!l)return viewLessons();
-  const body=l.blocks.map((b,bi)=>blockHTML(b).replace(/^(\s*<\w+)/,`$1 data-nb="${bi}"`)).join('');
-  const prev=LESSONS.find(x=>x.id===id-1),next=LESSONS.find(x=>x.id===id+1),[d,t]=doneCount(id);
-  return{title:'Lección '+id,back:'#/lecciones',html:`
-  <div class="lhead"><div class="lhero"><span class="acov">${lessonArt(id)}</span><div><span class="eyebrow">Lección ${id} de ${LESSONS.length}</span><h1>${l.title}</h1></div></div><p class="lead">${l.lead}</p>
-  ${HAS_TTS?`<div><button class="btn pri" data-narr="start" data-l="${id}">${IC.voice}Escuchar la lección</button></div>`:''}
-  <div><div class="bar" id="lprog" data-l="${id}"><i style="width:${d/t*100}%"></i></div><p class="cap" id="lcnt" style="margin-top:6px">${d} de ${t} ejercicios hechos</p></div></div>
-  ${body}
-  <div class="row" style="justify-content:space-between">${prev?`<a class="btn" href="#/leccion/${prev.id}">${IC.back}Lección ${prev.id}</a>`:'<span></span>'}${next?`<a class="btn pri" href="#/leccion/${next.id}">Lección ${next.id}</a>`:''}</div>`,
-  mount(r){
-    paintEx(r);paintNarr();
-    if(exId){const el=$('#ex-'+exId,r);if(el)setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),60)}
-    return()=>narrStop(true);
-  }};
+function viewProgress(){
+  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d}),minutes=days.map(d=>(DB.secs[today(d)]||0)/60);
+  const monday=new Date();monday.setHours(12,0,0,0);monday.setDate(monday.getDate()-(monday.getDay()+6)%7);
+  const weeks=Array.from({length:6},(_,i)=>{const start=new Date(monday);start.setDate(start.getDate()-(5-i)*7);const end=new Date(start);end.setDate(end.getDate()+7);const v=mean(DB.hist.filter(h=>h.d>=today(start)&&h.d<today(end)).map(h=>h.s));return{date:start,v:v==null?null:v*100}});
+  const first=DB.rangeHist[0],r=DB.range,growth=first&&r?(r.hi-r.lo)-(first.hi-first.lo):0;
+  const dateLabel=d=>d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+  return{title:'Progreso',html:`<div class="lhead"><span class="eyebrow">Cada práctica cuenta</span><h1>Tu progreso</h1></div><div class="coach-stats"><div><b>${streak()}</b><span>racha actual</span></div><div><b>${bestStreak()}</b><span>mejor racha</span></div><div><b>${DB.sung}</b><span>ejercicios cantados</span></div></div><section class="card"><h2>Minutos por día</h2><p class="cap">Últimos 7 días</p>${progressBars(minutes,days.map(d=>d.toLocaleDateString('es-MX',{weekday:'short'})),' min')}</section><section class="card"><h2>Tu afinación por semana</h2><p class="cap">Promedio de prácticas calificadas · últimas 6 semanas</p>${progressBars(weeks.map(w=>w.v),weeks.map(w=>dateLabel(w.date)),' %',100)}${!DB.hist.length?'<p class="cap">Tu primera práctica con micrófono aparecerá aquí.</p>':''}</section><section class="card"><h2>Tu rango crece contigo</h2>${r?`<p class="coach-range-title">${nnTxt(r.lo)} — ${nnTxt(r.hi)}</p>${keyboardSVG(r.lo,r.hi,comfy().lo,comfy().hi)}<p class="cap">Zona de referencia: ${voiceGuess(r.lo,r.hi).n}. Tu voz puede cambiar con la práctica.</p>${first?`<p>${growth>=0?'+':''}${growth} semitonos desde el ${dateLabel(new Date(first.d+'T12:00:00'))}</p><p class="cap">Primera medición: ${nnTxt(first.lo)} — ${nnTxt(first.hi)}</p>${keyboardSVG(first.lo,first.hi)}`:''}`:'<p>Mide tu rango para ver cómo cambia con la práctica.</p>'}<a class="btn" href="#/practicar/rango">Medir rango</a></section><section class="card"><h2>Estrellas por nivel</h2>${[1,2,3].map(l=>{const stars=levelStars(l),max=DRILLS.filter(d=>d.lvl===l&&!d.breath).length*3;return`<div class="level-progress"><div><b>${l}. ${LEVELS[l]}</b><span>${stars} / ${max} ★</span></div><progress max="${l<3?10:max}" value="${Math.min(stars,l<3?10:max)}" aria-label="Estrellas del nivel ${l}"></progress><p class="cap">${l===3?'Sigue mejorando tus marcas.':stars>=10?'Siguiente nivel desbloqueado.':`Faltan ${10-stars} para abrir el nivel ${l+1}.`}</p></div>`}).join('')}</section>`};
 }
-function viewPractice(){
-  return{title:'Practicar',html:`<div class="lhead"><span class="eyebrow">Herramientas y calentamientos</span><h1>Practicar</h1></div>
-  ${warmCard()}
-  <div class="grid2">${toolCards()}</div>
-  <section><div class="sech"><h2>Calentamientos</h2></div><p class="cap" style="margin:-4px 0 12px">La app toca el patrón, tú lo repites y el micrófono te califica nota por nota. Cada ronda sube medio tono dentro de tu rango.</p><div class="albs">${DRILLS.map(drillAlb).join('')}</div></section>`};
-}
-function viewWarmup(){
-  const step=(k,i)=>{const done=DB.today[k]===today();if(k==='respira')return`<a class="srow wrow${done?' done':''}" href="#/practicar/respiracion"><span class="sart">${coverArt(180,TART.breath[1],null,'wr')}</span><span class="st"><b>${i+1}. Respiración 4-4-8</b><span>Cinco ciclos para despertar el aire</span></span><span class="wk">${done?IC.check:''}</span></a>`;
-    const d=drillById(k);return`<a class="srow wrow${done?' done':''}" href="#/practicar/ej/${k}"><span class="sart">${drillArt(d)}</span><span class="st"><b>${i+1}. ${d.t}</b><span>${d.sub} · ${d.syl}${DB.best[k]!=null?' · récord '+Math.round(DB.best[k]*100)+' %':''}</span></span><span class="wk">${done?IC.check:''}</span></a>`};
-  const nx=WARMUP.find(k=>DB.today[k]!==today());
-  return{title:'Calentamiento de hoy',back:'#/practicar',html:`<div class="kplay tplay">
-  ${toolHead('rt','Calentamiento de hoy','10 minutos · de suave a fuerte')}
-  <div class="slist">${WARMUP.map(step).join('')}</div>
-  <p class="cap">Descansa 20 segundos entre ejercicios. Cada paso se palomea al terminarlo; mañana empieza de nuevo.</p>
-  ${toolDock(`<span class="tm">${warmDone()} de ${WARMUP.length} hechos</span><div class="ktrans"><a class="kplayb" href="${nx?(nx==='respira'?'#/practicar/respiracion':'#/practicar/ej/'+nx):'#/canciones'}" aria-label="${nx?'Siguiente paso':'Cantar una canción'}">${IC.play}<span>${nx?'Siguiente':'Cantar'}</span></a></div><span></span>`)}
-  </div>`,mount(r){const m=$('#tmeta',r);if(m)m.textContent=warmDone()===WARMUP.length?'Completo por hoy':'Haz los pasos en orden'}};
-}
-function viewSongs(){
-  return{title:'Canciones',html:`<div class="lhead"><span class="eyebrow">Canta con la línea de tu voz</span><h1>Canciones</h1><p class="sub">Melodías tradicionales y ejercicios cantados. La app las pone en el tono de tu voz; la letra se ilumina sílaba por sílaba.</p></div>
-  <div class="slist">${SONGLIST.map(s=>{const b=DB.best['song:'+s.id];return`<a class="srow" href="#/canciones/${s.id}"><span class="sart">${songArt(s)}</span><span class="st"><b>${esc(s.title)}</b><span>${esc(s.artist)}${b!=null?' · récord '+Math.round(b*100)+' %':''}</span></span><span class="sk">${s.bpm} bpm</span></a>`}).join('')}</div>
-  <p class="cap">Próximamente: pega la letra de tus canciones favoritas como en el cancionero de Roka Guitar.</p>`};
-}
-/* ---------- enrutador ---------- */
-const NAV=[['#/','Inicio',IC.home,''],['#/lecciones','Lecciones',IC.book,'leccion'],['#/practicar','Practicar',IC.mic,'practicar'],['#/canciones','Canciones',IC.note,'canciones']];
+const NAV=[['#/','Hoy',IC.home,''],['#/ejercicios','Ejercicios',IC.mic,'ejercicios'],['#/canciones','Canciones',IC.note,'canciones'],['#/progreso','Progreso',IC.cal,'progreso']];
 let UNMOUNT=null;
 function route(){
-  const h=location.hash.replace(/^#\/?/,''),p=h.split('/');
-  let v;
-  if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}
-  if(!p[0])v=viewHome();
-  else if(p[0]==='lecciones')v=viewLessons();
-  else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
-  else if(p[0]==='practicar')v=p[1]==='ej'?viewDrill(p[2]):({afinador:viewTuner,rango:viewRange,respiracion:viewBreath,metronomo:viewMetronome,calentamiento:viewWarmup}[p[1]]||viewPractice)();
-  else if(p[0]==='canciones')v=p[1]?viewSing(p[1]):viewSongs();
-  else v=viewHome();
-  const sec=p[0]===''?'':p[0]==='lecciones'?'leccion':p[0];
-  $$('[data-nav]').forEach(a=>{const on=a.dataset.nav===sec;if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-  $('#ttl').textContent=v.title;
-  const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
-  // página nueva en cada vista: así no se acumulan los clics de vistas anteriores
-  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
-  document.title=v.title==='Roka Couch Vocal'?v.title:v.title+' · Roka Couch Vocal';
-  if(v.mount)UNMOUNT=v.mount(pg)||null;
-  if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);
+  const p=location.hash.replace(/^#\/?/,'').split('/');
+  if(['leccion','lecciones'].includes(p[0])){location.replace('#/');return}
+  if(UNMOUNT){UNMOUNT();UNMOUNT=null}
+  let v;if(!p[0])v=viewHome();else if(p[0]==='sesion')v=viewCoach();else if(p[0]==='ejercicios')v=viewExercises();else if(p[0]==='progreso')v=viewProgress();else if(p[0]==='practicar')v=p[1]==='ej'?viewDrill(p[2]):p[1]==='calentamiento'?viewCoach():({afinador:viewTuner,rango:viewRange,respiracion:viewBreath,metronomo:viewMetronome}[p[1]]||viewExercises)();else if(p[0]==='canciones')v=p[1]?viewSing(p[1]):viewSongs();else v=viewHome();
+  document.documentElement.classList.toggle('fs',!!v.fs);
+  const section=p[0]==='practicar'?'ejercicios':p[0]==='sesion'?'':p[0];
+  $$('[data-nav]').forEach(a=>{if(a.dataset.nav===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  $('#ttl').textContent=v.title;const back=$('#back');back.hidden=!v.back;if(v.back)back.href=v.back;
+  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;document.title=v.title+' · Roka Couch Vocal';
+  if(v.mount)UNMOUNT=v.mount(pg)||null;window.scrollTo(0,0);
 }
-/* ---------- arranque ---------- */
-document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
- <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Couch Vocal</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
- <main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main>
-</div>
-<nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
-save();
-window.addEventListener('hashchange',route);
-route();
+document.body.insertAdjacentHTML('afterbegin',`<div class="shell"><nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Couch Vocal</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav><main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main></div><nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
+document.addEventListener('click',e=>{if(e.target.closest('[data-start-session]'))COACH_AUTOSTART=true});
+save();window.addEventListener('hashchange',route);route();
 /* Actualizaciones: busca versión nueva al abrir y al volver a la app; avisa cuando está lista. */
 function showUpdate(){
   if(document.getElementById('upd'))return;

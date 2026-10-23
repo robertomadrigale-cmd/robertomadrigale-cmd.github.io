@@ -1135,3 +1135,72 @@ a.kplayb{text-decoration:none}
 .tstage .gauge{max-width:230px;margin:0 auto}
 .tstage .tnote{font-size:clamp(44px,13vw,64px)}
 @media(min-width:760px){.tstage .gauge{max-width:300px}}
+/* ===================== Roka Couch Vocal (v2 coach) ===================== */
+button,.btn,.kplayb{white-space:nowrap}
+.coach-greeting{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.coach-greeting h1,.coach-greeting p{flex-basis:100%;margin:0}
+.coach-greeting h1{font-size:clamp(32px,5vw,52px);letter-spacing:-.045em}
+.coach-greeting p{color:var(--muted)}
+.coach-pill{margin-left:auto;border:1px solid var(--line);border-radius:99px;padding:6px 12px;color:var(--good);font-size:12px}
+.session-card{padding:0;overflow:hidden;display:grid;grid-template-columns:38% minmax(0,1fr);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.session-art{min-height:100%;overflow:hidden;background:var(--surface2)}
+.session-art>svg{width:100%;height:100%;object-fit:cover;display:block}
+.session-content{padding:30px;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.session-content h2{font-size:clamp(23px,3vw,34px);line-height:1.1;letter-spacing:-.03em;margin:10px 0}
+.session-steps{padding:0;list-style:none;display:grid;gap:10px;margin:24px 0 0;order:2;width:100%}
+.session-steps li{display:flex;align-items:center;gap:10px;font-size:14px;min-width:0}
+.session-steps li>span{display:grid;place-items:center;flex-shrink:0;width:24px;height:24px;border:1px solid var(--line);border-radius:50%;font-size:11px;color:var(--muted)}
+.session-steps li.done>span{background:var(--good);color:var(--bg);border-color:var(--good)}
+.session-steps b{font-weight:500;line-height:1.3}.session-steps small{color:var(--muted);margin-left:auto}
+.session-steps svg{width:16px;height:16px}.session-steps a{display:grid;place-items:center;min-width:32px;min-height:32px;margin-left:auto;color:var(--accent-text)}
+.session-start{display:flex;align-items:center;gap:18px;margin-top:16px}.session-start>span{font-size:13px;color:var(--muted);max-width:160px}
+.session-start .kplayb{width:92px;height:92px;flex-shrink:0}.session-start .kplayb span{font-size:11px}
+.session-start .kplayb,.coach-center>.kplayb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.coach-center>.kplayb{width:88px;height:88px}
+.session-start .kplayb>span,.coach-center>.kplayb>span{position:static;width:auto;height:auto;overflow:visible;clip:auto;font-size:11px;line-height:1.2}
+.coach-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;width:100%}
+.coach-stats.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.coach-stats>div{border:1px solid var(--line);border-radius:18px;padding:20px 12px;background:var(--surface);display:flex;flex-direction:column;gap:6px;text-align:center;min-width:0}
+.coach-stats b{font-size:clamp(24px,3vw,36px);font-variant-numeric:tabular-nums;letter-spacing:-.04em}.coach-stats span{font-size:12px;color:var(--muted);line-height:1.35}
+.coach-stats .range-stat{font-size:clamp(16px,2vw,23px);line-height:1.6}
+.coach-quick{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.coach-quick .btn{min-height:46px}
+.level-section .sech{align-items:center}.level-section .sech>span{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+.level-section .sech svg,.alb small svg{width:14px;height:14px;vertical-align:middle}
+.level-section .albs{gap:20px}.alb.locked .acov{filter:saturate(.25);opacity:.6}.alb.locked small{color:var(--muted)}
+.coach-lock svg{width:44px;height:44px}.coach-link{color:var(--accent-text)}
+.coach-settings{width:100%;max-width:540px;text-align:left}.coach-settings summary{cursor:pointer;font-size:14px;padding:8px 0;color:var(--muted)}
+.coach-settings label{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:14px 0;font-size:14px}
+.coach-settings select,.coach-settings input{max-width:100%;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--fg);padding:10px;font:inherit}
+.coach-settings input[type=number]{width:105px}.coach-settings input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.coach-dialog{color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:24px;max-width:420px;width:calc(100% - 32px);padding:28px;box-shadow:0 30px 120px #0008}
+.coach-dialog::backdrop{background:#000a;backdrop-filter:blur(8px)}.coach-dialog .logo{display:block;width:48px;height:48px}.coach-dialog p{color:var(--muted);line-height:1.6}.coach-dialog button{min-height:44px}
+html.fs .topbar,html.fs .tabs,html.fs .side{display:none!important}
+html.fs .shell{display:block;max-width:none;margin:0;padding:0}html.fs main{margin:0;padding:0;min-width:0}
+html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-height:100svh;gap:0}
+.coach{min-height:100svh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);width:100%;min-width:0}
+.coach-head{display:flex;align-items:center;gap:12px;min-height:64px;flex-shrink:0;color:var(--muted);font-size:12px}
+.coach-head .icon-btn{flex-shrink:0;width:44px;height:44px}.coach-head>span{min-width:0}.coach-mic{margin-left:auto;font-size:11px;text-align:right}
+.coach-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px 0 40px;min-width:0}
+.coach-center h1{font-size:clamp(28px,5vw,48px);line-height:1.12;letter-spacing:-.035em;margin:0;max-width:700px}
+.coach-center p{margin:0;max-width:490px;line-height:1.5}.coach-center .cap{color:var(--muted);font-size:13px}
+.coach-cover{width:clamp(110px,22vh,200px);height:clamp(110px,22vh,200px);flex-shrink:0;border-radius:24px;overflow:hidden;margin-bottom:6px}
+.coach-syllable{color:var(--accent-text);font-weight:600}.coach-tip{color:var(--muted);font-size:clamp(15px,2vw,18px);max-width:560px;line-height:1.55}
+.coach-count{font-size:72px;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--accent-text)}
+.coach-hud{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:90px;padding:8px 0 14px}.coach-hud h1{margin:6px 0;font-size:clamp(30px,4vw,44px);line-height:1}.coach-hud #round{color:var(--muted);font-size:13px}
+#live-note{font-size:clamp(23px,4vw,38px);color:var(--root);white-space:nowrap}#live-note.hit{color:var(--good)}
+.coach .coach-lane{height:62svh;min-height:200px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+.coach-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 0;flex-shrink:0;margin-top:auto}.coach-controls .btn{min-height:46px}
+.coach-hint{color:var(--muted);font-size:13px;text-align:center;margin:10px 0;min-height:20px}
+.coach .concert{min-height:80px;text-align:center;padding:14px 8px 0;gap:5px}.coach .concert .lyl{font-size:clamp(18px,3vw,26px);transform:none}.coach .concert .lyl[hidden]{display:none}
+.coach.is-paused .coach-lane{opacity:.45}.coach.is-paused .syl{transition:none;animation-play-state:paused}
+.coach-pause{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);padding:18px 24px;border-radius:20px;background:var(--surface2);color:var(--fg);border:1px solid var(--line);font-weight:700;display:flex;align-items:center;gap:18px;z-index:10}
+.coach-result{gap:20px}.coach-center .coach-score{font-size:clamp(64px,15vw,120px);letter-spacing:-.065em;line-height:1.05}.coach-score small{font-size:.4em;color:var(--muted)}
+.coach-stars{display:flex;gap:12px;font-size:44px;color:var(--line);line-height:1.1}.coach-stars .earned{color:var(--accent-text);animation:coach-star .5s calc(var(--i)*.15s) both}.coach-good{color:var(--good)}
+@keyframes coach-star{from{opacity:0;transform:scale(.55) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.next-ring{--progress:0deg;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-size:12px;background:conic-gradient(var(--fg) var(--progress),#ffffff35 0);color:var(--accent-ink);position:relative;isolation:isolate}.next-ring:before{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--accent);z-index:-1}
+.coach #coach-range .kplay{margin:0}.coach #coach-range .tdock{position:static}.coach #coach-range .khead{display:none}.coach #coach-range .rstage{padding:18px}
+.progress-chart{display:flex;gap:12px;align-items:flex-end;padding:18px 0 4px;min-width:0}.chart-column{display:flex;flex:1;min-width:0;flex-direction:column;align-items:center;gap:10px;text-align:center}.chart-column b{font-size:12px;font-weight:600}.chart-column small{font-size:11px;color:var(--muted);line-height:1.4}.chart-track{height:135px;width:100%;max-width:42px;display:flex;align-items:flex-end;border-radius:9px;background:var(--surface2);overflow:hidden}.chart-track i{display:block;width:100%;background:linear-gradient(0deg,var(--accent),var(--accent-text));border-radius:8px}
+.coach-range-title{font-size:28px;letter-spacing:-.03em}.level-progress{margin-top:22px}.level-progress>div{display:flex;justify-content:space-between;gap:12px}.level-progress span{color:var(--accent-text);white-space:nowrap}.level-progress progress{width:100%;height:9px;margin-top:12px;border:0;border-radius:8px;accent-color:var(--accent)}.level-progress progress::-webkit-progress-bar{background:var(--surface2);border-radius:8px}.level-progress progress::-webkit-progress-value{background:var(--accent);border-radius:8px}
+@media(max-width:600px){.session-card{grid-template-columns:1fr}.session-art{height:140px;min-height:0}.session-art>svg{width:100%;height:100%}.session-content{padding:22px}.session-content h2{max-width:270px}.session-steps{gap:9px}.session-start .kplayb{width:82px;height:82px}.coach-stats.four{grid-template-columns:repeat(2,minmax(0,1fr))}.coach-stats{gap:8px}.coach-stats>div{padding:16px 8px}.coach-quick{gap:8px}.coach-quick .btn{font-size:13px;padding:10px 12px}.level-section .sech{flex-wrap:wrap;gap:8px}.level-section .sech h2{font-size:22px}.coach-greeting .coach-pill{padding:5px 8px;font-size:11px}html.fs .page{padding:0 16px}.coach-head{gap:8px;font-size:11px}.coach-mic{max-width:80px}.coach-controls{gap:8px}.coach-controls .btn{font-size:12px;padding:10px 12px}.coach-controls svg{width:16px;height:16px}.coach-center .coach-score{font-size:72px}.coach-result .coach-stats{max-width:440px}.progress-chart{gap:7px}.chart-column b{font-size:10px}.chart-column small{font-size:10px}.coach .coach-lane{height:60svh}.coach-center{padding-top:16px}.coach-settings summary{font-size:13px}}
+@media(max-height:650px){.coach-cover{width:100px;height:100px}.coach-center{gap:12px}.coach-count{font-size:52px}.coach .coach-lane{height:55svh}.coach-hud{min-height:75px}}
+@media(prefers-reduced-motion:reduce){.coach-stars .earned{animation:none}.brdisc{transition:none}}
