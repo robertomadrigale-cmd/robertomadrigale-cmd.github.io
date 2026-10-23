@@ -1067,6 +1067,20 @@ html.welcome-on{overflow:hidden}
 .wskip{border:0;background:none;color:var(--fg);font:600 15px var(--font-body);padding:10px 16px;cursor:pointer;border-radius:999px}
 .wskip:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
 .wsmall{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4;max-width:320px}
+/* bloques pedagógicos de las lecciones */
+.box.aim{border-color:color-mix(in srgb,var(--accent) 35%,transparent);background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.box.aim li::marker{color:var(--accent-text)}
+.lstep .stepk{display:flex;align-items:center;gap:10px;font:700 19px/1.25 var(--font-display);letter-spacing:-.01em;margin:6px 0 8px}
+.lstep .stepk span{flex:none;font:700 12px var(--font-body);letter-spacing:.04em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent);border-radius:999px;padding:4px 10px}
+.keyi{padding:16px 18px;border-radius:var(--r);border-left:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+.keyi p:last-child{margin:4px 0 0;font-size:17px;line-height:1.5;font-weight:500}
+.box.chk details{border-top:1px solid var(--hair);padding:10px 0}
+.box.chk details:first-of-type{border-top:0}
+.box.chk summary{cursor:pointer;font-weight:600;list-style:none;display:flex;gap:10px;align-items:flex-start}
+.box.chk summary::-webkit-details-marker{display:none}
+.box.chk summary::before{content:'+';flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--surface2);color:var(--accent-text)}
+.box.chk details[open] summary::before{content:'−';background:var(--accent);color:var(--accent-ink)}
+.box.chk details p{margin:8px 0 0 32px;color:var(--muted)}
 
 </style>
 </head>
@@ -1611,20 +1625,28 @@ const LESSONS=[
  {box:'Errores comunes',ul:['Contar el traste de la raíz como uno: la raíz es el cero.','Confundir cuarta aumentada y quinta disminuida: suenan igual (tritono) y cambian de nombre según el contexto.','Olvidar la excepción entre las cuerdas 3 y 2.','Aprender solo la forma o solo el oído: combina ambos.']},
  {sec:'Referencias para el oído',p:'Algunas melodías conocidas ayudan a reconocer distancias. El inicio de «Estrellita» (Do–Do–Sol–Sol) salta una quinta justa. El inicio de «Cumpleaños feliz» sube una segunda mayor y después una cuarta justa. Busca las tuyas y asócialas a cada intervalo.'},
  {trick:['3ª menor = 3 semitonos · 3ª mayor = 4 · 4ª justa = 5 · 5ª justa = 7 · octava = 12.','Misma cuerda: +3 trastes → 3ª menor; +4 → 3ª mayor.','Cuerda siguiente: mismo traste → 4ª; +2 trastes → 5ª (cuerdas 3 y 2: un traste más).','Oído: menor = sombrío, mayor = luminoso, tritono = inestable.']}]},
-{id:3,part:2,title:'Escalas y tonalidades: la regla madre',sub:'Una fórmula para las doce tonalidades',
- lead:'Una receta de distancias que funciona desde cualquier nota.',
+{id:3,part:2,title:'Escalas y tonalidades: la regla madre',sub:'Una receta para las doce tonalidades',
+ lead:'Aprende la receta de la escala mayor, tócala con una forma que cabe en tu mano y muévela a cualquier tono.',
  blocks:[
- {p:'Una escala mayor es una receta: <span class="hl">tono, tono, semitono, tono, tono, tono, semitono</span>. Esa fórmula funciona desde cualquier nota, y por eso una sola forma sirve para las doce tonalidades.'},
+ {aim:['Saber qué es un tono y un semitono en la guitarra.','Armar la escala mayor desde cualquier nota con una sola receta.','Tocarla con una forma de dedos que puedes mover a cualquier tonalidad.','Usar números (grados) para tocar la misma melodía en otro tono.']},
+ {step:'Paso 1',t:'Tono y semitono: las dos medidas',p:'En la guitarra las distancias se miden en trastes. <span class="hl">Un semitono es un traste</span> y <span class="hl">un tono son dos trastes</span>. Ejemplo: en la cuerda 5, del traste 3 al 4 hay un semitono; del traste 3 al 5 hay un tono. Con solo estas dos medidas se arman todas las escalas.'},
+ E({id:'3s',t:'Siente el semitono y el tono',min:2,bpm:60,steps:['Pon el dedo 1 en la cuerda 5, traste 3 (es Do).','Sube un traste (traste 4): eso es un semitono. Regresa al 3.','Ahora sube dos trastes (traste 5): eso es un tono. Regresa al 3.','Alterna semitono y tono diciendo en voz alta «semi» o «tono».'],goal:'Sabes, sin contar, si un salto es de uno o de dos trastes.',fig:pts([[5,3,'Do','root'],[5,4,'S'],[5,3,'Do','root'],[5,5,'T']],{to:6})}),
+ {step:'Paso 2',t:'La receta de la escala mayor',p:'La escala mayor es la de «do-re-mi-fa-sol-la-si-do». Para armarla desde cualquier nota se siguen siempre los mismos saltos: <span class="hl">tono, tono, semitono, tono, tono, tono, semitono</span>. Ejemplo resuelto, empezando en Do (cuerda 5, traste 3): Do +2 trastes = Re (5), +2 = Mi (7), +1 = Fa (8), +2 = Sol (10), +2 = La (12), +2 = Si (14), +1 = Do (15). Llegaste a Do otra vez, una octava más agudo.'},
+ {key:'La receta (T T S T T T S) es la misma para las doce notas. Si te la sabes, puedes armar cualquier escala mayor sin memorizar nombres.'},
  {w:'scale'},
- E({id:'3a',t:'Do mayor en una sola cuerda',min:3,bpm:60,steps:['Empieza en la cuerda 5, traste 3 (Do).','Sube aplicando la fórmula: trastes 3, 5, 7, 8, 10, 12, 14 y 15.','Di el grado de cada nota (1 a 8) mientras la tocas.','Marca con más fuerza los dos semitonos: 3–4 y 7–8.'],goal:'Tocas la escala en una cuerda diciendo los grados, de ida y vuelta.',fig:pts([[5,3,'1','root'],[5,5,'2'],[5,7,'3'],[5,8,'4'],[5,10,'5'],[5,12,'6'],[5,14,'7'],[5,15,'8','root']],{to:15})}),
- E({id:'3b',t:'La forma de una octava',min:4,bpm:60,steps:['Sol mayor desde la cuerda 6: trastes 3, 5 y 7.','Cuerda 5: trastes 3, 5 y 7.','Cuerda 4: trastes 4 y 5 (Fa♯ y Sol).','Sube y baja una nota por pulso; luego dos notas por pulso; sube 5 bpm cada vez que salga limpio.'],goal:'Tocas la forma a corcheas a 80 bpm sin errores.',fig:pts([[6,3,'1','root'],[6,5,'2'],[6,7,'3'],[5,3,'4'],[5,5,'5'],[5,7,'6'],[4,4,'7'],[4,5,'8','root']],{to:8})}),
- {p:'Una tonalidad es la escala más los acordes que nacen de ella. Tocar «en Sol mayor» significa que todas las notas y acordes salen de esa escala, con Sol como centro de reposo. Cada nota recibe un número, su <b>grado</b>: así puedes trasladar cualquier idea a otra tonalidad sin pensar en nombres.'},
- E({id:'3c',t:'Mueve la forma',min:4,bpm:70,steps:['Toca la misma forma empezando en el traste 5: es La mayor.','Ahora desde el traste 8: Do mayor.','Ahora desde el traste 1: Fa mayor.','Antes de cada repetición, di el nombre de la tónica.'],goal:'Tocas la escala mayor en cuatro tonalidades con una sola forma.',fig:pts([[6,5,'1','root'],[6,7,'2'],[6,9,'3'],[5,5,'4'],[5,7,'5'],[5,9,'6'],[4,6,'7'],[4,7,'8','root']],{to:10})}),
- E({id:'3d',t:'Toca por grados',min:3,steps:['Con la forma de Sol toca 1–3–5–8 y de regreso.','Toca 1–2–3–1 y 5–4–3–2–1.','Mueve la forma a La mayor y repite los mismos números.'],goal:'Los mismos números suenan igual en las dos tonalidades.',fig:pts([[6,3,'1','root'],[6,7,'3'],[5,5,'5'],[4,5,'8','root'],[5,5,'5'],[6,7,'3'],[6,3,'1','root'],[6,5,'2'],[6,7,'3'],[6,3,'1','root']],{to:8})}),
- E({id:'3e',t:'Transporta una melodía',min:5,steps:['«Cumpleaños feliz» en grados: 5 5 6 5 1 7 · 5 5 6 5 2 1 · 5 5 5 3 1 7 6 · 4 4 3 1 2 1 (el tercer 5 es una octava arriba).','Tócala en Do mayor (5 = Sol).','Tócala en Sol mayor y en La mayor usando la forma de una octava.'],goal:'Tocas la melodía en tres tonalidades sin escribir los nombres de las notas.'}),
- {box:'Errores comunes',ul:['Memorizar nombres de notas sin los grados: no podrás transportar.','Olvidar que los semitonos caen entre el 3 y el 4, y entre el 7 y el 8.','Confundir tonalidad con escala: la tonalidad incluye acordes y un centro.','Aprender doce formas distintas: es una sola forma que se mueve.']},
- {sec:'Transportar sin sufrir',p:'Si una canción está en Do y tu voz alcanza mejor en Re, sube todo un tono: cada grado se mueve dos semitonos. Como los grados no cambian, la melodía y las relaciones entre acordes se conservan.'},
- {trick:['Fórmula: T T S T T T S.','Grados clave: 1 tónica, 4 subdominante, 5 dominante.','Cada tonalidad tiene sostenidos o bemoles fijos (lección 9).','Para transportar, mueve la forma y conserva los grados.']}]},
+ E({id:'3a',t:'Do mayor en una sola cuerda',min:3,bpm:60,steps:['Empieza en la cuerda 5, traste 3 (Do).','Sube siguiendo la receta: trastes 3, 5, 7, 8, 10, 12, 14 y 15.','Di el número de cada nota mientras la tocas: 1, 2, 3… hasta 8.','Fíjate en los dos saltos cortos (un traste): entre el 3 y el 4, y entre el 7 y el 8.'],goal:'Tocas la escala de ida y vuelta diciendo los números sin equivocarte.',fig:pts([[5,3,'1','root'],[5,5,'2'],[5,7,'3'],[5,8,'4'],[5,10,'5'],[5,12,'6'],[5,14,'7'],[5,15,'8','root']],{to:15})}),
+ {check:[['¿Cuántos trastes mide un tono?','Dos trastes. Un semitono es un traste.'],['Si empiezas en la cuerda 6, traste 5 (La), ¿qué trastes tocas para La mayor?','5, 7, 9, 10, 12, 14, 16 y 17: la misma receta T T S T T T S.'],['¿Entre qué números caen los dos semitonos?','Entre el 3 y el 4, y entre el 7 y el 8.']]},
+ {step:'Paso 3',t:'Una forma que cabe en la mano',p:'Tocar la escala en una sola cuerda obliga a recorrer todo el mástil. Por eso se usa una <b>forma</b>: el mismo dibujo de puntos, repartido en tres cuerdas, que se toca sin mover la mano. La llamaremos <span class="hl">la forma de una octava</span>. Empieza siempre en la cuerda 6, y <b>la primera nota le da nombre a la escala</b>: si empiezas en el traste 3 (Sol), tocas Sol mayor.'},
+ E({id:'3b',t:'La forma de una octava (Sol mayor)',min:4,bpm:60,steps:['Cuerda 6: trastes 3, 5 y 7 con los dedos 1, 3 y 4. Son los números 1, 2 y 3.','Cuerda 5: trastes 3, 5 y 7 con los dedos 1, 3 y 4. Son el 4, el 5 y el 6.','Cuerda 4: trastes 4 y 5 con los dedos 2 y 3. Son el 7 y el 8 (Sol otra vez).','Sube y baja una nota por pulso. Cuando salga limpio tres veces, sube 5 bpm.'],goal:'Tocas la forma de ida y vuelta a 80 bpm sin ver la mano.',fig:pts([[6,3,'1','root'],[6,5,'2'],[6,7,'3'],[5,3,'4'],[5,5,'5'],[5,7,'6'],[4,4,'7'],[4,5,'8','root']],{to:8})}),
+ {step:'Paso 4',t:'Mover la forma cambia la tonalidad',p:'La forma no cambia; lo que cambia es dónde la empiezas. Recuerda las notas de la cuerda 6 de la lección 1: traste 1 = Fa, 3 = Sol, 5 = La, 8 = Do. Empieza la misma forma en el traste 5 y tocas La mayor; en el 8, Do mayor. Una sola forma te da las doce escalas mayores.'},
+ E({id:'3c',t:'Mueve la forma',min:4,bpm:70,steps:['Toca la forma empezando en el traste 5: es La mayor (el diagrama la muestra).','Ahora empiézala en el traste 8: Do mayor.','Ahora en el traste 1: Fa mayor.','Antes de cada vuelta di en voz alta el nombre de la primera nota.'],goal:'Tocas la escala mayor en cuatro tonalidades con la misma forma.',fig:pts([[6,5,'1','root'],[6,7,'2'],[6,9,'3'],[5,5,'4'],[5,7,'5'],[5,9,'6'],[4,6,'7'],[4,7,'8','root']],{to:10})}),
+ {step:'Paso 5',t:'Grados: tocar con números',p:'A cada nota de la escala le damos un número, su <b>grado</b>: la primera es el 1, la siguiente el 2, y así hasta el 7; el 8 es otra vez el 1, una octava arriba. Una <b>tonalidad</b> es la escala con su 1 como «casa»: la nota donde la música descansa. Si tocas con números en vez de con nombres, la misma melodía funciona en cualquier tonalidad: solo mueves la forma.'},
+ E({id:'3d',t:'Toca por números',min:3,bpm:70,steps:['Pon la forma de una octava en el traste 3 (Sol mayor). Ubica los números: 1 = cuerda 6 traste 3, 3 = cuerda 6 traste 7, 5 = cuerda 5 traste 5, 8 = cuerda 4 traste 5.','Toca 1 – 3 – 5 – 8 y regresa 8 – 5 – 3 – 1 (el diagrama lo muestra).','Toca 1 – 2 – 3 – 1 y luego 5 – 4 – 3 – 2 – 1.','Mueve la forma al traste 5 (La mayor) y toca los mismos números.'],goal:'Los mismos números suenan igual en Sol y en La, solo más agudo.',fig:pts([[6,3,'1','root'],[6,7,'3'],[5,5,'5'],[4,5,'8','root'],[5,5,'5'],[6,7,'3'],[6,3,'1','root']],{to:8})}),
+ E({id:'3e',t:'Una melodía en tres tonalidades',min:5,bpm:80,steps:['«Estrellita» en números: 1 1 5 5 6 6 5 · 4 4 3 3 2 2 1.','Tócala con la forma en el traste 3 (Sol mayor). El diagrama te la muestra.','Mueve la forma al traste 5 y tócala en La mayor.','Ahora en el traste 8: Do mayor. Los números no cambian.'],goal:'Tocas la melodía en tres tonalidades sin pensar en nombres de notas.',fig:pts([[6,3,'1','root'],[6,3,'1','root'],[5,5,'5'],[5,5,'5'],[5,7,'6'],[5,7,'6'],[5,5,'5'],[5,3,'4'],[5,3,'4'],[6,7,'3'],[6,7,'3'],[6,5,'2'],[6,5,'2'],[6,3,'1','root']],{to:8})}),
+ {check:[['¿Qué le da nombre a la escala cuando usas la forma de una octava?','La primera nota, en la cuerda 6: traste 3 = Sol mayor, traste 5 = La mayor.'],['Quieres tocar Do mayor con la forma. ¿En qué traste empiezas?','En el traste 8 de la cuerda 6, que es Do.'],['¿Por qué conviene pensar en números y no en nombres?','Porque los números son iguales en todas las tonalidades: mueves la forma y la melodía sale sola.']]},
+ {box:'Errores comunes',ul:['Contar mal los saltos: un tono son dos trastes, no uno.','Olvidar los dos semitonos (entre 3–4 y 7–8): la escala suena «rara».','Pensar que cada tonalidad tiene otra forma: es la misma forma movida.','Aprenderte nombres de notas sin los números: así no puedes transportar.']},
+ {sec:'Transportar sin sufrir',p:'Si una canción está en Do y a tu voz le queda mejor en Re, mueve la forma dos trastes hacia arriba (un tono). Como los números no cambian, la melodía y los acordes se conservan.'},
+ {trick:['Semitono = 1 traste · tono = 2 trastes.','Receta de la escala mayor: T T S T T T S.','La forma de una octava empieza en la cuerda 6; esa nota le da nombre a la escala.','Cuerda 6: traste 1 Fa, 3 Sol, 5 La, 8 Do.','Para cambiar de tonalidad, mueve la forma y conserva los números.']}]},
 {id:4,part:2,title:'Los modos, sin misticismo',sub:'Mismas notas, otra casa',
  lead:'Un modo es la escala mayor vista desde otra de sus notas.',
  blocks:[
@@ -2467,7 +2489,11 @@ function buildNarration(l,root){
   it.push({el:head,text:`Lección ${l.id}. ${l.title}. ${l.lead}`});
   l.blocks.forEach((b,i)=>{
     const el=blk(i);if(!el)return;
-    if(b.p&&!b.sec)sentences(b.p).forEach(s=>it.push({el,text:s}));
+    if(b.p&&!b.sec&&!b.step)sentences(b.p).forEach(s=>it.push({el,text:s}));
+    else if(b.step){it.push({el,text:b.step+'. '+b.t+'.'});sentences(b.p).forEach(s=>it.push({el,text:s}))}
+    else if(b.aim){const lis=$$('li',el);it.push({el,text:'Al terminar podrás:'});b.aim.forEach((t,k)=>it.push({el,li:lis[k],text:t}))}
+    else if(b.key){it.push({el,text:'La idea clave.'});sentences(b.key).forEach(s=>it.push({el,text:s}))}
+    else if(b.check){it.push({el,text:'Compruébalo. Contesta antes de ver la respuesta.'});b.check.forEach(([q])=>it.push({el,text:q}))}
     else if(b.sec){it.push({el,text:b.sec+'.'});sentences(b.p).forEach(s=>it.push({el,text:s}))}
     else if(b.box||b.trick){const lis=$$('li',el),arr=b.ul||b.ol||b.trick;it.push({el,text:(b.box||'Hoja de trucos')+'.'});arr.forEach((t,k)=>it.push({el,li:lis[k],text:t}))}
     else if(b.w){it.push({el,text:'Mira el diagrama.',demo:'widget'})}
@@ -4657,6 +4683,11 @@ function blockHTML(b,ws){
   if(b.w){ws.push(b);return`<div class="widget" data-wi="${ws.length-1}"></div>`}
   if(b.ex)return exCard(b.ex);
   if(b.sec)return`<div class="prose"><p class="blockh">${b.sec}</p><p>${b.p}</p></div>`;
+  // bloques pedagógicos: objetivos, pasos, idea clave y autoevaluación
+  if(b.aim)return`<div class="box aim"><p class="blockh">Al terminar podrás</p><ul>${b.aim.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+  if(b.step)return`<div class="prose lstep"><p class="stepk"><span>${b.step}</span>${b.t}</p><p>${b.p}</p></div>`;
+  if(b.key)return`<div class="keyi"><p class="blockh">La idea clave</p><p>${b.key}</p></div>`;
+  if(b.check)return`<div class="box chk"><p class="blockh">Compruébalo</p>${b.check.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</div>`;
   if(b.box)return`<div class="box"><p class="blockh">${b.box}</p>${b.ul?`<ul>${b.ul.map(t=>`<li>${t}</li>`).join('')}</ul>`:`<ol>${b.ol.map(t=>`<li>${t}</li>`).join('')}</ol>`}</div>`;
   if(b.trick)return`<div class="box trick"><p class="blockh">Hoja de trucos</p><ul>${b.trick.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
   if(b.p)return`<p class="prose">${b.p}</p>`;

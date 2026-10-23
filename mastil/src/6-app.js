@@ -269,6 +269,11 @@ function blockHTML(b,ws){
   if(b.w){ws.push(b);return`<div class="widget" data-wi="${ws.length-1}"></div>`}
   if(b.ex)return exCard(b.ex);
   if(b.sec)return`<div class="prose"><p class="blockh">${b.sec}</p><p>${b.p}</p></div>`;
+  // bloques pedagógicos: objetivos, pasos, idea clave y autoevaluación
+  if(b.aim)return`<div class="box aim"><p class="blockh">Al terminar podrás</p><ul>${b.aim.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+  if(b.step)return`<div class="prose lstep"><p class="stepk"><span>${b.step}</span>${b.t}</p><p>${b.p}</p></div>`;
+  if(b.key)return`<div class="keyi"><p class="blockh">La idea clave</p><p>${b.key}</p></div>`;
+  if(b.check)return`<div class="box chk"><p class="blockh">Compruébalo</p>${b.check.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</div>`;
   if(b.box)return`<div class="box"><p class="blockh">${b.box}</p>${b.ul?`<ul>${b.ul.map(t=>`<li>${t}</li>`).join('')}</ul>`:`<ol>${b.ol.map(t=>`<li>${t}</li>`).join('')}</ol>`}</div>`;
   if(b.trick)return`<div class="box trick"><p class="blockh">Hoja de trucos</p><ul>${b.trick.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
   if(b.p)return`<p class="prose">${b.p}</p>`;

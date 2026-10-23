@@ -57,7 +57,11 @@ function buildNarration(l,root){
   it.push({el:head,text:`Lección ${l.id}. ${l.title}. ${l.lead}`});
   l.blocks.forEach((b,i)=>{
     const el=blk(i);if(!el)return;
-    if(b.p&&!b.sec)sentences(b.p).forEach(s=>it.push({el,text:s}));
+    if(b.p&&!b.sec&&!b.step)sentences(b.p).forEach(s=>it.push({el,text:s}));
+    else if(b.step){it.push({el,text:b.step+'. '+b.t+'.'});sentences(b.p).forEach(s=>it.push({el,text:s}))}
+    else if(b.aim){const lis=$$('li',el);it.push({el,text:'Al terminar podrás:'});b.aim.forEach((t,k)=>it.push({el,li:lis[k],text:t}))}
+    else if(b.key){it.push({el,text:'La idea clave.'});sentences(b.key).forEach(s=>it.push({el,text:s}))}
+    else if(b.check){it.push({el,text:'Compruébalo. Contesta antes de ver la respuesta.'});b.check.forEach(([q])=>it.push({el,text:q}))}
     else if(b.sec){it.push({el,text:b.sec+'.'});sentences(b.p).forEach(s=>it.push({el,text:s}))}
     else if(b.box||b.trick){const lis=$$('li',el),arr=b.ul||b.ol||b.trick;it.push({el,text:(b.box||'Hoja de trucos')+'.'});arr.forEach((t,k)=>it.push({el,li:lis[k],text:t}))}
     else if(b.w){it.push({el,text:'Mira el diagrama.',demo:'widget'})}

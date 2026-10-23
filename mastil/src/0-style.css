@@ -1035,3 +1035,17 @@ html.welcome-on{overflow:hidden}
 .wskip{border:0;background:none;color:var(--fg);font:600 15px var(--font-body);padding:10px 16px;cursor:pointer;border-radius:999px}
 .wskip:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
 .wsmall{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4;max-width:320px}
+/* bloques pedagógicos de las lecciones */
+.box.aim{border-color:color-mix(in srgb,var(--accent) 35%,transparent);background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.box.aim li::marker{color:var(--accent-text)}
+.lstep .stepk{display:flex;align-items:center;gap:10px;font:700 19px/1.25 var(--font-display);letter-spacing:-.01em;margin:6px 0 8px}
+.lstep .stepk span{flex:none;font:700 12px var(--font-body);letter-spacing:.04em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent);border-radius:999px;padding:4px 10px}
+.keyi{padding:16px 18px;border-radius:var(--r);border-left:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+.keyi p:last-child{margin:4px 0 0;font-size:17px;line-height:1.5;font-weight:500}
+.box.chk details{border-top:1px solid var(--hair);padding:10px 0}
+.box.chk details:first-of-type{border-top:0}
+.box.chk summary{cursor:pointer;font-weight:600;list-style:none;display:flex;gap:10px;align-items:flex-start}
+.box.chk summary::-webkit-details-marker{display:none}
+.box.chk summary::before{content:'+';flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--surface2);color:var(--accent-text)}
+.box.chk details[open] summary::before{content:'−';background:var(--accent);color:var(--accent-ink)}
+.box.chk details p{margin:8px 0 0 32px;color:var(--muted)}
