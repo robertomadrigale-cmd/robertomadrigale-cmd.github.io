@@ -62,7 +62,10 @@ function chordFing(frets){
   const lo=Math.min(...fr.map(x=>x.f)),atLo=fr.filter(x=>x.f===lo),open=frets.some(f=>f===0);let barre=null;
   if(!open&&fr.length>=4&&atLo.length>=2){const ss=atLo.map(x=>x.s);barre={f:lo,s1:Math.min(...ss),s2:Math.max(...ss)};atLo.forEach(x=>fg[x.s]=1)}
   // un dedo por traste a partir del más bajo; si dos notas caen en el mismo traste, la siguiente toma el dedo de al lado
-  let last=barre?1:0;fr.filter(x=>fg[x.s]==null).sort((a,b)=>a.f-b.f||b.s-a.s).forEach(x=>{fg[x.s]=Math.min(4,Math.max(last+1,x.f-lo+1));last=fg[x.s]});
+  const rest=fr.filter(x=>fg[x.s]==null).sort((a,b)=>a.f-b.f||b.s-a.s);let last=barre?1:0,over=false;
+  rest.forEach(x=>{const v=Math.max(last+1,x.f-lo+1);if(v>4)over=true;fg[x.s]=v;last=v});
+  // si no alcanzan los cuatro dedos con «uno por traste», se asignan en orden (formas altas como la de Re o la de Sol)
+  if(over){let n=barre?2:1;rest.forEach(x=>{fg[x.s]=Math.min(4,n++)})}
   return{fg,barre};
 }
 function fretboard(o){
