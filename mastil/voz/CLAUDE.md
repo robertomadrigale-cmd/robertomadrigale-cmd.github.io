@@ -45,8 +45,17 @@ Roberto no es programador: entrégale cambios terminados y probados, sin pedirle
 - `6-app.js`: Inicio «Tu sesión de hoy», Ejercicios por nivel (candados con «Te faltan N estrellas»), Canciones, **Progreso** (racha y mejor racha, minutos por día, afinación por semana, rango que crece, estrellas por nivel). `html.fs` = pantalla completa. Se guarda en `pagehide`.
 - Pruebas de lógica: `node src/coach.test.cjs` (13 pruebas; no entra al build).
 
+### Canciones y «Mis canciones» (24 oct 2026, programado con Codex)
+- `5-song-data.js`: sílabas (`silabas`, corregibles a mano), validación (`validateSongRow`), respaldo `RCV1:` (letra, notas y tiempos; sin audio), IndexedDB `roka-vocal` (almacén `audio`, clave `orig:<id>`, máx. 80 MB / 10 min), **extracción de melodía** (`extractMelody`: canal central estéreo, filtro 150–1100 Hz, YIN con claridad > 0.75, mediana de 5, quita saltos de octava < 120 ms, notas ≥ 120 ms, cuantiza a medio pulso; MP4 por `decodeAudioData` o `<video>` oculto), `timedSongSpec` (usa los tiempos reales para **cantar sobre la grabación original**, con opción «quitar la voz» = canal lateral).
+- `5-song-editor.js`: pantalla guiada de 3 pasos `#/canciones/nueva` y `#/canciones/editar/<id>` (letra → melodía por tarareo por renglón, por audio de voz sola o canción completa «experimental», o notas a mano → probar y guardar). La letra siempre la pega la persona: la app no transcribe.
+- `5-song-library.js`: biblioteca con buscador, filtros (colección, dificultad 1–3), orden «Para tu voz primero» (`songFit` = si cabe en tu rango), importar/borrar, y **cantar libre** (`viewFreeSong`: eliges tonalidad y mide el % de tiempo dentro de la escala y la estabilidad; marcas `free:<id>`). `DB.songs` guarda las canciones propias (`allSongs()` = catálogo + propias).
+- Catálogo: 40 entradas (35 nuevas) solo de dominio público/tradicionales y ejercicios originales; 8 con letra tradicional, el resto fragmentos para vocalizar con «la». Pendiente: más tradicionales mexicanas con letra (Las mañanitas, De colores, Cielito lindo…) y validar sus melodías.
+- Pruebas (Node, no entran al build): `songs.test.cjs` (46), `coach.test.cjs` (13), `segmentation.test.cjs`, `extraction.test.cjs` (voz sintética estéreo: 20/20 notas dentro de ±1 semitono; **con grabaciones reales con música la precisión es menor y no está medida**). Las pruebas con navegador (`songs.browser.test.cjs`, `margins.test.cjs`, `editor-layout.test.cjs`) necesitan puppeteer con `NODE_PATH`, `CHROME` y el servidor en :8765.
+- Píldora «Guitarra» arriba a la derecha de Hoy (enlace relativo `../roka/?cambiar`); la portada está en `mastil/roka/`.
+- Falta probar con micrófonos físicos (Android, iPhone/Safari) y canciones reales.
+
 ### Rutas
-`#/` (Hoy) · `#/sesion` · `#/ejercicios` · `#/progreso` · `#/practicar/ej/<id>` · `#/practicar/afinador|rango|respiracion|metronomo` · `#/canciones` · `#/canciones/<id>`.
+`#/` (Hoy) · `#/sesion` · `#/ejercicios` · `#/progreso` · `#/practicar/ej/<id>` · `#/practicar/afinador|rango|respiracion|metronomo` · `#/canciones` · `#/canciones/<id>` · `#/canciones/nueva` · `#/canciones/editar/<id>`.
 
 ## Antes de entregar
 1. `sh build.sh` y revisa que el JavaScript compile (comando de arriba).

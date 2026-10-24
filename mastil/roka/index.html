@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Roka · Guitarra y Voz</title>
+  <meta name="description" content="Aprende música en tu celular. Elige Guitarra o Voz y empieza tu práctica con Roka.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:title" content="Roka · Guitarra y Voz">
+  <meta property="og:description" content="Aprende música en tu celular. Elige Guitarra o Voz y empieza tu práctica con Roka.">
+  <meta property="og:image" content="../og.jpg">
+  <meta property="og:image:alt" content="Roka Guitar for All">
+  <link rel="icon" href="../icons/icon-192.png" type="image/png">
+  <style>
+    :root{color-scheme:dark light;--bg:#08090c;--fg:#f6f7fb;--muted:#a7adbd;--line:#292d38;--card:#11141b;--blue:#2f7bff;--pink:#ff4fa3}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(ellipse at 12% 0%,#2f7bff12,transparent 48%),radial-gradient(ellipse at 95% 70%,#ff4fa30a,transparent 45%),var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+    main{width:min(100%,960px);margin:auto;padding:clamp(28px,6vw,64px) 24px 32px}
+    header{margin-bottom:32px}
+    h1{margin:0;font-size:clamp(52px,9vw,80px);line-height:1.05;font-weight:850;letter-spacing:-.065em;text-transform:lowercase}
+    header p{margin:14px 0 0;color:var(--muted);font-size:clamp(16px,2.4vw,20px)}
+    .albums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+    .album{min-width:0;display:flex;flex-direction:column;padding:12px;border:1px solid var(--line);border-radius:24px;background:var(--card);color:inherit;text-decoration:none;transition:border-color .18s ease,transform .18s ease}
+    .album:hover{border-color:var(--blue);transform:translateY(-3px)}
+    .album.voice:hover{border-color:var(--pink)}
+    .art{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:15px;background:#101b38}
+    .info{display:flex;flex-direction:column;flex:1;align-items:flex-start;padding:18px 8px 8px}
+    h2{margin:0;font-size:clamp(30px,4vw,40px);line-height:1.1;font-weight:800;letter-spacing:-.045em;text-transform:lowercase}
+    h2 small{display:block;margin-top:8px;font-size:14px;line-height:1.5;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted)}
+    .phrase{margin:16px 0 22px;font-size:15px}
+    .enter{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:44px;margin-top:auto;padding:10px 20px;background:var(--blue);color:#fff;border-radius:999px;font-size:15px;font-weight:650;white-space:nowrap}
+    .voice .enter{background:var(--pink);color:#190a11}
+    .enter svg{width:18px;height:18px;flex:none}
+    .preferences{margin-top:24px;display:flex;justify-content:center}
+    .remember{display:inline-flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:15px;color:var(--muted)}
+    input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--blue);cursor:pointer}
+    a:focus-visible,input:focus-visible{outline:3px solid var(--fg);outline-offset:5px}
+    @media(max-width:620px){main{padding-inline:20px}.albums{grid-template-columns:minmax(0,1fr);gap:20px}header{margin-bottom:26px}}
+    @media(prefers-color-scheme:light){:root{--bg:#f6f7fb;--fg:#151a26;--muted:#566076;--line:#d8dce5;--card:#fff}}
+    @media(prefers-reduced-motion:reduce){.album{transition:none}.album:hover{transform:none}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Roka</h1>
+      <p>Aprende música en tu celular</p>
+    </header>
+    <nav class="albums" aria-label="Elige tu práctica">
+      <a class="album" href="../" data-app="guitarra" aria-labelledby="guitar-title guitar-enter">
+        <svg class="art" viewBox="0 0 400 400" aria-hidden="true">
+          <defs>
+            <radialGradient id="g-blue" cx=".12" cy=".16" r="1"><stop stop-color="#2f7bff"/><stop offset=".56" stop-color="#173b87"/><stop offset="1" stop-color="#080e24"/></radialGradient>
+            <radialGradient id="g-pink" cx="1" cy="1" r=".85"><stop stop-color="#ff4fa3" stop-opacity=".8"/><stop offset="1" stop-color="#ff4fa3" stop-opacity="0"/></radialGradient>
+          </defs>
+          <path fill="url(#g-blue)" d="M0 0h400v400H0z"/>
+          <path fill="url(#g-pink)" d="M0 0h400v400H0z"/>
+          <g fill="none" stroke="#fff" stroke-linecap="round">
+            <circle cx="200" cy="200" r="142" opacity=".13"/>
+            <circle cx="200" cy="200" r="117" opacity=".13"/>
+            <g stroke-width="2" opacity=".72" transform="rotate(-24 200 200)">
+              <path d="M140 92v216M164 92v216M188 92v216M212 92v216M236 92v216M260 92v216"/>
+              <path d="M128 147h144M128 200h144M128 253h144" opacity=".4"/>
+            </g>
+          </g>
+          <g fill="#fff" transform="rotate(-24 200 200)"><circle cx="164" cy="174" r="8"/><circle cx="212" cy="226" r="8"/><circle cx="236" cy="121" r="8"/></g>
+        </svg>
+        <div class="info">
+          <h2 id="guitar-title">Guitarra <small>Roka Guitar for All</small></h2>
+          <p class="phrase">Dale vida a tus acordes.</p>
+          <span class="enter" id="guitar-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
+        </div>
+      </a>
+      <a class="album voice" href="../voz/" data-app="voz" aria-labelledby="voice-title voice-enter">
+        <svg class="art" viewBox="0 0 400 400" aria-hidden="true">
+          <defs>
+            <radialGradient id="v-pink" cx=".18" cy=".14" r="1"><stop stop-color="#ff4fa3"/><stop offset=".54" stop-color="#782a70"/><stop offset="1" stop-color="#180f2e"/></radialGradient>
+            <radialGradient id="v-blue" cx=".95" cy=".95" r=".8"><stop stop-color="#2f7bff" stop-opacity=".9"/><stop offset="1" stop-color="#2f7bff" stop-opacity="0"/></radialGradient>
+          </defs>
+          <path fill="url(#v-pink)" d="M0 0h400v400H0z"/>
+          <path fill="url(#v-blue)" d="M0 0h400v400H0z"/>
+          <g fill="none" stroke="#fff" stroke-linecap="round">
+            <circle cx="200" cy="200" r="142" opacity=".13"/>
+            <circle cx="200" cy="200" r="117" opacity=".13"/>
+            <path d="M63 200h24m226 0h24" stroke-width="2" opacity=".4"/>
+            <path d="M88 200c14 0 14-40 28-40s14 80 28 80 14-124 28-124 14 168 28 168 14-168 28-168 14 124 28 124 14-80 28-80 14 40 28 40" stroke-width="3" opacity=".85"/>
+          </g>
+        </svg>
+        <div class="info">
+          <h2 id="voice-title">Voz <small>Roka Couch Vocal</small></h2>
+          <p class="phrase">Descubre lo que puedes cantar.</p>
+          <span class="enter" id="voice-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
+        </div>
+      </a>
+    </nav>
+    <div class="preferences">
+      <label class="remember"><input id="remember" type="checkbox"> Recordar mi elección</label>
+    </div>
+  </main>
+  <script>
+    (()=>{
+      const key='roka-portada:v1';
+      const destinations={guitarra:'../',voz:'../voz/'};
+      const checkbox=document.getElementById('remember');
+      let last=null;
+      try{
+        const saved=JSON.parse(localStorage.getItem(key));
+        if(saved&&(saved.last==='guitarra'||saved.last==='voz')){
+          last=saved.last;
+          checkbox.checked=saved.remember===true;
+          if(checkbox.checked&&!new URLSearchParams(location.search).has('cambiar')){
+            location.replace(destinations[last]);
+            return;
+          }
+        }
+      }catch(_){}
+      function save(){
+        if(!last)return;
+        try{localStorage.setItem(key,JSON.stringify({last,remember:checkbox.checked}))}catch(_){}
+      }
+      checkbox.addEventListener('change',save);
+      document.querySelectorAll('[data-app]').forEach(link=>{
+        link.addEventListener('click',()=>{last=link.dataset.app;save()});
+      });
+    })();
+  </script>
+</body>
+</html>

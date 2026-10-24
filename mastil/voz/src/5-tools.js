@@ -216,4 +216,4 @@ function viewMetronome(){
 /* ---------- ejercicio de calentamiento con calificación ---------- */
 function lyricHTML(S){return S.lines.map((L,li)=>`<p class="lyl" data-li="${li}">${L.syl.map((s,si)=>`<span class="syl" data-si="${si}">${esc(s.x)}</span>${s.sp?' ':''}`).join('')}</p>`).join('')}
 function viewDrill(id){const d=drillById(id);return d?levelOpen(d.lvl)?viewCoach({id}):viewLocked(d.lvl):viewExercises()}
-function viewSing(id){return songById(id)?viewCoach({id:'song:'+id}):viewSongs()}
+function viewSing(id){const s=songById(id);return s?hasMelody(s)?viewCoach({id:'song:'+id}):viewFreeSong(s):viewSongs()}

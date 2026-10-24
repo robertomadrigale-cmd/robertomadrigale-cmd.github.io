@@ -94,6 +94,7 @@ function drillSpec(d,o={}){
 // transpone la melodía al centro de tu zona cómoda (de semitono en semitono)
 function songShift(S){
   const ms=S.lines.flatMap(l=>(l.mel||[]).filter(n=>n.m!=null).map(n=>n.m)),c=comfy();
+  if(!ms.length)return 0;
   return Math.round((c.lo+c.hi)/2-(Math.min(...ms)+Math.max(...ms))/2);
 }
 const CHPC={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
@@ -153,7 +154,7 @@ function practiceRun(cv,spec,o){
     st.trail.push(s);if(st.trail.length>400)st.trail.splice(0,100);
     o.onPitch&&o.onPitch(d,g);
   };
-  const stop=fin=>{if(!alive)return;alive=false;cancelAnimationFrame(raf);bus.gain.value=0;if(paused)AC.resume();if(MIC.on===onMic)MIC.on=null;o.onEnd&&o.onEnd(fin?spec:null)};
+  const stop=fin=>{if(!alive)return;alive=false;cancelAnimationFrame(raf);bus.gain.value=0;spec.cleanup?.();bus.disconnect();if(paused)AC.resume();if(MIC.on===onMic)MIC.on=null;o.onEnd&&o.onEnd(fin?spec:null)};
   const pause=async()=>{if(!alive||paused)return;paused=true;cancelAnimationFrame(raf);await AC.suspend();pauseAt=AC.currentTime};
   const resume=()=>{if(!alive||!paused)return;const delta=Math.max(0,AC.currentTime-pauseAt);
     if(delta){spec.targets.forEach(g=>{g.t0+=delta;g.t1+=delta});spec.segs.forEach(s=>{s.t0+=delta;s.t1+=delta});(spec.lines||[]).forEach(s=>{s.t0+=delta;s.t1+=delta});spec.ev.slice(ei).forEach(e=>e.t+=delta);spec.end+=delta;st.trail.forEach(p=>p.t+=delta)}

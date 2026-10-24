@@ -1204,3 +1204,38 @@ html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-heigh
 @media(max-width:600px){.session-card{grid-template-columns:1fr}.session-art{height:140px;min-height:0}.session-art>svg{width:100%;height:100%}.session-content{padding:22px}.session-content h2{max-width:270px}.session-steps{gap:9px}.session-start .kplayb{width:82px;height:82px}.coach-stats.four{grid-template-columns:repeat(2,minmax(0,1fr))}.coach-stats{gap:8px}.coach-stats>div{padding:16px 8px}.coach-quick{gap:8px}.coach-quick .btn{font-size:13px;padding:10px 12px}.level-section .sech{flex-wrap:wrap;gap:8px}.level-section .sech h2{font-size:22px}.coach-greeting .coach-pill{padding:5px 8px;font-size:11px}html.fs .page{padding:0 16px}.coach-head{gap:8px;font-size:11px}.coach-mic{max-width:80px}.coach-controls{gap:8px}.coach-controls .btn{font-size:12px;padding:10px 12px}.coach-controls svg{width:16px;height:16px}.coach-center .coach-score{font-size:72px}.coach-result .coach-stats{max-width:440px}.progress-chart{gap:7px}.chart-column b{font-size:10px}.chart-column small{font-size:10px}.coach .coach-lane{height:60svh}.coach-center{padding-top:16px}.coach-settings summary{font-size:13px}}
 @media(max-height:650px){.coach-cover{width:100px;height:100px}.coach-center{gap:12px}.coach-count{font-size:52px}.coach .coach-lane{height:55svh}.coach-hud{min-height:75px}}
 @media(prefers-reduced-motion:reduce){.coach-stars .earned{animation:none}.brdisc{transition:none}}
+
+/* Roka Couch Vocal (canciones) */
+.song-editor,.song-free{max-width:100%;min-width:0}
+.guitar-pill{order:1;margin:0 0 0 auto;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12px;color:var(--fg);white-space:nowrap;text-decoration:none}
+.coach-greeting>.eyebrow{order:0}.coach-greeting h1{order:2}.coach-greeting p{order:3;flex:1}.coach-greeting .coach-pill{order:4}
+.song-fields,.song-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px}
+.song-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.song-filters label:first-child,.song-filters label:last-child{grid-column:1/-1}
+@media(min-width:900px){.song-filters{grid-template-columns:1.5fr 1fr 1fr 1.3fr}.song-filters label:first-child,.song-filters label:last-child{grid-column:auto}}
+.song-editor label,.song-filters label,.song-free label,.song-backup label{display:grid;gap:7px;min-width:0;font-size:13px;color:var(--muted)}
+.song-editor input,.song-editor textarea,.song-editor select,.song-filters input,.song-filters select,.song-backup textarea,.song-free select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}
+.song-editor input[type=file]{font-size:12px;padding:10px 5px}
+.song-editor textarea,.song-backup textarea{resize:vertical;font-size:14px;line-height:1.6}
+.song-editor .card,.song-free .card,.song-filters,.song-backup{margin:18px 0;padding:20px}
+.song-editor details{margin-top:16px}.song-editor summary,.song-backup summary{cursor:pointer;font-weight:650}
+.song-editor label+label{margin-top:12px}.song-editor .song-fields label{margin:0}
+.song-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.song-actions .btn,.note-controls .btn,.song-editor button,.song-backup button{white-space:nowrap;max-width:100%}
+.song-backup .btn{font-size:12px;padding:10px 12px}
+.song-experimental{border-left:3px solid var(--accent);padding-left:12px;color:var(--fg);font-size:14px;line-height:1.6}
+.song-line{border-top:1px solid var(--line);padding:22px 0}.song-line h3{overflow-wrap:anywhere}
+.note-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:16px}
+.note-edit{min-width:0;display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}
+.note-edit>b{color:var(--accent-text);overflow-wrap:anywhere}.note-edit input{background:var(--surface)}
+.note-controls{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:13px}
+.note-edit .song-actions{margin:0;gap:6px}.note-edit .sm{padding:8px 10px;min-height:36px}
+.song-editor .lane{height:200px;margin:16px 0}.song-editor progress{width:100%;margin:12px 0}
+.srow.vocal-srow{display:grid;grid-template-columns:64px minmax(0,1fr) 38px!important;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);align-items:center}
+.song-cover{display:block;width:64px;height:64px;border-radius:13px;overflow:hidden}.song-cover svg{display:block;width:100%;height:100%}
+.song-info{min-width:0;font-size:12px;color:var(--muted)}.song-info a{text-decoration:none}.song-info h2{font-size:17px;margin:0 0 5px;color:var(--fg);overflow-wrap:anywhere}
+.song-info p{margin:4px 0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}.song-info .song-actions{margin:8px 0 0}
+.song-volume{display:flex;gap:14px;align-items:center;justify-content:center;padding:12px;flex-wrap:wrap;font-size:13px}.song-volume input{max-width:100%}
+.scale-chips{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.scale-chip{padding:8px 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted);cursor:pointer}.scale-chip.in-scale{color:var(--accent-text);background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:var(--accent)}.scale-chip.singing{outline:2px solid var(--good)}
+.free-meter{display:grid;justify-items:center;gap:10px;padding:20px}.free-meter b{font-size:48px}.free-meter meter{width:min(100%,320px)}
+.song-free .lane{height:220px}.song-free .lyrics{margin-top:24px}
+@media(max-width:480px){.srow.vocal-srow{grid-template-columns:48px minmax(0,1fr) 30px!important;gap:10px}.song-cover{width:48px;height:48px}.vocal-srow>.icon-btn{width:30px;min-width:30px}.song-editor .card,.song-filters,.song-backup{padding:14px}.song-info h2{font-size:15px}.song-backup .btn{font-size:11px;padding:10px 8px}}

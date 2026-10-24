@@ -45,7 +45,7 @@ function shortSong(S){
 }
 function stepInfo(id){
   if(id==='rango')return{id,t:'Mide tu rango',tip:'Canta suave de grave a agudo. Quédate donde tu voz se sienta cómoda.',syl:'aaa',hue:262,motif:TART.range[1]};
-  if(id.startsWith('song:')){const s=songById(id.slice(5));return{id,t:s.title,syl:'la letra',tip:'Escucha la guía y canta con suavidad. Usa audífonos para medir mejor.',hue:SONGHUE[s.id],motif:SONGM[s.id],song:s}}
+  if(id.startsWith('song:')){const s=songById(id.slice(5));return{id,t:s.title,syl:'la letra',tip:'Escucha la guía y canta con suavidad. Usa audífonos para medir mejor.',hue:COLLECTION_HUE[s.mine?'Mis canciones':s.meta.gen]||SONGHUE[s.id]||218,motif:SONGM[s.id]||DLINE,song:s}}
   return drillById(id);
 }
 function buildSession(d=today()){
@@ -65,7 +65,8 @@ function viewCoach(options={}){
   const daily=!options.id,sess=daily?buildSession():null,steps=daily?sess.steps:[options.id];
   return{title:daily?'Tu sesión de hoy':stepInfo(options.id).t,fs:true,html:'<section class="coach" aria-label="Coach de voz"></section>',mount(page){
     const root=$('.coach',page);let alive=true,started=false,micOK=false,run=null,rangeCleanup=null,index=daily?sess.i:0,stage='ready',paused=false,clock=null,previous=performance.now(),pauseBusy=false;
-    let rangeElapsed=0,rangePhase=0,spec=null,result=null,rangeMic=null;
+    let rangeElapsed=0,rangePhase=0,spec=null,result=null,rangeMic=null,originalBuffer=null;
+    const audioAbort=new AbortController();
     const state={get active(){return started&&!paused&&['exercise','breath','range'].includes(stage)},addTime(s){if(daily)sess.secs+=s}};COACH=state;
     const header=()=>`<header class="coach-head"><button class="icon-btn" data-coach="exit" aria-label="Salir">${IC.x}</button><span>${daily?'Tu sesión de hoy':'Práctica'} · ${Math.min(index+1,steps.length)} de ${steps.length}</span><span class="coach-mic">${started?(micOK?'Micrófono activo':'Sin calificación'):''}</span></header>`;
     const shell=html=>{root.innerHTML=header()+html};
@@ -76,12 +77,23 @@ function viewCoach(options={}){
       const x=stepInfo(steps[Math.min(index,steps.length-1)]);
       shell(`<div class="coach-center"><span class="acov coach-cover">${coverArt(x.hue,x.motif,null,'coach')}</span><span class="eyebrow">${daily?sess.minutes+' min · a tu ritmo':'Práctica guiada'}</span><h1>${daily?'Tu sesión de hoy':esc(x.t)}</h1><p>${daily?'Calienta, afina y termina cantando.':esc(x.tip)}</p><p class="cap">Usa audífonos para que la guía no se confunda con tu voz.</p><button class="kplayb" data-coach="begin">${IC.play}<span>${index?'Continuar':'Empezar'}</span></button>${settings(x)}</div>`);
     }
-    function settings(x){return `<details class="coach-settings"><summary>Ajustes de práctica</summary><label>Tolerancia<select data-setting="tol">${[[25,'Estricta'],[50,'Normal'],[75,'Relajada']].map(([v,t])=>`<option value="${v}" ${DB.tol===v?'selected':''}>${t}</option>`).join('')}</select></label>${!daily&&!x.song&&!x.breath?`<label>Rondas<select data-setting="dir"><option value="up">Subir</option><option value="ud" ${DB.dir==='ud'?'selected':''}>Subir y bajar</option></select></label><label>Modo<select data-setting="mode"><option value="eco">Escucha y repite</option><option value="junto" ${DB.mode==='junto'?'selected':''}>Canta junto</option></select></label><label>Tempo<input type="number" data-setting="bpm:${x.id}" min="40" max="160" value="${DB['bpm:'+x.id]||x.bpm}"></label>`:''}${x.song&&!daily?`<label>Velocidad<select data-setting="songSpeed"><option value="1" ${(DB.songSpeed||1)===1?'selected':''}>Normal</option><option value="0.9" ${DB.songSpeed===.9?'selected':''}>90 %</option><option value="0.75" ${DB.songSpeed===.75?'selected':''}>75 %</option></select></label><label>Tono (semitonos)<input type="number" data-setting="shift:${x.song.id}" min="-36" max="36" value="${DB['shift:'+x.song.id]??songShift(x.song)}"></label><label>Voz guía<input type="checkbox" data-setting="sguide" ${DB.sguide!==false?'checked':''}></label><label>Acordes<input type="checkbox" data-setting="schords" ${DB.schords!==false?'checked':''}></label>`:''}</details>`}
+    function settings(x){
+      const song=x.song,original=song&&song.recording?.audioStored&&hasOriginalTimings(song)&&!!DB['original:'+song.id];
+      return `<details class="coach-settings"><summary>Ajustes de práctica</summary><label>Tolerancia<select data-setting="tol">${[[25,'Estricta'],[50,'Normal'],[75,'Relajada']].map(([v,t])=>`<option value="${v}" ${DB.tol===v?'selected':''}>${t}</option>`).join('')}</select></label>${!daily&&!song&&!x.breath?`<label>Rondas<select data-setting="dir"><option value="up">Subir</option><option value="ud" ${DB.dir==='ud'?'selected':''}>Subir y bajar</option></select></label><label>Modo<select data-setting="mode"><option value="eco">Escucha y repite</option><option value="junto" ${DB.mode==='junto'?'selected':''}>Canta junto</option></select></label><label>Tempo<input type="number" data-setting="bpm:${x.id}" min="40" max="160" value="${DB['bpm:'+x.id]||x.bpm}"></label>`:''}${song&&!daily?`
+      ${song.mine?`<a class="btn" href="#/canciones/editar/${song.id}">Editar canción</a><a class="btn" href="#/canciones/libre/${song.id}">Cantar libre</a>`:''}
+      ${song.recording?.audioStored&&hasOriginalTimings(song)?`<label>Cantar sobre mi grabación<input type="checkbox" data-setting="original:${song.id}" ${original?'checked':''}></label>`:''}
+      ${original?`<p class="cap">Tono y velocidad originales. La voz guía está apagada. La calificación usa los tiempos de tu audio.</p><label>Volumen de tu grabación<input type="range" min="0" max="1" step=".05" data-setting="originalVolume" value="${DB.originalVolume??.65}"></label><label>Quitar la voz<input type="checkbox" data-setting="originalSide" ${DB.originalSide?'checked':''}></label><p class="cap">Reduce el canal central solo en estéreo; también puede quitar instrumentos. En mono no cambia el sonido.</p>`:`<label>Velocidad<select data-setting="songSpeed"><option value="1" ${(DB.songSpeed||1)===1?'selected':''}>Normal</option><option value="0.9" ${DB.songSpeed===.9?'selected':''}>90 %</option><option value="0.75" ${DB.songSpeed===.75?'selected':''}>75 %</option></select></label><label>Tono (semitonos)<input type="number" data-setting="shift:${song.id}" min="-36" max="36" value="${DB['shift:'+song.id]??songShift(song)}"></label><label>Voz guía<input type="checkbox" data-setting="sguide" ${DB.sguide!==false?'checked':''}></label><label>Acordes<input type="checkbox" data-setting="schords" ${DB.schords!==false?'checked':''}></label>`}`:''}</details>`;
+    }
     async function begin(){
       if(started)return;
       if(daily&&index>=steps.length){summary();return}
       started=true;stage='loading';shell('<div class="coach-center"><h1>Prepara tu voz</h1><p>Activa el micrófono para ver tu afinación.</p></div>');
       if(!ac()){started=false;stage='ready';ready();toast('No se pudo iniciar el audio. Vuelve a intentar.');return}
+      const selected=stepInfo(steps[index]).song;originalBuffer=null;
+      if(!daily&&selected&&selected.recording?.audioStored&&hasOriginalTimings(selected)&&DB['original:'+selected.id]){
+        try{const file=await audioStore('get',selected.id);if(!file)throw Error('El audio no está en este dispositivo. Vuelve a subirlo desde Editar canción.');originalBuffer=await decodeSongFile(file,{signal:audioAbort.signal})}
+        catch(e){if(!alive)return;started=false;stage='ready';ready();toast(esc(e.message),6500);return}
+      }
       await AC.resume();micOK=await micStart(null,()=>{});
       if(!alive){micStop();return}
       if(!micOK)toast('Seguimos sin micrófono y sin calificación. Puedes practicar con la guía.',6500);
@@ -100,7 +112,8 @@ function viewCoach(options={}){
       stage='exercise';
       const song=x.song?(daily?shortSong(x.song):x.song):null;
       shell(`<div class="coach-hud"><div><span class="eyebrow">${esc(x.t)}</span><h1 id="phase">Escucha</h1><span id="round"></span></div><b id="live-note" aria-label="Nota que cantas">—</b></div><canvas class="lane coach-lane" id="coach-lane" aria-label="Notas objetivo y línea de tu voz"></canvas>${song?`<div class="lyrics concert" id="lyr">${lyricHTML(song)}</div>`:'<p id="rest-label" class="coach-hint">La línea verde sigue tu voz.</p>'}${controls()}`);
-      spec=song?songSpec(song,{shift:daily?songShift(song):(DB['shift:'+song.id]??songShift(song)),speed:daily?1:(DB.songSpeed||1),guide:DB.sguide!==false,chords:DB.schords!==false}):drillSpec(x,{rounds:x.rounds,bpm:daily?x.bpm:DB['bpm:'+x.id]||x.bpm,dir:daily?'up':DB.dir,mode:daily?'eco':DB.mode,rest:daily?sess.rest:2});
+      spec=song?(originalBuffer?timedSongSpec(song,originalBuffer,{volume:DB.originalVolume??.65,side:!!DB.originalSide}):songSpec(song,{shift:daily?songShift(song):(DB['shift:'+song.id]??songShift(song)),speed:daily?1:(DB.songSpeed||1),guide:DB.sguide!==false,chords:DB.schords!==false})):drillSpec(x,{rounds:x.rounds,bpm:daily?x.bpm:DB['bpm:'+x.id]||x.bpm,dir:daily?'up':DB.dir,mode:daily?'eco':DB.mode,rest:daily?sess.rest:2});
+      if(originalBuffer)root.insertAdjacentHTML('beforeend','<label class="song-volume">Volumen de tu grabación<input aria-label="Volumen de tu grabación" data-original-volume type="range" min="0" max="1" step=".05" value="'+(DB.originalVolume??.65)+'"></label>');
       if(spec.adapted)$('#rest-label',root).textContent='Patrón ajustado a tu zona cómoda.';
       let last=null;
       run=practiceRun($('#coach-lane',root),spec,{sec:5,onSeg(s){
@@ -176,7 +189,8 @@ function viewCoach(options={}){
       const stay=()=>{dialog.close();dialog.remove();if(!was)setPaused(false)};
       $('[data-stay]',dialog).onclick=stay;$('[data-leave]',dialog).onclick=()=>{dialog.close();location.hash=daily?'#/':steps[0].startsWith('song:')?'#/canciones':'#/ejercicios'};dialog.oncancel=e=>{e.preventDefault();stay()};
     }
-    root.addEventListener('change',e=>{const k=e.target.dataset.setting;if(!k)return;DB[k]=e.target.type==='checkbox'?e.target.checked:['mode','dir'].includes(k)?e.target.value:Number(e.target.value);if(k.startsWith('bpm:'))DB[k]=Math.max(40,Math.min(160,DB[k]||60));if(k.startsWith('shift:'))DB[k]=Math.max(-36,Math.min(36,DB[k]||0));save()});
+    root.addEventListener('change',e=>{const k=e.target.dataset.setting;if(!k)return;DB[k]=e.target.type==='checkbox'?e.target.checked:['mode','dir'].includes(k)?e.target.value:Number(e.target.value);if(k.startsWith('bpm:'))DB[k]=Math.max(40,Math.min(160,DB[k]||60));if(k.startsWith('shift:'))DB[k]=Math.max(-36,Math.min(36,DB[k]||0));save();if(k.startsWith('original:')){ready();$('.coach-settings',root).open=true}});
+    root.addEventListener('input',e=>{if(e.target.matches('[data-original-volume]')){DB.originalVolume=Number(e.target.value);spec?.setVolume?.(DB.originalVolume)}});
     root.addEventListener('click',e=>{const b=e.target.closest('[data-coach]');if(!b)return;const action=b.dataset.coach;
       if(pauseBusy)return;
       if(action==='begin')begin();else if(action==='exit')exit();else if(action==='pause')setPaused(!paused);else if(action==='resume')setPaused(false);else if(action==='repeat'){if(daily){sess.res[index]=null;save()}intro()}else if(action==='skip')skip();else if(action==='now'&&stage==='intro')exercise();else if(action==='next')next();
@@ -187,6 +201,6 @@ function viewCoach(options={}){
     },80);
     const visibility=()=>{if(document.hidden&&started&&!paused)setPaused(true);else if(!document.hidden&&paused&&run&&AC)AC.suspend()};document.addEventListener('visibilitychange',visibility);
     ready();if(COACH_AUTOSTART){COACH_AUTOSTART=false;begin()}
-    return()=>{alive=false;clearStep();clearInterval(iv);document.removeEventListener('visibilitychange',visibility);if(COACH===state)COACH=null;micStop();if(AC&&AC.state==='suspended')AC.resume();save()};
+    return()=>{alive=false;audioAbort.abort();clearStep();clearInterval(iv);document.removeEventListener('visibilitychange',visibility);if(COACH===state)COACH=null;micStop();if(AC&&AC.state==='suspended')AC.resume();save()};
   }};
 }

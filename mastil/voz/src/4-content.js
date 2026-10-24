@@ -100,6 +100,107 @@ function songParse(src){
   S.id=S.meta.id;S.title=S.meta.title||'Canción';S.artist=S.meta.artist||'';S.bpm=+S.meta.bpm||90;S.beats=+(S.meta.time||'4/4').split('/')[0]||4;
   return S;
 }
+/* Fragmentos de melodías históricas. «la» evita atribuir traducciones modernas
+   a la tradición. Las vocalizaciones al final son composiciones de esta app. */
+const CATALOG_ADDITIONS=[
+ ['hermano-juan','Hermano Juan','Tradicional francesa','Infantiles',1,96,4,
+  ['C4 D4 E4 C4','C4 D4 E4 C4','E4 F4 G4/2','E4 F4 G4/2','G4/.5 A4/.5 G4/.5 F4/.5 E4 C4','G4/.5 A4/.5 G4/.5 F4/.5 E4 C4','C4 G3 C4/2','C4 G3 C4/2'],
+  ['Her~ma~no Juan','Her~ma~no Juan','duer~mes tú','duer~mes tú','To~ca la cam~pa~na','to~ca la cam~pa~na','din don dan','din don dan']],
+ ['row-row','Row, Row, Row Your Boat','Tradicional · siglo XIX','Folk',1,100,3,
+  ['C4/1.5 C4/.5 C4 D4/.5 E4/1.5','E4/1.5 D4/.5 E4 F4/.5 G4/1.5','C5/.5 C5/.5 C5/.5 G4/.5 G4/.5 G4/.5 E4/.5 E4/.5 E4/.5 C4/.5 C4/.5 C4/.5','G4/1.5 F4/.5 E4 D4/.5 C4/1.5']],
+ ['mary-lamb','Mary Had a Little Lamb','Sarah J. Hale · melodía tradicional','Infantiles',1,96,4,
+  ['E4 D4 C4 D4 E4 E4 E4/2','D4 D4 D4/2 E4 G4 G4/2','E4 D4 C4 D4 E4 E4 E4 E4','D4 D4 E4 D4 C4/4']],
+ ['london-bridge','London Bridge','Tradicional inglesa','Infantiles',1,100,4,
+  ['G4/1.5 A4/.5 G4 F4 E4 F4 G4/2','D4 E4 F4/2 E4 F4 G4/2','G4/1.5 A4/.5 G4 F4 E4 F4 G4/2','D4/2 G4/2 E4 C4/3']],
+ ['hot-cross-buns','Hot Cross Buns','Tradicional inglesa','Infantiles',1,90,4,
+  ['E4/2 D4/2 C4/4','E4/2 D4/2 C4/4','C4 C4 C4 C4 D4 D4 D4 D4','E4/2 D4/2 C4/4']],
+ ['au-clair','Au clair de la lune','Tradicional francesa · siglo XVIII','Infantiles',1,90,4,
+  ['C4 C4 C4 D4 E4/2 D4/2','C4 E4 D4 D4 C4/4','C4 C4 C4 D4 E4/2 D4/2','C4 E4 D4 D4 C4/4']],
+ ['sur-le-pont','Sur le pont d’Avignon','Tradicional francesa','Infantiles',1,108,4,
+  ['C4 C4 C4 D4 E4 C4/3','E4 D4 D4 E4 F4 D4/3','C4 C4 C4 D4 E4 C4/3','D4/2 G4/2 E4 C4/3']],
+ ['bingo','Bingo','Tradicional · siglo XVIII','Infantiles',2,105,4,
+  ['G3 C4 C4 C4 G3 A3 A3 G3','G3 C4 C4 D4 E4/2 C4/2','E4 E4 F4 F4 G4/2 G4/2','A4 A4 A4 F4 G4/2 G4/2','F4 F4 F4 D4 E4/2 E4/2','D4 C4 D4 E4 C4/4']],
+ ['old-macdonald','Old MacDonald','Tradicional · siglo XIX','Infantiles',1,105,4,
+  ['C4 C4 C4 G3 A3 A3 G3/2','E4 E4 D4 D4 C4/4','G3 C4 C4 C4 G3 A3 A3 G3','E4 E4 D4 D4 C4/4']],
+ ['hickory','Hickory Dickory Dock','Tradicional inglesa','Infantiles',2,108,3,
+  ['G3/.5 C4/.5 C4/.5 D4/.5 E4 G4/2 E4','E4 F4/.5 G4/.5 A4/2 A4','A4 G4/.5 F4/.5 G4/2 E4','E4 D4/.5 C4/.5 D4/2 C4']],
+ ['cucaracha','La cucaracha · estribillo','Tradicional mexicana','Tradicionales',2,104,4,
+  ['C4/.5 C4/.5 C4/.5 F4/1.5 A4','C4/.5 C4/.5 C4/.5 F4/1.5 A4','F4/.5 F4/.5 E4/.5 E4/.5 D4/.5 D4/.5 C4/2','C4/.5 C4/.5 C4/.5 E4/1.5 G4','C4/.5 C4/.5 C4/.5 E4/1.5 G4','C5/.5 D5/.5 C5/.5 Bb4/.5 A4/.5 G4/.5 F4/2']],
+ ['noche-paz','Noche de paz','Franz Xaver Gruber · 1818','Navidad',2,84,3,
+  ['G4/1.5 A4/.5 G4 E4/3','G4/1.5 A4/.5 G4 E4/3','D5/2 D5 B4/3','C5/2 C5 G4/3','A4/2 A4 C5/1.5 B4/.5 A4','G4/1.5 A4/.5 G4 E4/3']],
+ ['jingle-bells','Jingle Bells · estribillo','James L. Pierpont · 1857','Navidad',1,112,4,
+  ['E4 E4 E4/2 E4 E4 E4/2','E4 G4 C4/1.5 D4/.5 E4/4','F4 F4 F4/1.5 F4/.5 F4 E4 E4/.5 E4/.5 E4','E4 D4 D4 E4 D4/2 G4/2']],
+ ['adeste','Adeste fideles','Himno · siglo XVIII','Navidad',2,92,4,
+  ['G4/2 G4 D4 G4/2 A4/2','D4/4 B4 A4 B4 C5','B4/2 A4/2 G4/2 G4 F#4 E4','F#4 G4 A4 B4 F#4/2 E4 D4']],
+ ['deck-halls','Deck the Halls','Tradicional galesa','Navidad',2,108,4,
+  ['G4/1.5 F4/.5 E4 D4 C4 D4 E4 C4','D4/.5 E4/.5 F4/.5 D4/.5 E4/1.5 D4/.5 C4 B3 C4/2','G4/1.5 F4/.5 E4 D4 C4 D4 E4 C4','D4/.5 E4/.5 F4/.5 D4/.5 E4/1.5 D4/.5 C4 B3 C4/2']],
+ ['we-wish','We Wish You a Merry Christmas','Tradicional inglesa','Navidad',2,108,3,
+  ['G3 C4 C4/.5 D4/.5 C4 B3 A3','A3 D4 D4/.5 E4/.5 D4 C4 B3','G3 E4 E4/.5 F4/.5 E4 D4 C4','A3 G3 G3 A3 D4 B3 C4/2']],
+ ['first-noel','The First Noel','Tradicional inglesa','Navidad',2,96,3,
+  ['E4/.5 D4/.5 C4/1.5 D4/.5 E4/.5 F4/.5 G4/2 A4/.5 B4/.5','C5/2 B4 A4/2 G4','A4/2 B4 C5/2 B4','A4 G4 F4 E4/2 D4 C4/3']],
+ ['auld-lang-syne','Auld Lang Syne','Tradicional escocesa · siglo XVIII','Folk',2,96,4,
+  ['G3 C4/1.5 C4/.5 C4 E4 D4/1.5 C4/.5 D4 E4','C4/1.5 C4/.5 E4 G4 A4/3 A4','G4/1.5 E4/.5 E4 C4 D4/1.5 C4/.5 D4 E4','C4/1.5 A3/.5 A3 G3 C4/3']],
+ ['oh-susanna','Oh! Susanna','Stephen Foster · 1848','Folk',2,108,4,
+  ['C4/.5 D4/.5 E4 G4 G4/1.5 A4/.5 G4 E4 C4 D4','E4 E4 D4 C4 D4/4','C4/.5 D4/.5 E4 G4 G4/1.5 A4/.5 G4 E4 C4 D4','E4 E4 D4 D4 C4/4']],
+ ['saints','When the Saints Go Marching In','Himno tradicional','Folk',1,100,4,
+  ['C4 E4 F4 G4/5','C4 E4 F4 G4/5','C4 E4 F4 G4/2 E4/2 C4/2 E4/2 D4/4','E4 E4 D4 C4/3 C4 E4 G4 G4 F4/4','F4 E4 F4 G4 E4/2 D4/2 C4/4']],
+ ['scarborough','Scarborough Fair','Tradicional inglesa','Folk',2,92,3,
+  ['D4/2 D4 A4/2 A4 E4 F4 E4 D4/3','A4/2 C5 D5/2 C5 A4 B4 G4 A4/3','D5/2 D5 D5 C5 A4 A4 G4 F4 E4 C4/3','D4/2 A4 G4 F4 E4 D4 C4 D4/3']],
+ ['greensleeves','Greensleeves','Tradicional inglesa · siglo XVI','Folk',3,100,3,
+  ['A3 C4/2 D4 E4/1.5 F4/.5 E4 D4/2 B3 G3/1.5 A3/.5 B3','C4/2 A3 A3/1.5 G#3/.5 A3 B3/2 G#3 E3/3']],
+ ['sakura','Sakura Sakura','Tradicional japonesa','Folk',2,80,4,
+  ['A4 A4 B4/2 A4 A4 B4/2','A4 B4 C5 B4 A4 B4/.5 A4/.5 F4/2','E4 C4 E4 F4 E4 E4/.5 C4/.5 B3/2','A4 A4 B4/2 A4 A4 B4/2']],
+ ['shady-grove','Shady Grove','Tradicional de los Apalaches','Folk',2,100,4,
+  ['D4 D4 F4 G4 A4/2 G4 F4','D4 D4 F4 D4 C4/4','D4 D4 F4 G4 A4/2 C5/2','A4 G4 F4 E4 D4/4']],
+ ['shoes','Shoo Fly','Tradicional · siglo XIX','Folk',1,108,4,
+  ['G4 E4/2 C4 G4 E4/2 C4','G4 E4 C4 D4 E4 D4 C4/2','G4 E4/2 C4 G4 E4/2 C4','G4 E4 C4 D4 E4 D4 C4/2']],
+ ['alegria','Oda a la alegría','L. van Beethoven · 1824','Clásicas',1,100,4,
+  ['E4 E4 F4 G4 G4 F4 E4 D4','C4 C4 D4 E4 E4/1.5 D4/.5 D4/2','E4 E4 F4 G4 G4 F4 E4 D4','C4 C4 D4 E4 D4/1.5 C4/.5 C4/2']],
+ ['brahms-cuna','Canción de cuna','Johannes Brahms · 1868','Clásicas',2,84,3,
+  ['E4/.5 E4/.5 G4/2 E4/.5 E4/.5 G4/2','E4 G4 C5 B4/2 A4 A4/2 G4','D4 E4 F4 D4 D4 E4 F4/2','D4 F4 B4 A4 G4 B4 C5/3']],
+ ['largo-dvorak','Largo · Nuevo Mundo','Antonín Dvořák · 1893','Clásicas',2,76,4,
+  ['E4/2 G4/2 G4/4 E4 D4 C4 D4 E4/4','G4 A4 C5 A4 G4/4 E4 D4 C4 D4 C4/4']],
+ ['canon-tallis','Canon de Tallis','Thomas Tallis · siglo XVI','Clásicas',1,90,4,
+  ['G4 F4 E4 D4 C4 D4 E4 C4','G4 G4 A4 B4 C5 B4 A4 G4','A4 G4 F4 E4 F4 E4 D4 G4','G4 F4 E4 D4 C4/4']],
+ ['escala-menor','La escalera menor','Original · Roka Couch Vocal','Vocalizaciones',2,80,4,
+  ['A3 B3 C4 D4 E4 F4 G4 A4','A4 G4 F4 E4 D4 C4 B3 A3']],
+ ['saltos-tercera','Los saltos de tercera','Original · Roka Couch Vocal','Vocalizaciones',2,90,4,
+  ['C4 E4 D4 F4 E4 G4 F4 A4','G4 E4 F4 D4 E4 C4 D4 C4']],
+ ['saltos-quinta','Los saltos de quinta','Original · Roka Couch Vocal','Vocalizaciones',3,80,4,
+  ['C4 G4 D4 A4 E4 B4 F4 C5','C5 F4 B4 E4 A4 D4 G4 C4']],
+ ['pentatonica','Cinco peldaños','Original · Roka Couch Vocal','Vocalizaciones',1,90,4,
+  ['C4 D4 E4 G4 A4 G4 E4 D4','C4/2 E4/2 G4/2 C4/2']],
+ ['olas-suaves','Olas suaves','Original · Roka Couch Vocal','Vocalizaciones',1,72,4,
+  ['C4/2 D4/2 E4/2 D4/2','C4/2 E4/2 G4/2 E4/2','D4/2 F4/2 E4/2 C4/2']],
+ ['eco-menor','Eco en menor','Original · Roka Couch Vocal','Vocalizaciones',2,96,4,
+  ['A3 C4 E4 C4 A3/2 E4/2','B3 D4 F4 D4 B3/2 F4/2','C4 E4 A4 E4 C4 B3 A3/2']]
+];
+// Textos tradicionales originales, sin traducciones ni arreglos modernos.
+const CATALOG_LYRICS={
+ 'row-row':['Row row row your boat','Gent~ly down the stream','Mer~ri~ly mer~ri~ly mer~ri~ly mer~ri~ly','Life is but a dream'],
+ 'mary-lamb':['Ma~ry had a lit~tle lamb','lit~tle lamb lit~tle lamb','Ma~ry had a lit~tle lamb its','fleece was white as snow'],
+ 'london-bridge':['Lon~don Bridge is fal~ling down','fal~ling down fal~ling down','Lon~don Bridge is fal~ling down','My fair la~dy'],
+ 'hot-cross-buns':['Hot cross buns','Hot cross buns','One a pen~ny two a pen~ny','Hot cross buns'],
+ 'au-clair':['Au clair de la lu~ne','Mon a~mi Pier~rot','Prê~te moi ta plu~me','Pour é~crire un mot'],
+ 'old-macdonald':['Old Mac~Do~nald had a farm','E I E I O','And on that farm he had a cow','E I E I O'],
+ 'jingle-bells':['Jin~gle bells jin~gle bells','jin~gle all the way','Oh what fun it is to ride in a','one horse o~pen sleigh hey']
+};
+for(const [id,title,artist,gen,lvl,bpm,beats,phrases,providedWords] of CATALOG_ADDITIONS){
+  const words=providedWords||CATALOG_LYRICS[id];
+  SONGS.push(`{id:${id}}{title:${title}}{artist:${artist}}{gen:${gen}}{lvl:${lvl}}{bpm:${bpm}}{time:${beats}/4}{version:${words?'Letra tradicional':'Fragmento para vocalizar con la'}}\n`+phrases.map((p,i)=>{
+    const tokens=p.split(' ').map(n=>n.includes('/')?n:n+'/1');
+    return (words?words[i]:tokens.filter(n=>!n.startsWith('r')).map(()=>'la').join(' '))+'\n{mel:'+tokens.join(' ')+'}';
+  }).join('\n'));
+}
+// Completa el último compás con silencio; conserva anacrusas y ligaduras internas.
+for(let i=0;i<SONGS.length;i++){
+  let src=SONGS[i];if(i<5)src=`{lvl:${i===2||i===4?2:1}}{gen:${i<2?'Vocalizaciones':i===4?'Folk':'Infantiles'}}\n`+src;
+  const s=songParse(src),total=s.lines.flatMap(l=>l.mel||[]).reduce((n,x)=>n+x.d,0),rest=(s.beats-total%s.beats)%s.beats;
+  if(rest)src=src.replace(/(\{mel:[^}]*)(\})\s*$/,'$1 r/'+rest+'$2');SONGS[i]=src;
+}
 const SONGLIST=SONGS.map(songParse);
-const songById=id=>SONGLIST.find(s=>s.id===id);
-const songArt=s=>coverArt(SONGHUE[s.id]||218,SONGM[s.id],null,'s'+s.id);
+if(!Array.isArray(DB.songs))DB.songs=[];
+function allSongs(){return [...SONGLIST,...DB.songs.filter(s=>s&&typeof s.src==='string').map(row=>({...songParse(row.src),id:row.id,mine:true,recording:row}))]}
+const songById=id=>allSongs().find(s=>s.id===id);
+const COLLECTION_HUE={Infantiles:262,Tradicionales:328,Navidad:160,Folk:26,Clásicas:215,Vocalizaciones:185,'Mis canciones':300};
+const songArt=s=>coverArt(COLLECTION_HUE[s.mine?'Mis canciones':s.meta.gen]||SONGHUE[s.id]||218,SONGM[s.id]||DLINE,null,'s'+s.id);

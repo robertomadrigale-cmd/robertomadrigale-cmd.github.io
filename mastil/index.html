@@ -1094,6 +1094,15 @@ html.welcome-on{overflow:hidden}
 .figstep .kic{width:40px;height:40px}
 .fsl{font-size:14px;line-height:1.35;text-align:center;color:var(--fg)}
 
+/* acceso a la portada Roka desde Inicio */
+.brandhero-roka .logo{flex:none}
+.brandhero-copy{flex:1;min-width:0}
+.brandhero-greeting{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.brandhero-greeting .eyebrow{min-width:0;overflow-wrap:anywhere}
+.roka-switch{display:inline-flex;align-items:center;justify-content:center;flex:none;min-height:44px;padding:8px 14px;border:1px solid var(--hair,var(--line));border-radius:999px;background:var(--surface);color:var(--muted);font:600 13px/1.2 var(--font-body);text-decoration:none;white-space:nowrap;margin-left:auto}
+.roka-switch:hover{color:var(--fg);border-color:var(--accent)}
+.roka-switch:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
 </style>
 </head>
 <body>
@@ -4701,7 +4710,7 @@ function viewHome(){
   const nx=nextEx(),[d,t]=doneCount();
   const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
   return{title:'Roka Guitar for All',html:`
-  <div class="brandhero"><span class="logo">${logo()}</span><div><span class="eyebrow">${greet()}</span><h1 class="glow">Tu práctica de hoy</h1></div></div>
+  <div class="brandhero brandhero-roka"><span class="logo">${logo()}</span><div class="brandhero-copy"><div class="brandhero-greeting"><span class="eyebrow">${greet()}</span><a class="roka-switch" href="roka/?cambiar">Voz</a></div><h1 class="glow">Tu práctica de hoy</h1></div></div>
   <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
     <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
     <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
