@@ -1239,3 +1239,66 @@ html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-heigh
 .free-meter{display:grid;justify-items:center;gap:10px;padding:20px}.free-meter b{font-size:48px}.free-meter meter{width:min(100%,320px)}
 .song-free .lane{height:220px}.song-free .lyrics{margin-top:24px}
 @media(max-width:480px){.srow.vocal-srow{grid-template-columns:48px minmax(0,1fr) 30px!important;gap:10px}.song-cover{width:48px;height:48px}.vocal-srow>.icon-btn{width:30px;min-width:30px}.song-editor .card,.song-filters,.song-backup{padding:14px}.song-info h2{font-size:15px}.song-backup .btn{font-size:11px;padding:10px 8px}}
+/* ===================== Roka Couch Vocal (v3 guiado) =====================
+   «Cómo se hace» con boca animada, indicaciones grandes, tarjeta «Tu nota», velocidad a la vista y karaoke con la letra al centro. */
+.coach-how{gap:14px}
+.coach-how h1{font-size:clamp(28px,6vw,44px)}
+.how-top{display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap}
+.how-top .coach-syllable{font-size:clamp(20px,4.6vw,26px);font-weight:800;color:var(--accent-text);margin:0}
+.mouth{width:92px;height:92px;flex:none}
+.mouth .m-face{fill:color-mix(in srgb,var(--accent) 14%,var(--surface));stroke:color-mix(in srgb,var(--accent) 45%,transparent);stroke-width:1.5}
+.mouth path,.mouth ellipse{fill:none;stroke:var(--fg);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;transform-box:fill-box;transform-origin:center}
+.mouth .m-air{stroke:var(--accent-text);stroke-width:2.5;opacity:.8;animation:mAir 1.1s ease-in-out infinite}
+.mouth-lips .m-up{animation:mBuzzU .09s linear infinite alternate}.mouth-lips .m-lo{animation:mBuzzD .09s linear infinite alternate}
+.mouth-u .m-u{fill:color-mix(in srgb,var(--fg) 12%,transparent);animation:mPulse 2.4s ease-in-out infinite}
+.mouth-a .m-a{fill:color-mix(in srgb,var(--fg) 12%,transparent);animation:mPulse 2.4s ease-in-out infinite}
+.mouth-i .m-i{fill:color-mix(in srgb,var(--fg) 12%,transparent);animation:mPulse 2.4s ease-in-out infinite}
+.mouth-ma .m-ma{fill:color-mix(in srgb,var(--fg) 12%,transparent);animation:mOpen 1.4s ease-in-out infinite}
+.mouth-ja .m-ja{fill:color-mix(in srgb,var(--fg) 12%,transparent);animation:mOpen .55s ease-in-out infinite}
+.mouth-ss .m-ss{animation:mPulse 2s ease-in-out infinite}
+@keyframes mBuzzU{from{transform:translateY(0)}to{transform:translateY(-2px)}}
+@keyframes mBuzzD{from{transform:translateY(0)}to{transform:translateY(2px)}}
+@keyframes mAir{0%,100%{opacity:.25;transform:translateX(0)}50%{opacity:.9;transform:translateX(4px)}}
+@keyframes mPulse{0%,100%{transform:scale(.92)}50%{transform:scale(1.06)}}
+@keyframes mOpen{0%,100%{transform:scaleY(.18)}45%,60%{transform:scaleY(1)}}
+@media(prefers-reduced-motion:reduce){.mouth *{animation:none!important}}
+.how-steps{list-style:none;counter-reset:hs;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-width:520px;width:100%;text-align:left}
+.how-steps li{counter-increment:hs;display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start;font-size:16px;line-height:1.4}
+.how-steps li::before{content:counter(hs);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent-text);font-weight:800;font-size:14px}
+.how-actions{justify-content:center;gap:10px;flex-wrap:wrap}
+.how-actions .btn{white-space:nowrap}
+.spd{justify-content:center;flex-wrap:nowrap;gap:6px}
+.spd .chip{white-space:nowrap}
+.coach-center>.how-go{width:84px;height:84px}
+/* HUD del ejercicio */
+.coach-hud{align-items:flex-start;min-height:0;padding:6px 0 10px}
+.hud-l{min-width:0;flex:1}
+.coach-hud #phase{font-size:clamp(24px,5.4vw,40px);color:var(--fg);transition:color .2s;overflow-wrap:anywhere}
+.coach-hud #phase.sing{color:var(--accent-text)}
+.rbar{height:4px;border-radius:2px;background:var(--surface2);margin-top:8px;max-width:340px;overflow:hidden}
+.rbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:2px;transition:width .08s linear}
+.vnote{flex:none;min-width:104px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);transition:background .15s,border-color .15s}
+.vnote small{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.vnote b{font-size:clamp(22px,4.6vw,30px);line-height:1.1;font-variant-numeric:tabular-nums}
+.vnote span{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+.vnote.hit{border-color:var(--good);background:color-mix(in srgb,var(--good) 16%,var(--surface))}.vnote.hit span{color:var(--good)}
+.vnote.low span,.vnote.high span{color:#f5b43c}.vnote.low,.vnote.high{border-color:color-mix(in srgb,#f5b43c 60%,transparent)}
+.vnote.quiet span{color:var(--root)}
+.hud-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+.hud-tools .spd{justify-content:flex-start}
+.lane-wrap{position:relative}
+.lane-rest{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:color-mix(in srgb,var(--bg) 55%,transparent);border-radius:18px;text-align:center;padding:12px}
+.lane-rest[hidden]{display:none}
+.lane-rest .brdisc{position:static;display:block;width:70px;height:70px;border-radius:50%;transform:none;animation:restBreath 3s ease-in-out infinite}
+.lane-rest b{font-size:24px}.lane-rest span{color:var(--muted);font-size:14px}
+@keyframes restBreath{0%,100%{transform:scale(.7)}50%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.lane-rest .brdisc{animation:none}}
+/* karaoke: carril compacto arriba y la letra grande en medio */
+.coach.is-song .coach-lane{height:30svh;min-height:150px}
+.coach.is-song .lyrics.concert{flex:1;min-height:34svh;max-height:44svh;overflow-y:auto;scroll-behavior:smooth;padding:18px 8px;gap:14px;text-align:center;mask-image:linear-gradient(transparent,#000 18%,#000 82%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 18%,#000 82%,transparent)}
+.coach.is-song .lyrics.concert .lyl{font-size:clamp(22px,5.6vw,34px);transform:none;line-height:1.3}
+.coach.is-song .lyrics.live .lyl.cur{font-size:clamp(28px,7vw,42px);opacity:1}
+.coach.is-song .lyrics.concert .lyl[hidden]{display:block}
+@media(max-width:420px){.vnote{min-width:88px;padding:6px 8px}.coach-how .how-steps li{font-size:15px}.mouth{width:76px;height:76px}}
+@media(max-height:650px){.coach.is-song .coach-lane{height:26svh}.coach.is-song .lyrics.concert{min-height:28svh}}
+.vnote #live-note{color:var(--fg)}.vnote.hit #live-note{color:var(--good)}.vnote.low #live-note,.vnote.high #live-note{color:#f5b43c}.vnote.quiet #live-note{color:var(--muted)}

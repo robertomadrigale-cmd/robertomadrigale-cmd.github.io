@@ -6,7 +6,7 @@ const DRILLS=[
  {id:'larga',lvl:1,t:'Nota larga',syl:'ma',bpm:60,pat:[[0,4]],rounds:5,hue:218,tip:'Mantén el aire y el volumen parejos hasta el final.'},
  {id:'trino',lvl:1,t:'Trino de labios',syl:'brrr',bpm:72,pat:[[0,1],[2,1],[4,1],[5,1],[7,1],[5,1],[4,1],[2,1],[0,2]],rounds:5,hue:180,tip:'Deja los labios sueltos. Si no vibran, ayuda con dos dedos en las mejillas.'},
  {id:'sirena',lvl:1,t:'Sirena',syl:'uuu',bpm:60,glide:true,pat:[[0,3],[12,3],[0,2]],rounds:5,hue:262,tip:'Desliza la voz sin levantar la barbilla. Arriba, deja el sonido ligero.'},
- {id:'tres',lvl:1,t:'Tres notas',syl:'nu',bpm:60,pat:[[0,1],[2,1],[4,1],[2,1],[0,2]],rounds:5,hue:240,tip:'Une las tres notas con el mismo aire y una «u» suave.'},
+ {id:'tres',lvl:1,t:'Tres notas',syl:'no',bpm:60,pat:[[0,1],[2,1],[4,1],[2,1],[0,2]],rounds:5,hue:240,tip:'Une las tres notas con el mismo aire y una «u» suave.'},
  {id:'escala',lvl:2,t:'Escala de cinco notas',syl:'no',bpm:80,pat:[[0,1],[2,1],[4,1],[5,1],[7,1],[5,1],[4,1],[2,1],[0,2]],rounds:5,hue:26,tip:'Une las notas sin cortar el aire. Conserva la misma vocal.'},
  {id:'arpegio3',lvl:2,t:'Saltos 1-3-5',syl:'ia',bpm:72,pat:[[0,1],[4,1],[7,1],[4,1],[0,2]],rounds:5,hue:310,tip:'Escucha el salto antes de hacerlo. Mantén la mandíbula suelta.'},
  {id:'terceras',lvl:2,t:'Saltos de tercera',syl:'mi',bpm:80,pat:[[0,1],[4,1],[2,1],[5,1],[4,1],[7,1],[5,1],[2,1],[0,2]],rounds:5,hue:285,tip:'Imagina la siguiente nota sin empujar el volumen.'},

@@ -54,6 +54,14 @@ Roberto no es programador: entrégale cambios terminados y probados, sin pedirle
 - Píldora «Guitarra» arriba a la derecha de Hoy (enlace relativo `../roka/?cambiar`); la portada está en `mastil/roka/`.
 - Falta probar con micrófonos físicos (Android, iPhone/Safari) y canciones reales.
 
+### v3 «guiada» (24 oct 2026): que se entienda qué hacer
+Roberto: «hay que ser un genio para saber qué hacer». Programado por Claude (Codex sin cupo).
+- `4-how.js` (nuevo): `HOW[id]` = `{mouth, steps[2–3], listen, fix}` por ejercicio (+ `rango`, `song`); `howFor(x)`; `mouthSVG(type)` = boca animada en SVG/CSS (`lips` trino, `u`, `a`, `i`, `ma`, `ja`, `ss`); `playExample(x,velocidad)` toca una ronda con `guideTone` y textura de ruido para «brrr»/«ja»/«sss»; `speakText()` (Web Speech) para «Explícamelo»; `SPEEDS` (Lento 0.75, Normal 1, Rápido 1.15) y `spdOf(id)` = `DB['spd:'+id]`.
+- `5-coach.js`: `intro()` es la pantalla **«Cómo se hace»** (boca, pasos numerados, Escuchar ejemplo, Explícamelo, velocidad, Empezar). En la sesión diaria arranca sola a los 5 s solo si ya hiciste ese ejercicio (`DB.seen[id]`). `exercise(opt)`: HUD con fase explícita («Escucha: la app canta» / «Ahora tú: «brrr»» / «Respira»; canciones «Prepárate» / «Canta»), ronda y nº de notas, barra de progreso `#rbar`, tarjeta **«Tu nota»** `#vnote` (sube ↑ / baja ↓ / ¡Ahí! / No te oigo), chips de velocidad (cambiarla reinicia el ejercicio) y «Voz guía» en canciones; el descanso muestra un disco que respira sobre el carril (`#lane-rest`). **Auto-ajuste**: si una ronda sale < 40 %, baja a Lento y retoma desde la siguiente ronda (`drillSpec({from})` conservando las notas ya calificadas); con 2 rondas > 90 % sugiere Rápido.
+- `5-lane.js` `laneDraw`: barras «Escucha» claras y «Ahora tú» azul sólido, nombre de la nota dentro de la barra, sílaba completa arriba, brillo en la nota actual, sirenas con «Do3 → Do4», línea de tu voz de 4.5 px.
+- Karaoke (`.coach.is-song`): carril compacto (30 % del alto) y la letra grande al centro con todos los renglones; el actual (28–42 px) se centra con scroll suave y se llena sílaba por sílaba.
+- `syl` de «Tres notas» pasó de «nu» a «no».
+
 ### Rutas
 `#/` (Hoy) · `#/sesion` · `#/ejercicios` · `#/progreso` · `#/practicar/ej/<id>` · `#/practicar/afinador|rango|respiracion|metronomo` · `#/canciones` · `#/canciones/<id>` · `#/canciones/nueva` · `#/canciones/editar/<id>`.
 
