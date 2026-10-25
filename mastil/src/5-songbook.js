@@ -244,6 +244,13 @@ function linePieces(l){
 }
 /* Tonalidad a partir de TODOS los acordes (no solo el primero): cada una de las 24 tonalidades suma puntos por
    acorde que le pertenece (más si es el I, el IV o el V) y gana extra si la canción empieza o termina en su tónica. */
+/* «Tocar con un beat»: abre Roka Estudio (mastil/estudio/) con el tono, el tempo y un estilo parecido al ritmo de la banda */
+const BEAT_FROM_GROOVE={folk:'pop',pop:'pop',balada:'balada',arpegio:'balada',travis:'pop',rock:'rock',rocknroll:'rock',shuffle:'rock',country:'norteno',ranchera:'polka',vals:'vals',bolero:'bolero',cumbia:'cumbia',son:'cumbia',merengue:'cumbia',reggae:'reggaeton',bossa:'bossa',urbano:'reggaeton'};
+const US_NAMES=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+function estudioLink(pc,minor,bpm,groove,beats){
+  let g=BEAT_FROM_GROOVE[groove]||'';if(beats===3)g=g==='bolero'?'bolero':'vals';
+  return 'estudio/#/nueva?'+new URLSearchParams({tono:US_NAMES[((pc%12)+12)%12]+(minor?'m':''),bpm:String(Math.round(bpm)),genero:g,desde:'guitarra'}).toString();
+}
 function detectKey(all){
   if(!all.length)return{pc:0,minor:false,suf:''};
   const MAJ={0:'M',2:'m',4:'m',5:'M',7:'M',9:'m',11:'d'},MIN={0:'m',2:'d',3:'M',5:'m',7:'X',8:'M',10:'M'};
@@ -538,7 +545,8 @@ function viewSongPlay(id,slow){
   const panel=(k,t,h)=>`<div class="kpanel" data-p="${k}" hidden><div class="kph"><b>${t}</b><button class="kic" data-pclose aria-label="Cerrar">${IC.x||'×'}</button></div>${h}</div>`;
   return{title:P.title,back:slow?'#/practicar/lento':'#/cancionero',html:`<div class="kplay">
   <div class="kamb" aria-hidden="true">${coverHTML(P.title,s.mine||s.top?P.artist:'')}</div>
-  <div class="khead">${coverHTML(P.title,s.mine||s.top?P.artist:'',1)}<div class="kht"><span class="eyebrow">${esc(P.artist||'Tu canción')}</span><h2>${esc(P.title)}</h2><small class="kmeta" id="kmeta"></small></div>${s.mine||s.trad&&P.hasMel?`<button class="btn sm" id="kretoplay">Jugar como reto</button>`:''}${s.mine?`<a class="kic" href="#/cancionero/editar/${id}" aria-label="Editar canción">${KIC.edit}</a>`:s.top?`<a class="btn sm pri" href="#/cancionero/editar/${id}">${IC.plus}Letra</a>`:''}</div>
+  <div class="khead">${coverHTML(P.title,s.mine||s.top?P.artist:'',1)}<div class="kht"><span class="eyebrow">${esc(P.artist||'Tu canción')}</span><h2>${esc(P.title)}</h2><small class="kmeta" id="kmeta"></small></div>${s.mine?`<a class="kic" href="#/cancionero/editar/${id}" aria-label="Editar canción">${KIC.edit}</a>`:s.top?`<a class="btn sm pri" href="#/cancionero/editar/${id}">${IC.plus}Letra</a>`:''}</div>
+  <div class="kextra">${s.mine||s.trad&&P.hasMel?`<button class="btn sm" id="kretoplay">Jugar como reto</button>`:''}<button class="btn sm" id="kbeatgo">Tocar con un beat</button></div>
   ${s.top?`<div class="card note">Esta es solo la <b>progresión principal</b> para practicar con la banda. Para tener la canción completa con letra, toca <b>Letra</b>.</div>`:''}
   <div class="ktools" role="toolbar" aria-label="Ajustes de la canción">${tool('tono','Tono')}${tool('tempo','Tempo')}${tool('son','Sonido')}${tool('grab','Grabación')}${tool('rep','Repetir')}${tool('mas','Ritmo')}</div>
   <div class="kpanels card kctl" hidden>
@@ -566,6 +574,7 @@ function viewSongPlay(id,slow){
   </div>`,
   mount(r){
     const kr=$('#kretoplay',r);if(kr)kr.onclick=()=>{RETO_PICK='song:'+id+':'+st.shift;location.hash='#/practicar/reto'};
+    const kb=$('#kbeatgo',r);if(kb)kb.onclick=()=>{location.href=estudioLink(P.key.pc+st.shift,!!P.key.minor,st.bpm,gid(),st.beats)};
     coverWatch(r);
     const toolVals=()=>{const set=(k,v)=>{const e=$('#kt-'+k,r);if(e)e.textContent=v};
       set('tono',keyLbl());set('tempo',Math.round(st.bpm*(st.sp||1)));set('son',KAR.band?'Música':'Silencio');set('grab',O.use&&O.blob?'Tuya':'Banda');set('rep',st.loop?st.loop+(st.loop>1?' renglones':' renglón'):'No');set('mas',BSTYLES[gid()]);

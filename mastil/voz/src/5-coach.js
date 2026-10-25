@@ -59,6 +59,13 @@ function buildSession(d=today()){
   DB.sess={d,i:0,res:[],steps,rest,minutes:Math.ceil((seconds+gaps*rest)/60),secs:0,lvl,startRange:DB.range?{...DB.range}:null,startStreak:streak(),hadDay:!!DB.days[d],gained:0};save();return DB.sess;
 }
 function bestStreak(){let best=0,n=0,prev=null;Object.keys(DB.days).filter(d=>DB.days[d]).sort().forEach(d=>{const t=new Date(d+'T12:00:00');if(prev){const next=new Date(prev);next.setDate(next.getDate()+1);n=today(next)===d?n+1:1}else n=1;prev=t;best=Math.max(best,n)});return best}
+// «Tocar con un beat»: abre Roka Estudio con el tono de la canción ya ajustado a tu voz y su tempo
+function estudioHref(S){
+  const L=S.lines.find(l=>l.syl&&l.syl.some(x=>x.ch)),ch=L&&L.syl.find(x=>x.ch).ch,m=ch&&ch.match(/^([A-G])([#b]?)(m(?!aj))?/);
+  const US=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],sh=DB['shift:'+S.id]??songShift(S);
+  const pc=m?CHPC[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0):0;
+  return '../estudio/#/nueva?'+new URLSearchParams({tono:US[(((pc+sh)%12)+12)%12]+(m&&m[3]?'m':''),bpm:String(S.bpm),genero:S.beats===3?'vals':'balada',desde:'voz'}).toString();
+}
 let COACH=null,COACH_AUTOSTART=false;
 /* Un controlador por vista: el micrófono pertenece a toda la sesión. */
 function viewCoach(options={}){
@@ -108,7 +115,7 @@ function viewCoach(options={}){
       shell(`<div class="coach-center coach-how"><span class="eyebrow">Paso ${index+1} de ${steps.length} · Cómo se hace</span><h1>${esc(x.t)}</h1>
         <div class="how-top">${mouthSVG(h.mouth)}<p class="coach-syllable">${x.song?'Canta la letra':x.breath?'Con «sss»':'Canta «'+esc(x.syl)+'»'}</p></div>
         <ol class="how-steps">${h.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>${h.fix?`<p class="cap">${esc(h.fix)}</p>`:''}
-        <div class="row how-actions">${x.id!=='rango'?`<button class="btn" data-coach="example">${IC.sound}<span>Escuchar ejemplo</span></button>`:''}${HAS_TTS?`<button class="btn" data-coach="explain">${IC.voice}<span>Explícamelo</span></button>`:''}</div>
+        <div class="row how-actions">${x.id!=='rango'?`<button class="btn" data-coach="example">${IC.sound}<span>Escuchar ejemplo</span></button>`:''}${HAS_TTS?`<button class="btn" data-coach="explain">${IC.voice}<span>Explícamelo</span></button>`:''}${x.song?`<a class="btn" href="${estudioHref(x.song)}">${IC.note}<span>Tocar con un beat</span></a>`:''}</div>
         ${speed?speedHTML(id):''}
         <button class="kplayb how-go" data-coach="now">${IC.play}<span>Empezar</span></button>${auto?'<p class="cap" id="count" aria-live="polite">Empieza solo en 5 s</p>':''}</div>`);
       if(auto)timer(5,n=>{const c=$('#count',root);if(c)c.textContent='Empieza solo en '+Math.ceil(n)+' s'},()=>exercise());

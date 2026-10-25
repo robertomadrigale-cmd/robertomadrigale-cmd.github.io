@@ -260,6 +260,7 @@ function viewTracks(){
   <div class="card"><span class="cl">Acordes · <span id="tstat">detenida</span></span><div class="strip" id="tchips">${trkChips(-1)}</div>
    <p class="cap" style="margin:0 0 10px" id="ttip"></p><div id="tboard">${trkScaleBoard(-1)}</div>
    <p class="cap">Rojo: raíz del acorde que suena. Ámbar: notas del acorde. Tenue: el resto de la escala sugerida.</p></div>
+  <div class="row" style="justify-content:center"><button class="btn" id="tbeatgo">Tocar con un beat en Roka Estudio</button></div>
   ${toolDock(`<span class="tm" id="tdm"></span><div class="ktrans"><button class="kic" data-b="-5" aria-label="Más lento">${IC.minus}</button><button class="kplayb" id="tgo"></button><button class="kic" data-b="5" aria-label="Más rápido">${IC.plus}</button></div><span></span>`)}
   </div>`,
   mount(r){
@@ -274,6 +275,7 @@ function viewTracks(){
     go.onclick=()=>{if(running())seqStop();else{OWNER='tool';trkStart(ui)}paint()};
     $$('[data-b]',r).forEach(b=>b.onclick=()=>{TRK.bpm=Math.max(50,Math.min(200,TRK.bpm+ +b.dataset.b));paint()});
     $$('[data-set]',r).forEach(b=>b.onclick=()=>{const k=b.dataset.set;TRK[k]=k==='k'?+b.dataset.v:b.dataset.v;if(k==='st')TRK.bpm=STYLES[TRK.st].bpm;$$(`[data-set="${k}"]`,r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));tip();restart();paint();if(!running())ui(-1,'')});
+    $('#tbeatgo',r).onclick=()=>{location.href=estudioLink(KEYS[TRK.k].pc,['menor','andaluza','dorico'].includes(TRK.p),TRK.bpm,TRK.st==='ranchera'?'ranchera':TRK.st,TRK.st==='ranchera'?3:4)};
     const h=()=>paint();document.addEventListener('playstate',h);tip();paint();
     return()=>{document.removeEventListener('playstate',h);if(SEQ.id==='trk'&&OWNER==='tool')SEQ.ui=null};
   }};
