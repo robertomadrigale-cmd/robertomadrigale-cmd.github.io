@@ -129,7 +129,7 @@ function viewBand(q){
       ['sty','Estilo de la banda','<div id="bsty"></div>'],['tempo','Tempo',tempoBox('bbpm',st.bpm+' bpm')],
       ['snd','Sonido',`<div class="chips"><button class="chip" data-o="click" aria-pressed="true">Click</button><button class="chip" data-o="guide" aria-pressed="false">Batería guía</button></div><p class="cap">La batería guía toca el groove por ti para escucharlo; apágala para tocarlo tú.</p>`]])}
     <div class="card"><div class="gridbox" id="bgrid"></div><p class="cap" id="bch"></p></div>
-    <a class="btn studio" id="bstudio" href="#">${IC.studio}Grabar en Roka Estudio</a>
+    <a class="btn studio" id="bstudio" href="#">${IC.studio}Grabar en Om Estudio</a>
     ${toolDock(`<button class="kplayb" id="bgo"></button>`)}</div>`,
   mount(r){
     let res=null,busy=false;

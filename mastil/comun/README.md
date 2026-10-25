@@ -1,6 +1,6 @@
-# Núcleo compartido de la familia Roka (`mastil/comun/`)
+# Núcleo compartido de la familia Om (`mastil/comun/`)
 
-Código que las apps concatenan ANTES del suyo al construir (hoy: Roka Estudio; mañana: bajo, batería, teclado). No se publica por separado (`firebase.json` ignora `comun/**`; queda dentro de cada `index.html`).
+Código que las apps concatenan ANTES del suyo al construir (hoy: Om Estudio y Om Batería; mañana: bajo y teclado). No se publica por separado (`firebase.json` ignora `comun/**`; queda dentro de cada `index.html`).
 
 | Archivo | Qué da |
 |---|---|
@@ -10,6 +10,7 @@ Código que las apps concatenan ANTES del suyo al construir (hoy: Roka Estudio; 
 | `src/4-theory.js` | `NOTE_ES`, `parseKey('Sib'|'La m'|'C')`, `chordOf(grado,tono,menor)` (I, ii, V7, ♭VII, Imaj7…), `chordTones`, `chordLabel`, `pcIn`. |
 | `src/5-beats.js` | `BEATS` (15 estilos con partes A/B/relleno escritas celda por celda), `beatById`, `BEAT_GENRES`, `beatCheck` (valida patrones). |
 | `src/6-render.js` | `renderBeat({id,parte,compases,bpm,tono,prog,seed,entrada})` → AudioBuffers separados `bateria`, `bajo`, `armonia`, `metales` + `dur` + `acordes`. Humanización con semilla (±5 ms, ±8 % de fuerza). |
+| `src/7-marca.js` | Marca visible compartida: `omLogo({color,size})` y `automatiaMark()`. El nombre interno de carpetas, claves y cachés no cambia. |
 
 ## Packs y licencias
 Guitarra y bajo: tonejs-instruments (CC BY 3.0). Batería: AVL Drumkits «Black Pearl» (CC BY-SA 3.0). Metales, piano y órgano: VSCO 2 CE (CC0). Todo en `mastil/samples/` con su `LICENCIA.txt`. Para agregar un pack: archivos en `samples/<carpeta>/`, entrada en `PACKS` con `licencia`, `autor`, `url`, `credito` y `notas:{midi:{archivo,cents}}` o `golpes:{nombre:archivo}`. Solo material que permita redistribuir (nada «royalty free» que lo prohíba).

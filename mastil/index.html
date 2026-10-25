@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Roka Guitar for All</title>
+<title>Om Guitarra</title>
 <meta name="description" content="Teoría visual para guitarra con ejercicios, metrónomo, afinador, juego del mástil y pistas para improvisar.">
 <!-- vista previa al compartir el link (WhatsApp, Facebook, X) -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Roka Guitar for All">
-<meta property="og:title" content="Roka Guitar for All · Aprende guitarra viendo el mástil">
+<meta property="og:site_name" content="Om Guitarra">
+<meta property="og:title" content="Om Guitarra · Aprende guitarra viendo el mástil">
 <meta property="og:description" content="Lecciones paso a paso, canciones con karaoke y acordes, una banda que te acompaña, afinador y metrónomo. Gratis en tu celular.">
 <meta property="og:url" content="https://rokaguitarrall.web.app/">
 <meta property="og:image" content="https://rokaguitarrall.web.app/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Roka Guitar for All: aprende guitarra viendo el mástil">
+<meta property="og:image:alt" content="Om Guitarra · Centro de aprendizaje musical">
 <meta property="og:locale" content="es_MX">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Roka Guitar for All · Aprende guitarra viendo el mástil">
+<meta name="twitter:title" content="Om Guitarra · Aprende guitarra viendo el mástil">
 <meta name="twitter:description" content="Lecciones, karaoke con acordes, banda que te acompaña, afinador y metrónomo. Gratis.">
 <meta name="twitter:image" content="https://rokaguitarrall.web.app/og.jpg">
 <meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
@@ -28,7 +28,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Roka Guitar">
+<meta name="apple-mobile-web-app-title" content="Om Guitarra">
 <style>
 /* Concept: estudio nocturno — mástil como regla visual, barras de vidrio, ámbar para lo que se toca y rojo para la raíz. */
 @font-face{font-family:'Barlow Condensed';font-weight:800;font-display:swap;src:url(fonts/barlow-condensed-latin-800-normal.woff2) format('woff2')}
@@ -1133,7 +1133,7 @@ html.welcome-on{overflow:hidden}
 </style>
 </head>
 <body>
-<noscript>Activa JavaScript para usar Roka Guitar for All.</noscript>
+<noscript>Activa JavaScript para usar Om Guitarra.</noscript>
 <script>
 /* Configuración de Firebase para la cuenta en la nube y el modo maestro.
    Mientras sea null, la app funciona igual que siempre y no muestra nada de cuentas.
@@ -2206,7 +2206,7 @@ function welcomeShow(){
   for(let i=0;i<24;i++){const l=i%11+1;tiles.push(i%3===1?coverArt(H[i%12],ARTM[(i*5)%11+1],null,'w'+i):lessonArt(l))}
   document.body.insertAdjacentHTML('beforeend',`<div id="welcome" role="dialog" aria-modal="true" aria-labelledby="wtitle">
    <div class="wmos" aria-hidden="true">${tiles.map(t=>`<span class="acov">${t}</span>`).join('')}</div><div class="wfade" aria-hidden="true"></div>
-   <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">Roka Guitar<br>for All</h1>
+    <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">Om Guitarra</h1>
     <p class="wsub">Aprende guitarra viendo el mástil: lecciones, canciones con karaoke y una banda que te acompaña.</p>
     <button class="wgoogle" data-w="google">${GLOGO}Continuar con Google</button>
     <button class="wskip" data-w="skip">Seguir sin cuenta</button>
@@ -2276,15 +2276,13 @@ function cloudMount(r){
     else if(k==='join')busy(async()=>{const n=await cloudJoin($('#clcode',r).value);toast(`Te uniste a la clase «${esc(n)}».`);cloudRefresh()});
     else if(k==='leave')busy(()=>cloudLeave());
     else if(k==='create')busy(async()=>{const n=$('#clgnew',r).value.trim();if(!n)throw{msg:'Ponle nombre a la clase.'};const c=await cloudCreateGroup(n);toast(`Clase creada. Código: ${c}`,5000);cloudRefresh()});
-    else if(k==='copy'){const c=b.dataset.code,t=`Únete a mi clase en Roka Guitar for All: abre ${location.href.split('#')[0]}#/cuenta y escribe el código ${c}`;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Invitación copiada. Pégala en WhatsApp.'),()=>toast('Código: '+c,5000))}
+    else if(k==='copy'){const c=b.dataset.code,t=`Únete a mi clase en Om Guitarra: abre ${location.href.split('#')[0]}#/cuenta y escribe el código ${c}`;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Invitación copiada. Pégala en WhatsApp.'),()=>toast('Código: '+c,5000))}
   });
 }
 cloudInit();
 
 /* ---------- logo ---------- */
-let LGN=0;
-// marca: púa en degradado metálico con una sola línea de cuerda
-const logo=()=>{const id='lgp'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".55" stop-color="#ff9f0a"/><stop offset="1" stop-color="#e2541f"/></linearGradient></defs><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58 20.6 48.6 9 33 9 20.8 9 10.6 19.5 6 32 6z" fill="url(#${id})"/><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M20 23h24" stroke="#1a1000" stroke-opacity=".55" stroke-width="2.4" stroke-linecap="round"/></svg>`};
+const logo=()=>omLogo({color:'#2f7bff'});
 /* ---------- avisos ---------- */
 function toast(html,ms){
   let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}
@@ -3230,7 +3228,7 @@ function downloadICS(time){
   const [h,m]=time.split(':').map(Number),d=new Date();d.setDate(d.getDate()+(d.getHours()*60+d.getMinutes()>=h*60+m?1:0));
   const pad=n=>String(n).padStart(2,'0'),dt=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(h)}${pad(m)}00`,now=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
   const url=location.href.split('#')[0]+'#/practicar/rutina';
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Roka Guitar for All//ES','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:practica-${Date.now()}@roka-guitar`,`DTSTAMP:${now}`,`DTSTART:${dt}`,'DURATION:PT15M','RRULE:FREQ=DAILY','SUMMARY:Practicar guitarra · Roka',`DESCRIPTION:Tu rutina de hoy: ${url}`,`URL:${url}`,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Hora de practicar guitarra','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Om Guitarra//ES','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:practica-${Date.now()}@roka-guitar`,`DTSTAMP:${now}`,`DTSTART:${dt}`,'DURATION:PT15M','RRULE:FREQ=DAILY','SUMMARY:Practicar guitarra · Om Guitarra',`DESCRIPTION:Tu rutina de hoy: ${url}`,`URL:${url}`,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Hora de practicar guitarra','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='practicar-guitarra.ics';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
   DB.remTime=time;save();toast('Abre el archivo para agregar el recordatorio a tu calendario.',4500);
 }
@@ -3243,7 +3241,7 @@ const ONB_Q=[
 function onboardShow(){
   if(document.getElementById('onb'))return;const A=Object.assign({},DB.onb&&!DB.onb.skip?DB.onb:{});
   const d=document.createElement('div');d.id='onb';d.className='onb';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','Bienvenida');
-  const paint=()=>{d.innerHTML=`<div class="onbc"><p class="eyebrow">Bienvenido a Roka Guitar for All</p><h2>Armemos tu plan</h2>
+  const paint=()=>{d.innerHTML=`<div class="onbc"><p class="eyebrow">Te damos la bienvenida a Om Guitarra</p><h2>Armemos tu plan</h2>
    ${ONB_Q.map(([k,q,os])=>`<div><span class="cl">${q}</span><div class="chips">${os.map(([v,l])=>`<button class="chip" data-onb="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join('')}</div></div>`).join('')}
    <div class="row" style="justify-content:space-between"><button class="btn sm" data-onb="skip">Ahora no</button><button class="btn pri" data-onb="go" ${ONB_Q.every(([k])=>A[k])?'':'disabled'}>Ver mi plan</button></div></div>`};
   d.addEventListener('click',e=>{const b=e.target.closest('[data-onb]');if(!b)return;const k=b.dataset.onb;
@@ -4868,7 +4866,7 @@ function viewTracks(){
   <div class="card"><span class="cl">Acordes · <span id="tstat">detenida</span></span><div class="strip" id="tchips">${trkChips(-1)}</div>
    <p class="cap" style="margin:0 0 10px" id="ttip"></p><div id="tboard">${trkScaleBoard(-1)}</div>
    <p class="cap">Rojo: raíz del acorde que suena. Ámbar: notas del acorde. Tenue: el resto de la escala sugerida.</p></div>
-  <div class="row" style="justify-content:center"><button class="btn" id="tbeatgo">Tocar con un beat en Roka Estudio</button></div>
+  <div class="row" style="justify-content:center"><button class="btn" id="tbeatgo">Tocar con un beat en Om Estudio</button></div>
   ${toolDock(`<span class="tm" id="tdm"></span><div class="ktrans"><button class="kic" data-b="-5" aria-label="Más lento">${IC.minus}</button><button class="kplayb" id="tgo"></button><button class="kic" data-b="5" aria-label="Más rápido">${IC.plus}</button></div><span></span>`)}
   </div>`,
   mount(r){
@@ -5116,7 +5114,7 @@ function songShelf(){
 function viewHome(){
   const nx=nextEx(),[d,t]=doneCount();
   const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
-  return{title:'Roka Guitar for All',html:`
+  return{title:'Om Guitarra',html:`
   <div class="brandhero brandhero-roka"><span class="logo">${logo()}</span><div class="brandhero-copy"><div class="brandhero-greeting"><span class="eyebrow">${greet()}</span><a class="roka-switch" href="roka/?cambiar">Voz</a></div><h1 class="glow">Tu práctica de hoy</h1></div></div>
   <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
     <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
@@ -5142,7 +5140,7 @@ function viewHome(){
     <div id="bkw" hidden><textarea id="bkt" rows="3" placeholder="Pega aquí el código que copiaste en tu otro dispositivo"></textarea><div class="row" style="margin-top:8px"><button class="btn sm pri" data-h="bk-load">Restaurar progreso</button><span class="cap" id="bkm" style="margin:0"></span></div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
   </div>
-  <p class="foot">Roka Guitar for All · funciona sin conexión<br>Guitarra y bajo grabados: tonejs-instruments de Nicholaus Brosowsky (licencia CC BY 3.0)<br>Batería grabada: kit Black Pearl de AVL Drumkits, Glen MacArthur (licencia CC BY-SA 3.0)</p>`,
+  <p class="foot">Om Guitarra · ${automatiaMark()} · funciona sin conexión<br>Guitarra y bajo grabados: tonejs-instruments de Nicholaus Brosowsky (licencia CC BY 3.0)<br>Batería grabada: kit Black Pearl de AVL Drumkits, Glen MacArthur (licencia CC BY-SA 3.0)</p>`,
   mount(r){
     coverWatch(r);
     if(DB.onb==null)setTimeout(()=>{if(DB.onb==null&&(!location.hash||location.hash==='#/'))onboardShow()},400);
@@ -5284,7 +5282,7 @@ function route(){
   const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
   // página nueva en cada vista: así no se acumulan los clics de vistas anteriores
   const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
-  document.title=v.title==='Roka Guitar for All'?v.title:v.title+' · Roka Guitar for All';
+  document.title=v.title==='Om Guitarra'?v.title:v.title+' · Om Guitarra';
   if(v.mount)UNMOUNT=v.mount(pg)||null;
   if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);
   paintPlayer();
@@ -5299,7 +5297,7 @@ document.addEventListener('click',e=>{
 });
 /* ---------- arranque ---------- */
 document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
- <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Guitar for All</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
+ <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Om<br>Guitarra</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
  <main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main>
 </div>
 <nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
@@ -5324,6 +5322,13 @@ if('serviceWorker' in navigator&&location.protocol!=='file:'){
     }).catch(()=>{});
   });
 }
+
+/* Marca Om. Copia local: esta app todavía no concatena mastil/comun/. */
+function omLogo({color='#2f7bff',size=64}={}){
+  omLogo.seq=(omLogo.seq||0)+1;const id='omg'+omLogo.seq,n=Number(size)||64;
+  return`<svg class="om-logo" viewBox="0 0 108 64" width="${n}" height="${Math.round(n*.6)}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="28" cy="32" r="27" stroke="${color}" stroke-width="1.5" opacity=".12"/><circle cx="28" cy="32" r="21" stroke="${color}" stroke-width="2" opacity=".3"/><circle cx="28" cy="32" r="14" stroke="${color}" stroke-width="8"/><path d="M54 47V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20" stroke="url(#${id})" stroke-width="8.5"/></g></svg>`;
+}
+function automatiaMark(){return'<span class="automatia-mark" style="white-space:nowrap">by AutomaT<span style="color:#2ec4b6">IA</span></span>'}
 
 
 </script>

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Roka Batería</title>
+<title>Om Batería</title>
 <meta name="description" content="Tu coach de batería: sesión diaria, grooves, rudimentos, precisión con el micrófono o con toques, y tocar con la banda. Gratis y sin internet.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Roka Batería">
-<meta property="og:title" content="Roka Batería · Toca a tiempo">
+<meta property="og:site_name" content="Om Batería">
+<meta property="og:title" content="Om Batería · Toca a tiempo">
 <meta property="og:description" content="Grooves que se iluminan al compás, calificación de cada golpe y una banda para tocar encima.">
 <meta property="og:locale" content="es_MX">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Roka Batería">
+<meta name="apple-mobile-web-app-title" content="Om Batería">
 <style>
 /* Concept: estudio nocturno — mástil como regla visual, barras de vidrio, ámbar para lo que se toca y rojo para la raíz. */
 @font-face{font-family:'Barlow Condensed';font-weight:800;font-display:swap;src:url(../fonts/barlow-condensed-latin-800-normal.woff2) format('woff2')}
@@ -1441,7 +1441,7 @@ html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-heigh
 </style>
 </head>
 <body>
-<noscript>Activa JavaScript para usar Roka Batería.</noscript>
+<noscript>Activa JavaScript para usar Om Batería.</noscript>
 <script>
 /* Roka audio v1: independiente de DOM, sesiones y controles de cualquier app. */
 const RokaAudio = (() => {
@@ -1727,6 +1727,13 @@ async function renderBeat(o){
   return{bateria,bajo,armonia,metales,dur:comp*L*step,acordes:chords.map(c=>chordLabel(c)),beat:b};
 }
 
+/* Marca Om compartida. El anillo toma el color de cada app; la m conserva el degradado de la familia. */
+function omLogo({color='#2f7bff',size=64}={}){
+  omLogo.seq=(omLogo.seq||0)+1;const id='omg'+omLogo.seq,n=Number(size)||64;
+  return`<svg class="om-logo" viewBox="0 0 108 64" width="${n}" height="${Math.round(n*.6)}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="28" cy="32" r="27" stroke="${color}" stroke-width="1.5" opacity=".12"/><circle cx="28" cy="32" r="21" stroke="${color}" stroke-width="2" opacity=".3"/><circle cx="28" cy="32" r="14" stroke="${color}" stroke-width="8"/><path d="M54 47V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20" stroke="url(#${id})" stroke-width="8.5"/></g></svg>`;
+}
+function automatiaMark(){return'<span class="automatia-mark" style="white-space:nowrap">by AutomaT<span style="color:#2ec4b6">IA</span></span>'}
+
 /* ---------- Roka Batería: utilidades, datos del usuario, racha y temas ---------- */
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1817,9 +1824,8 @@ const TKIC={tempo:TI('<path d="M8 21h8l-1.5-15h-5z"/><path d="M12 14l5-9"/>'),me
   mic:TI('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),mode:TI('<path d="M4 12h4l3-7 3 14 3-7h3"/>'),tol:TI('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'),key:TI('<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'),
   style:TI('<path d="M4 20V10M9 20V4M14 20v-8M19 20V7"/>'),drum:TI('<ellipse cx="12" cy="9" rx="8" ry="3"/><path d="M4 9v6c0 1.7 3.6 3 8 3s8-1.3 8-3V9"/>'),gap:TI('<path d="M4 12h3M10 12h4M17 12h3"/>'),dur:TI('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>')};
 const chipRow=(k,label,opts,cur)=>`<div><span class="cl">${label}</span><div class="chips">${opts.map(o=>`<button class="chip" data-set="${k}" data-v="${o.v}" aria-pressed="${String(o.v)===String(cur)}">${o.l}${o.s?`<i>${o.s}</i>`:''}</button>`).join('')}</div></div>`;
-/* ---------- logo: tambor con baquetas, azul a rosa ---------- */
-let LGN=0;
-const logo=()=>{const id='lgv'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b9cff"/><stop offset=".55" stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="16" fill="url(#${id})"/><g fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"><path d="M14 12l22 17M50 12L28 29"/><rect x="13" y="32" width="38" height="19" rx="3"/><path d="M23 40v11M32 40v11M41 40v11"/></g><ellipse cx="32" cy="33" rx="19" ry="5" fill="#fff"/></svg>`};
+/* ---------- logo Om ---------- */
+const logo=()=>omLogo({color:'#ff5a5a'});
 /* ---------- portadas abstractas (luz difusa + trazo + número), como los discos de Roka Guitar ---------- */
 function coverArt(h,motif,label,uid){
   const h2=(h+44)%360,g='ca'+uid;
@@ -2706,7 +2712,7 @@ function viewBand(q){
       ['sty','Estilo de la banda','<div id="bsty"></div>'],['tempo','Tempo',tempoBox('bbpm',st.bpm+' bpm')],
       ['snd','Sonido',`<div class="chips"><button class="chip" data-o="click" aria-pressed="true">Click</button><button class="chip" data-o="guide" aria-pressed="false">Batería guía</button></div><p class="cap">La batería guía toca el groove por ti para escucharlo; apágala para tocarlo tú.</p>`]])}
     <div class="card"><div class="gridbox" id="bgrid"></div><p class="cap" id="bch"></p></div>
-    <a class="btn studio" id="bstudio" href="#">${IC.studio}Grabar en Roka Estudio</a>
+    <a class="btn studio" id="bstudio" href="#">${IC.studio}Grabar en Om Estudio</a>
     ${toolDock(`<button class="kplayb" id="bgo"></button>`)}</div>`,
   mount(r){
     let res=null,busy=false;
@@ -2826,7 +2832,7 @@ function grooveAlb(id){
 function viewHome(){
   const s=buildSession(),done=s.i>=s.steps.length,lvl=currentLevel(),label=done?'Resumen':s.i||s.res.some(Boolean)?'Continuar':'Empezar';
   const wa=weekAcc(),old=oldProgress()&&!DB.imported,nx=ALLEX.find(x=>!DB.done[x.id]);
-  return{title:'Hoy',html:`<div class="coach-greeting"><a class="guitar-pill" href="../roka/?cambiar">Familia Roka</a><span class="eyebrow">${greet()}</span><span class="coach-pill">${streak()===1?'1 día':streak()+' días'} de racha</span><h1>Tu sesión de hoy</h1><p>Nivel ${lvl} · ${LEVELS[lvl]}</p></div>
+  return{title:'Hoy',html:`<div class="coach-greeting"><a class="guitar-pill" href="../roka/?cambiar">Familia Om</a><span class="eyebrow">${greet()}</span><span class="coach-pill">${streak()===1?'1 día':streak()+' días'} de racha</span><h1>Tu sesión de hoy</h1><p>Nivel ${lvl} · ${LEVELS[lvl]}</p></div>
     ${old?`<section class="card importc"><div><h2>Traer tu progreso de Pulso a la Vista</h2><p class="cap">Encontramos tu práctica de la app anterior en este teléfono: lecciones hechas, días, pruebas del medidor, setlist y calibración. Se suma sin borrar nada.</p></div><div class="row"><button class="btn pri" data-imp="1">${IC.down}Traer mi progreso</button><button class="btn" data-imp="0">Ahora no</button></div></section>`:''}
     <section class="card session-card"><div class="session-art">${grooveArt(s.steps[1].id)}</div><div class="session-content"><span class="eyebrow">Tu sesión de hoy · unos 10 min</span><h2>${done?'Hoy ya sonaste':'Manos sueltas. Pulso firme.'}</h2><p class="cap">Calienta, toca el groove del día, mide tu precisión y toca con la banda. Avanza sola.</p>
       <ol class="session-steps">${s.steps.map((x,i)=>{const r=s.res[i],ok=r&&!r.skipped;return`<li class="${ok?'done':''}"><span>${ok?IC.check:i+1}</span><b>${KIND[x.k][0]}: ${esc(G[x.id].n)}</b>${r?`<small>${r.skipped?'Saltado':Math.round(r.p*100)+' %'}</small>`:''}</li>`}).join('')}</ol>
@@ -2835,7 +2841,7 @@ function viewHome(){
     ${nx?`<a class="card dtool" href="#/leccion/${nx.lesson}"><span class="ic">${IC.book}</span><span><b>Continuar: ${esc(nx.t)}</b><small>Lección ${nx.lesson} · ${esc(LESSONS.find(l=>l.id===nx.lesson).title)}</small></span></a>`:''}
     <section><div class="sech"><h2>Grooves de tu nivel</h2><a class="coach-link" href="#/grooves">Ver todos</a></div><div class="shelf">${LVL[lvl].map(grooveAlb).join('')}</div></section>
     <section><h2>Herramientas</h2>${toolList()}</section>
-    <p class="foot">Roka Batería · tu progreso se guarda en este dispositivo · <a href="#/ajustes">Ajustes y créditos</a></p>`,
+    <p class="foot">Om Batería · ${automatiaMark()} · tu progreso se guarda en este dispositivo · <a href="#/ajustes">Ajustes y créditos</a></p>`,
   mount(r){
     r.addEventListener('click',e=>{const b=e.target.closest('[data-imp]');if(!b)return;if(b.dataset.imp==='1'){importOld();toast('Listo: tu progreso de Pulso a la Vista ya está aquí.')}else{DB.imported=-1;save()}route()});
     const t=setTimeout(()=>{if(DB.onb==null)onboardShow()},400);return()=>{clearTimeout(t);$('#onb')?.remove()};
@@ -2936,7 +2942,7 @@ function viewSettings(){
     <section class="card coach-settings"><h2>Micrófono</h2><p class="cap">${DB.lat!=null?'Retraso medido: '+Math.round(DB.lat*1000)+' ms.':'Sin calibrar.'} Calibra en el medidor (Ajustes del micrófono).</p><a class="btn" href="#/practicar/precision">${IC.target}Ir al medidor</a></section>
     ${oldProgress()?`<section class="card coach-settings"><h2>Pulso a la Vista</h2><p class="cap">${DB.imported>0?'Ya trajiste tu progreso de la app anterior.':'Hay progreso de la app anterior en este dispositivo.'}</p><button class="btn" data-imp>${IC.down}Traer mi progreso</button></section>`:''}
     <section class="card coach-settings"><h2>Créditos</h2><p class="cap">Batería grabada: «${esc(k.nombre)}» de ${esc(k.autor)}, licencia ${k.licencia} (<a href="${k.url}" target="_blank" rel="noopener">${k.url}</a>). ${esc(k.credito)} Bajo y guitarra de la banda: tonejs-instruments (CC BY 3.0); metales, piano y órgano: VSCO 2 CE (CC0).</p>
-      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Roka Batería es parte de la familia Roka (guitarra, voz, estudio).</p></section>`,
+      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Om Batería es parte de la familia Om (guitarra, voz, estudio).</p></section>`,
   mount(r){
     r.addEventListener('change',e=>{const k=e.target.dataset.pref;if(!k)return;DB[k]=k==='clickVol'?+e.target.value:e.target.value;save();if(k==='theme')applyTheme()});
     let un=null;
@@ -2976,10 +2982,10 @@ function route(){
   const section=p[0]==='groove'?'grooves':p[0]==='leccion'||p[0]==='glosario'?'lecciones':p[0]==='sesion'?'':p[0];
   $$('[data-nav]').forEach(a=>{if(a.dataset.nav===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   $('#ttl').textContent=v.title;const back=$('#back');back.hidden=!v.back;if(v.back)back.href=v.back;
-  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;document.title=v.title+' · Roka Batería';
+  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;document.title=v.title+' · Om Batería';
   if(v.mount)UNMOUNT=v.mount(pg)||null;window.scrollTo(0,0);
 }
-document.body.insertAdjacentHTML('afterbegin',`<div class="shell"><nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Batería</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav><main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span><a class="icon-btn" href="#/ajustes" aria-label="Ajustes">${IC.cog}</a></div></header><div class="page" id="page"></div></main></div><nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
+document.body.insertAdjacentHTML('afterbegin',`<div class="shell"><nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Om<br>Batería</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav><main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span><a class="icon-btn" href="#/ajustes" aria-label="Ajustes">${IC.cog}</a></div></header><div class="page" id="page"></div></main></div><nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
 save();window.addEventListener('hashchange',route);route();
 /* Actualizaciones: busca versión nueva al abrir y al volver a la app; avisa cuando está lista. */
 function showUpdate(){

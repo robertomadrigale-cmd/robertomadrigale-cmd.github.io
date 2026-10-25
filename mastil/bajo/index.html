@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Om Bajo</title><meta name="description" content="Aprende bajo de cuatro o cinco cuerdas: lecciones paso a paso, afinador, banda y retos de ritmo."><meta name="theme-color" content="#08090d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Om Bajo"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png" type="image/png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><style>
+:root{color-scheme:dark;--bg:#08090d;--surface:#13151d;--soft:#1c202c;--fg:#f4f5fa;--muted:#a9afc1;--line:#303646;--accent:#2f7bff;--pink:#ff66af;--good:#43d9ab;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;background:var(--bg);color:var(--fg)}
+:root[data-theme=claro]{color-scheme:light;--bg:#f4f5fa;--surface:#fff;--soft:#e6eaf4;--fg:#171c2d;--muted:#505b72;--line:#c5cede;--good:#08744d}
+*{box-sizing:border-box}body{margin:0;line-height:1.6;background:radial-gradient(ellipse at 85% 0,#2f7bff12,transparent 35%)}a{color:#7aafff;text-underline-offset:4px}:root[data-theme=claro] a{color:#165ac6}button,input,select{font:inherit}button,.button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 15px;border:1px solid var(--line);border-radius:999px;background:var(--soft);color:var(--fg);text-decoration:none;font-weight:650;white-space:nowrap;cursor:pointer;max-width:100%;font-size:.875rem}button:hover,.button:hover{filter:brightness(1.15)}button:disabled{opacity:.55;cursor:wait}.primary,a.primary{background:var(--accent);color:white;border-color:transparent;box-shadow:0 8px 25px #2f7bff25}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--pink);outline-offset:3px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.12;letter-spacing:-.045em;margin-bottom:16px}h2{font-size:1.45rem;line-height:1.25;letter-spacing:-.025em}h3{font-size:1.12rem;line-height:1.35;margin:0}p,li{overflow-wrap:break-word}small,.caption{font-size:.8rem;color:var(--muted)}.eyebrow{font-size:.68rem;letter-spacing:.17em;font-weight:750;color:var(--muted);margin-bottom:12px}.appbar{max-width:1120px;margin:auto;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px}.appbar>a:last-child{font-size:.75rem;white-space:nowrap;color:var(--muted)}.brand{color:var(--fg)!important;text-decoration:none;font-weight:850;letter-spacing:.04em;font-size:1.15rem;white-space:nowrap}.brand{display:inline-flex;align-items:center;gap:8px}.brand span{color:#34d399;font-weight:550;letter-spacing:.02em}.omword{color:#34d399;font-weight:850;letter-spacing:0}.sign{color:var(--muted)}.amark{white-space:nowrap;font-weight:650;color:var(--muted)}.amark .ia{color:#2ec4b6}.skip{position:absolute;top:-100px;left:10px;background:var(--surface);z-index:20}.skip:focus{top:10px}#page{width:100%;max-width:1120px;margin:auto;padding:28px 28px 130px;min-height:80vh;outline:none}nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:6px;padding:12px 8px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line);z-index:10}nav a{color:var(--muted)!important;text-decoration:none;font-size:.8rem;font-weight:650;padding:10px 16px;border-radius:30px;white-space:nowrap}nav a[aria-current]{color:white!important;background:var(--accent)}#notice{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--soft);box-shadow:0 10px 30px #0008;max-width:calc(100% - 24px);width:max-content;border-radius:14px;padding:12px 18px;z-index:30;font-size:.9rem}#notice:empty{display:none}.homehead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:12px 0 28px}.homehead h1 span{display:block;font-weight:450;font-size:.49em;letter-spacing:-.015em;margin-top:12px;color:var(--muted)}.hero{display:grid;grid-template-columns:minmax(180px,36%) minmax(0,1fr);overflow:hidden;border-radius:24px;background:linear-gradient(110deg,#182d5b,var(--surface));border:1px solid var(--line);align-items:center;margin-bottom:40px}.heroart{padding:28px}.heroart svg{width:100%;display:block;border-radius:16px;box-shadow:0 20px 45px #0007;transform:rotate(-5deg)}.herotext{padding:28px 28px 28px 10px;min-width:0}.herotext h2{font-size:clamp(1.7rem,3.5vw,2.8rem)}.herotext>p:not(.eyebrow){color:var(--muted)}.herotext .caption{margin:18px 0 0}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:34px 0 18px}.sectionhead h2{margin:0}.sectionhead a{font-size:.8rem;white-space:nowrap}.toolgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.toolcard{display:grid;grid-template-columns:58px minmax(0,1fr);gap:2px 12px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;text-decoration:none;color:var(--fg)!important;align-items:center}.toolcard>div{grid-row:span 2}.toolcard svg{display:block;width:100%;border-radius:10px}.toolcard b{font-size:.9rem;line-height:1.25}.toolcard span{color:var(--muted);font-size:.75rem}.albums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 20px;margin:22px 0 36px}.album{display:flex;flex-direction:column;gap:5px;color:var(--fg)!important;text-decoration:none;min-width:0}.cover{position:relative;isolation:isolate;overflow:hidden;border-radius:15px;aspect-ratio:1;margin-bottom:8px}.cover svg{display:block;width:100%}.covernum{position:absolute;bottom:12px;right:14px;font-size:2rem;font-weight:800;color:#fff;line-height:1}.album>small{font-size:.65rem;letter-spacing:.04em}.album>b{font-size:1rem;line-height:1.25}.album>span{font-size:.78rem;color:var(--muted)}progress{height:4px;width:100%;border:0;background:var(--soft);accent-color:var(--accent);margin-top:8px}progress::-webkit-progress-bar{background:var(--soft)}progress::-webkit-progress-value{background:var(--accent)}.panel{padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--surface);margin:24px 0;min-width:0}.welcome p{max-width:75ch}footer{font-size:.75rem;color:var(--muted);margin:38px 0 0}footer p{margin-top:12px}.toolhead,.lessonhead{display:flex;align-items:center;gap:24px;position:relative;isolation:isolate;margin:12px 0 28px}.toolhead:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,#2f7bff33,transparent 70%);z-index:-1;pointer-events:none}.toolhead>div:last-child,.lessonhead>div:last-child{min-width:0}.toolhead p,.lessonhead p{margin-bottom:0;color:var(--muted)}.toolart,.lessonart{width:120px;flex-shrink:0}.toolart svg,.lessonart svg{display:block;border-radius:16px;width:100%}.back{font-size:.8rem;display:inline-block;margin-bottom:14px}.lessonbody{max-width:880px}.lessonblock{margin:36px 0;padding:0 0 26px;border-bottom:1px solid var(--line)}.lessonblock li{margin-bottom:10px}.lessonblock.narrating{border-left:3px solid var(--accent);padding-left:14px}.keyblock{border:1px solid #2f7bff70;border-radius:16px;padding:22px;background:#2f7bff0d}.keyblock p:last-child{margin:0}.exercise{background:var(--surface);padding:24px;border:1px solid var(--line);border-radius:20px;min-width:0}.exheading{display:flex;gap:12px;align-items:center}.exnum{width:36px;height:36px;display:grid;place-items:center;flex:none;background:var(--soft);border-radius:50%;font-weight:750}.exbadge{color:var(--good)}.steps{padding-left:24px;margin-top:20px}.steps li{padding-left:4px}.goal{border-left:3px solid var(--good);padding:8px 12px;background:#43d9ab09;font-size:.9rem}.boardscroll{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border-radius:12px;background:var(--bg);border:1px solid var(--line)}.fretboard{width:100%;min-width:740px;display:block;color:var(--muted)}.fretboard text{fill:var(--muted);font-size:12px}.string{stroke:var(--muted);opacity:.55}.fret{stroke:var(--line)}.dot>circle{fill:var(--accent)}.dot.root>circle{fill:#d83783}.dot text{fill:white;font-weight:650}.dot>circle.finger{fill:#e6eeff;stroke:#132343;stroke-width:1}.dot text.fingertext{fill:#132343;font-size:10px}.dot.playing>circle{fill:var(--pink);stroke:white;stroke-width:2}.tab{max-width:100%;overflow:auto;font-size:.9rem;padding:15px;background:var(--bg);border-radius:12px;line-height:2}.figbar,.figstep,.dock,.lessonnav{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:16px 0}.figstep .where{flex:1 1 100%;font-size:.85rem;color:var(--muted)}.figstatus{font-size:.85rem;color:var(--muted);margin-top:16px}.controls{display:flex;flex-wrap:wrap;align-items:end;gap:16px;margin:20px 0}.controls>label{flex:1 1 140px;min-width:0}label{display:flex;flex-direction:column;gap:7px;font-size:.85rem;color:var(--muted)}select,input[type=number]{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;max-width:100%;min-width:0;min-height:44px}.toggle{flex-direction:row;align-items:center;gap:9px;min-height:44px}.toggle input{width:20px;height:20px;accent-color:var(--accent);flex:none}.pulse{display:flex;gap:10px;justify-content:center;margin:22px 0}.pulse span{width:44px;max-width:14%;height:44px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:750}.pulse span.on{background:var(--accent);color:white;box-shadow:0 0 20px #2f7bff65}.pulse span:first-child.on{background:#d83783}.notechips{display:flex;flex-wrap:wrap;gap:6px}.notechips>span{display:flex;flex-direction:column;align-items:center;min-width:40px;border:1px solid var(--line);border-radius:10px;font-size:.8rem;padding:5px}.notechips>span.playing{border-color:var(--pink);background:#ff66af20}.notechips>span.hit{background:#14734f;color:white}.notechips small{font-size:.65rem}.check{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:10px 0;padding:16px}.check summary{cursor:pointer;font-weight:600}.check p{margin:16px 0 0;color:var(--muted)}.dock{position:sticky;bottom:80px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;z-index:3}.dock #status{flex:1 1 100%;font-size:.8rem;color:var(--muted)}.dock #status:empty{display:none}.bigtempo{font-size:5rem;font-weight:700;text-align:center;letter-spacing:-.05em}.bigtempo small{font-size:1rem;letter-spacing:0;padding-left:10px}.strings{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.tuner{text-align:center;padding:24px 0}.tuner strong,.chordnow strong{font-size:3.5rem;line-height:1.3;letter-spacing:-.04em;display:block}.good{color:var(--good)}.meter{height:16px;position:relative;background:linear-gradient(90deg,#bd476e,var(--good),#bd476e);border-radius:10px;margin:30px 10px 8px}.meter i{position:absolute;left:50%;top:-9px;height:34px;width:4px;background:var(--fg);transform:translateX(-50%)}.meterlabels{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);gap:10px}.chordnow{text-align:center;margin:25px 0}.chordnow p{color:var(--muted)}.game{background:#0a0c14;border-radius:18px;overflow:hidden;margin-top:20px}.game svg{display:block;width:100%;min-height:230px;max-height:440px}.lanebuttons{display:grid;grid-template-columns:repeat(var(--lanes),minmax(0,1fr));gap:6px;margin:12px 0}.lanebuttons button{padding:8px 2px;font-size:.85rem;touch-action:manipulation;user-select:none}.settings>label{margin:24px 0 10px}.settings p{max-width:70ch}.studio-link{font-size:.8rem}.lessonnav{justify-content:space-between}.narrating{scroll-margin-top:20px}
+@media(max-width:800px){.albums{grid-template-columns:repeat(2,minmax(0,1fr))}.toolgrid{grid-template-columns:1fr}.toolcard{grid-template-columns:54px minmax(0,1fr)}.toolcard b{font-size:1rem}.hero{grid-template-columns:minmax(130px,35%) minmax(0,1fr)}.heroart{padding:18px}.herotext{padding:24px 20px 24px 0}.herotext h2{font-size:1.7rem}.toolhead h1,.lessonhead h1{font-size:2rem}}
+@media(max-width:480px){#page{padding:20px 16px 120px}.appbar{padding:20px 16px}.homehead{margin:4px 0 24px}.homehead>.button{display:none}.hero{grid-template-columns:1fr}.heroart{width:46%;padding:20px 0 0;margin:0 auto}.heroart svg{transform:rotate(-6deg)}.herotext{padding:24px;text-align:center}.sectionhead h2{font-size:1.15rem}.sectionhead a{font-size:.7rem}.albums{gap:24px 14px}.panel,.exercise{padding:16px}.toolhead,.lessonhead{align-items:flex-start;gap:14px}.toolart,.lessonart{width:68px}.toolhead h1,.lessonhead h1{font-size:1.5rem}.toolhead .eyebrow,.lessonhead .eyebrow{font-size:.57rem}.toolhead p,.lessonhead p{font-size:.8rem}.eyebrow{font-size:.65rem}.controls>label{flex-basis:100%}.controls>.toggle{flex-basis:100%}.figbar{gap:8px}.figbar button{padding:9px 12px}.dock{padding:12px;bottom:76px}.game~.dock{position:static}nav{gap:0;justify-content:space-around}nav a{font-size:.65rem;padding:10px 9px}.bigtempo{font-size:4rem}.lessonbody h2{font-size:1.3rem}.hero .eyebrow{letter-spacing:.09em}.caption{font-size:.75rem}.studio-link{padding:9px 11px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+</style></head><body><noscript>Activa JavaScript para usar Om Bajo.</noscript><script>
+/* Roka audio v1: independiente de DOM, sesiones y controles de cualquier app. */
+const RokaAudio = (() => {
+  let context, silent;
+  const rooms = new WeakMap();
+  function ac() {
+    if (!context) context = new (globalThis.AudioContext || globalThis.webkitAudioContext)({latencyHint:'interactive'});
+    return context;
+  }
+  async function unlockAudio() {
+    const c = ac();
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
+    // Un elemento multimedia saca a iOS del canal de sonidos de interfaz.
+    if (!silent && typeof Audio !== 'undefined') {
+      silent = new Audio('data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQIAAAAAAA==');
+      silent.setAttribute('playsinline','');
+    }
+    if (silent) silent.play().catch(() => {});
+    await c.resume();
+    const s = c.createBufferSource(); s.buffer = c.createBuffer(1,1,22050); s.connect(c.destination); s.start();
+    return c;
+  }
+  function outLat(c = context) { return c ? Math.max(0, (c.outputLatency || 0) + (c.baseLatency || 0)) : 0; }
+  function room(c) {
+    if (rooms.has(c)) return rooms.get(c);
+    const n = Math.floor(c.sampleRate * 1.4), b = c.createBuffer(2,n,c.sampleRate);
+    let seed = 127;
+    for (let ch=0;ch<2;ch++) {
+      const d=b.getChannelData(ch);
+      for(let i=0;i<n;i++) { seed=(Math.imul(seed,1664525)+1013904223)|0; d[i]=(seed/2147483648)*Math.pow(1-i/n,3.2); }
+    }
+    rooms.set(c,b); return b;
+  }
+  function reverb(c, destination, wet=.16) {
+    const node=c.createConvolver(), gain=c.createGain(); node.buffer=room(c); gain.gain.value=wet;
+    node.connect(gain); gain.connect(destination); return node;
+  }
+  return {ac,unlockAudio,outLat,room,reverb};
+})();
+const ac=RokaAudio.ac, unlockAudio=RokaAudio.unlockAudio, outLat=RokaAudio.outLat;
+
+/* Manifiestos ampliables; no se copian muestras ni se cambia su licencia. */
+const PACKS = {
+  guitarra:{id:'guitarra',nombre:'Guitarra acústica',autor:'Nicholaus Brosowsky',licencia:'CC BY 3.0',url:'https://github.com/nbrosowsky/tonejs-instruments',credito:'tonejs-instruments. Recortes a 3 s, mono, MP3 64 kbps; afinación corregida al reproducir.',tipo:'instrumento',base:'../samples/',notas:Object.fromEntries([
+    ['D2',38,2],['E2',40,-3],['Fs2',42,1],['Gs2',44,-5],['As2',46,2],['C3',48,-4],['D3',50,2],['E3',52,-3],['Fs3',54,3],['Gs3',56,-13],['As3',58,11],['C4',60,6],['D4',62,2],['E4',64,-3],['Fs4',66,17],['Gs4',68,3],['As4',70,11],['C5',72,6],['D5',74,-21]
+  ].map(([n,m,cents])=>[m,{archivo:'g-'+n+'.mp3',cents}]))},
+  bajo:{id:'bajo',nombre:'Bajo eléctrico',autor:'Nicholaus Brosowsky',licencia:'CC BY 3.0',url:'https://github.com/nbrosowsky/tonejs-instruments',credito:'tonejs-instruments. Recortes a 2.4 s, mono, MP3 56 kbps; afinación corregida al reproducir.',tipo:'instrumento',base:'../samples/',notas:Object.fromEntries([
+    ['E1',28,7],['G1',31,-4],['As1',34,2],['Cs2',37,1],['E2',40,-3],['G2',43,0],['As2',46,2],['Cs3',49,1],['E3',52,-3],['G3',55,8]
+  ].map(([n,m,cents])=>[m,{archivo:'b-'+n+'.mp3',cents}]))},
+  bateria:{id:'bateria',nombre:'Black Pearl · AVL Drumkits',autor:'Glen MacArthur',licencia:'CC BY-SA 3.0',url:'https://www.bandshed.net/avldrumkits/',credito:'19 golpes. Capas de fuerza seleccionadas, recortes de 0.2–2.2 s con desvanecido, normalización, mono, MP3 64 kbps. Las muestras modificadas conservan CC BY-SA 3.0.',tipo:'bateria',base:'../samples/',golpes:Object.fromEntries('kick1 kick2 snare1 snare2 rim hat1 hat2 hatp hato ride bell crash tom ftom clap tamb cow mara click'.split(' ').map(n=>[n,'d-'+n+'.mp3']))}
+};
+const SAMPLE_CACHE='roka-estudio-muestras-v1';
+const loadedPacks=new Map(), pendingPacks=new Map();
+async function loadPack(id) {
+  if(loadedPacks.has(id)) return loadedPacks.get(id);
+  if(pendingPacks.has(id)) return pendingPacks.get(id);
+  const manifest=PACKS[id]; if(!manifest) throw Error('Pack desconocido: '+id);
+  const job=(async()=>{
+    const ctx=ac(), samples={}; let cache;
+    try { if(globalThis.caches) cache=await caches.open(SAMPLE_CACHE); } catch(_) {}
+    const entries=Object.entries(manifest.notas||manifest.golpes);
+    // Cuatro decodificaciones simultáneas como máximo en teléfonos.
+    let cursor=0;
+    await Promise.all(Array.from({length:4},async()=>{
+      while(cursor<entries.length) {
+        const [key,value]=entries[cursor++], meta=typeof value==='string'?{archivo:value,cents:0}:value;
+        const url=new URL(manifest.base+meta.archivo,document.baseURI).href;
+        let response=cache && await cache.match(url);
+        if(!response) { response=await fetch(url); if(!response.ok) throw Error('No se pudo cargar '+meta.archivo); if(cache) await cache.put(url,response.clone()); }
+        const buf=await ctx.decodeAudioData(await response.arrayBuffer());
+        const d=buf.getChannelData(0), limit=Math.min(d.length,buf.sampleRate*.35|0);
+        let peak=0; for(let i=0;i<limit;i++) peak=Math.max(peak,Math.abs(d[i]));
+        if(peak<.00001) throw Error('Muestra vacía: '+meta.archivo);
+        let onset=0; while(onset<limit && Math.abs(d[onset])<peak*.06) onset++;
+        samples[key]={buf,off:Math.max(0,onset-24)/buf.sampleRate,norm:.5/peak,cents:meta.cents||0};
+      }
+    }));
+    const pack={manifest,samples}; loadedPacks.set(id,pack); return pack;
+  })();
+  pendingPacks.set(id,job);
+  try { return await job; } finally { pendingPacks.delete(id); }
+}
+function sampleVoice(sample,midiDelta,t,dur,vel,options={}) {
+  const c=options.context||ac(), destination=options.destination||c.destination;
+  t=Math.max(t,c.currentTime||0); // la humanización nunca debe mandar una nota antes de tiempo cero
+  const src=c.createBufferSource(), gain=c.createGain(), filter=c.createBiquadFilter();
+  src.buffer=sample.buf; src.playbackRate.value=2**((midiDelta-sample.cents/100)/12);
+  const length=Math.max(.01,Math.min(dur,(sample.buf.duration-sample.off)/src.playbackRate.value));
+  const end=t+length, release=Math.min(.07,length*.25);
+  gain.gain.setValueAtTime(0,t); gain.gain.linearRampToValueAtTime(Math.max(0,vel)*sample.norm,t+.001);
+  gain.gain.setValueAtTime(Math.max(0,vel)*sample.norm,Math.max(t+.001,end-release)); gain.gain.linearRampToValueAtTime(0,end);
+  filter.type='lowpass'; filter.frequency.value=options.lowpass||10000;
+  src.connect(filter); filter.connect(gain);
+  let output=gain;
+  if(c.createStereoPanner) { const p=c.createStereoPanner(); p.pan.value=options.pan||0; gain.connect(p); output=p; }
+  output.connect(destination);
+  if(options.wet>0 && options.reverb) { const send=c.createGain(); send.gain.value=options.wet; output.connect(send); send.connect(options.reverb); }
+  src.start(t,sample.off); src.stop(end+.002); return {source:src,gain,end};
+}
+function playSample(pack,nota,t,dur,vel,options={}) {
+  const p=typeof pack==='string'?loadedPacks.get(pack):pack;
+  if(!p) throw Error('Carga el pack antes de tocarlo.');
+  const keys=Object.keys(p.samples).map(Number), nearest=keys.reduce((a,b)=>Math.abs(b-nota)<Math.abs(a-nota)?b:a);
+  return sampleVoice(p.samples[nearest],nota-nearest,t,dur,vel,options);
+}
+function drumHit(nombre,t,vel=.7,options={}) {
+  const p=loadedPacks.get(options.pack||'bateria'), s=p && p.samples[nombre];
+  if(!s) throw Error('Golpe no disponible: '+nombre);
+  return sampleVoice(s,0,t,s.buf.duration,vel,options);
+}
+
+/* Metales y teclados CC0 (VSCO 2 Community Edition, Versilian Studios; piano y órgano de Simon Dalzell / Ivy Audio).
+   Notas medidas con YIN (nota MIDI real y centésimos) en samples/cc0/manifest.json; aquí van copiadas para funcionar sin conexión. */
+(()=>{
+  const V='Versilian Studios — VSCO 2 Community Edition',U='https://github.com/sgossner/VSCO-2-CE',L='CC0 1.0 (dominio público)';
+  const mk=(id,nombre,pref,list,extra)=>PACKS[id]=Object.assign({id,nombre,autor:V,licencia:L,url:U,tipo:'instrumento',base:'../samples/cc0/',
+    credito:'Notas sueltas recortadas con desvanecido, normalizadas, mono, MP3 64 kbps.',notas:Object.fromEntries(list.map(([m,c])=>[m,{archivo:pref+'-'+m+'.mp3',cents:c}]))},extra||{});
+  mk('trompeta','Trompeta','tp',[[53,-2],[57,-4],[60,-13],[63,2],[67,6],[70,-2],[74,0],[77,-9],[81,3],[84,2]]);
+  mk('trombon','Trombón tenor','tbn',[[41,1],[46,-1],[50,-1],[53,-1],[60,0],[61,0],[63,1]]);
+  mk('tuba','Tuba','tuba',[[34,1],[39,5],[41,-3],[46,5],[50,-10],[53,-2],[58,13]]);
+  mk('piano','Piano vertical','piano',[[33,-2],[37,-10],[41,6],[45,-6],[49,-1],[53,0],[57,2],[61,2],[65,1],[69,2],[73,5],[77,5],[81,8]],{autor:'Simon Dalzell (Ivy Audio) · Versilian Studios'});
+  mk('organo','Órgano de tubos','organ',[[30,4],[33,2],[36,3],[39,0],[42,1],[45,-1],[48,-3],[51,-2],[54,0],[57,0],[60,-1],[63,-2],[66,0]],{autor:'Simon Dalzell (Ivy Audio) · Versilian Studios'});
+})();
+
+/* Teoría mínima compartida: nombres de notas, tonalidades y acordes por grado (I, ii, V7, ♭VII…). */
+const NOTE_ES=['Do','Do♯','Re','Mi♭','Mi','Fa','Fa♯','Sol','La♭','La','Si♭','Si'];
+const NOTE_US=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const pcMod=n=>((n%12)+12)%12;
+const noteName=(pc,us)=>(us?NOTE_US:NOTE_ES)[pcMod(pc)];
+// «La», «Fa#», «Sib», «C», «Bb», «am» → clase de altura (y menor si termina en m)
+function parseKey(s){
+  if(s==null)return null;s=String(s).trim();const minor=/m(enor)?$/i.test(s)&&!/^mi$/i.test(s);s=s.replace(/\s*m(enor)?$/i,'');
+  const es={do:0,re:2,mi:4,fa:5,sol:7,la:9,si:11},us={c:0,d:2,e:4,f:5,g:7,a:9,b:11};
+  const m=s.toLowerCase().match(/^(do|re|mi|fa|sol|la|si|[a-g])\s*([#♯b♭])?/);if(!m)return null;
+  let pc=(es[m[1]]??us[m[1]]);if(m[2]==='#'||m[2]==='♯')pc++;if(m[2]==='b'||m[2]==='♭')pc--;return{pc:pcMod(pc),minor};
+}
+const SCALE_MAJ=[0,2,4,5,7,9,11],SCALE_MIN=[0,2,3,5,7,8,10];
+const ROMAN={i:0,ii:1,iii:2,iv:3,v:4,vi:5,vii:6};
+// grado → {pc, q:'maj'|'min'|'dim'|'7'|'m7'} en la tonalidad (keyPc, menor)
+function chordOf(deg,keyPc,minor){
+  const m=String(deg).match(/^([♭b#♯]?)(vii|vi|v|iv|iii|ii|i)(°|7|m7|maj7)?$/i);if(!m)return{pc:keyPc,q:'maj'};
+  const idx=ROMAN[m[2].toLowerCase()],sc=minor?SCALE_MIN:SCALE_MAJ;let pc=keyPc+sc[idx];
+  if(m[1]==='b'||m[1]==='♭')pc--;if(m[1]==='#'||m[1]==='♯')pc++;
+  const upper=m[2]===m[2].toUpperCase();let q=m[3]==='°'?'dim':upper?'maj':'min';if(m[3]==='7')q=upper?'7':'m7';if(m[3]==='m7')q='m7';if(m[3]==='maj7')q='maj7';
+  return{pc:pcMod(pc),q,deg};
+}
+const QUAL={maj:[0,4,7],min:[0,3,7],dim:[0,3,6],'7':[0,4,7,10],m7:[0,3,7,10],maj7:[0,4,7,11]};
+const chordTones=c=>QUAL[c.q]||QUAL.maj;
+const chordLabel=(c,us)=>noteName(c.pc,us)+({maj:'',min:'m',dim:'°','7':'7',m7:'m7',maj7:'maj7'}[c.q]||'');
+// nota MIDI de la clase pc dentro de [lo, lo+11]
+const pcIn=(pc,lo)=>lo+pcMod(pc-lo);
+
+/* Estilos de beat por género. Cada parte (A, B, F = relleno) escribe UN compás celda por celda (4 celdas por tiempo).
+   Batería: k bombo · s tarola · r aro · l palmas · h hi-hat · o hi-hat abierto · p pedal · y ride · c crash · t tom · f tom de piso
+            · m maracas/güiro · a pandero · w cencerro.   X fuerte · x suave · - nada.
+   Bajo (b): R raíz · 3 tercera · 5 quinta · O octava · 7 séptima · A nota que se acerca a la raíz del siguiente acorde · . sostiene · - silencio.
+   Armonía (g): D d rasgueo abajo · U u arriba · x golpe apagado · X x acorde (piano/órgano) · 0–4 arpegio (notas del acorde de grave a agudo) · . sostiene.
+   Metales (x): X x golpe de acorde (trompeta arriba, trombón abajo) · . sostiene.
+   inst: qué pack toca cada pista (bajo eléctrico o tuba; guitarra, piano u órgano). Las aproximaciones se marcan con aprox. */
+const BEATS=[
+ {id:'tumbado',n:'Corrido tumbado',gen:'Regional',beats:3,bpm:[100,135,116],swing:0,key:'La m',prog:[['i','VI','VII','i'],['i','iv','VII','III'],['i','VII','VI','V']],
+  inst:{bajo:'bajo',arm:'guitarra'},aprox:'El tololoche se aproxima con el bajo eléctrico.',
+  parts:{A:{b:'R...5...O...',g:'0-2-1-3-2-1-',h:'----x---x---'},B:{b:'R...5...3...',g:'0-1-2-3-4-3-',h:'----x---x-x-'},F:{b:'R...5.3.A...',g:'4-3-2-1-0-0-',f:'--------x-x-'}}},
+ {id:'norteno',n:'Corrido norteño',gen:'Regional',beats:4,bpm:[110,150,128],swing:0,key:'Sol',prog:[['I','V7','V7','I'],['I','IV','V7','I']],
+  inst:{bajo:'bajo',arm:'guitarra'},aprox:'Sin acordeón: la guitarra hace el bajo sexto.',
+  parts:{A:{k:'X-------X-------',s:'----X-------X---',b:'R-------5-------',g:'----D-------D---'},B:{k:'X-------X-------',s:'----X-------X--x',b:'R-------5---A---',g:'----D-u-----D-u-'},F:{k:'X-------X---X---',s:'----X---X-xxXXXX',b:'R-------5-3-A---',g:'----D-------D---'}}},
+ {id:'banda',n:'Banda (polka)',gen:'Regional',beats:4,bpm:[115,150,132],swing:0,key:'Fa',prog:[['I','V7','V7','I'],['I','IV','V7','I'],['I','I','V7','V7']],
+  inst:{bajo:'tuba',arm:null,met:true},
+  parts:{A:{k:'X-------X-------',s:'----X--x----X--x',y:'--x---x---x---x-',b:'R-------5-------',x:'----X-------X---'},B:{k:'X-------X-------',s:'----X--x----X--x',y:'--x---x---x---x-',b:'R---3---5---O---',x:'----X-x-----X-x-'},F:{k:'X-------X-------',s:'----X---XxXxXXXX',c:'X---------------',b:'R-------5---A---',x:'X.......X...X...'}}},
+ {id:'cumbia',n:'Cumbia',gen:'Tropical',beats:4,bpm:[85,110,96],swing:0,key:'La m',prog:[['i','iv','V7','i'],['i','VII','VI','V7'],['I','IV','V7','I']],
+  inst:{bajo:'bajo',arm:'guitarra'},
+  parts:{A:{k:'X-------X-------',m:'X-x-X-x-X-x-X-x-',a:'--x---x---x---x-',b:'R-----5-5-----O-',g:'--U---U---U---U-'},B:{k:'X-------X-------',m:'X-xxX-x-X-xxX-x-',w:'--x---x---x---x-',b:'R-----5-5---3-O-',g:'--U-x-U---U-x-U-'},F:{k:'X-------X---X---',m:'X-x-X-x-X-x-X-x-',t:'--------x-x-',f:'------------x-x-',b:'R-----5-5-----A-',g:'--U---U---U---U-'}}},
+ {id:'sonidera',n:'Cumbia sonidera',gen:'Tropical',beats:4,bpm:[78,95,86],swing:0,key:'Re m',prog:[['i','VII','VI','V7'],['i','iv','i','V7']],
+  inst:{bajo:'bajo',arm:'organo'},
+  parts:{A:{k:'X-------X-------',m:'X-x-X-x-X-x-X-x-',w:'--x---x---x---x-',b:'R.....5.5.....O.',g:'--X---X---X---X-'},B:{k:'X-------X-------',m:'X-xxX-x-X-xxX-x-',a:'--x---x---x---x-',b:'R.....5.5...3.O.',g:'--X.X.X---X.X.X-'},F:{k:'X-------X-X-X-X-',m:'X-x-X-x-X-x-X-x-',b:'R.....5.5.....A.',g:'--X---X---X---X-'}}},
+ {id:'vals',n:'Ranchera (vals)',gen:'Regional',beats:3,bpm:[90,140,110],swing:0,key:'Re',prog:[['I','I','V7','V7','V7','V7','I','I'],['I','IV','V7','I']],
+  inst:{bajo:'bajo',arm:'guitarra',met:true},
+  parts:{A:{b:'R-----------',g:'----D---D---'},B:{b:'5-----------',g:'----D---D---',x:'----x---x---'},F:{b:'R---5---3---',g:'D.......D---',x:'X.......X---'}}},
+ {id:'polka',n:'Ranchera (polka)',gen:'Regional',beats:4,bpm:[120,160,140],swing:0,key:'Sol',prog:[['I','I','V7','V7','V7','V7','I','I']],
+  inst:{bajo:'bajo',arm:'guitarra',met:true},
+  parts:{A:{k:'X-------X-------',b:'R-------5-------',g:'----D-------D---',x:'----x-------x---'},B:{k:'X-------X-------',s:'----x-------x---',b:'R-------5---A---',g:'----D-u-----D-u-',x:'----X-------X---'},F:{k:'X-------X---X---',s:'----X---X-X-XXXX',b:'R-------5-3-A---',g:'D.......D...D---',x:'X.......X...X---'}}},
+ {id:'bolero',n:'Bolero',gen:'Romántico',beats:4,bpm:[70,95,80],swing:0,key:'Do',prog:[['Imaj7','vi','ii','V7'],['Imaj7','iii','vi','ii','V7']],
+  inst:{bajo:'bajo',arm:'guitarra'},
+  parts:{A:{r:'x--x--x---x-x---',m:'x-x-x-x-x-x-x-x-',b:'R.....5.5.......',g:'0-1-2-3-2-1-2-3-'},B:{r:'x--x--x---x-x---',m:'x-x-x-x-x-x-x-x-',t:'------x-------x-',b:'R.....5.3.......',g:'0-2-1-3-0-2-1-3-'},F:{r:'x--x--x---x-x---',f:'--------x-x-x-x-',b:'R.....5.A.......',g:'4-3-2-1-0-1-2-3-'}}},
+ {id:'balada',n:'Balada pop',gen:'Pop',beats:4,bpm:[64,88,74],swing:0,key:'Do',prog:[['I','V','vi','IV'],['vi','IV','I','V'],['I','iii','IV','V']],
+  inst:{bajo:'bajo',arm:'piano'},
+  parts:{A:{k:'X-------x-X-----',s:'----x-------x---',h:'x-x-x-x-x-x-x-x-',b:'R.......5.......',g:'X.......x.......'},B:{k:'X-------x-X-----',s:'----X-------X---',h:'x-x-x-x-x-x-x-x-',b:'R.......3...5...',g:'X...x...X...x...'},F:{k:'X-------x-X-----',s:'----X-------x-xx',t:'--------x-x-',f:'------------x-x-',b:'R.......5...A...',g:'X.......x.......'}}},
+ {id:'reggaeton',n:'Reggaetón (dembow)',gen:'Urbano',beats:4,bpm:[85,100,92],swing:0,key:'La m',prog:[['i','VI','III','VII'],['i','iv','VI','V']],
+  inst:{bajo:'bajo',arm:'piano'},aprox:'El 808 se aproxima con el bajo eléctrico grave.',
+  parts:{A:{k:'X---X---X---X---',l:'---X--X----X--X-',r:'---x--x----x--x-',h:'x-x-x-x-x-x-x-x-',b:'R.......R...5...',g:'X.......X.......'},B:{k:'X---X---X---X---',l:'---X--X----X--X-',h:'x-xxx-x-x-xxx-x-',b:'R.......R..5O...',g:'X...X...X...X...'},F:{k:'X---X---X-X-X-X-',l:'---X--X---XXXXXX',b:'R.......R...A...',g:'X.......X.......'}}},
+ {id:'bachata',n:'Bachata',gen:'Tropical',beats:4,bpm:[120,140,128],swing:0,key:'Mi m',prog:[['i','iv','V7','i'],['i','VI','VII','i']],
+  inst:{bajo:'bajo',arm:'guitarra'},
+  parts:{A:{m:'X-xxX-xxX-xxX-xx',t:'--x---x---xx--x-',b:'R-----5---R-5---',g:'0121312101213121'},B:{m:'X-xxX-xxX-xxX-xx',t:'--x---x---xx--x-',f:'------------x---',b:'R-----5---3-5---',g:'0213021302130213'},F:{m:'X-xxX-xxX-xxX-xx',t:'x-x-x-x-',f:'--------x-x-x-x-',b:'R-----5---A-----',g:'4321432143214321'}}},
+ {id:'rock',n:'Rock',gen:'Rock',beats:4,bpm:[90,150,112],swing:0,key:'Mi',prog:[['I','IV','V','IV'],['I','bVII','IV','I'],['vi','IV','I','V']],
+  inst:{bajo:'bajo',arm:'guitarra'},
+  parts:{A:{k:'X-----x-X-------',s:'----X-------X---',h:'x-x-x-x-x-x-x-x-',b:'R-R-R-R-R-R-R-R-',g:'D-d-D-d-D-d-D-d-'},B:{k:'X-----xxX-------',s:'----X-------X--x',o:'x-------x-------',h:'--x-x-x---x-x-x-',b:'R-R-5-R-O-R-5-R-',g:'D-d-D-d-D-d-D-d-'},F:{k:'X-------X-------',s:'----X---X-x-XXXX',c:'X---------------',t:'--------x-x-',f:'------------x-xx',b:'R-R-R-R-5-5-A-A-',g:'D.......D.......'}}},
+ {id:'pop',n:'Pop',gen:'Pop',beats:4,bpm:[96,128,110],swing:0,key:'Sol',prog:[['I','V','vi','IV'],['vi','IV','I','V']],
+  inst:{bajo:'bajo',arm:'guitarra'},
+  parts:{A:{k:'X---X---X---X---',s:'----X-------X---',l:'----X-------X---',h:'--x---x---x---x-',b:'R-----R-R-----5-',g:'D---d-U---U-d-U-'},B:{k:'X---X---X---X---',s:'----X-------X---',l:'----X-------X---',o:'--x---x---x---x-',b:'R-R---R-R-5---O-',g:'D-d-U-U-D-d-U-U-'},F:{k:'X---X---X-X-X-X-',s:'----X---X-xxXXXX',c:'X---------------',b:'R-----R-5---A---',g:'D.......D.......'}}},
+ {id:'trap',n:'Trap / hip hop',gen:'Urbano',beats:4,bpm:[130,150,140],swing:0,key:'Do m',prog:[['i','VI','III','VII'],['i','i','VI','V']],
+  inst:{bajo:'bajo',arm:'piano'},aprox:'El 808 se aproxima con el bajo eléctrico grave.',
+  parts:{A:{k:'X------X--X-----',s:'--------X-------',l:'--------X-------',h:'x-x-x-x-x-x-x-x-',b:'R.......R..5....',g:'X...............'},B:{k:'X------X--X--X--',s:'--------X-------',l:'--------X-------',h:'x-x-xxx-x-x-xxxx',b:'R.......R..5O...',g:'X.......X.......'},F:{k:'X------X--X-----',s:'--------X---XXXX',h:'xxxxxxxxxxxxxxxx',b:'R.......A.......',g:'X...............'}}},
+ {id:'bossa',n:'Bossa nova',gen:'Jazz',beats:4,bpm:[110,140,124],swing:0,key:'Do',prog:[['Imaj7','ii','V7','Imaj7'],['ii','V7','Imaj7','vi']],
+  inst:{bajo:'bajo',arm:'guitarra'},
+  parts:{A:{r:'x--x--x---x--x--',k:'x--xx--xx--xx--x',h:'x-x-x-x-x-x-x-x-',b:'R..5R..5R..5R..5',g:'D--U--D---D--U--'},B:{r:'x--x---x--x--x--',k:'x--xx--xx--xx--x',h:'x-x-x-x-x-x-x-x-',b:'R..5R..5R..3A..5',g:'D--U--D--U--D---'},F:{r:'x--x--x---x--x--',k:'x--xx--xx--xx--x',b:'R..5R..5A..5A..5',g:'D.....D.....D...'}}}
+];
+const beatById=id=>BEATS.find(b=>b.id===id);
+const BEAT_GENRES=[...new Set(BEATS.map(b=>b.gen))];
+// valida que cada línea mida un compás exacto (beats×4 celdas) y use solo símbolos conocidos
+function beatCheck(b){
+  const errs=[],L=b.beats*4,ok={drum:/^[Xx-]+$/,b:/^[R357OA.\-]+$/,g:/^[DdUuXx0-4.\-]+$/,x:/^[Xx.\-]+$/};
+  for(const[pn,p]of Object.entries(b.parts))for(const[k,v]of Object.entries(p)){
+    const re=k==='b'?ok.b:k==='g'?ok.g:k==='x'?ok.x:ok.drum;
+    if(!re.test(v))errs.push(`${b.id}.${pn}.${k}: símbolo desconocido`);
+    if(v.length!==L&&!(re===ok.drum&&v.length<L))errs.push(`${b.id}.${pn}.${k}: mide ${v.length}, debe medir ${L}`);
+  }
+  return errs;
+}
+
+/* Genera un beat en pistas separadas (batería, bajo, armonía, metales) con OfflineAudioContext y los packs grabados.
+   renderBeat({id, parte:'A'|'B'|'F', compases, bpm, tono:{pc,minor}, prog:índice}) → {bateria,bajo,armonia,metales, dur, acordes}
+   Los AudioBuffer resultantes se usan como clips en cualquier app (estudio, bajo, batería…). */
+const DRUM_MAP={k:['kick2','kick1',.95,-.03,.04],s:['snare2','snare1',.72,.04,.22],r:['rim','rim',.6,.1,.12],l:['clap','clap',.55,-.05,.2],
+  h:['hat2','hat1',.4,.3,.06],o:['hato','hato',.42,.3,.15],p:['hatp','hatp',.35,.3,.05],y:['ride','ride',.4,-.25,.14],c:['crash','crash',.5,-.2,.22],
+  t:['tom','tom',.6,.15,.18],f:['ftom','ftom',.65,-.15,.18],m:['mara','mara',.38,.2,.08],a:['tamb','tamb',.38,-.2,.1],w:['cow','cow',.4,.12,.1]};
+const BEAT_PACKS=b=>['bateria',b.inst.bajo||'bajo',b.inst.arm,b.inst.met?'trompeta':null,b.inst.met?'trombon':null].filter(Boolean);
+async function beatPacks(b){await Promise.all(BEAT_PACKS(b).map(id=>loadPack(id)))}
+function beatChords(b,tono,progIdx,compases){
+  const prog=b.prog[progIdx%b.prog.length]||b.prog[0],key=tono||parseKey(b.key);
+  return Array.from({length:compases},(_,i)=>chordOf(prog[i%prog.length],key.pc,key.minor));
+}
+// pequeñas variaciones para que no suene a máquina (siempre las mismas para el mismo beat: generador con semilla)
+function rng(seed){let s=seed|0||1;return()=>((s=Math.imul(s^s>>>15,2246822507)^Math.imul(s^s>>>13,3266489909))>>>0)/4294967296}
+async function renderBeat(o){
+  const b=beatById(o.id);if(!b)throw Error('Beat desconocido: '+o.id);
+  await beatPacks(b);
+  const bpm=o.bpm||b.bpm[2],comp=o.compases||4,part=b.parts[o.parte||'A']||b.parts.A,L=b.beats*4,step=60/bpm/4;
+  const chords=beatChords(b,o.tono,o.prog||0,comp),dur=comp*L*step+1.2,sr=44100;
+  const swing=t=>t; // reservado: swing por estilo
+  const make=async(fill)=>{const c=new OfflineAudioContext(2,Math.ceil(dur*sr),sr),bus=c.createGain();bus.connect(c.destination);
+    const rev=RokaAudio.reverb(c,bus,.9);const any=fill(c,bus,rev);if(!any)return null;return c.startRendering()};
+  const R=rng((o.seed||7)+comp*31+bpm);
+  const tAt=(bar,i)=>bar*L*step+i*step+(i%4===2?b.swing*step:0);
+  const lineFor=k=>Object.prototype.hasOwnProperty.call(part,k)?part[k]:null;
+  // batería
+  const bateria=await make((c,bus,rev)=>{let n=0;
+    for(let bar=0;bar<comp;bar++)for(const k of Object.keys(DRUM_MAP)){const line=lineFor(k);if(!line)continue;const[strong,soft,lvl,pan,wet]=DRUM_MAP[k];
+      for(let i=0;i<line.length;i++){const ch=line[i];if(ch!=='X'&&ch!=='x')continue;
+        const hum=(bar===0&&i===0)||k==='k'&&i===0?0:(R()-.5)*.010,v=(ch==='X'?1:.62)*lvl*(.92+R()*.16);
+        drumHit(ch==='X'?strong:soft,Math.max(0,tAt(bar,i)+hum),v,{context:c,destination:bus,pan,reverb:rev,wet});n++}}
+    // crash de entrada en estilos con platillo
+    if(o.entrada&&/rock|pop|banda|polka|norteno/.test(b.id)){drumHit('crash',0,.45,{context:c,destination:bus,pan:-.2,reverb:rev,wet:.2});n++}
+    return n});
+  // bajo (o tuba)
+  const bp=b.inst.bajo||'bajo',bLo=bp==='tuba'?34:28;
+  const bajo=await make((c,bus,rev)=>{const line=lineFor('b');if(!line)return 0;let n=0;
+    for(let bar=0;bar<comp;bar++){const ch=chords[bar],nx=chords[(bar+1)%comp],root=pcIn(ch.pc,bLo),tones=chordTones(ch);
+      for(let i=0;i<line.length;i++){const s=line[i];if(!'R357OA'.includes(s))continue;
+        let j=i+1;while(j<line.length&&line[j]==='.')j++;
+        const m=s==='R'?root:s==='3'?root+tones[1]:s==='5'?root+7:s==='O'?root+12:s==='7'?root+10:pcIn(nx.pc,bLo)-1;
+        playSample(bp,m,tAt(bar,i)+(R()-.5)*.008,(j-i)*step*.95,(i%4===0?.9:.72)*(.94+R()*.12),{context:c,destination:bus,lowpass:b.id==='trap'||b.id==='reggaeton'?600:2400,reverb:rev,wet:.04});n++}}
+    return n});
+  // armonía (guitarra, piano u órgano)
+  const ap=b.inst.arm;
+  const armonia=!ap?null:await make((c,bus,rev)=>{const line=lineFor('g');if(!line)return 0;let n=0;
+    for(let bar=0;bar<comp;bar++){const ch=chords[bar],tones=chordTones(ch),r=pcIn(ch.pc,ap==='guitarra'?47:48);
+      const voic=[r,...tones.slice(1).map(x=>r+x),r+12],arp=[r-12+ (ap==='guitarra'?12:0),r+tones[1],r+tones[2],r+12,r+12+tones[1]];
+      for(let i=0;i<line.length;i++){const s=line[i];if(s==='-'||s==='.')continue;let j=i+1;while(j<line.length&&line[j]==='.')j++;
+        const t=tAt(bar,i)+(R()-.5)*.008,len=Math.max(step*.9,(j-i)*step*.98),acc=i%4===0?1:.8;
+        if(/[0-4]/.test(s)){playSample(ap,arp[+s],t,Math.max(len,step*3),.5*acc*(.9+R()*.2),{context:c,destination:bus,reverb:rev,wet:.18,pan:.15});n++;continue}
+        const strong=s==='D'||s==='U'||s==='X',up=s==='U'||s==='u',mute=s==='x'&&ap==='guitarra';
+        const notes=up?[...voic].reverse().slice(0,3):voic,gap=ap==='guitarra'?(strong?.011:.016):.004;
+        notes.forEach((m,q)=>{playSample(ap,m,t+q*gap,mute?.06:len,(strong?.5:.32)*acc*(.9+R()*.2),{context:c,destination:bus,reverb:rev,wet:ap==='organo'?.22:.15,pan:ap==='guitarra'?.15:0,lowpass:mute?1800:9000});n++})}}
+    return n});
+  // metales (trompeta arriba, trombón abajo)
+  const metales=!b.inst.met?null:await make((c,bus,rev)=>{const line=lineFor('x');if(!line)return 0;let n=0;
+    for(let bar=0;bar<comp;bar++){const ch=chords[bar],tones=chordTones(ch),tp=pcIn(ch.pc+tones[1],64),tp2=pcIn(ch.pc+tones[2],64),tb=pcIn(ch.pc,48);
+      for(let i=0;i<line.length;i++){const s=line[i];if(s!=='X'&&s!=='x')continue;let j=i+1;while(j<line.length&&line[j]==='.')j++;
+        const len=Math.min(.9,Math.max(step*1.6,(j-i)*step*.95)),v=(s==='X'?.55:.38)*(.92+R()*.14),t=tAt(bar,i)+(R()-.5)*.01;
+        playSample('trompeta',tp,t,len,v,{context:c,destination:bus,reverb:rev,wet:.2,pan:-.2});playSample('trompeta',tp2,t+.006,len,v*.85,{context:c,destination:bus,reverb:rev,wet:.2,pan:.2});
+        playSample('trombon',tb,t+.004,len,v*.9,{context:c,destination:bus,reverb:rev,wet:.18,pan:0});n+=3}}
+    return n});
+  return{bateria,bajo,armonia,metales,dur:comp*L*step,acordes:chords.map(c=>chordLabel(c)),beat:b};
+}
+
+/* Marca Om compartida. El anillo toma el color de cada app; la m conserva el degradado de la familia. */
+function omLogo({color='#2f7bff',size=64}={}){
+  omLogo.seq=(omLogo.seq||0)+1;const id='omg'+omLogo.seq,n=Number(size)||64;
+  return`<svg class="om-logo" viewBox="0 0 108 64" width="${n}" height="${Math.round(n*.6)}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="28" cy="32" r="27" stroke="${color}" stroke-width="1.5" opacity=".12"/><circle cx="28" cy="32" r="21" stroke="${color}" stroke-width="2" opacity=".3"/><circle cx="28" cy="32" r="14" stroke="${color}" stroke-width="8"/><path d="M54 47V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20" stroke="url(#${id})" stroke-width="8.5"/></g></svg>`;
+}
+function automatiaMark(){return'<span class="automatia-mark" style="white-space:nowrap">by AutomaT<span style="color:#2ec4b6">IA</span></span>'}
+
+/* Estado exclusivo de Bajo. El adaptador léxico evita escribir en el caché de Estudio. */
+const caches=globalThis.caches?{open:name=>globalThis.caches.open(name==='roka-estudio-muestras-v1'?'roka-bajo-muestras-v1':name)}:null;
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DBK='roka-bajo:v1';
+const DB={strings:4,lefty:false,theme:'estudio',done:{},figbest:{},retobest:{},bpm:{},last:1,met:80,meter:4,mute:false};
+try{const d=JSON.parse(localStorage.getItem(DBK)||'{}');if(d&&typeof d==='object')Object.assign(DB,d)}catch(_){}
+DB.strings=DB.strings===5?5:4;
+for(const k of ['done','figbest','retobest','bpm'])if(!DB[k]||typeof DB[k]!=='object'||Array.isArray(DB[k]))DB[k]={};
+function save(){try{localStorage.setItem(DBK,JSON.stringify(DB))}catch(_){toast('No se pudo guardar tu avance en este navegador.')}}
+function toast(t){const el=$('#notice');if(el){el.textContent=t;clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.textContent='',6500)}}
+const m2f=m=>440*2**((m-69)/12),f2m=f=>69+12*Math.log2(f/440);
+const nn=m=>noteName(m)+String(Math.floor(m/12)-1);
+function recordResult(id,pct,kind='figbest'){DB[kind][id]=Math.max(DB[kind][id]||0,pct);if(kind==='figbest'&&pct>=80)DB.done[id]=true;save()}
+let artID=0;
+function coverArt(hue=220,motif=0){const id='art'+(++artID);return `<svg viewBox="0 0 240 240" aria-hidden="true"><defs><radialGradient id="${id}"><stop stop-color="hsl(${hue} 90% 60%)"/><stop offset="1" stop-color="#10121e"/></radialGradient></defs><rect width="240" height="240" fill="url(#${id})"/><circle cx="120" cy="120" r="83" fill="#000" opacity=".35"/>${[75,57,39,21].map(r=>`<circle cx="120" cy="120" r="${r}" fill="none" stroke="#fff" stroke-opacity=".22"/>`).join('')}<g transform="rotate(${motif*17-25} 120 120)" stroke-linecap="round">${[0,1,2,3].map(i=>`<path d="M${72+i*32} 28V212" stroke="${i===motif%4?'#ff66af':'#c9ddff'}" stroke-width="${8-i}"/>`).join('')}</g><circle cx="120" cy="120" r="7" fill="#0a0c15"/></svg>`}
+function toolHead(title,sub,hue=220){return `<header class="toolhead"><div class="toolart">${coverArt(hue,2)}</div><div><p class="eyebrow">OM BAJO / PRÁCTICA</p><h1>${title}</h1><p>${sub}</p></div></header>`}
+function toolDock(label='Empezar'){return `<div class="dock"><button class="primary" id="go">${label}</button><button data-stop>Detener</button><span id="status" role="status"></span></div>`}
+function control(label,id,options,value){return `<label>${label}<select id="${id}">${options.map(([v,t])=>`<option value="${esc(v)}"${String(v)===String(value)?' selected':''}>${esc(t)}</option>`).join('')}</select></label>`}
+// Marca Om (usa omLogo/automatiaMark de ../comun/src/7-marca.js si existe; si no, texto)
+const OM_GREEN='#34d399';
+function omBrand(size=26){return typeof omLogo==='function'?omLogo({color:OM_GREEN,size}):'<b class="omword">om</b>'}
+function byMark(){return typeof automatiaMark==='function'?automatiaMark():'<span class="amark">by Automat<span class="ia">IA</span></span>'}
+
+/* Cuerda 1 = Sol; añadir Si grave no renumera las otras cuatro. */
+const BASS_OPEN={1:43,2:38,3:33,4:28,5:23};
+function openStrings(count=DB.strings,drop=false){return Array.from({length:count},(_,i)=>({s:i+1,m:drop&&i===3?26:BASS_OPEN[i+1]}))}
+function midiOf(s,f,count=DB.strings){if(!Number.isInteger(s)||s<1||s>count||!Number.isInteger(f)||f<0||f>15)throw Error('Cuerda o traste fuera del mástil');return BASS_OPEN[s]+f}
+function autoFingers(notes){let base=1;return notes.map(n=>{if(n.f>0&&(n.f<base||n.f>base+3))base=n.f;return {...n,fg:n.f? n.f-base+1:0,pos:base}})}
+function notesOf(ex,count=DB.strings){return autoFingers((count===5&&ex.fig.five?ex.fig.five:ex.fig.notes).map(n=>({...n,m:midiOf(n.s,n.f,count)})))}
+function tablature(notes,count=DB.strings){return openStrings(count).map(({s,m})=>noteName(m).padEnd(3,' ')+'|'+notes.map(n=>n.s===s?String(n.f).padStart(2,'-')+'-':'---').join('')+'|').join('\n')}
+function fretboard({dots=[],count=DB.strings,lefty=DB.lefty,label='Mástil de bajo: trastes 0 a 15'}={}){
+ const W=850,H=50+count*42,x=f=>lefty?W-44-f*48:44+f*48,y=s=>30+(s-1)*42;
+ let g='';for(let f=0;f<=15;f++){g+=`<text x="${x(f)}" y="${H-9}" text-anchor="middle">${f}</text>`;if(f)g+=`<path d="M${x(f)+(lefty?24:-24)} 16V${H-38}" class="fret"/>`}
+ for(const {s,m} of openStrings(count))g+=`<path d="M24 ${y(s)}H820" class="string" stroke-width="${1+s*.5}"/><text x="${lefty?835:12}" y="${y(s)+5}" text-anchor="middle">${s}</text>`;
+ dots.forEach((d,i)=>{if(d.s>count)return;g+=`<g class="dot${d.k==='root'?' root':''}" data-s="${d.s}" data-f="${d.f}"><circle cx="${x(d.f)}" cy="${y(d.s)}" r="17"/><text x="${x(d.f)}" y="${y(d.s)+4}" text-anchor="middle">${esc(d.t||noteName(midiOf(d.s,d.f,count)))}</text>${d.fg?`<circle class="finger" cx="${x(d.f)+14}" cy="${y(d.s)-13}" r="8"/><text class="fingertext" x="${x(d.f)+14}" y="${y(d.s)-10}" text-anchor="middle">${d.fg}</text>`:''}</g>`});
+ return `<div class="boardscroll" tabindex="0" aria-label="Desliza para explorar el mástil"${lefty?' dir="rtl"':''}><svg class="fretboard" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">${g}</svg></div><p class="caption">Desliza el mástil. 0 = cuerda al aire. Cuerdas: ${openStrings(count).map(o=>o.s+' '+noteName(o.m)).join(' · ')}.<br>Dedos: 1 índice · 2 medio · 3 anular · 4 meñique. Mueve la mano al cambiar de posición.</p>`;
+}
+function chordDots(ch,count=DB.strings){const dots=[];for(let s=1;s<=count;s++)for(let f=0;f<=15;f++){const pc=midiOf(s,f,count)%12;if(pc===ch.pc||pc===pcMod(ch.pc+7))dots.push({s,f,t:pc===ch.pc?'R':'5',k:pc===ch.pc?'root':''})}return dots}
+
+/* YIN con reducción a ~12 kHz. Ventana original 8192: >5 ciclos de Si0 a 48 kHz. */
+function detectPitch(input,sr,minHz=28,maxHz=420){
+ const stride=Math.max(1,Math.floor(sr/12000)),n=Math.floor(input.length/stride),rate=sr/stride,b=new Float32Array(n);
+ let mean=0;for(let i=0;i<n;i++){let v=0;for(let j=0;j<stride;j++)v+=input[i*stride+j];b[i]=v/stride;mean+=b[i]}mean/=n;
+ let energy=0;for(let i=0;i<n;i++){b[i]-=mean;energy+=b[i]*b[i]}const rms=Math.sqrt(energy/n);if(rms<.003)return null;
+ const max=Math.min(Math.floor(rate/minHz),Math.floor(n/2)-1),min=Math.max(2,Math.floor(rate/maxHz)),span=n-max,cm=new Float64Array(max+1);let sum=0;
+ for(let tau=1;tau<=max;tau++){let d=0;for(let i=0;i<span;i++){const v=b[i]-b[i+tau];d+=v*v}sum+=d;cm[tau]=sum?d*tau/sum:1}
+ for(let tau=min;tau<max;tau++){if(cm[tau]>.12)continue;while(tau+1<max&&cm[tau+1]<cm[tau])tau++;const a=cm[tau-1],v=cm[tau],z=cm[tau+1],den=a-2*v+z,shift=den?(a-z)/(2*den):0,f=rate/(tau+shift);if(f<minHz||f>maxHz)return null;return {f,c:1-v,rms,m:f2m(f)}}return null;
+}
+const MIC={stream:null,node:null,source:null,timer:0,epoch:0,on:null};
+function micStop(){MIC.epoch++;clearInterval(MIC.timer);MIC.stream?.getTracks().forEach(t=>t.stop());MIC.source?.disconnect();MIC.node?.disconnect();MIC.stream=null;MIC.on=null}
+async function micStart(on){
+ micStop();const epoch=MIC.epoch;
+ if(!navigator.mediaDevices?.getUserMedia)throw Error('El micrófono necesita HTTPS o localhost y un navegador compatible.');
+ let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false})}catch(e){throw Error(e.name==='NotAllowedError'?'Permite el micrófono en los ajustes del navegador.':'No se pudo abrir el micrófono. Revisa que esté conectado y disponible.')}
+ if(epoch!==MIC.epoch){stream.getTracks().forEach(t=>t.stop());return false}
+ const c=ac();try{if(navigator.audioSession)navigator.audioSession.type='play-and-record'}catch(_){}
+ MIC.stream=stream;MIC.source=c.createMediaStreamSource(stream);MIC.node=c.createAnalyser();MIC.node.fftSize=8192;MIC.source.connect(MIC.node);MIC.on=on;
+ const buf=new Float32Array(8192);MIC.timer=setInterval(()=>{MIC.node.getFloatTimeDomainData(buf);const p=detectPitch(buf,c.sampleRate);MIC.on?.(p?{...p,t:c.currentTime-outLat(c)-buf.length/c.sampleRate/2}:null)},50);return true;
+}
+
+/* Un solo dueño de audio/micrófono. Las cargas asíncronas se invalidan al salir. */
+const RUN={token:0,timer:0,raf:0,nodes:new Set(),bus:null,active:false};
+function stopAll(){RUN.token++;RUN.active=false;clearInterval(RUN.timer);cancelAnimationFrame(RUN.raf);RUN.nodes.forEach(n=>{try{n.stop()}catch(_){}});RUN.nodes.clear();if(RUN.bus){RUN.bus.disconnect();RUN.bus=null}micStop();if(typeof stopNarration==='function')stopNarration();$$('.playing,.hit').forEach(e=>e.classList.remove('playing','hit'));$$('[data-busy]').forEach(e=>{e.disabled=false;e.removeAttribute('data-busy')});const s=$('#status');if(s)s.textContent='Detenido';}
+async function prepareAudio(packs=['bajo','bateria']){stopAll();const token=RUN.token;await unlockAudio();await Promise.all(packs.map(loadPack));if(token!==RUN.token)return null;RUN.bus=ac().createGain();RUN.bus.gain.value=.72;RUN.bus.connect(ac().destination);return token}
+function bass(m,t,d=.6,v=.7){const n=playSample('bajo',m,t,d,v,{destination:RUN.bus||ac().destination});RUN.nodes.add(n.source);n.source.onended=()=>RUN.nodes.delete(n.source);return n}
+function tick(t,strong=false){if(DB.mute)return;const n=drumHit('click',t,strong?.65:.32,{destination:RUN.bus||ac().destination});RUN.nodes.add(n.source);n.source.onended=()=>RUN.nodes.delete(n.source)}
+function pulseHTML(n=4){return `<div class="pulse" aria-label="Pulso visual">${Array.from({length:n},(_,i)=>`<span>${i+1}</span>`).join('')}</div>`}
+function pulsePaint(root,beat){$$('.pulse span',root).forEach((e,i)=>e.classList.toggle('on',i===beat))}
+function playTimeline({events,duration,bpm=60,beats=4,onFrame,onEnd,click=true}){
+ const c=ac(),start=c.currentTime+.18,token=RUN.token,spb=60/bpm;let next=0,nextBeat=0;RUN.active=true;
+ const schedule=()=>{const now=c.currentTime;while(next<events.length&&start+events[next].at<now+.18){const e=events[next++];if(start+e.at>=now-.03&&e.m!=null)bass(e.m,Math.max(now,start+e.at),e.d,.7)}while(nextBeat*spb<duration&&start+nextBeat*spb<now+.18){const t=start+nextBeat*spb;if(click&&t>=now-.03)tick(Math.max(t,now),nextBeat%beats===0);nextBeat++}};
+ schedule();RUN.timer=setInterval(schedule,25);
+ const frame=()=>{if(token!==RUN.token)return;const elapsed=c.currentTime-outLat(c)-start;onFrame?.(elapsed,start);if(elapsed>=duration){clearInterval(RUN.timer);RUN.active=false;micStop();onEnd?.();return}RUN.raf=requestAnimationFrame(frame)};RUN.raf=requestAnimationFrame(frame);return start;
+}
+function bandTracks(render,reference=false){return ['bateria','armonia','metales',...(reference?['bajo']:[])].filter(k=>render[k]).map(k=>({role:k,buffer:render[k]}))}
+
+/* Material original de Roka Bajo. Cada tupla = cuerda, traste, duración en pulsos. */
+const P=rows=>rows.map(([s,f,d=1])=>({s,f,d}));
+const E=o=>({type:'exercise',bpm:60,beats:4,...o,fig:{notes:P(o.notes),...(o.five?{five:P(o.five)}:{})}});
+const LESSONS=[
+{id:1,title:'Tu primer sonido',sub:'Postura y apagado de cuerdas',hue:220,blocks:[
+ {aim:['Sostener el bajo sin cargar la muñeca.','Tocar una cuerda y apagar las demás.']},
+ {step:'Paso 1',t:'Acomoda el instrumento',p:'La cuerda es el alambre que vibra; el mástil es la parte larga donde apoyas los dedos. Un traste es cada espacio entre las barras metálicas del mástil. Ajusta la correa para que el bajo no se caiga al soltar las manos. Mantén los hombros sueltos y la muñeca sin doblarla de más. Si algo duele, detente y reajusta.'},
+ {step:'Paso 2',t:'Un sonido, luego silencio',p:'Pulsar significa jalar y soltar suavemente una cuerda con la yema. Al aire significa tocar sin pisar ningún traste: se escribe 0. Apagar es detener la vibración con un contacto suave. Ejemplo resuelto: pulsa Mi, la cuerda 4, al aire; apoya luego la yema sobre ella sin empujarla contra el mástil. Escucharás Mi y después silencio. Los números de cuerda se cuentan desde la más delgada: 1 Sol, 2 Re, 3 La, 4 Mi; en cinco cuerdas agregas 5 Si.'},
+ {key:'Deja sonar solo la cuerda que elegiste. Apoya el pulgar en una cuerda más grave y los dedos libres sobre las que no tocas.'},
+ E({id:'b1-apagar',t:'Mi y silencio',notes:[[4,0],[4,0],[4,0],[4,0]],steps:['Apoya el pulgar sin tensarlo.','Pulsa Mi con índice y medio alternados.','Apaga cada sonido antes del siguiente toque.'],goal:'Cuatro sonidos separados, sin zumbidos de otras cuerdas.'}),
+ E({id:'b1-cuerdas',t:'Conoce tus cuerdas',notes:[[4,0],[3,0],[2,0],[1,0]],five:[[5,0],[4,0],[3,0],[2,0],[1,0]],steps:['Escucha el ejemplo.','Toca cada cuerda al aire en el orden mostrado.','Apaga la cuerda anterior al cambiar.'],goal:'Nombras las cuerdas y dejas sonar una a la vez.'}),
+ E({id:'b1-turnos',t:'Sonido largo, silencio claro',notes:[[4,0,2],[3,0,2],[2,0,2],[1,0,2]],five:[[5,0,2],[4,0,2],[3,0,2],[2,0,2],[1,0,2]],steps:['Cuenta dos pulsos mientras suena cada cuerda.','Apaga justo antes de cambiar.','Comprueba que no quede otra cuerda vibrando.'],goal:'Sostienes cada nota y haces cuatro cambios limpios.'}),
+ {check:[['¿Qué significa el traste 0?','Cuerda al aire: no presionas el mástil.'],['¿Cómo apagas una nota?','Toca la cuerda suavemente para detener su vibración.']]},
+ {errors:['Apretar de más: usa solo la presión necesaria.','Levantar todos los dedos al cambiar: deja uno tocando la cuerda que debe callar.']},
+ {trick:['Cuerda 1 = la más delgada, Sol.','Pulsa, escucha, apaga.','El micrófono califica altura y momento; revisa tú la postura y el apagado.']}
+]},
+{id:2,title:'Lee tu primera línea',sub:'Tablatura y dedos',hue:240,blocks:[
+ {aim:['Leer cuerda y traste en una tablatura.','Ubicar cada dedo sin estirar de más.']},
+ {step:'Paso 1',t:'Las líneas son cuerdas',p:'La tablatura es un dibujo de las cuerdas con números de traste. La línea de arriba es Sol, cuerda 1; la de abajo es Mi en cuatro cuerdas o Si en cinco. Se lee de izquierda a derecha. Un guion indica que no hay un nuevo toque en esa columna; aquí cada columna sigue la duración indicada en el paso a paso.'},
+ {step:'Paso 2',t:'Un dedo por traste',p:'Dedo 1 = índice, 2 = medio, 3 = anular y 4 = meñique de la mano que pisa. Una posición es la zona del mástil que cubres sin mover esa mano. Ejemplo resuelto: en la cuerda Mi, posición 1, traste 1 con índice, 2 con medio, 3 con anular y 4 con meñique. El 0 no lleva dedo. Si el alcance es incómodo, mueve la mano; no fuerces la separación.'},
+ {key:'El número grande es el traste; la insignia pequeña en el punto es el dedo.'},
+ E({id:'b2-dedos',t:'Cuatro dedos',notes:[[4,1],[4,2],[4,3],[4,4]],steps:['Localiza la cuerda Mi.','Pisa junto a la barra metálica, sin quedar encima.','Sigue 1, 2, 3, 4 con la mano relajada.'],goal:'Lees cuatro números y eliges los dedos correspondientes.'}),
+ E({id:'b2-tab',t:'Cambia de línea',notes:[[3,0],[3,2],[2,0],[2,2]],steps:['Lee primero la línea y después el número.','Toca La al aire y traste 2.','Pasa a Re al aire y traste 2.'],goal:'Cambias de cuerda sin confundirla con el traste.'}),
+ E({id:'b2-escalera',t:'Escalera en dos cuerdas',notes:[[4,1],[4,2],[4,3],[4,4],[3,1],[3,2],[3,3],[3,4]],steps:['Lee los cuatro trastes de la cuerda Mi.','Cambia a La y repite la misma digitación.','Mueve solo lo necesario y conserva la mano relajada.'],goal:'Relacionas línea, traste y dedo en dos cuerdas.'}),
+ {check:[['¿Un 3 en la línea La significa cuerda 3?','Significa traste 3 de la cuerda La; la línea identifica la cuerda.'],['¿Qué dedo usa una cuerda al aire?','Ninguno de la mano que pisa.']]},
+ {errors:['Leer de abajo hacia arriba como una lista: sigue las columnas de izquierda a derecha.','Confundir dedo 4 con cuerda 4: revisa la leyenda.']},
+ {trick:['Línea = cuerda; número = traste.','Los puntos muestran la nota y su dedo.','Usa Anterior y Siguiente para escuchar una nota a la vez.']}
+]},
+{id:3,title:'La raíz al pulso',sub:'Tu lugar dentro del grupo',hue:260,blocks:[
+ {aim:['Mantener una velocidad estable.','Sostener la nota que da nombre al acorde.']},
+ {step:'Paso 1',t:'Pulso, tempo y compás',p:'El pulso es el paso regular de la música. El tempo es su velocidad; bpm significa pulsos por minuto: a 60 bpm hay uno por segundo. Un compás agrupa pulsos; en 4/4 contamos 1, 2, 3, 4 y volvemos al 1. Una nota de un pulso se llama negra; de dos, blanca. El silencio es tiempo que cuentas sin tocar.'},
+ {step:'Paso 2',t:'Encuentra la raíz',p:'Un acorde es un conjunto de notas que suenan juntas. Su raíz es la nota que le da nombre. El bajo puede sostener esa raíz mientras otros instrumentos completan el acorde. Ejemplo resuelto: para acompañar un acorde de La, toca La, cuerda 3 al aire, en cada número de la cuenta 1, 2, 3, 4.'},
+ {key:'Primero cuenta parejo; después toca. Una sola nota a tiempo sostiene a toda la banda.'},
+ E({id:'b3-raiz',t:'Cuatro pasos en La',notes:[[3,0],[3,0],[3,0],[3,0]],steps:['Escucha los cuatro pulsos de entrada.','Toca La en cada pulso.','Mantén la cuenta aunque una nota no salga.'],goal:'Aciertas al menos 80 % en una ronda.'}),
+ E({id:'b3-largas',t:'Deja espacio',notes:[[3,0,2],[3,0,2],[4,0,2],[4,0,2]],steps:['Cuenta dos pulsos por nota.','La suena dos veces; luego cambia a Mi.','Apaga al llegar la nota siguiente.'],goal:'No aceleras cuando sostienes una nota.'}),
+ E({id:'b3-cambios',t:'Raíces en cada pulso',notes:[[3,3],[3,3],[4,3],[4,3],[3,0],[3,0],[4,0],[4,0]],steps:['Cuenta dos Do, dos Sol, dos La y dos Mi.','Cambia de posición sin detener la cuenta.','Vuelve al pulso siguiente si una nota no sale.'],goal:'Mantienes ocho pulsos mientras cambias de raíz.'}),
+ {check:[['¿Cuántos segundos dura un pulso a 60 bpm?','Un segundo.'],['¿Cuál es la raíz de un acorde de Mi?','Mi.']]},
+ {errors:['Seguir una nota equivocada con prisa: regresa al pulso siguiente.','Tocar cada vez más fuerte: mantén una fuerza cómoda.']},
+ {trick:['Cuenta de entrada = preparación antes de tocar.','4/4 = grupos de cuatro pulsos.','Una nota larga también necesita una cuenta estable.']}
+]},
+{id:4,title:'Raíz y quinta',sub:'Tololoche, ranchera y polka',hue:290,blocks:[
+ {aim:['Encontrar una quinta desde una raíz.','Alternar dos notas en compases de tres y cuatro pulsos.']},
+ {step:'Paso 1',t:'Mide el salto',p:'Un semitono es la distancia de un traste. Un tono son dos semitonos. Un intervalo es la distancia entre dos notas. La quinta justa está siete semitonos arriba de la raíz. Ejemplo resuelto: Sol, cuerda 4 traste 3, más siete semitonos es Re; lo encuentras en cuerda 3 traste 5. En cuerdas vecinas de este bajo, la quinta queda dos trastes adelante.'},
+ {step:'Paso 2',t:'Alterna con intención',p:'El tololoche es un contrabajo acústico usado en música regional; aquí practicas su función con bajo eléctrico, sin imitar su timbre. En una polka puedes alternar raíz en 1 y quinta en 3 de un compás de cuatro pulsos. Una ranchera en vals agrupa tres pulsos: toca una nota en 1 y cuenta 2, 3; cambia de nota en el siguiente 1.'},
+ {key:'Raíz y quinta forman una base clara. El compás decide cuándo alternarlas.'},
+ E({id:'b4-polka',t:'Sol y Re',bpm:80,notes:[[4,3,2],[3,5,2],[4,3,2],[3,5,2]],steps:['Pon el dedo 1 en Sol, traste 3.','Toca Re con dedo 3, cuerda 3 traste 5.','Alterna cada dos pulsos.'],goal:'Cambias entre raíz y quinta sin perder la cuenta.'}),
+ E({id:'b4-vals',t:'Ranchera en tres',beats:3,bpm:90,notes:[[3,0,3],[4,0,3],[3,0,3],[4,0,3]],steps:['Cuenta 1, 2, 3.','Toca La en el primer compás y Mi en el segundo.','Mi es la quinta de La en una altura más grave.'],goal:'Se siente el inicio de cada grupo de tres.'}),
+ E({id:'b4-dos-pares',t:'Dos pares de raíz y quinta',bpm:76,notes:[[3,3,2],[2,5,2],[4,3,2],[3,5,2]],steps:['Toca Do y su quinta Sol.','Mueve la mano para tocar Sol grave y su quinta Re.','Da dos pulsos a cada nota.'],goal:'Reconoces la misma relación desde dos raíces.'}),
+ {check:[['¿Cuántos semitonos separan raíz y quinta justa?','Siete hacia arriba.'],['Desde Sol en cuerda 4 traste 3, ¿dónde está Re?','Cuerda 3 traste 5.']]},
+ {errors:['Tocar una nota en cada número del vals cuando buscas espacio: sostén tres pulsos.','Cambiar de cuerda sin apagar: evita que raíz y quinta se encimen.']},
+ {trick:['Raíz = R. Quinta = 5.','En una cuerda: +7 trastes.','En la cuerda más aguda vecina: +2 trastes.']}
+]},
+{id:5,title:'Octavas y caminos cortos',sub:'Aproximaciones cromáticas',hue:315,blocks:[
+ {aim:['Encontrar la misma nota más aguda.','Llegar a una raíz desde un traste vecino.']},
+ {step:'Paso 1',t:'La misma nota en otra altura',p:'Una octava es el salto de doce semitonos: el nombre se repite, pero más agudo o más grave. Ejemplo resuelto: Sol en cuerda 4 traste 3 tiene su octava aguda en cuerda 2 traste 5. Los números pequeños de Mi1 o Sol2 indican la octava; no son dedos ni cuerdas.'},
+ {step:'Paso 2',t:'Acércate por un semitono',p:'Cromático significa avanzar por semitonos. Una aproximación cromática es una nota vecina que conduce a la siguiente nota importante. Sostenido (♯) sube un semitono y bemol (♭) baja uno. Ejemplo resuelto: para llegar a La en cuerda 4 traste 5, toca Sol♯ en traste 4 justo antes y resuelve en La. Resolver significa llegar a la nota de destino.'},
+ {key:'La nota de paso crea movimiento; la raíz de llegada debe escucharse clara.'},
+ E({id:'b5-octava',t:'Sol abajo y arriba',notes:[[4,3],[2,5],[4,3],[2,5]],steps:['Localiza Sol grave con dedo 1.','Salta dos cuerdas a Sol agudo con dedo 3.','Apaga las cuerdas que atraviesas.'],goal:'Reconoces el mismo nombre en dos alturas.'}),
+ E({id:'b5-croma',t:'Llega a La',notes:[[4,3],[4,4],[4,5,2],[4,4],[4,5,3]],steps:['Toca Sol, Sol♯ y La.','Sostén La dos pulsos.','Repite Sol♯ y termina en La durante tres pulsos.'],goal:'La llegada a La suena estable.'}),
+ E({id:'b5-octava-la',t:'La en dos alturas',notes:[[4,5],[2,7],[4,5],[2,7]],steps:['Toca La grave en cuerda 4, traste 5.','Salta a La agudo en cuerda 2, traste 7.','Regresa sin dejar cuerdas abiertas sonando.'],goal:'Encuentras otra octava y conservas el mismo nombre de nota.'}),
+ {check:[['¿Cuántos semitonos tiene una octava?','Doce.'],['¿Qué ocurre entre Mi y Fa?','Ya hay un semitono; Mi♯ suena como Fa. También Si♯ = Do, Fa♭ = Mi y Do♭ = Si. Son nombres equivalentes según el contexto.']]},
+ {errors:['Quedarte en la nota cromática por accidente: recuerda el destino.','Confundir una octava con una cuerda vecina: salta dos cuerdas y dos trastes.']},
+ {trick:['Octava: dos cuerdas más agudas y dos trastes adelante.','Cromático = de traste en traste.','Mi♯ = Fa · Si♯ = Do · Fa♭ = Mi · Do♭ = Si.']}
+]},
+{id:6,title:'Dibuja el acorde',sub:'Arpegios mayores y menores',hue:340,blocks:[
+ {aim:['Tocar las notas de un acorde una por una.','Distinguir una tercera mayor de una menor.']},
+ {step:'Paso 1',t:'Tercera y arpegio',p:'La tercera mayor está cuatro semitonos sobre la raíz; la tercera menor está tres. Una tríada es un acorde de tres notas: raíz, tercera y quinta. Mayor y menor describen qué tercera tiene. Un arpegio toca esas notas una tras otra. Ejemplo resuelto: Do mayor = Do, Mi, Sol. Desde Do en cuerda 3 traste 3, Mi está en cuerda 2 traste 2 y Sol en cuerda 2 traste 5.'},
+ {step:'Paso 2',t:'Cambia una sola nota',p:'Do menor = Do, Mi♭, Sol: baja la tercera un traste, de Mi a Mi♭, y conserva raíz y quinta. En la posición 1, el dedo 1 toca traste 1 y el 3 toca traste 3. Si una nota queda fuera de los cuatro trastes de tu posición, desplaza la mano completa; el paso a paso muestra el dedo nuevo.'},
+ {key:'La tercera decide si esta tríada es mayor o menor. La raíz y la quinta siguen iguales.'},
+ E({id:'b6-mayor',t:'Do mayor',notes:[[3,3],[2,2],[2,5],[3,3]],steps:['Di Do, Mi, Sol, Do.','Escucha el arpegio.','Toca cada nota y cambia de posición al llegar a traste 5.'],goal:'Ubicas raíz, tercera mayor y quinta.'}),
+ E({id:'b6-menor',t:'Do menor',notes:[[3,3],[2,1],[2,5],[3,3]],steps:['Baja Mi un traste: ahora es Mi♭.','Conserva Do y Sol.','Compara con el ejercicio anterior.'],goal:'Cambias el carácter del acorde moviendo solo la tercera.'}),
+ E({id:'b6-terceras',t:'Compara las terceras',notes:[[3,3],[2,2],[3,3],[2,1],[3,3,2]],steps:['Toca Do y Mi para escuchar la tercera mayor.','Vuelve a Do y toca Mi♭ para escuchar la menor.','Termina en Do y sostén dos pulsos.'],goal:'Distingues cuál nota cambia entre mayor y menor.'}),
+ {check:[['¿Qué diferencia hay entre acorde y arpegio?','En el acorde pueden sonar juntas sus notas; en el arpegio las tocas una a una.'],['¿Qué tercera tiene Do menor?','Mi♭, a tres semitonos de Do.']]},
+ {errors:['Estirar para evitar todo cambio: mueve la mano con calma.','Bajar también la quinta al pasar a menor: solo cambia la tercera.']},
+ {trick:['Mayor: 0, 4, 7 semitonos desde la raíz.','Menor: 0, 3, 7.','Toca una nota a la vez y escucha la diferencia.']}
+]},
+{id:7,title:'Un mapa para moverte',sub:'Escalas y caja pentatónica',hue:190,blocks:[
+ {aim:['Construir una escala mayor.','Usar cinco notas dentro de una zona cómoda.']},
+ {step:'Paso 1',t:'La receta de la escala',p:'Una escala es una familia de notas ordenadas por altura. La escala mayor usa saltos de 2, 2, 1, 2, 2, 2, 1 semitonos. Un grado es el lugar de una nota dentro de esa familia: primero, segundo, tercero. Ejemplo resuelto: desde Do obtienes Do, Re, Mi, Fa, Sol, La, Si y Do. Una tonalidad es el conjunto de notas organizado alrededor de una nota principal, como Do mayor.'},
+ {step:'Paso 2',t:'Cinco notas en una caja',p:'Pentatónica significa escala de cinco notas. La pentatónica menor de La contiene La, Do, Re, Mi y Sol: distancias 0, 3, 5, 7 y 10 semitonos desde La. Una caja es una manera de distribuirlas por cuerdas dentro de pocos trastes. Ejemplo resuelto: La y Do en cuerda 4 trastes 5 y 8; Re y Mi en cuerda 3 trastes 5 y 7; Sol y La en cuerda 2 trastes 5 y 7.'},
+ {key:'La caja es un mapa, no una obligación de tocar todas las notas en cada frase.'},
+ E({id:'b7-mayor',t:'Escala de Do',notes:[[3,3],[3,5],[2,2],[2,3],[2,5],[1,2],[1,4],[1,5]],steps:['Escucha y di los nombres.','Toca lento; mueve la mano cuando lo indique el dedo.','Vuelve a escuchar si dudas de un salto.'],goal:'Reconoces los dos semitonos: Mi–Fa y Si–Do.'}),
+ E({id:'b7-penta',t:'Caja de La menor',notes:[[4,5],[4,8],[3,5],[3,7],[2,5],[2,7]],steps:['Empieza con dedo 1 en traste 5.','Usa dedo 4 en traste 8 y dedo 3 en traste 7.','Al llegar a La agudo, apaga y respira.'],goal:'Tocas la caja sin perder la posición.'}),
+ E({id:'b7-mayor-baja',t:'Escala de Do al regresar',notes:[[1,5],[1,4],[1,2],[2,5],[2,3],[2,2],[3,5],[3,3]],steps:['Empieza en Do agudo.','Di Si, La, Sol, Fa, Mi y Re mientras bajas.','Termina en Do grave sin acelerar.'],goal:'Recorres la escala mayor en sentido descendente.'}),
+ {check:[['¿Cuántas notas distintas tiene una pentatónica?','Cinco; la octava repite el nombre de la raíz.'],['¿La receta mayor cambia al empezar en Sol?','No. Mantiene los mismos saltos desde la nueva raíz.']]},
+ {errors:['Memorizar solo los dedos: di también los nombres.','Correr al subir: usa un tempo que permita notas limpias.']},
+ {trick:['Mayor: 2–2–1–2–2–2–1.','Pentatónica menor: raíz, +3, +5, +7, +10.','Un patrón cambia de tono al mover todas sus notas la misma distancia.']}
+]},
+{id:8,title:'El ritmo de cada género',sub:'Siete formas de acompañar',hue:205,blocks:[
+ {aim:['Distinguir dónde empieza cada nota.','Probar siete líneas originales con su intención rítmica.']},
+ {step:'Paso 1',t:'Parte el pulso',p:'Una corchea dura medio pulso. Cuenta «1 y 2 y 3 y 4 y»: los números caen en el pulso y las «y» entre pulsos. Una síncopa pone énfasis entre pulsos o sostiene una nota a través del siguiente. Groove es el patrón de notas, silencios y acentos que se repite y da movimiento.'},
+ {step:'Paso 2',t:'Escucha antes de copiar',p:'Ejemplo resuelto de cumbia: La dura un pulso y medio, Mi medio, luego Mi un pulso y medio y La agudo medio. Cuenta los ocho medios pulsos para saber dónde cambiar. Son propuestas para practicar: cada región y cada grupo puede usar variantes. En Tocar con la banda puedes cambiar el género y escuchar sus demás instrumentos.'},
+ {key:'El género no depende solo de las notas: importa cuánto duran y dónde entran.'},
+ E({id:'b8-cumbia',t:'Cumbia: ida y vuelta',bpm:85,notes:[[3,0,1.5],[2,2,.5],[2,2,1.5],[1,2,.5]],steps:['Cuenta números y «y».','Entra en La; cambia a Mi después de «2».','Termina con La agudo justo antes del nuevo 1.'],goal:'Mantienes los cambios de un pulso y medio.'}),
+ E({id:'b8-banda',t:'Banda: raíz y quinta',bpm:100,notes:[[4,3,2],[3,5,2],[4,3,2],[3,5,2]],steps:['Piensa en un apoyo firme en 1.','Alterna Sol y Re en 1 y 3.','Deja espacio para los metales.'],goal:'Sostienes el patrón sin añadir notas.'}),
+ E({id:'b8-norteno',t:'Norteño: regreso a la raíz',bpm:100,notes:[[4,3,2],[3,5],[4,2],[4,3,4]],steps:['Toca Sol y luego Re.','Usa Fa♯, traste 2, para acercarte a Sol.','Llega a Sol en el inicio del siguiente compás.'],goal:'La aproximación desemboca en la raíz.'}),
+ E({id:'b8-rock',t:'Rock: ocho motores',bpm:90,notes:Array.from({length:8},()=>[4,0,.5]),steps:['Alterna índice y medio.','Toca en cada número y cada «y».','Busca la misma fuerza en todos los golpes.'],goal:'Ocho Mi constantes sin acelerarte.'}),
+ E({id:'b8-balada',t:'Balada: deja respirar',bpm:68,notes:[[3,3,4],[4,3,4],[3,0,4],[4,1,4]],steps:['Toca Do y cuenta cuatro.','Sigue Sol, La y Fa, cuatro pulsos cada uno.','Apaga antes del siguiente cambio.'],goal:'Cuatro notas largas con entradas claras.'}),
+ E({id:'b8-reggaeton',t:'Reggaetón: base firme',bpm:85,notes:[[3,0,2],[3,0],[2,2],[3,0,2],[3,0],[2,2]],steps:['Sostén La durante 1 y 2.','Repite La en 3 y toca Mi en 4.','Deja que la batería de la banda complete el patrón.'],goal:'Distingues una nota larga de dos cortas.'}),
+ E({id:'b8-bossa',t:'Bossa: llegada anticipada',bpm:90,notes:[[3,3,1.5],[4,3,.5],[3,3,1.5],[4,3,.5]],steps:['Toca Do en 1 y Sol en «2 y».','Regresa a Do en 3.','Sol entra en «4 y», sin empujar el tempo.'],goal:'Las anticipaciones llegan entre pulsos.'}),
+ {check:[['¿Cuánto dura una corchea aquí?','Medio pulso.'],['¿Qué debes cambiar para pasar de balada a rock?','La duración y repetición de las notas, además de la intención y el tempo; no basta cambiar sus nombres.']]},
+ {errors:['Tocar la «y» pegada al número: divídelo en dos mitades iguales.','Subir el tempo antes de comprender el patrón: escucha y cuenta primero.']},
+ {trick:['Negra = 1 pulso; corchea = 0.5.','Cuenta «1 y 2 y 3 y 4 y».','Prueba la banda sin bajo y luego activa la referencia.']}
+]},
+{id:9,title:'Camina entre acordes',sub:'Walking bass básico',hue:170,blocks:[
+ {aim:['Crear una nota por pulso.','Conectar dos raíces con un camino corto.']},
+ {step:'Paso 1',t:'Una caminata regular',p:'Walking bass significa bajo caminante: una línea que avanza normalmente con una nota por pulso y conecta los acordes. Comienza por notas del arpegio; después agrega notas de la escala o aproximaciones. No necesitas llenar cada espacio con un salto grande.'},
+ {step:'Paso 2',t:'Decide primero a dónde llegas',p:'Ejemplo resuelto: un compás de Do mayor seguido de Fa mayor. Toca Do, Mi, Sol y Mi en el primer compás. Ese último Mi queda un semitono debajo de Fa y prepara la llegada. En el segundo toca Fa, La, Do y Si; Si prepara el regreso a Do. Es una línea original para practicar, no una regla única.'},
+ {key:'La raíz en el primer pulso aclara el acorde; el último pulso puede preparar el siguiente.'},
+ E({id:'b9-caminar',t:'De Do a Fa y de regreso',bpm:65,notes:[[3,3],[2,2],[2,5],[2,2],[2,3],[1,2],[1,5],[1,4],[3,3,4]],steps:['Cuenta cuatro notas por compás.','Escucha Mi acercándose a Fa.','Escucha Si acercándose a Do.'],goal:'Llegas a las raíces sin perder el pulso.'}),
+ E({id:'b9-corto',t:'Un camino hacia Sol',notes:[[3,3],[2,2],[2,3],[2,4],[2,5,4]],steps:['Toca Do, Mi y Fa.','Agrega Fa♯ como aproximación.','Resuelve en Sol y sostén cuatro pulsos.'],goal:'Distingues el paso cromático de la llegada.'}),
+ E({id:'b9-la-re',t:'De La hacia Re',bpm:65,notes:[[3,0],[3,2],[3,4],[2,0,4]],steps:['Empieza en La.','Camina por Si y Do♯, una nota por pulso.','Llega a Re en el siguiente inicio y sostén cuatro pulsos.'],goal:'Preparas una raíz nueva con un camino corto y regular.'}),
+ {check:[['¿Por qué funciona Mi antes de Fa?','Está un semitono abajo y conduce a la raíz siguiente.'],['¿Debes tocar siempre notas distintas?','No. Repetir una nota también puede mantener una línea clara.']]},
+ {errors:['Elegir notas sin pensar en el siguiente acorde: decide primero la llegada.','Acelerar en el paso cromático: cada nota conserva un pulso.']},
+ {trick:['Inicio del compás: raíz clara.','Centro: notas del acorde o escala.','Final: prepara el siguiente inicio.']}
+]},
+{id:10,title:'Haz tu propia respuesta',sub:'Improvisación con intención',hue:320,blocks:[
+ {aim:['Crear una frase breve con pocas notas.','Escuchar y responder sin llenar todo.']},
+ {step:'Paso 1',t:'Una idea que se reconoce',p:'Improvisar es elegir notas y ritmos mientras tocas. Una frase es una idea musical con inicio y final. Un motivo es una idea corta que puedes repetir o variar. Ejemplo resuelto en La menor: La, Do, Mi, La. Repite esa idea y después cambia el último La por Sol antes de volver a La.'},
+ {step:'Paso 2',t:'Pregunta y respuesta',p:'Toca una frase de cuatro pulsos como pregunta; contesta con otra que termine en la raíz. Un silencio también es una respuesta: apaga las cuerdas y cuenta sin tocar. La práctica calificada de abajo tiene notas fijas para comprobar el mapa. Después abre Tocar con la banda, elige La menor y cumbia, y crea tu propia frase sin calificación automática.'},
+ {key:'Una buena respuesta puede usar menos notas. Escucha al resto del grupo y regresa a la raíz.'},
+ E({id:'b10-pregunta',t:'Una pregunta en La',notes:[[4,5],[4,8],[3,7],[2,7]],steps:['Toca La, Do, Mi y La agudo.','Escucha el final.','Repite buscando el mismo ritmo.'],goal:'Puedes recordar una frase de cuatro notas.'}),
+ E({id:'b10-respuesta',t:'Cambia el final',notes:[[4,5],[4,8],[2,5],[4,5]],steps:['Conserva La y Do del inicio.','Responde con Sol y La grave.','Al terminar, cuenta un compás en silencio antes de repetir.'],goal:'Reconoces la variación y la vuelta a la raíz.'}),
+ E({id:'b10-motivo',t:'Repite y cambia una nota',notes:[[4,5],[4,8],[3,7],[4,5],[4,5],[4,8],[2,5],[4,5]],steps:['Toca La, Do, Mi y La como primera frase.','Repite el inicio La, Do.','Cambia Mi por Sol y vuelve a La.'],goal:'Conservas un motivo reconocible y varías una sola nota.'}),
+ {check:[['¿Improvisar exige tocar muchas notas?','No. Elige pocas, escucha y deja espacio.'],['¿Por qué empezar con una frase fija?','Te permite conocer el mapa y el pulso antes de elegir variantes.']]},
+ {errors:['Cambiar todas las notas a la vez: conserva una parte del motivo.','Tocar encima de todo: deja espacio para quien lleva la melodía.']},
+ {trick:['Escucha → repite → cambia una cosa.','Termina en la raíz para una respuesta estable.','El reto mide precisión; la música también necesita intención y escucha.']}
+]}
+];
+const ALLEX=LESSONS.flatMap(l=>l.blocks.filter(b=>b.type==='exercise').map(x=>Object.assign(x,{lesson:l.id})));
+const CHALLENGES=[['cumbia','Patio de cumbia','b8-cumbia'],['banda','Paso de banda','b8-banda'],['norteno','Camino norteño','b8-norteno'],['rock','Motor de cuatro cuerdas','b8-rock'],['reggaeton','Pulso de noche','b8-reggaeton'],['bossa','Vuelta suave','b8-bossa']].map(([id,t,ex])=>({id,t,ex:ALLEX.find(x=>x.id===ex)}));
+
+let GAME=null;
+function viewChallenge(){return `${toolHead('Reto de notas','Toca el carril cuando el número llegue a la línea. El número indica el traste.',285)}<section class="panel"><div class="controls">${control('Línea original','challenge',CHALLENGES.map(c=>[c.id,c.t]),'cumbia')}${control('Velocidad','speed',[50,60,75,90,100,110,120].map(n=>[n,n+' %']),100)}${control('Cómo calificas','gameinput',[['tap','Toques en pantalla'],['mic','Bajo con micrófono']],'tap')}</div><p class="caption">Los toques califican cuerda y momento, no el sonido de tu bajo. Con micrófono se comprueba la nota en su octava; usa audífonos y toca una sola nota. Dos lecturas seguidas cuentan como acierto.</p><div class="game" id="game"><svg id="falling" viewBox="0 0 600 380" role="img" aria-label="Notas que caen por cuerda"></svg></div><div class="lanebuttons" style="--lanes:${DB.strings}">${laneStrings().map(s=>`<button data-lane="${s}" aria-label="Tocar cuerda ${s}, ${noteName(BASS_OPEN[s])}">${noteName(BASS_OPEN[s])}</button>`).join('')}</div><p id="gameresult" role="status">Elige una línea y empieza. Mejor marca: ${DB.retobest['cumbia:tap']??'—'} %.</p>${toolDock()}</section>`}
+function laneStrings(){const a=Array.from({length:DB.strings},(_,i)=>DB.strings-i);return DB.lefty?a.reverse():a}
+function gameDraw(run,time){const strings=laneStrings(),width=600/strings.length;let svg='';strings.forEach((s,i)=>svg+=`<path d="M${(i+.5)*width} 0V380" stroke="#464856" stroke-width="${1+s}"/><text x="${(i+.5)*width}" y="24" text-anchor="middle" fill="#fff">${noteName(BASS_OPEN[s])}</text>`);svg+='<path d="M0 306H600" stroke="#ff66af" stroke-width="3"/>';
+ if(run)run.targets.forEach(n=>{const y=306-(n.at-time)*95;if(y<40||y>360)return;const x=(strings.indexOf(n.s)+.5)*width;svg+=`<rect x="${x-24}" y="${y-19}" width="48" height="38" rx="12" fill="${n.hit?'#36d5a0':time>n.at+.3?'#bd476e':'#2f7bff'}"/><text x="${x}" y="${y+6}" text-anchor="middle" fill="white" font-size="21">${n.f}</text>`});$('#falling').innerHTML=svg;
+}
+function gameTap(s){const g=GAME;if(!g||!RUN.active||g.mic)return;const t=ac().currentTime-outLat()-g.start;const near=g.targets.filter(n=>!n.hit&&Math.abs(t-n.at)<.24).sort((a,b)=>Math.abs(t-a.at)-Math.abs(t-b.at))[0];if(near&&near.s===s){near.hit=true;bass(near.m,ac().currentTime,.18,.35)}else g.wrong++;}
+function mountChallenge(){gameDraw(null,0);for(const id of ['challenge','speed','gameinput'])$('#'+id).onchange=()=>{stopAll();GAME=null;gameDraw(null,0);$('#gameresult').textContent='Mejor marca de este modo: '+(DB.retobest[$('#challenge').value+':'+$('#gameinput').value]??'—')+' %'};
+ $('#go').onclick=()=>safe(async()=>{const choice=CHALLENGES.find(c=>c.id===$('#challenge').value),mic=$('#gameinput').value==='mic',bpm=choice.ex.bpm*(+$('#speed').value/100),token=await prepareAudio();if(token===null)return;const spec=exerciseTargets(notesOf(choice.ex),bpm,4,4),run={...spec,start:0,mic,wrong:0};GAME=run;if(mic){await micStart(p=>fmPitch(run,p));if(token!==RUN.token)return}$('#gameresult').textContent='Cuenta de entrada: cuatro pulsos.';run.start=playTimeline({events:run.targets.map(n=>({at:n.at,m:null,d:n.dur})),duration:spec.duration+.3,bpm,beats:4,onFrame:t=>{gameDraw(run,t);if(t>4*spec.spb)$('#gameresult').textContent=`${run.targets.filter(n=>n.hit).length} de ${run.targets.length} notas${!mic?' · toques fuera de tiempo: '+run.wrong:''}`},onEnd:()=>{const hits=run.targets.filter(n=>n.hit).length,pct=Math.max(0,Math.round((hits-run.wrong*.25)/run.targets.length*100)),key=choice.id+':'+(mic?'mic':'tap');recordResult(key,pct,'retobest');$('#gameresult').textContent=`Resultado: ${pct} % · Mejor: ${DB.retobest[key]} % · ${mic?'Notas con micrófono':'Cuerdas y ritmo en pantalla'}`;GAME=null;$('#status').textContent='Reto terminado'}})})
+}
+
+const FIGST={};let FIGRUN=null;
+function figState(x){return FIGST[x.id]||(FIGST[x.id]={mic:false,si:-1})}
+const figBpm=x=>DB.bpm[x.id]||x.bpm;
+const figWhere=n=>`${nn(n.m)} · cuerda ${n.s}, ${n.f?'traste '+n.f+', dedo '+n.fg:'al aire'} · ${n.d} ${n.d===1?'pulso':'pulsos'}`;
+function figHTML(x){const ns=notesOf(x),st=figState(x);return `<div class="fig" data-fig="${x.id}">${fretboard({dots:ns})}<details><summary>Ver tablatura</summary><pre class="tab" tabindex="0">${esc(tablature(ns))}</pre></details><div class="figbar"><button data-fx="listen">Escuchar</button><button data-fx="follow" class="primary">Seguir al pulso</button><button data-stop>Detener</button></div><div class="controls"><label>Tempo (bpm)<input type="number" min="35" max="180" value="${figBpm(x)}" data-tempo="${x.id}"></label><label class="toggle"><input type="checkbox" data-mic="${x.id}" ${st.mic?'checked':''}> Calificar con micrófono</label></div><p class="caption">Con micrófono, usa audífonos: la nota guía se apaga. Sin micrófono, toca «Marcar pulso» para practicar el ritmo.</p><div class="figstep"><button data-fx="prev" aria-label="Nota anterior">Anterior</button><button data-fx="next" aria-label="Nota siguiente">Siguiente</button><span class="where">Paso a paso: empieza con Siguiente.</span></div>${pulseHTML(x.beats)}<button data-fx="tap">Marcar pulso</button><p class="figstatus" role="status">Mejor con micrófono: ${DB.figbest[x.id]??'—'} %</p><div class="notechips">${ns.map((n,i)=>`<span data-note="${i}">${noteName(n.m)}<small>${n.s}/${n.f}</small></span>`).join('')}</div></div>`}
+function fmStep(run,time){return run.targets.find(n=>time>=n.at&&time<n.at+n.dur)}
+function fmPitch(run,p){if(!p){run.targets.forEach(n=>n.reads=0);return}const t=p.t-run.start,n=fmStep(run,t);if(!n)return;const ok=Math.abs(p.m-n.m)<=.5;if(ok){n.reads++;if(n.reads>=2)n.hit=true}else n.reads=0}
+function exerciseTargets(ns,bpm,rounds=2,count=4){const spb=60/bpm,targets=[];let at=count*spb;for(let r=0;r<rounds;r++)for(let i=0;i<ns.length;i++){const n=ns[i];targets.push({...n,at,dur:n.d*spb,round:r,i,hit:false,reads:0});at+=n.d*spb}return {targets,duration:at,spb}}
+async function figStart(x,preview=false){
+ const st=figState(x),token=await prepareAudio();if(token===null)return;
+ const root=$(`[data-fig="${x.id}"]`);if(!root)return;const ns=notesOf(x),bpm=figBpm(x),spec=exerciseTargets(ns,bpm,preview?1:2,preview?0:x.beats);
+ const run={...spec,x,root,mic:!preview&&st.mic,start:0,scored:new Set(),last:-1};FIGRUN=run;
+ if(run.mic){await micStart(p=>fmPitch(run,p));if(token!==RUN.token)return}
+ const events=run.targets.map(n=>({at:n.at,m:preview||!run.mic?n.m:null,d:n.dur*.82}));
+ $('.figstatus',root).textContent=preview?'Escucha el ejemplo.':run.mic?'Toca tu bajo después de la cuenta.':'Toca Marcar pulso al empezar cada nota; se califica solo tu ritmo.';
+ run.start=playTimeline({events,duration:spec.duration,bpm,beats:x.beats,click:!preview,onFrame:time=>{
+   pulsePaint(root,Math.max(0,Math.floor(time/spec.spb))%x.beats);const n=fmStep(run,time);
+   if(n){const idx=run.targets.indexOf(n);if(idx!==run.last){run.last=idx;$('.where',root).textContent=`Ronda ${n.round+1} · ${figWhere(n)}`;$$('.dot',root).forEach(e=>e.classList.toggle('playing',+e.dataset.s===n.s&&+e.dataset.f===n.f));$$('[data-note]',root).forEach(e=>{const k=+e.dataset.note;e.classList.toggle('playing',k===n.i);e.classList.toggle('hit',!!run.targets.find(t=>t.round===n.round&&t.i===k)?.hit)})}}
+   else if(time>=0&&time<(preview?0:x.beats*spec.spb))$('.where',root).textContent='Cuenta de entrada: '+(Math.floor(time/spec.spb)+1);
+   if(!preview)for(let r=0;r<2;r++){const rows=run.targets.filter(n=>n.round===r),end=rows.at(-1).at+rows.at(-1).dur;if(time>=end&&!run.scored.has(r)){run.scored.add(r);const pct=Math.round(rows.filter(n=>n.hit).length/rows.length*100);if(run.mic)recordResult(x.id,pct);$('.figstatus',root).textContent=`Ronda ${r+1}: ${pct} %${run.mic?' · mejor: '+DB.figbest[x.id]+' %':' · ritmo en pantalla'}${pct>=80?' · Meta de precisión alcanzada.':' · Baja el tempo y repite.'}`;const card=root.closest('.exercise');if(card&&DB.done[x.id])$('.exbadge',card).textContent='Completado'}}
+ },onEnd:()=>{$$('.playing',root).forEach(e=>e.classList.remove('playing'));FIGRUN=null;if(preview)$('.figstatus',root).textContent='Ahora prueba Seguir al pulso.'}});
+}
+async function figAction(button){const root=button.closest('[data-fig]'),x=ALLEX.find(x=>x.id===root?.dataset.fig);if(!x)return;
+ const action=button.dataset.fx;if(action==='tap'){const run=FIGRUN;if(!run||!RUN.active||run.x.id!==x.id||run.mic)return;const t=ac().currentTime-outLat()-run.start,n=run.targets.find(n=>!n.hit&&Math.abs(t-n.at)<.28);if(n){n.hit=true;$(`[data-note="${n.i}"]`,root)?.classList.add('hit')}return}
+ if(action==='listen'||action==='follow'){await figStart(x,action==='listen');return}
+ const st=figState(x),ns=notesOf(x);st.si=st.si<0?(action==='prev'?ns.length-1:0):(st.si+(action==='prev'?-1:1)+ns.length)%ns.length;const token=await prepareAudio(['bajo']);if(token===null)return;const n=ns[st.si];bass(n.m,ac().currentTime+.02,.8);$('.where',root).textContent=figWhere(n);$$('.dot',root).forEach(e=>e.classList.toggle('playing',+e.dataset.s===n.s&&+e.dataset.f===n.f));
+}
+
+const NARR={token:0,on:false,utterance:null};
+function stopNarration(){NARR.token++;NARR.on=false;if('speechSynthesis'in globalThis)speechSynthesis.cancel();$$('[data-narrate]').forEach(b=>{b.textContent='Escuchar la lección';b.setAttribute('aria-pressed','false')});$$('.narrating').forEach(e=>e.classList.remove('narrating'))}
+function sayText(s){return String(s).replace(/♯/g,' sostenido ').replace(/♭/g,' bemol ').replace(/\bbpm\b/g,'pulsos por minuto').replace(/\b4\/4\b/g,'cuatro cuartos')}
+function buildNarration(lesson){return lesson.blocks.map((b,i)=>({i,text:b.aim?'Al terminar podrás. '+b.aim.join('. '):b.step?b.step+'. '+b.t+'. '+b.p:b.key?'La idea clave. '+b.key:b.type==='exercise'?b.t+'. '+b.steps.join('. ')+'. Meta. '+b.goal:b.check?'Compruébalo. '+b.check.map(p=>p[0]).join('. '):b.errors?'Errores comunes. '+b.errors.join('. '):'Hoja de trucos. '+b.trick.join('. ')}))}
+function narrate(lesson){if(NARR.on){stopNarration();return}if(!('speechSynthesis'in globalThis)||!('SpeechSynthesisUtterance'in globalThis)){toast('Tu navegador no ofrece lectura en voz alta. Puedes seguir la lección en pantalla.');return}stopAll();NARR.on=true;const token=NARR.token,items=buildNarration(lesson),button=$('[data-narrate]');button.textContent='Detener lectura';button.setAttribute('aria-pressed','true');
+ const voices=speechSynthesis.getVoices(),voice=voices.find(v=>/^es[-_]MX/i.test(v.lang))||voices.find(v=>/^es/i.test(v.lang));let index=0;
+ const next=()=>{if(token!==NARR.token)return;if(index>=items.length){stopNarration();return}const item=items[index++],u=new SpeechSynthesisUtterance(sayText(item.text));NARR.utterance=u;u.lang='es-MX';if(voice)u.voice=voice;u.rate=.95;$$('[data-nb]').forEach(e=>e.classList.toggle('narrating',+e.dataset.nb===item.i));u.onend=next;u.onerror=e=>{if(e.error!=='interrupted'&&e.error!=='canceled'){stopNarration();toast('No se pudo iniciar la voz. Revisa las voces en español del dispositivo.')}};speechSynthesis.speak(u)};next();
+}
+
+function viewTuner(){return `${toolHead('Afinador','Toca una cuerda al aire y deja que suene. Baja el volumen de la banda.',245)}<div class="panel">${control('Afinación','tuning',[['standard','Estándar '+DB.strings+' cuerdas'],['drop','Re–La–Re–Sol (4)']],'standard')}<p class="caption">Mi1–La1–Re2–Sol2; con quinta cuerda, Si0. Re–La–Re–Sol baja solo Mi a Re. Esta selección cambia el afinador; las lecciones usan afinación estándar.</p><div class="strings" id="tunerstrings"></div><div class="tuner"><strong id="pitch">—</strong><p id="pitchinfo" role="status">Activa el micrófono para empezar.</p><div class="meter"><i id="needle"></i></div><div class="meterlabels"><span>Grave</span><span>Al centro</span><span>Agudo</span></div></div><p class="caption">Una centésima es 1/100 de semitono. Cerca de 0 estás en afinación. El número tras la nota indica su octava. El detector cubre desde Si0; en graves necesita unos instantes de sonido estable.</p>${toolDock('Activar micrófono')}</div>`}
+function mountTuner(){const tuning=()=>$('#tuning').value==='drop'?openStrings(4,true):openStrings();const paint=()=>{$('#tunerstrings').innerHTML=tuning().slice().reverse().map(o=>`<button data-reference="${o.m}">${nn(o.m)}</button>`).join('')};paint();$('#tuning').onchange=()=>{stopAll();paint()};$('#go').onclick=()=>safe(async()=>{const token=await prepareAudio(['bajo']);if(token===null)return;await micStart(p=>{if(!p){$('#pitchinfo').textContent='No se distingue una nota. Toca una sola cuerda.';return}const target=tuning().reduce((a,b)=>Math.abs(p.m-b.m)<Math.abs(p.m-a.m)?b:a),cents=(p.m-target.m)*100;$('#pitch').textContent=nn(target.m);$('#pitchinfo').textContent=`${p.f.toFixed(1)} Hz · ${Math.round(cents)} centésimas · ${Math.abs(cents)<=5?'En afinación':cents<0?'Sube la afinación poco a poco':'Baja la afinación poco a poco'}`;$('#needle').style.left=(50+Math.max(-50,Math.min(50,cents)))+'%';$('#pitch').classList.toggle('good',Math.abs(cents)<=5)});if(token===RUN.token)$('#status').textContent='Micrófono activo'});}
+function viewMetronome(){return `${toolHead('Metrónomo','El pulso es tu paso regular. Cuenta con la luz y el click.',210)}<section class="panel"><div class="controls"><label>Tempo (bpm)<input id="metbpm" type="number" min="35" max="220" value="${DB.met}"></label>${control('Pulsos por compás','meter',[2,3,4,6].map(n=>[n,n+' pulsos']),DB.meter)}<label class="toggle"><input type="checkbox" id="metmute" ${DB.mute?'checked':''}> Solo visual</label></div><div id="metpulse">${pulseHTML(DB.meter)}</div><div class="bigtempo">${DB.met}<small>bpm</small></div>${toolDock()}</section>`}
+function mountMetronome(){for(const id of ['metbpm','meter','metmute'])$('#'+id).onchange=()=>{stopAll();DB.met=clamp($('#metbpm').value,35,220,80);DB.meter=+$('#meter').value;DB.mute=$('#metmute').checked;save();$('#metbpm').value=DB.met;$('.bigtempo').innerHTML=DB.met+'<small>bpm</small>';$('#metpulse').innerHTML=pulseHTML(DB.meter)};$('#go').onclick=()=>safe(async()=>{const token=await prepareAudio(['bateria']);if(token===null)return;$('#status').textContent='En marcha';playTimeline({events:[],duration:3600,bpm:DB.met,beats:DB.meter,onFrame:t=>pulsePaint($('#metpulse'),Math.max(0,Math.floor(t/(60/DB.met)))%DB.meter),onEnd:()=>$('#status').textContent='Sesión terminada'})})}
+const BAND={id:'cumbia',tono:'La m',bpm:90,bars:4,reference:false};
+function studioURL(){return '../estudio/#/nueva?'+new URLSearchParams({tono:BAND.tono,bpm:BAND.bpm,genero:BAND.id,desde:'bajo'}).toString()}
+function viewBand(){return `${toolHead('Tocar con la banda','Tú llevas el bajo. Elige el acompañamiento y busca la raíz del acorde.',325)}<section class="panel"><div class="controls">${control('Género','genre',BEATS.map(b=>[b.id,b.n]),BAND.id)}${control('Tono','key',NOTE_ES.flatMap(n=>[[n,n+' mayor'],[n+' m',n+' menor']]),BAND.tono)}<label>Tempo (bpm)<input id="bandbpm" type="number" min="40" max="180" value="${BAND.bpm}"></label>${control('Ciclo','bars',[2,4,8].map(n=>[n,n+' compases']),BAND.bars)}<label class="toggle"><input type="checkbox" id="reference" ${BAND.reference?'checked':''}> Bajo de referencia</label></div><p id="bandapprox" class="caption"></p><div class="chordnow"><small id="barcount">Ciclo de ${BAND.bars} compases</small><strong id="chord">—</strong><p id="chordnotes">Raíz (R) y quinta (5) del acorde actual</p></div><div id="bandboard"></div>${toolDock('Tocar')}<a class="button studio-link" id="studio" href="${studioURL()}">Abrir en Roka Estudio</a><p class="caption">La referencia agrega la pista de bajo o tuba del género. Con el interruptor apagado solo suenan batería, armonía y, cuando corresponde, metales.</p></section>`}
+function mountBand(){const update=()=>{BAND.id=$('#genre').value;BAND.tono=$('#key').value;BAND.bpm=clamp($('#bandbpm').value,40,180,90);$('#bandbpm').value=BAND.bpm;BAND.bars=+$('#bars').value;BAND.reference=$('#reference').checked;$('#studio').href=studioURL();const b=beatById(BAND.id);$('#bandapprox').textContent=b.aprox||'Patrón original de acompañamiento por género.';const ch=beatChords(b,parseKey(BAND.tono),0,1)[0];paintChord(ch,0)};
+ function paintChord(ch,bar){$('#chord').textContent=chordLabel(ch);$('#barcount').textContent=`Compás ${bar+1} de ${BAND.bars}`;$('#chordnotes').textContent=`Raíz: ${noteName(ch.pc)} · Quinta: ${noteName(ch.pc+7)}`;$('#bandboard').innerHTML=fretboard({dots:chordDots(ch)})}
+ for(const id of ['genre','key','bandbpm','bars','reference'])$('#'+id).onchange=()=>{stopAll();update()};update();
+ $('#go').onclick=()=>safe(async()=>{const btn=$('#go'),token=await prepareAudio(['bajo']);if(token===null)return;btn.disabled=true;btn.dataset.busy='1';$('#status').textContent='Preparando instrumentos…';const options={id:BAND.id,tono:parseKey(BAND.tono),bpm:BAND.bpm,compases:BAND.bars,parte:'A',prog:0,seed:17};const rendered=await renderBeat(options);if(token!==RUN.token)return;btn.disabled=false;btn.removeAttribute('data-busy');const c=ac(),start=c.currentTime+.2,beat=beatById(options.id),chords=beatChords(beat,options.tono,0,options.compases);for(const tr of bandTracks(rendered,BAND.reference)){const s=c.createBufferSource();s.buffer=tr.buffer;s.loop=true;s.loopStart=0;s.loopEnd=rendered.dur;s.connect(RUN.bus);s.start(start);RUN.nodes.add(s)}RUN.active=true;$('#status').textContent='La banda está tocando';let last=-1;const frame=()=>{if(token!==RUN.token)return;const time=Math.max(0,c.currentTime-outLat(c)-start),bar=Math.floor(time/(60/options.bpm*beat.beats))%options.compases;if(bar!==last){last=bar;paintChord(chords[bar],bar)}RUN.raf=requestAnimationFrame(frame)};frame()})
+}
+
+const clamp=(v,lo,hi,fallback)=>{const n=Number(v);return Number.isFinite(n)&&n>0?Math.max(lo,Math.min(hi,n)):fallback};
+async function safe(fn){try{await fn()}catch(e){stopAll();toast(e.message||'No se pudo completar la acción.');console.error(e)}}
+function lessonProgress(l){const xs=ALLEX.filter(x=>x.lesson===l.id);return {done:xs.filter(x=>DB.done[x.id]).length,total:xs.length}}
+function lessonCard(l){const p=lessonProgress(l);return `<a class="album" href="#/leccion/${l.id}"><div class="cover">${coverArt(l.hue,l.id)}<span class="covernum">${String(l.id).padStart(2,'0')}</span></div><small>LECCIÓN ${l.id}</small><b>${l.title}</b><span>${l.sub}</span><progress value="${p.done}" max="${p.total}" aria-label="${p.done} de ${p.total} ejercicios completos"></progress><small>${p.done} de ${p.total} ejercicios</small></a>`}
+function viewHome(){const next=LESSONS.find(l=>lessonProgress(l).done<lessonProgress(l).total)||LESSONS[9],done=ALLEX.filter(x=>DB.done[x.id]).length;return `<header class="homehead"><div><p class="eyebrow">OM · CENTRO DE APRENDIZAJE MUSICAL</p><h1>Om Bajo<span>Haz que la música camine.</span></h1></div><a class="button" href="#/ajustes">Ajustes</a></header><section class="hero"><div class="heroart">${coverArt(220,3)}</div><div class="herotext"><p class="eyebrow">TU SIGUIENTE PASO / ${String(next.id).padStart(2,'0')}</p><h2>${next.title}</h2><p>${next.sub}. Escucha, ubica tus dedos y toca al pulso.</p><a class="button primary" href="#/leccion/${next.id}">${done?'Continuar':'Empezar'}</a><p class="caption">${DB.strings} cuerdas · ${done} de ${ALLEX.length} ejercicios completos</p></div></section><div class="sectionhead"><h2>Prepara tu sonido</h2><a href="#/reto">Ir al reto</a></div><div class="toolgrid">${[['afinador','Afina tu bajo','Una cuerda a la vez',240],['metronomo','Encuentra el pulso','Escucha y cuenta',210],['banda','Toca con la banda','El bajo lo pones tú',325]].map(([id,t,s,h])=>`<a class="toolcard" href="#/${id}"><div>${coverArt(h,1)}</div><b>${t}</b><span>${s}</span></a>`).join('')}</div><div class="sectionhead"><h2>Aprende desde cero</h2><a href="#/lecciones">Ver las 10</a></div><div class="albums">${LESSONS.slice(0,4).map(lessonCard).join('')}</div><section class="panel welcome"><h2>Un paso a la vez</h2><p>1. Afina. 2. Escucha el ejemplo. 3. Toca despacio. El micrófono marca tu precisión por nota; tú revisas la postura y el sonido limpio. A partir de 80 % se guarda el ejercicio como completo.</p><p>Tu avance se guarda en este navegador. Para usar otra persona de la escuela, elige otro perfil del navegador.</p></section><footer><p class="sign">Om Bajo · Centro de aprendizaje musical ${byMark()}</p><a href="../roka/?cambiar">Otras apps Om</a><p>Muestras: tonejs-instruments, Nicholaus Brosowsky (CC BY 3.0); Black Pearl, Glen MacArthur (CC BY-SA 3.0); VSCO 2 CE (CC0). <a href="#/licencias">Créditos y licencias</a>.</p><p id="offlineinfo">La app conserva sus pantallas sin conexión después de la primera visita. Abre los sonidos que usarás mientras tengas internet.</p></footer>`}
+function exCard(x){return `<article class="exercise" id="${x.id}"><div class="exheading"><span class="exnum">${ALLEX.filter(e=>e.lesson===x.lesson).indexOf(x)+1}</span><div><h3>${x.t}</h3><small class="exbadge">${DB.done[x.id]?'Completado':'Práctica guiada'}</small></div></div><ol class="steps">${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol><p class="goal">Meta: ${x.goal}</p>${figHTML(x)}</article>`}
+function blockHTML(b,i){let html;if(b.type==='exercise')html=exCard(b);else if(b.aim)html=`<h2>Al terminar podrás</h2><ul>${b.aim.map(s=>`<li>${s}</li>`).join('')}</ul>`;else if(b.step)html=`<p class="eyebrow">${b.step}</p><h2>${b.t}</h2><p>${b.p}</p>`;else if(b.key)html=`<p class="eyebrow">La idea clave</p><p>${b.key}</p>`;else if(b.check)html=`<h2>Compruébalo</h2>${b.check.map(([q,a])=>`<details class="check"><summary>${q}</summary><p>${a}</p></details>`).join('')}`;else{const list=b.errors||b.trick;html=`<h2>${b.errors?'Errores comunes':'Hoja de trucos'}</h2><ul>${list.map(s=>`<li>${s}</li>`).join('')}</ul>`}return `<section data-nb="${i}" class="lessonblock${b.key?' keyblock':''}">${html}</section>`}
+function viewLesson(id){const l=LESSONS.find(l=>l.id===id);if(!l)return '<h1>No encontramos esa lección</h1><a href="#/lecciones">Ver lecciones</a>';DB.last=id;save();return `<a class="back" href="#/lecciones">Todas las lecciones</a><header class="lessonhead"><div class="lessonart">${coverArt(l.hue,l.id)}</div><div><p class="eyebrow">LECCIÓN ${id} / 10</p><h1>${l.title}</h1><p>${l.sub}</p></div></header><button data-narrate="${id}" aria-pressed="false">Escuchar la lección</button><div class="lessonbody">${l.blocks.map(blockHTML).join('')}</div><div class="lessonnav">${id>1?`<a class="button" href="#/leccion/${id-1}">Anterior</a>`:''}${id<10?`<a class="button primary" href="#/leccion/${id+1}">Siguiente lección</a>`:'<a class="button primary" href="#/banda">Tocar con la banda</a>'}</div>`}
+function viewSettings(){return `${toolHead('Ajustes','Acomoda el mástil y la lectura a tu manera.',250)}<section class="panel settings"><label class="toggle"><input id="strings5" type="checkbox" ${DB.strings===5?'checked':''}> Bajo de cinco cuerdas</label><p>Agrega Si0 grave. Se conservan las cuerdas 1 Sol, 2 Re, 3 La y 4 Mi; Si es la cuerda 5.</p><label class="toggle"><input id="lefty" type="checkbox" ${DB.lefty?'checked':''}> Modo zurdo</label><p>Invierte el recorrido del mástil y el orden de los carriles del reto. La tablatura mantiene su lectura habitual.</p>${control('Apariencia','theme',[['estudio','Estudio oscuro'],['claro','Claro']],DB.theme)}<p>La digitación propone un dedo por traste. Desplaza la mano si lo necesitas y evita forzar el alcance.</p><a class="button" href="#/licencias">Licencias</a></section>`}
+function viewLicenses(){return `<h1>Créditos y licencias</h1><p>Las lecciones, portadas y líneas de práctica de Om Bajo son originales. Los instrumentos usan muestras grabadas del núcleo compartido de Om.</p>${Object.values(PACKS).map(p=>`<article class="panel"><h2>${esc(p.nombre)}</h2><p>${esc(p.autor)} · ${esc(p.licencia)}</p><p>${esc(p.credito||'')}</p><a href="${esc(p.url)}" target="_blank" rel="noopener">Ver fuente de las muestras</a></article>`).join('')}<p><a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a> · <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a></p><p>Las modificaciones de las muestras de batería conservan CC BY-SA 3.0. <a href="../samples/LICENCIA.txt">Créditos de los archivos</a>.</p><p>Voz narrada: Web Speech, según las voces instaladas en tu dispositivo. No se envía ni se guarda una grabación desde esta app al usar el afinador o la calificación.</p>`}
+function route(){stopAll();FIGRUN=null;GAME=null;const raw=location.hash.slice(1)||'/',p=raw.split('/').filter(Boolean),name=p[0]||'',old=$('#page'),page=old.cloneNode(false);old.replaceWith(page);document.documentElement.dataset.theme=DB.theme==='claro'?'claro':'estudio';let html;
+ switch(name){case '':html=viewHome();break;case 'lecciones':html='<p class="eyebrow">DEL PRIMER SONIDO A TU PROPIA LÍNEA</p><h1>Tu ruta de aprendizaje</h1><p>Diez lecciones. Escucha, prueba y avanza a tu ritmo.</p><div class="albums">'+LESSONS.map(lessonCard).join('')+'</div>';break;case 'leccion':html=viewLesson(+p[1]);break;case 'afinador':html=viewTuner();break;case 'metronomo':html=viewMetronome();break;case 'banda':html=viewBand();break;case 'reto':html=viewChallenge();break;case 'ajustes':html=viewSettings();break;case 'licencias':html=viewLicenses();break;default:html='<h1>No encontramos esa página</h1><a href="#/">Volver al inicio</a>'}
+ page.innerHTML=html;page.onchange=e=>{const el=e.target;if(el.dataset.tempo){stopAll();DB.bpm[el.dataset.tempo]=clamp(el.value,35,180,60);el.value=DB.bpm[el.dataset.tempo];save()}if(el.dataset.mic){stopAll();figState(ALLEX.find(x=>x.id===el.dataset.mic)).mic=el.checked}};
+ if(name==='afinador')mountTuner();if(name==='metronomo')mountMetronome();if(name==='banda')mountBand();if(name==='reto')mountChallenge();if(name==='ajustes')for(const id of ['strings5','lefty','theme'])$('#'+id).onchange=()=>{DB.strings=$('#strings5').checked?5:4;DB.lefty=$('#lefty').checked;DB.theme=$('#theme').value;save();route()};
+ $$('nav a').forEach(a=>{const active=a.hash==='#/'+name||(name==='leccion'&&a.hash==='#/lecciones');if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});document.title=(()=>{const h=$('h1',page);if(!h)return'Om Bajo';const c=h.cloneNode(true);c.querySelectorAll('small').forEach(x=>x.remove());const t=c.textContent.trim();return!t||t==='Om Bajo'?'Om Bajo':t+' · Om Bajo'})();window.scrollTo(0,0);
+}
+document.body.insertAdjacentHTML('afterbegin',`<a class="skip" href="#page">Ir al contenido</a><div class="appbar"><a class="brand" href="#/" aria-label="Om Bajo, inicio">${omBrand()}<span>Bajo</span></a><a href="../roka/?cambiar">Otras apps Om</a></div><main id="page" tabindex="-1"></main><nav aria-label="Navegación principal"><a href="#/">Inicio</a><a href="#/lecciones">Aprender</a><a href="#/banda">Banda</a><a href="#/reto">Reto</a><a href="#/ajustes">Ajustes</a></nav><div id="notice" role="status" aria-live="polite"></div>`);
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-stop')){stopAll();FIGRUN=null;GAME=null;return}if(b.dataset.fx)safe(()=>figAction(b));if(b.dataset.narrate)narrate(LESSONS.find(l=>l.id===+b.dataset.narrate));if(b.dataset.reference)safe(async()=>{const token=await prepareAudio(['bajo']);if(token!==null)bass(+b.dataset.reference,ac().currentTime+.03,1.6)});if(b.dataset.lane)gameTap(+b.dataset.lane)});
+window.addEventListener('hashchange',()=>safe(route));window.addEventListener('pagehide',stopAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAll()});route();
+if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>toast('No se pudo activar el modo sin conexión. Reintenta al tener internet.'));
+
+
+</script></body></html>

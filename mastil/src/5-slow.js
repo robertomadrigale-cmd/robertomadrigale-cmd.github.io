@@ -85,7 +85,7 @@ function downloadICS(time){
   const [h,m]=time.split(':').map(Number),d=new Date();d.setDate(d.getDate()+(d.getHours()*60+d.getMinutes()>=h*60+m?1:0));
   const pad=n=>String(n).padStart(2,'0'),dt=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(h)}${pad(m)}00`,now=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
   const url=location.href.split('#')[0]+'#/practicar/rutina';
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Roka Guitar for All//ES','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:practica-${Date.now()}@roka-guitar`,`DTSTAMP:${now}`,`DTSTART:${dt}`,'DURATION:PT15M','RRULE:FREQ=DAILY','SUMMARY:Practicar guitarra · Roka',`DESCRIPTION:Tu rutina de hoy: ${url}`,`URL:${url}`,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Hora de practicar guitarra','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Om Guitarra//ES','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:practica-${Date.now()}@roka-guitar`,`DTSTAMP:${now}`,`DTSTART:${dt}`,'DURATION:PT15M','RRULE:FREQ=DAILY','SUMMARY:Practicar guitarra · Om Guitarra',`DESCRIPTION:Tu rutina de hoy: ${url}`,`URL:${url}`,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Hora de practicar guitarra','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='practicar-guitarra.ics';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
   DB.remTime=time;save();toast('Abre el archivo para agregar el recordatorio a tu calendario.',4500);
 }
@@ -98,7 +98,7 @@ const ONB_Q=[
 function onboardShow(){
   if(document.getElementById('onb'))return;const A=Object.assign({},DB.onb&&!DB.onb.skip?DB.onb:{});
   const d=document.createElement('div');d.id='onb';d.className='onb';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','Bienvenida');
-  const paint=()=>{d.innerHTML=`<div class="onbc"><p class="eyebrow">Bienvenido a Roka Guitar for All</p><h2>Armemos tu plan</h2>
+  const paint=()=>{d.innerHTML=`<div class="onbc"><p class="eyebrow">Te damos la bienvenida a Om Guitarra</p><h2>Armemos tu plan</h2>
    ${ONB_Q.map(([k,q,os])=>`<div><span class="cl">${q}</span><div class="chips">${os.map(([v,l])=>`<button class="chip" data-onb="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join('')}</div></div>`).join('')}
    <div class="row" style="justify-content:space-between"><button class="btn sm" data-onb="skip">Ahora no</button><button class="btn pri" data-onb="go" ${ONB_Q.every(([k])=>A[k])?'':'disabled'}>Ver mi plan</button></div></div>`};
   d.addEventListener('click',e=>{const b=e.target.closest('[data-onb]');if(!b)return;const k=b.dataset.onb;

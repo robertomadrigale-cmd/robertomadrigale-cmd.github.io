@@ -260,7 +260,7 @@ function viewTracks(){
   <div class="card"><span class="cl">Acordes · <span id="tstat">detenida</span></span><div class="strip" id="tchips">${trkChips(-1)}</div>
    <p class="cap" style="margin:0 0 10px" id="ttip"></p><div id="tboard">${trkScaleBoard(-1)}</div>
    <p class="cap">Rojo: raíz del acorde que suena. Ámbar: notas del acorde. Tenue: el resto de la escala sugerida.</p></div>
-  <div class="row" style="justify-content:center"><button class="btn" id="tbeatgo">Tocar con un beat en Roka Estudio</button></div>
+  <div class="row" style="justify-content:center"><button class="btn" id="tbeatgo">Tocar con un beat en Om Estudio</button></div>
   ${toolDock(`<span class="tm" id="tdm"></span><div class="ktrans"><button class="kic" data-b="-5" aria-label="Más lento">${IC.minus}</button><button class="kplayb" id="tgo"></button><button class="kic" data-b="5" aria-label="Más rápido">${IC.plus}</button></div><span></span>`)}
   </div>`,
   mount(r){

@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Roka Estudio</title>
+<title>Om Estudio</title>
 <meta name="description" content="Beats por género generados con instrumentos grabados, pistas, grabación con micrófono y mezcla. Gratis y sin internet.">
-<meta property="og:title" content="Roka Estudio · Beats y grabación">
+<meta property="og:site_name" content="Om Estudio">
+<meta property="og:title" content="Om Estudio · Beats y grabación">
 <meta property="og:description" content="Corrido, cumbia, banda, reggaetón, bolero y más: elige un beat, cambia el tono y graba encima.">
 <meta property="og:locale" content="es_MX">
 <meta name="theme-color" content="#000000">
@@ -14,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Roka Estudio">
+<meta name="apple-mobile-web-app-title" content="Om Estudio">
 <style>
 /* Roka Estudio · diseño «Estudio» de la familia Roka (negro, azul eléctrico, rosa) con un color por pista */
 :root{--bg:#000;--surface:#111114;--surface2:#1b1b20;--fg:#f4f4f7;--muted:#8b8b95;--line:#26262c;--accent:#2f7bff;--accent-text:#5b9cff;--root:#ff4fa3;--good:#34d399;--warn:#f5b43c;
@@ -121,7 +122,7 @@ h1{font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-height:1.08;margin:
 </style>
 </head>
 <body>
-<noscript>Activa JavaScript para usar Roka Estudio.</noscript>
+<noscript>Activa JavaScript para usar Om Estudio.</noscript>
 <script>
 /* Roka audio v1: independiente de DOM, sesiones y controles de cualquier app. */
 const RokaAudio = (() => {
@@ -407,6 +408,13 @@ async function renderBeat(o){
   return{bateria,bajo,armonia,metales,dur:comp*L*step,acordes:chords.map(c=>chordLabel(c)),beat:b};
 }
 
+/* Marca Om compartida. El anillo toma el color de cada app; la m conserva el degradado de la familia. */
+function omLogo({color='#2f7bff',size=64}={}){
+  omLogo.seq=(omLogo.seq||0)+1;const id='omg'+omLogo.seq,n=Number(size)||64;
+  return`<svg class="om-logo" viewBox="0 0 108 64" width="${n}" height="${Math.round(n*.6)}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="28" cy="32" r="27" stroke="${color}" stroke-width="1.5" opacity=".12"/><circle cx="28" cy="32" r="21" stroke="${color}" stroke-width="2" opacity=".3"/><circle cx="28" cy="32" r="14" stroke="${color}" stroke-width="8"/><path d="M54 47V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20" stroke="url(#${id})" stroke-width="8.5"/></g></svg>`;
+}
+function automatiaMark(){return'<span class="automatia-mark" style="white-space:nowrap">by AutomaT<span style="color:#2ec4b6">IA</span></span>'}
+
 /* ---------- utilidades, íconos, portadas y datos locales de Roka Estudio ---------- */
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -419,8 +427,7 @@ const IC={play:sv('<path d="M7 4l13 8-13 8z" fill="currentColor"/>'),stop:sv('<r
  trash:sv('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),mic:sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),file:sv('<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/>'),
  zin:sv('<circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6M21 21l-5-5"/>'),zout:sv('<circle cx="11" cy="11" r="7"/><path d="M8 11h6M21 21l-5-5"/>'),info:sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),
  save:sv('<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>'),music:sv('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>')};
-let LGN=0;
-const logo=()=>{const id='lge'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5b43c"/><stop offset=".55" stop-color="#ff7a3c"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="16" fill="url(#${id})"/><path d="M16 40V24M24 46V18M32 42V22M40 48V16M48 38V26" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>`};
+const logo=()=>omLogo({color:'#f5b43c'});
 function coverArt(h,motif,uidk){const h2=(h+44)%360,g='ce'+uidk;
   return`<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><radialGradient id="${g}a" cx=".22" cy=".18" r=".95"><stop offset="0" stop-color="hsl(${h} 88% 62%)"/><stop offset=".55" stop-color="hsl(${h} 62% 30%)"/><stop offset="1" stop-color="hsl(${h} 55% 12%)"/></radialGradient><radialGradient id="${g}b" cx=".92" cy=".96" r=".75"><stop offset="0" stop-color="hsl(${h2} 92% 62% / .9)"/><stop offset="1" stop-color="hsl(${h2} 92% 50% / 0)"/></radialGradient></defs><rect width="100" height="100" fill="url(#${g}a)"/><rect width="100" height="100" fill="url(#${g}b)"/><g transform="translate(18 -2) scale(.8)" fill="none" stroke="#fff" stroke-width="2.4" stroke-opacity=".85" stroke-linecap="round">${motif}</g></svg>`}
 const GEN_HUE={Regional:28,Tropical:150,'Romántico':330,Pop:218,Urbano:270,Rock:0,Jazz:190};
@@ -467,7 +474,7 @@ function trackFor(S,rol,nombre){
 }
 // respaldo sin audios: archivo .roka.json
 const sessionJSON=S=>JSON.stringify({app:'roka-estudio',version:1,sesion:S},null,1);
-function sessionFromJSON(txt){const o=JSON.parse(txt);if(!o||o.app!=='roka-estudio'||!o.sesion)throw Error('No es una sesión de Roka Estudio.');const S=o.sesion;S.id=uid();S.nombre+=' (importada)';S.pistas.forEach(p=>p.clips=p.clips.filter(c=>c.fuente.beat));return S}
+function sessionFromJSON(txt){const o=JSON.parse(txt);if(!o||o.app!=='roka-estudio'||!o.sesion)throw Error('No es una sesión de Om Estudio.');const S=o.sesion;S.id=uid();S.nombre+=' (importada)';S.pistas.forEach(p=>p.clips=p.clips.filter(c=>c.fuente.beat));return S}
 
 /* ---------- motor del estudio: búferes, reproducción con ciclo, metrónomo, grabación, importar y exportar ---------- */
 const BUF=new Map();            // clipId → AudioBuffer
@@ -592,7 +599,7 @@ function download(blob,name){const a=document.createElement('a');a.href=URL.crea
 /* ---------- pantallas: sesiones, estudio y licencias ---------- */
 const KEYOPTS=NOTE_ES.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
 function viewHome(){
-  return{html:`<div class="page"><div class="top"><span class="logo">${logo()}</span><div class="grow"><span class="eyebrow">Roka Estudio</span><h1>Tus sesiones</h1></div><a class="btn sm" href="../roka/?cambiar">Apps</a></div>
+  return{html:`<div class="page"><div class="top"><span class="logo">${logo()}</span><div class="grow"><span class="eyebrow">Om Estudio</span><h1>Tus sesiones</h1><span class="cap">${automatiaMark()}</span></div><a class="btn sm" href="../roka/?cambiar">Apps</a></div>
     <p class="muted" style="margin:0">Elige un beat por género, cambia el tono y el tempo, y graba tu instrumento o tu voz encima.</p>
     <div class="toolbar"><button class="btn pri" data-h="new">${IC.plus}Nueva sesión</button><label class="btn">${IC.file}Abrir respaldo<input type="file" accept=".json,application/json" data-h="imp" hidden></label><a class="btn" href="#/licencias">${IC.info}Sonidos y licencias</a></div>
     <div id="cont"></div><h2>Sesiones guardadas</h2><div class="grid" id="list"><p class="muted">Cargando…</p></div>
@@ -797,7 +804,7 @@ async function route(){
   const v=p[0]==='s'&&p[1]?viewStudio(p[1],q):p[0]==='licencias'?viewLicenses():viewHome();
   if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}
   const old=$('#app'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
-  document.title=p[0]==='s'?'Estudio · Roka Estudio':'Roka Estudio';
+  document.title=p[0]==='s'?'Estudio · Om Estudio':'Om Estudio';
   if(v.mount)UNMOUNT=(await v.mount(pg))||null;
   if(q.get('genero')){const b=$(`[data-gen="${(beatById(q.get('genero'))||{}).gen}"]`,pg);if(b)b.click()}
 }

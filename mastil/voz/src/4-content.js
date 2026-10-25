@@ -29,12 +29,12 @@ const drillArt=d=>coverArt(d.hue,d.motif,null,'d'+d.id);
    ChordPro como en Roka Guitar: sílabas con ~, _ une dos palabras en una sílaba, {mel: G4/1 +A4/.5 r/1} da nota y pulsos
    de cada sílaba (+ = la misma sílaba sigue en otra nota, r = silencio). */
 const SONGS=[
-`{id:escala-do}{title:La escala con su nombre}{artist:Ejercicio · Roka Couch Vocal}{bpm:80}{time:4/4}
+`{id:escala-do}{title:La escala con su nombre}{artist:Ejercicio · Om Voz}{bpm:80}{time:4/4}
 Do Re Mi Fa Sol La Si Do,
 {mel:C4/1 D4/1 E4/1 F4/1 G4/1 A4/1 B4/1 C5/1}
 Do Si La Sol Fa Mi Re Do.
 {mel:C5/1 B4/1 A4/1 G4/1 F4/1 E4/1 D4/1 C4/2}`,
-`{id:vocales}{title:Las cinco vocales}{artist:Ejercicio · Roka Couch Vocal}{bpm:72}{time:4/4}
+`{id:vocales}{title:Las cinco vocales}{artist:Ejercicio · Om Voz}{bpm:72}{time:4/4}
 A E I O U,
 {mel:C4/1 E4/1 G4/1 E4/1 C4/2}
 U O I E A.
@@ -180,17 +180,17 @@ const CATALOG_ADDITIONS=[
   ['E4/2 G4/2 G4/4 E4 D4 C4 D4 E4/4','G4 A4 C5 A4 G4/4 E4 D4 C4 D4 C4/4']],
  ['canon-tallis','Canon de Tallis','Thomas Tallis · siglo XVI','Clásicas',1,90,4,
   ['G4 F4 E4 D4 C4 D4 E4 C4','G4 G4 A4 B4 C5 B4 A4 G4','A4 G4 F4 E4 F4 E4 D4 G4','G4 F4 E4 D4 C4/4']],
- ['escala-menor','La escalera menor','Original · Roka Couch Vocal','Vocalizaciones',2,80,4,
+ ['escala-menor','La escalera menor','Original · Om Voz','Vocalizaciones',2,80,4,
   ['A3 B3 C4 D4 E4 F4 G4 A4','A4 G4 F4 E4 D4 C4 B3 A3']],
- ['saltos-tercera','Los saltos de tercera','Original · Roka Couch Vocal','Vocalizaciones',2,90,4,
+ ['saltos-tercera','Los saltos de tercera','Original · Om Voz','Vocalizaciones',2,90,4,
   ['C4 E4 D4 F4 E4 G4 F4 A4','G4 E4 F4 D4 E4 C4 D4 C4']],
- ['saltos-quinta','Los saltos de quinta','Original · Roka Couch Vocal','Vocalizaciones',3,80,4,
+ ['saltos-quinta','Los saltos de quinta','Original · Om Voz','Vocalizaciones',3,80,4,
   ['C4 G4 D4 A4 E4 B4 F4 C5','C5 F4 B4 E4 A4 D4 G4 C4']],
- ['pentatonica','Cinco peldaños','Original · Roka Couch Vocal','Vocalizaciones',1,90,4,
+ ['pentatonica','Cinco peldaños','Original · Om Voz','Vocalizaciones',1,90,4,
   ['C4 D4 E4 G4 A4 G4 E4 D4','C4/2 E4/2 G4/2 C4/2']],
- ['olas-suaves','Olas suaves','Original · Roka Couch Vocal','Vocalizaciones',1,72,4,
+ ['olas-suaves','Olas suaves','Original · Om Voz','Vocalizaciones',1,72,4,
   ['C4/2 D4/2 E4/2 D4/2','C4/2 E4/2 G4/2 E4/2','D4/2 F4/2 E4/2 C4/2']],
- ['eco-menor','Eco en menor','Original · Roka Couch Vocal','Vocalizaciones',2,96,4,
+ ['eco-menor','Eco en menor','Original · Om Voz','Vocalizaciones',2,96,4,
   ['A3 C4 E4 C4 A3/2 E4/2','B3 D4 F4 D4 B3/2 F4/2','C4 E4 A4 E4 C4 B3 A3/2']]
 ];
 // Textos tradicionales originales, sin traducciones ni arreglos modernos.

@@ -1,6 +1,6 @@
-# Roka Estudio — beats por género y estudio multipistas
+# Om Estudio — beats por género y estudio multipistas
 
-Tercera app de la familia Roka (portada `mastil/roka/`): **https://rokaguitarrall.web.app/estudio/** (también GitHub Pages `…/mastil/estudio/`). Inspirada en corridoz.app/studio: biblioteca de beats a la izquierda, línea de tiempo con pistas y clips con forma de onda, transporte, mezcla. Roberto (no programador; uso personal, amigos y quizá una escuela; **no se vende**) quiere que la familia crezca con apps de **bajo, batería y teclado**: todo lo reutilizable va en el **núcleo compartido `mastil/comun/`**. Español de México, tuteando, sin asumir género, sin emojis.
+Tercera app de la familia Om (portada `mastil/roka/`): **https://rokaguitarrall.web.app/estudio/** (también GitHub Pages `…/mastil/estudio/`). Inspirada en corridoz.app/studio: biblioteca de beats a la izquierda, línea de tiempo con pistas y clips con forma de onda, transporte, mezcla. Roberto (no programador; uso personal, amigos y quizá una escuela; **no se vende**) quiere que la familia crezca con apps de **bajo, batería y teclado**: todo lo reutilizable va en el **núcleo compartido `mastil/comun/`**. Su nombre visible es **Om Estudio**; la carpeta y las claves históricas no cambian. Español de México, tuteando, sin asumir género, sin emojis.
 
 ## Construir y probar
 ```sh

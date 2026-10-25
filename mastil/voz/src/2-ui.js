@@ -32,9 +32,8 @@ const TKIC={tempo:TI('<path d="M8 21h8l-1.5-15h-5z"/><path d="M12 14l5-9"/>'),me
   mic:TI('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),mode:TI('<path d="M4 12h4l3-7 3 14 3-7h3"/>'),tol:TI('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'),key:TI('<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'),
   dir:TI('<path d="M7 17l5-10 5 10"/>'),ref:TI('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/>'),guide:TI('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 010 7"/>')};
 const chipRow=(k,label,opts,cur)=>`<div><span class="cl">${label}</span><div class="chips">${opts.map(o=>`<button class="chip" data-set="${k}" data-v="${o.v}" aria-pressed="${String(o.v)===String(cur)}">${o.l}${o.s?`<i>${o.s}</i>`:''}</button>`).join('')}</div></div>`;
-/* ---------- logo: micrófono sobre ondas, azul a rosa ---------- */
-let LGN=0;
-const logo=()=>{const id='lgv'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b9cff"/><stop offset=".55" stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="16" fill="url(#${id})"/><rect x="25" y="13" width="14" height="25" rx="7" fill="#fff"/><path d="M19 32a13 13 0 0 0 26 0M32 45v7M25 52h14" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg>`};
+/* ---------- logo Om ---------- */
+const logo=()=>omLogo({color:'#ff4fa3'});
 /* ---------- portadas abstractas (luz difusa + trazo + número), como los discos de Roka Guitar ---------- */
 function coverArt(h,motif,label,uid){
   const h2=(h+44)%360,g='ca'+uid;

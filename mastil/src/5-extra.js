@@ -1,7 +1,5 @@
 /* ---------- logo ---------- */
-let LGN=0;
-// marca: púa en degradado metálico con una sola línea de cuerda
-const logo=()=>{const id='lgp'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".55" stop-color="#ff9f0a"/><stop offset="1" stop-color="#e2541f"/></linearGradient></defs><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58 20.6 48.6 9 33 9 20.8 9 10.6 19.5 6 32 6z" fill="url(#${id})"/><path d="M32 6c12.5 0 23 4.6 23 14.8C55 33 43.4 48.6 32 58" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M20 23h24" stroke="#1a1000" stroke-opacity=".55" stroke-width="2.4" stroke-linecap="round"/></svg>`};
+const logo=()=>omLogo({color:'#2f7bff'});
 /* ---------- avisos ---------- */
 function toast(html,ms){
   let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}

@@ -33,9 +33,8 @@ const TKIC={tempo:TI('<path d="M8 21h8l-1.5-15h-5z"/><path d="M12 14l5-9"/>'),me
   mic:TI('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),mode:TI('<path d="M4 12h4l3-7 3 14 3-7h3"/>'),tol:TI('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'),key:TI('<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'),
   style:TI('<path d="M4 20V10M9 20V4M14 20v-8M19 20V7"/>'),drum:TI('<ellipse cx="12" cy="9" rx="8" ry="3"/><path d="M4 9v6c0 1.7 3.6 3 8 3s8-1.3 8-3V9"/>'),gap:TI('<path d="M4 12h3M10 12h4M17 12h3"/>'),dur:TI('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>')};
 const chipRow=(k,label,opts,cur)=>`<div><span class="cl">${label}</span><div class="chips">${opts.map(o=>`<button class="chip" data-set="${k}" data-v="${o.v}" aria-pressed="${String(o.v)===String(cur)}">${o.l}${o.s?`<i>${o.s}</i>`:''}</button>`).join('')}</div></div>`;
-/* ---------- logo: tambor con baquetas, azul a rosa ---------- */
-let LGN=0;
-const logo=()=>{const id='lgv'+(++LGN);return`<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b9cff"/><stop offset=".55" stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="16" fill="url(#${id})"/><g fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"><path d="M14 12l22 17M50 12L28 29"/><rect x="13" y="32" width="38" height="19" rx="3"/><path d="M23 40v11M32 40v11M41 40v11"/></g><ellipse cx="32" cy="33" rx="19" ry="5" fill="#fff"/></svg>`};
+/* ---------- logo Om ---------- */
+const logo=()=>omLogo({color:'#ff5a5a'});
 /* ---------- portadas abstractas (luz difusa + trazo + número), como los discos de Roka Guitar ---------- */
 function coverArt(h,motif,label,uid){
   const h2=(h+44)%360,g='ca'+uid;

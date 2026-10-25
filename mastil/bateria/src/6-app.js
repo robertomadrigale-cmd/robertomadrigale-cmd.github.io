@@ -18,7 +18,7 @@ function grooveAlb(id){
 function viewHome(){
   const s=buildSession(),done=s.i>=s.steps.length,lvl=currentLevel(),label=done?'Resumen':s.i||s.res.some(Boolean)?'Continuar':'Empezar';
   const wa=weekAcc(),old=oldProgress()&&!DB.imported,nx=ALLEX.find(x=>!DB.done[x.id]);
-  return{title:'Hoy',html:`<div class="coach-greeting"><a class="guitar-pill" href="../roka/?cambiar">Familia Roka</a><span class="eyebrow">${greet()}</span><span class="coach-pill">${streak()===1?'1 día':streak()+' días'} de racha</span><h1>Tu sesión de hoy</h1><p>Nivel ${lvl} · ${LEVELS[lvl]}</p></div>
+  return{title:'Hoy',html:`<div class="coach-greeting"><a class="guitar-pill" href="../roka/?cambiar">Familia Om</a><span class="eyebrow">${greet()}</span><span class="coach-pill">${streak()===1?'1 día':streak()+' días'} de racha</span><h1>Tu sesión de hoy</h1><p>Nivel ${lvl} · ${LEVELS[lvl]}</p></div>
     ${old?`<section class="card importc"><div><h2>Traer tu progreso de Pulso a la Vista</h2><p class="cap">Encontramos tu práctica de la app anterior en este teléfono: lecciones hechas, días, pruebas del medidor, setlist y calibración. Se suma sin borrar nada.</p></div><div class="row"><button class="btn pri" data-imp="1">${IC.down}Traer mi progreso</button><button class="btn" data-imp="0">Ahora no</button></div></section>`:''}
     <section class="card session-card"><div class="session-art">${grooveArt(s.steps[1].id)}</div><div class="session-content"><span class="eyebrow">Tu sesión de hoy · unos 10 min</span><h2>${done?'Hoy ya sonaste':'Manos sueltas. Pulso firme.'}</h2><p class="cap">Calienta, toca el groove del día, mide tu precisión y toca con la banda. Avanza sola.</p>
       <ol class="session-steps">${s.steps.map((x,i)=>{const r=s.res[i],ok=r&&!r.skipped;return`<li class="${ok?'done':''}"><span>${ok?IC.check:i+1}</span><b>${KIND[x.k][0]}: ${esc(G[x.id].n)}</b>${r?`<small>${r.skipped?'Saltado':Math.round(r.p*100)+' %'}</small>`:''}</li>`}).join('')}</ol>
@@ -27,7 +27,7 @@ function viewHome(){
     ${nx?`<a class="card dtool" href="#/leccion/${nx.lesson}"><span class="ic">${IC.book}</span><span><b>Continuar: ${esc(nx.t)}</b><small>Lección ${nx.lesson} · ${esc(LESSONS.find(l=>l.id===nx.lesson).title)}</small></span></a>`:''}
     <section><div class="sech"><h2>Grooves de tu nivel</h2><a class="coach-link" href="#/grooves">Ver todos</a></div><div class="shelf">${LVL[lvl].map(grooveAlb).join('')}</div></section>
     <section><h2>Herramientas</h2>${toolList()}</section>
-    <p class="foot">Roka Batería · tu progreso se guarda en este dispositivo · <a href="#/ajustes">Ajustes y créditos</a></p>`,
+    <p class="foot">Om Batería · ${automatiaMark()} · tu progreso se guarda en este dispositivo · <a href="#/ajustes">Ajustes y créditos</a></p>`,
   mount(r){
     r.addEventListener('click',e=>{const b=e.target.closest('[data-imp]');if(!b)return;if(b.dataset.imp==='1'){importOld();toast('Listo: tu progreso de Pulso a la Vista ya está aquí.')}else{DB.imported=-1;save()}route()});
     const t=setTimeout(()=>{if(DB.onb==null)onboardShow()},400);return()=>{clearTimeout(t);$('#onb')?.remove()};
@@ -128,7 +128,7 @@ function viewSettings(){
     <section class="card coach-settings"><h2>Micrófono</h2><p class="cap">${DB.lat!=null?'Retraso medido: '+Math.round(DB.lat*1000)+' ms.':'Sin calibrar.'} Calibra en el medidor (Ajustes del micrófono).</p><a class="btn" href="#/practicar/precision">${IC.target}Ir al medidor</a></section>
     ${oldProgress()?`<section class="card coach-settings"><h2>Pulso a la Vista</h2><p class="cap">${DB.imported>0?'Ya trajiste tu progreso de la app anterior.':'Hay progreso de la app anterior en este dispositivo.'}</p><button class="btn" data-imp>${IC.down}Traer mi progreso</button></section>`:''}
     <section class="card coach-settings"><h2>Créditos</h2><p class="cap">Batería grabada: «${esc(k.nombre)}» de ${esc(k.autor)}, licencia ${k.licencia} (<a href="${k.url}" target="_blank" rel="noopener">${k.url}</a>). ${esc(k.credito)} Bajo y guitarra de la banda: tonejs-instruments (CC BY 3.0); metales, piano y órgano: VSCO 2 CE (CC0).</p>
-      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Roka Batería es parte de la familia Roka (guitarra, voz, estudio).</p></section>`,
+      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Om Batería es parte de la familia Om (guitarra, voz, estudio).</p></section>`,
   mount(r){
     r.addEventListener('change',e=>{const k=e.target.dataset.pref;if(!k)return;DB[k]=k==='clickVol'?+e.target.value:e.target.value;save();if(k==='theme')applyTheme()});
     let un=null;
@@ -168,10 +168,10 @@ function route(){
   const section=p[0]==='groove'?'grooves':p[0]==='leccion'||p[0]==='glosario'?'lecciones':p[0]==='sesion'?'':p[0];
   $$('[data-nav]').forEach(a=>{if(a.dataset.nav===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   $('#ttl').textContent=v.title;const back=$('#back');back.hidden=!v.back;if(v.back)back.href=v.back;
-  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;document.title=v.title+' · Roka Batería';
+  const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;document.title=v.title+' · Om Batería';
   if(v.mount)UNMOUNT=v.mount(pg)||null;window.scrollTo(0,0);
 }
-document.body.insertAdjacentHTML('afterbegin',`<div class="shell"><nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Roka<br>Batería</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav><main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span><a class="icon-btn" href="#/ajustes" aria-label="Ajustes">${IC.cog}</a></div></header><div class="page" id="page"></div></main></div><nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
+document.body.insertAdjacentHTML('afterbegin',`<div class="shell"><nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Om<br>Batería</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav><main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span><a class="icon-btn" href="#/ajustes" aria-label="Ajustes">${IC.cog}</a></div></header><div class="page" id="page"></div></main></div><nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);
 save();window.addEventListener('hashchange',route);route();
 /* Actualizaciones: busca versión nueva al abrir y al volver a la app; avisa cuando está lista. */
 function showUpdate(){

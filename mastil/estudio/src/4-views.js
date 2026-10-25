@@ -1,7 +1,7 @@
 /* ---------- pantallas: sesiones, estudio y licencias ---------- */
 const KEYOPTS=NOTE_ES.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
 function viewHome(){
-  return{html:`<div class="page"><div class="top"><span class="logo">${logo()}</span><div class="grow"><span class="eyebrow">Roka Estudio</span><h1>Tus sesiones</h1></div><a class="btn sm" href="../roka/?cambiar">Apps</a></div>
+  return{html:`<div class="page"><div class="top"><span class="logo">${logo()}</span><div class="grow"><span class="eyebrow">Om Estudio</span><h1>Tus sesiones</h1><span class="cap">${automatiaMark()}</span></div><a class="btn sm" href="../roka/?cambiar">Apps</a></div>
     <p class="muted" style="margin:0">Elige un beat por género, cambia el tono y el tempo, y graba tu instrumento o tu voz encima.</p>
     <div class="toolbar"><button class="btn pri" data-h="new">${IC.plus}Nueva sesión</button><label class="btn">${IC.file}Abrir respaldo<input type="file" accept=".json,application/json" data-h="imp" hidden></label><a class="btn" href="#/licencias">${IC.info}Sonidos y licencias</a></div>
     <div id="cont"></div><h2>Sesiones guardadas</h2><div class="grid" id="list"><p class="muted">Cargando…</p></div>

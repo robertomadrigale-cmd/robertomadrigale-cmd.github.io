@@ -78,7 +78,7 @@ function welcomeShow(){
   for(let i=0;i<24;i++){const l=i%11+1;tiles.push(i%3===1?coverArt(H[i%12],ARTM[(i*5)%11+1],null,'w'+i):lessonArt(l))}
   document.body.insertAdjacentHTML('beforeend',`<div id="welcome" role="dialog" aria-modal="true" aria-labelledby="wtitle">
    <div class="wmos" aria-hidden="true">${tiles.map(t=>`<span class="acov">${t}</span>`).join('')}</div><div class="wfade" aria-hidden="true"></div>
-   <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">Roka Guitar<br>for All</h1>
+    <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">Om Guitarra</h1>
     <p class="wsub">Aprende guitarra viendo el mástil: lecciones, canciones con karaoke y una banda que te acompaña.</p>
     <button class="wgoogle" data-w="google">${GLOGO}Continuar con Google</button>
     <button class="wskip" data-w="skip">Seguir sin cuenta</button>
@@ -148,7 +148,7 @@ function cloudMount(r){
     else if(k==='join')busy(async()=>{const n=await cloudJoin($('#clcode',r).value);toast(`Te uniste a la clase «${esc(n)}».`);cloudRefresh()});
     else if(k==='leave')busy(()=>cloudLeave());
     else if(k==='create')busy(async()=>{const n=$('#clgnew',r).value.trim();if(!n)throw{msg:'Ponle nombre a la clase.'};const c=await cloudCreateGroup(n);toast(`Clase creada. Código: ${c}`,5000);cloudRefresh()});
-    else if(k==='copy'){const c=b.dataset.code,t=`Únete a mi clase en Roka Guitar for All: abre ${location.href.split('#')[0]}#/cuenta y escribe el código ${c}`;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Invitación copiada. Pégala en WhatsApp.'),()=>toast('Código: '+c,5000))}
+    else if(k==='copy'){const c=b.dataset.code,t=`Únete a mi clase en Om Guitarra: abre ${location.href.split('#')[0]}#/cuenta y escribe el código ${c}`;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Invitación copiada. Pégala en WhatsApp.'),()=>toast('Código: '+c,5000))}
   });
 }
 cloudInit();

@@ -6,7 +6,7 @@ async function route(){
   const v=p[0]==='s'&&p[1]?viewStudio(p[1],q):p[0]==='licencias'?viewLicenses():viewHome();
   if(UNMOUNT){try{UNMOUNT()}catch(e){}UNMOUNT=null}
   const old=$('#app'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
-  document.title=p[0]==='s'?'Estudio · Roka Estudio':'Roka Estudio';
+  document.title=p[0]==='s'?'Estudio · Om Estudio':'Om Estudio';
   if(v.mount)UNMOUNT=(await v.mount(pg))||null;
   if(q.get('genero')){const b=$(`[data-gen="${(beatById(q.get('genero'))||{}).gen}"]`,pg);if(b)b.click()}
 }

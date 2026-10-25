@@ -1,6 +1,6 @@
-# Roka Couch Vocal — coach de canto de Roberto
+# Om Voz — coach de canto de Roberto
 
-App hermana de **Roka Guitar for All** (`../ROKA GUITAR/mastil/`): mismo diseño «Estudio» (negro, azul eléctrico, portadas abstractas, barra de íconos con valores y dock con botón redondo) pero pensada como **coach**: ejercicios primero, poca teoría (solo tips de 1–2 líneas) y una sesión diaria guiada que avanza sola, al estilo Vanido / Yousician Sing. Roberto rechazó la v1 (muchas lecciones largas); la v2 «modo coach» (23 oct 2026, programada con Codex) es la actual. El nombre va escrito así, «Couch», por decisión de Roberto.
+App hermana de **Om Guitarra** (`../ROKA GUITAR/mastil/`): mismo diseño «Estudio» (negro, azul eléctrico, portadas abstractas, barra de íconos con valores y dock con botón redondo) pero pensada como **coach**: ejercicios primero, poca teoría (solo tips de 1–2 líneas) y una sesión diaria guiada que avanza sola, al estilo Vanido / Yousician Sing. Roberto rechazó la v1 (muchas lecciones largas); la v2 «modo coach» (23 oct 2026, programada con Codex) es la actual. Su nombre visible actual es **Om Voz**; la carpeta y las claves históricas no cambian.
 
 Roberto no es programador: entrégale cambios terminados y probados, sin pedirle que edite código. Todo el texto va en español de México, tuteando, y sin asumir el género de quien usa la app («Te damos la bienvenida», no «Bienvenido»).
 

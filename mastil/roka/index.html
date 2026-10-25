@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <title>Roka · Guitarra, Voz, Batería y Estudio</title>
-  <meta name="description" content="Aprende música en tu celular. Elige Guitarra o Voz y empieza tu práctica con Roka.">
+  <title>Om · Centro de aprendizaje musical</title>
+  <meta name="description" content="Centro de aprendizaje musical para practicar guitarra, voz, batería y producción desde tu celular.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_MX">
-  <meta property="og:title" content="Roka · Guitarra, Voz, Batería y Estudio">
-  <meta property="og:description" content="Aprende música en tu celular. Elige Guitarra o Voz y empieza tu práctica con Roka.">
+  <meta property="og:title" content="Om · Centro de aprendizaje musical">
+  <meta property="og:description" content="Practica guitarra, voz, batería y producción musical desde tu celular.">
   <meta property="og:image" content="../og.jpg">
-  <meta property="og:image:alt" content="Roka Guitar for All">
+  <meta property="og:image:alt" content="Om · Centro de aprendizaje musical">
   <link rel="icon" href="../icons/icon-192.png" type="image/png">
   <style>
     :root{color-scheme:dark light;--bg:#08090c;--fg:#f6f7fb;--muted:#a7adbd;--line:#292d38;--card:#11141b;--blue:#2f7bff;--pink:#ff4fa3}
@@ -19,30 +19,34 @@
     body{margin:0;background:radial-gradient(ellipse at 12% 0%,#2f7bff12,transparent 48%),radial-gradient(ellipse at 95% 70%,#ff4fa30a,transparent 45%),var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
     main{width:min(100%,960px);margin:auto;padding:clamp(28px,6vw,64px) 24px 32px}
     header{margin-bottom:32px}
-    h1{margin:0;font-size:clamp(52px,9vw,80px);line-height:1.05;font-weight:850;letter-spacing:-.065em;text-transform:lowercase}
-    header p{margin:14px 0 0;color:var(--muted);font-size:clamp(16px,2.4vw,20px)}
+    h1{margin:0;line-height:1}
+    .om-lockup{display:block;width:clamp(150px,25vw,230px);height:auto;overflow:visible}
+    .tagline{margin:14px 0 0;color:var(--muted);font-size:clamp(16px,2.4vw,20px);font-weight:650}
+    .automatia-mark{display:inline-block;margin-top:7px;color:var(--muted);font-size:13px;letter-spacing:.02em;white-space:nowrap}.automatia-mark .ia{color:#2ec4b6}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     .albums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
     .album{min-width:0;display:flex;flex-direction:column;padding:12px;border:1px solid var(--line);border-radius:24px;background:var(--card);color:inherit;text-decoration:none;transition:border-color .18s ease,transform .18s ease}
     .album:hover{border-color:var(--blue);transform:translateY(-3px)}
     .album.voice:hover{border-color:var(--pink)}
     .album.studio:hover{border-color:#f5b43c}
+    .album.bass:hover{border-color:#34d399}
     .art{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:15px;background:#101b38}
     .info{display:flex;flex-direction:column;flex:1;align-items:flex-start;padding:18px 8px 8px}
-    h2{margin:0;font-size:clamp(30px,4vw,40px);line-height:1.1;font-weight:800;letter-spacing:-.045em;text-transform:lowercase}
+    h2{margin:0;font-size:clamp(30px,4vw,40px);line-height:1.1;font-weight:800;letter-spacing:-.045em}
     h2 small{display:block;margin-top:8px;font-size:14px;line-height:1.5;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted)}
     .phrase{margin:16px 0 22px;font-size:15px}
     .enter{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:44px;margin-top:auto;padding:10px 20px;background:var(--blue);color:#fff;border-radius:999px;font-size:15px;font-weight:650;white-space:nowrap}
     .voice .enter{background:var(--pink);color:#190a11}
     .studio .enter{background:#f5b43c;color:#1a1000}
     .drums .enter{background:#ff5a5a;color:#1a0505}
+    .bass .enter{background:#34d399;color:#042016}
     .album.drums:hover{border-color:#ff5a5a}
     .enter svg{width:18px;height:18px;flex:none}
     .preferences{margin-top:24px;display:flex;justify-content:center}
     .remember{display:inline-flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:15px;color:var(--muted)}
     input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--blue);cursor:pointer}
     a:focus-visible,input:focus-visible{outline:3px solid var(--fg);outline-offset:5px}
-    @media(min-width:900px){main{width:min(100%,1180px)}.albums{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(min-width:1100px){.albums{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media(min-width:900px){main{width:min(100%,1180px)}.albums{display:flex;flex-wrap:wrap;justify-content:center}.album{flex:1 1 300px;max-width:360px}}
     @media(max-width:620px){main{padding-inline:20px}.albums{grid-template-columns:minmax(0,1fr);gap:20px}header{margin-bottom:26px}}
     @media(prefers-color-scheme:light){:root{--bg:#f6f7fb;--fg:#151a26;--muted:#566076;--line:#d8dce5;--card:#fff}}
     @media(prefers-reduced-motion:reduce){.album{transition:none}.album:hover{transform:none}}
@@ -51,8 +55,9 @@
 <body>
   <main>
     <header>
-      <h1>Roka</h1>
-      <p>Aprende música en tu celular</p>
+      <h1><span class="sr-only">Om</span><svg class="om-lockup" viewBox="0 0 108 64" aria-hidden="true"><defs><linearGradient id="om-cover-gradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2f7bff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="28" cy="32" r="27" stroke="#2f7bff" stroke-width="1.5" opacity=".12"/><circle cx="28" cy="32" r="21" stroke="#2f7bff" stroke-width="2" opacity=".3"/><circle cx="28" cy="32" r="14" stroke="#2f7bff" stroke-width="8"/><path d="M54 47V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20V27c0-5 3.2-8 7.5-8s7.5 3 7.5 8v20" stroke="url(#om-cover-gradient)" stroke-width="8.5"/></g></svg></h1>
+      <p class="tagline">Centro de aprendizaje musical</p>
+      <span class="automatia-mark">by AutomaT<span class="ia">IA</span></span>
     </header>
     <nav class="albums" aria-label="Elige tu práctica">
       <a class="album" href="../" data-app="guitarra" aria-labelledby="guitar-title guitar-enter">
@@ -74,7 +79,7 @@
           <g fill="#fff" transform="rotate(-24 200 200)"><circle cx="164" cy="174" r="8"/><circle cx="212" cy="226" r="8"/><circle cx="236" cy="121" r="8"/></g>
         </svg>
         <div class="info">
-          <h2 id="guitar-title">Guitarra <small>Roka Guitar for All</small></h2>
+          <h2 id="guitar-title">Om Guitarra <small>Teoría, canciones y práctica guiada</small></h2>
           <p class="phrase">Dale vida a tus acordes.</p>
           <span class="enter" id="guitar-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
         </div>
@@ -95,7 +100,7 @@
           </g>
         </svg>
         <div class="info">
-          <h2 id="voice-title">Voz <small>Roka Couch Vocal</small></h2>
+          <h2 id="voice-title">Om Voz <small>Coach de canto y afinación</small></h2>
           <p class="phrase">Descubre lo que puedes cantar.</p>
           <span class="enter" id="voice-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
         </div>
@@ -117,7 +122,7 @@
           </g>
         </svg>
         <div class="info">
-          <h2 id="drums-title">Batería <small>Roka Batería</small></h2>
+          <h2 id="drums-title">Om Batería <small>Grooves, rudimentos y precisión</small></h2>
           <p class="phrase">Ritmo, precisión y groove.</p>
           <span class="enter" id="drums-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
         </div>
@@ -137,10 +142,14 @@
           </g>
         </svg>
         <div class="info">
-          <h2 id="studio-title">Estudio <small>Roka Estudio</small></h2>
+          <h2 id="studio-title">Om Estudio <small>Beats, grabación y mezcla</small></h2>
           <p class="phrase">Beats por género para grabar encima.</p>
           <span class="enter" id="studio-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
         </div>
+      </a>
+      <a class="album bass" href="../bajo/" data-app="bajo" aria-labelledby="bass-title bass-enter">
+        <svg class="art" viewBox="0 0 400 400" aria-hidden="true"><defs><radialGradient id="b-green" cx=".16" cy=".14" r="1"><stop stop-color="#34d399"/><stop offset=".55" stop-color="#17664e"/><stop offset="1" stop-color="#071b17"/></radialGradient></defs><path fill="url(#b-green)" d="M0 0h400v400H0z"/><g fill="none" stroke="#fff" stroke-linecap="round" opacity=".85"><circle cx="200" cy="200" r="142" opacity=".13"/><circle cx="200" cy="200" r="117" opacity=".13"/><path d="M130 118v164M177 118v164M224 118v164M271 118v164" stroke-width="4"/><path d="M112 172h176M112 228h176" opacity=".35"/></g></svg>
+        <div class="info"><h2 id="bass-title">Om Bajo <small>Ritmo, armonía y groove</small></h2><p class="phrase">Construye el pulso desde abajo.</p><span class="enter" id="bass-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span></div>
       </a>
     </nav>
     <div class="preferences">
@@ -150,7 +159,7 @@
   <script>
     (()=>{
       const key='roka-portada:v1';
-      const destinations={guitarra:'../',voz:'../voz/',bateria:'../bateria/',estudio:'../estudio/'};
+      const destinations={guitarra:'../',voz:'../voz/',bajo:'../bajo/',bateria:'../bateria/',estudio:'../estudio/'};
       const checkbox=document.getElementById('remember');
       let last=null;
       try{

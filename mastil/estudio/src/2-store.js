@@ -28,4 +28,4 @@ function trackFor(S,rol,nombre){
 }
 // respaldo sin audios: archivo .roka.json
 const sessionJSON=S=>JSON.stringify({app:'roka-estudio',version:1,sesion:S},null,1);
-function sessionFromJSON(txt){const o=JSON.parse(txt);if(!o||o.app!=='roka-estudio'||!o.sesion)throw Error('No es una sesión de Roka Estudio.');const S=o.sesion;S.id=uid();S.nombre+=' (importada)';S.pistas.forEach(p=>p.clips=p.clips.filter(c=>c.fuente.beat));return S}
+function sessionFromJSON(txt){const o=JSON.parse(txt);if(!o||o.app!=='roka-estudio'||!o.sesion)throw Error('No es una sesión de Om Estudio.');const S=o.sesion;S.id=uid();S.nombre+=' (importada)';S.pistas.forEach(p=>p.clips=p.clips.filter(c=>c.fuente.beat));return S}

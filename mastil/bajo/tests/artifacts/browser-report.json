@@ -1,0 +1,680 @@
+{
+  "layouts": [
+    {
+      "route": "/",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/lecciones",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/1",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/2",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/3",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/4",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/5",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/6",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/7",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/8",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/9",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/leccion/10",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/afinador",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/metronomo",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/banda",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/reto",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/ajustes",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/licencias",
+      "w": 320,
+      "scale": 1.25,
+      "scroll": 320
+    },
+    {
+      "route": "/",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/lecciones",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/1",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/2",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/3",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/4",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/5",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/6",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/7",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/8",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/9",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/leccion/10",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/afinador",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/metronomo",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/banda",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/reto",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/ajustes",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/licencias",
+      "w": 360,
+      "scale": 1.25,
+      "scroll": 360
+    },
+    {
+      "route": "/",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/lecciones",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/1",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/2",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/3",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/4",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/5",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/6",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/7",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/8",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/9",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/leccion/10",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/afinador",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/metronomo",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/banda",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/reto",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/ajustes",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/licencias",
+      "w": 390,
+      "scale": 1.25,
+      "scroll": 390
+    },
+    {
+      "route": "/",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/lecciones",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/1",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/2",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/3",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/4",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/5",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/6",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/7",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/8",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/9",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/leccion/10",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/afinador",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/metronomo",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/banda",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/reto",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/ajustes",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    },
+    {
+      "route": "/licencias",
+      "w": 1280,
+      "scale": 1.25,
+      "scroll": 1280
+    }
+  ],
+  "audio": [
+    {
+      "m": 23,
+      "rms": 0.042425974435211594,
+      "peak": 0.24748200178146362,
+      "hz": 30.86752924382098
+    },
+    {
+      "m": 28,
+      "rms": 0.03907988408275961,
+      "peak": 0.24751919507980347,
+      "hz": 41.19490319611581
+    },
+    {
+      "m": 43,
+      "rms": 0.05114135908765879,
+      "peak": 0.2478053718805313,
+      "hz": 97.81919235770451
+    },
+    {
+      "id": "tumbado",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.002123182571708
+        },
+        {
+          "role": "armonia",
+          "rms": 0.039397003478484245
+        }
+      ],
+      "duration": 3
+    },
+    {
+      "id": "norteno",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.04853886752711255
+        },
+        {
+          "role": "armonia",
+          "rms": 0.03351666624557177
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "banda",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.05192031442292814
+        },
+        {
+          "role": "metales",
+          "rms": 0.03564610726479267
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "cumbia",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.04470214521144128
+        },
+        {
+          "role": "armonia",
+          "rms": 0.0306401897548959
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "sonidera",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.044584636573318695
+        },
+        {
+          "role": "armonia",
+          "rms": 0.02513969079400186
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "vals",
+      "levels": [
+        {
+          "role": "armonia",
+          "rms": 0.03962530556710426
+        }
+      ],
+      "duration": 3
+    },
+    {
+      "id": "polka",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.04358642019591897
+        },
+        {
+          "role": "armonia",
+          "rms": 0.031172732221105264
+        },
+        {
+          "role": "metales",
+          "rms": 0.026715862741840006
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "bolero",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.00856342218955697
+        },
+        {
+          "role": "armonia",
+          "rms": 0.0396481356756027
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "balada",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.048864588861093274
+        },
+        {
+          "role": "armonia",
+          "rms": 0.0564063471957059
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "reggaeton",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.06345520425786721
+        },
+        {
+          "role": "armonia",
+          "rms": 0.06350161751107494
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "bachata",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.03357440199971279
+        },
+        {
+          "role": "armonia",
+          "rms": 0.05174157847065979
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "rock",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.05271205318164607
+        },
+        {
+          "role": "armonia",
+          "rms": 0.05413299760011508
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "pop",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.06718381551906787
+        },
+        {
+          "role": "armonia",
+          "rms": 0.04261553947540734
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "trap",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.05676042494643167
+        },
+        {
+          "role": "armonia",
+          "rms": 0.051311032931737964
+        }
+      ],
+      "duration": 4
+    },
+    {
+      "id": "bossa",
+      "levels": [
+        {
+          "role": "bateria",
+          "rms": 0.04851975369135144
+        },
+        {
+          "role": "armonia",
+          "rms": 0.04241182535029426
+        }
+      ],
+      "duration": 4
+    }
+  ],
+  "flows": [
+    "Cinco cuerdas, modo zurdo, tema claro y persistencia",
+    "Banda real: referencia apagada/encendida, ciclo y cancelación al navegar",
+    "Micrófono simulado abre/cierra; metrónomo audio y pulso visual",
+    "Dos rondas de notas simuladas: 100 %, DB.done y mejor marca tras recargar",
+    "Reto completo con toques simulados en cinco carriles y velocidad 120 %",
+    "Recarga sin red, Si0 desde caché y banda previamente descargada sin red"
+  ],
+  "errors": [],
+  "cache": [
+    "roka-bajo-20261025105730",
+    "roka-bajo-muestras-v1"
+  ],
+  "passed": true
+}
