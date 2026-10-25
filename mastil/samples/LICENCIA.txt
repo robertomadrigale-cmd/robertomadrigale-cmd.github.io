@@ -8,3 +8,5 @@ https://www.bandshed.net/avldrumkits/ — Licencia: Creative Commons Attribution
 https://creativecommons.org/licenses/by-sa/3.0/
 Cambios: una o dos capas de fuerza por pieza, recortadas (0.2–2.2 s) con desvanecido, normalizadas, mono, MP3 64 kbps.
 Estos archivos modificados se comparten bajo la misma licencia CC BY-SA 3.0.
+
+Metales y teclados (cc0/*): VSCO 2 Community Edition (Versilian Studios; piano y órgano de Simon Dalzell / Ivy Audio), CC0 1.0. Detalles en cc0/LICENCIA.txt.

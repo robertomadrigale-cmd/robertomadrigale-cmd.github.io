@@ -1,0 +1,5 @@
+Metales y teclados (cc0/*.mp3): notas tomadas de VSCO 2 Community Edition de Versilian Studios
+https://github.com/sgossner/VSCO-2-CE — Licencia: CC0 1.0 (dominio público). Piano vertical y órgano: Simon Dalzell (Ivy Audio).
+Se agradece el crédito a Versilian Studios y a los autores originales aunque no es obligatorio.
+Cambios: notas sueltas (trompeta, trombón tenor, tuba, piano vertical, órgano), recortadas (1.6–2.4 s) con desvanecido,
+normalizadas, mono, MP3 64 kbps. La nota real y su desafinación en centésimos se midieron con YIN y están en manifest.json.

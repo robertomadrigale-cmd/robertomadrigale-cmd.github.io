@@ -25,6 +25,7 @@
     .album{min-width:0;display:flex;flex-direction:column;padding:12px;border:1px solid var(--line);border-radius:24px;background:var(--card);color:inherit;text-decoration:none;transition:border-color .18s ease,transform .18s ease}
     .album:hover{border-color:var(--blue);transform:translateY(-3px)}
     .album.voice:hover{border-color:var(--pink)}
+    .album.studio:hover{border-color:#f5b43c}
     .art{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:15px;background:#101b38}
     .info{display:flex;flex-direction:column;flex:1;align-items:flex-start;padding:18px 8px 8px}
     h2{margin:0;font-size:clamp(30px,4vw,40px);line-height:1.1;font-weight:800;letter-spacing:-.045em;text-transform:lowercase}
@@ -32,11 +33,13 @@
     .phrase{margin:16px 0 22px;font-size:15px}
     .enter{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:44px;margin-top:auto;padding:10px 20px;background:var(--blue);color:#fff;border-radius:999px;font-size:15px;font-weight:650;white-space:nowrap}
     .voice .enter{background:var(--pink);color:#190a11}
+    .studio .enter{background:#f5b43c;color:#1a1000}
     .enter svg{width:18px;height:18px;flex:none}
     .preferences{margin-top:24px;display:flex;justify-content:center}
     .remember{display:inline-flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:15px;color:var(--muted)}
     input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--blue);cursor:pointer}
     a:focus-visible,input:focus-visible{outline:3px solid var(--fg);outline-offset:5px}
+    @media(min-width:900px){main{width:min(100%,1180px)}.albums{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media(max-width:620px){main{padding-inline:20px}.albums{grid-template-columns:minmax(0,1fr);gap:20px}header{margin-bottom:26px}}
     @media(prefers-color-scheme:light){:root{--bg:#f6f7fb;--fg:#151a26;--muted:#566076;--line:#d8dce5;--card:#fff}}
     @media(prefers-reduced-motion:reduce){.album{transition:none}.album:hover{transform:none}}
@@ -94,6 +97,26 @@
           <span class="enter" id="voice-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
         </div>
       </a>
+      <a class="album studio" href="../estudio/" data-app="estudio" aria-labelledby="studio-title studio-enter">
+        <svg class="art" viewBox="0 0 400 400" aria-hidden="true">
+          <defs>
+            <radialGradient id="s-amber" cx=".16" cy=".14" r="1"><stop stop-color="#f5b43c"/><stop offset=".55" stop-color="#7a3d14"/><stop offset="1" stop-color="#1a0d06"/></radialGradient>
+            <radialGradient id="s-pink" cx=".95" cy=".95" r=".8"><stop stop-color="#ff4fa3" stop-opacity=".85"/><stop offset="1" stop-color="#ff4fa3" stop-opacity="0"/></radialGradient>
+          </defs>
+          <path fill="url(#s-amber)" d="M0 0h400v400H0z"/>
+          <path fill="url(#s-pink)" d="M0 0h400v400H0z"/>
+          <g fill="none" stroke="#fff" stroke-linecap="round">
+            <circle cx="200" cy="200" r="142" opacity=".13"/>
+            <circle cx="200" cy="200" r="117" opacity=".13"/>
+            <path d="M120 244V156M160 268V132M200 252V148M240 284V116M280 236V164" stroke-width="10" opacity=".85"/>
+          </g>
+        </svg>
+        <div class="info">
+          <h2 id="studio-title">Estudio <small>Roka Estudio</small></h2>
+          <p class="phrase">Beats por género para grabar encima.</p>
+          <span class="enter" id="studio-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
+        </div>
+      </a>
     </nav>
     <div class="preferences">
       <label class="remember"><input id="remember" type="checkbox"> Recordar mi elección</label>
@@ -102,12 +125,12 @@
   <script>
     (()=>{
       const key='roka-portada:v1';
-      const destinations={guitarra:'../',voz:'../voz/'};
+      const destinations={guitarra:'../',voz:'../voz/',estudio:'../estudio/'};
       const checkbox=document.getElementById('remember');
       let last=null;
       try{
         const saved=JSON.parse(localStorage.getItem(key));
-        if(saved&&(saved.last==='guitarra'||saved.last==='voz')){
+        if(saved&&destinations[saved.last]){
           last=saved.last;
           checkbox.checked=saved.remember===true;
           if(checkbox.checked&&!new URLSearchParams(location.search).has('cambiar')){

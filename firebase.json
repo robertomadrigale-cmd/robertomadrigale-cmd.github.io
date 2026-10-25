@@ -9,7 +9,12 @@
       "voz/src/**",
       "voz/tools/**",
       "voz/build.sh",
-      "voz/CLAUDE.md"
+      "voz/CLAUDE.md",
+      "estudio/src/**",
+      "estudio/tools/**",
+      "estudio/build.sh",
+      "estudio/CLAUDE.md",
+      "comun/**"
     ],
     "headers": [
       {
@@ -95,6 +100,42 @@
       },
       {
         "source": "/roka/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/estudio/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/estudio/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/estudio/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/estudio/manifest.webmanifest",
         "headers": [
           {
             "key": "Cache-Control",

@@ -1,0 +1,265 @@
+{
+ "version": 1,
+ "packs": [
+  {
+   "id": "trompeta",
+   "nombre": "Trompeta",
+   "autor": "Versilian Studios — VSCO 2 Community Edition",
+   "fuente": "Brass/Trumpet (sus, v1)",
+   "licencia": "CC0 1.0 (dominio público)",
+   "url": "https://github.com/sgossner/VSCO-2-CE",
+   "tipo": "instrumento",
+   "base": "cc0/",
+   "notas": {
+    "53": {
+     "archivo": "tp-53.mp3",
+     "cents": -2
+    },
+    "57": {
+     "archivo": "tp-57.mp3",
+     "cents": -4
+    },
+    "60": {
+     "archivo": "tp-60.mp3",
+     "cents": -13
+    },
+    "63": {
+     "archivo": "tp-63.mp3",
+     "cents": 2
+    },
+    "67": {
+     "archivo": "tp-67.mp3",
+     "cents": 6
+    },
+    "70": {
+     "archivo": "tp-70.mp3",
+     "cents": -2
+    },
+    "74": {
+     "archivo": "tp-74.mp3",
+     "cents": 0
+    },
+    "77": {
+     "archivo": "tp-77.mp3",
+     "cents": -9
+    },
+    "81": {
+     "archivo": "tp-81.mp3",
+     "cents": 3
+    },
+    "84": {
+     "archivo": "tp-84.mp3",
+     "cents": 2
+    }
+   }
+  },
+  {
+   "id": "tuba",
+   "nombre": "Tuba",
+   "autor": "Versilian Studios — VSCO 2 Community Edition",
+   "fuente": "Brass/Tuba (sus, v2)",
+   "licencia": "CC0 1.0 (dominio público)",
+   "url": "https://github.com/sgossner/VSCO-2-CE",
+   "tipo": "instrumento",
+   "base": "cc0/",
+   "notas": {
+    "34": {
+     "archivo": "tuba-34.mp3",
+     "cents": 1
+    },
+    "39": {
+     "archivo": "tuba-39.mp3",
+     "cents": 5
+    },
+    "41": {
+     "archivo": "tuba-41.mp3",
+     "cents": -3
+    },
+    "46": {
+     "archivo": "tuba-46.mp3",
+     "cents": 5
+    },
+    "50": {
+     "archivo": "tuba-50.mp3",
+     "cents": -10
+    },
+    "53": {
+     "archivo": "tuba-53.mp3",
+     "cents": -2
+    },
+    "58": {
+     "archivo": "tuba-58.mp3",
+     "cents": 13
+    }
+   }
+  },
+  {
+   "id": "trombon",
+   "nombre": "Trombón tenor",
+   "autor": "Versilian Studios — VSCO 2 Community Edition",
+   "fuente": "Brass/Tenor Trombone (sus, v2)",
+   "licencia": "CC0 1.0 (dominio público)",
+   "url": "https://github.com/sgossner/VSCO-2-CE",
+   "tipo": "instrumento",
+   "base": "cc0/",
+   "notas": {
+    "41": {
+     "archivo": "tbn-41.mp3",
+     "cents": 1
+    },
+    "46": {
+     "archivo": "tbn-46.mp3",
+     "cents": -1
+    },
+    "50": {
+     "archivo": "tbn-50.mp3",
+     "cents": -1
+    },
+    "53": {
+     "archivo": "tbn-53.mp3",
+     "cents": -1
+    },
+    "60": {
+     "archivo": "tbn-60.mp3",
+     "cents": 0
+    },
+    "61": {
+     "archivo": "tbn-61.mp3",
+     "cents": 0
+    },
+    "63": {
+     "archivo": "tbn-63.mp3",
+     "cents": 1
+    }
+   }
+  },
+  {
+   "id": "piano",
+   "nombre": "Piano vertical",
+   "autor": "Versilian Studios — VSCO 2 Community Edition",
+   "fuente": "Keys/Upright Piano (dyn2), Simon Dalzell / Ivy Audio",
+   "licencia": "CC0 1.0 (dominio público)",
+   "url": "https://github.com/sgossner/VSCO-2-CE",
+   "tipo": "instrumento",
+   "base": "cc0/",
+   "notas": {
+    "33": {
+     "archivo": "piano-33.mp3",
+     "cents": -2
+    },
+    "37": {
+     "archivo": "piano-37.mp3",
+     "cents": -10
+    },
+    "41": {
+     "archivo": "piano-41.mp3",
+     "cents": 6
+    },
+    "45": {
+     "archivo": "piano-45.mp3",
+     "cents": -6
+    },
+    "49": {
+     "archivo": "piano-49.mp3",
+     "cents": -1
+    },
+    "53": {
+     "archivo": "piano-53.mp3",
+     "cents": 0
+    },
+    "57": {
+     "archivo": "piano-57.mp3",
+     "cents": 2
+    },
+    "61": {
+     "archivo": "piano-61.mp3",
+     "cents": 2
+    },
+    "65": {
+     "archivo": "piano-65.mp3",
+     "cents": 1
+    },
+    "69": {
+     "archivo": "piano-69.mp3",
+     "cents": 2
+    },
+    "73": {
+     "archivo": "piano-73.mp3",
+     "cents": 5
+    },
+    "77": {
+     "archivo": "piano-77.mp3",
+     "cents": 5
+    },
+    "81": {
+     "archivo": "piano-81.mp3",
+     "cents": 8
+    }
+   }
+  },
+  {
+   "id": "organo",
+   "nombre": "Órgano de tubos",
+   "autor": "Versilian Studios — VSCO 2 Community Edition",
+   "fuente": "Keys/Organ (Loud, Man3Open), Simon Dalzell / Ivy Audio",
+   "licencia": "CC0 1.0 (dominio público)",
+   "url": "https://github.com/sgossner/VSCO-2-CE",
+   "tipo": "instrumento",
+   "base": "cc0/",
+   "notas": {
+    "30": {
+     "archivo": "organ-30.mp3",
+     "cents": 4
+    },
+    "33": {
+     "archivo": "organ-33.mp3",
+     "cents": 2
+    },
+    "36": {
+     "archivo": "organ-36.mp3",
+     "cents": 3
+    },
+    "39": {
+     "archivo": "organ-39.mp3",
+     "cents": 0
+    },
+    "42": {
+     "archivo": "organ-42.mp3",
+     "cents": 1
+    },
+    "45": {
+     "archivo": "organ-45.mp3",
+     "cents": -1
+    },
+    "48": {
+     "archivo": "organ-48.mp3",
+     "cents": -3
+    },
+    "51": {
+     "archivo": "organ-51.mp3",
+     "cents": -2
+    },
+    "54": {
+     "archivo": "organ-54.mp3",
+     "cents": 0
+    },
+    "57": {
+     "archivo": "organ-57.mp3",
+     "cents": 0
+    },
+    "60": {
+     "archivo": "organ-60.mp3",
+     "cents": -1
+    },
+    "63": {
+     "archivo": "organ-63.mp3",
+     "cents": -2
+    },
+    "66": {
+     "archivo": "organ-66.mp3",
+     "cents": 0
+    }
+   }
+  }
+ ]
+}
