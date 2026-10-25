@@ -76,9 +76,27 @@ was [Em]blind, but [D]now I [G]see.
 {mel:D4/1 G4/2 B4/.5 +G4/.5 B4/2 A4/1 G4/3}`];
 const SONGHUE={'escala-do':205,vocales:180,cumple:328,estrellita:262,grace:26};
 const SONGM={'escala-do':'<path d="M14 80h12v-9h12v-9h12v-6h12v-9h12v-9h12"/>',vocales:'<circle cx="50" cy="48" r="20"/><path d="M42 48h16" stroke-opacity=".6"/>',cumple:'<path d="M30 80V50h40v30"/><path d="M40 50V36M50 50V32M60 50V36"/>',estrellita:'<path d="M50 20l8 18 20 2-15 13 5 20-18-11-18 11 5-20-15-13 20-2z"/>',grace:'<path d="M14 70c14-30 58-30 72 0"/><circle cx="50" cy="34" r="6" fill="#fff" stroke="none"/>'};
+// «Acordes arriba, letra abajo» (como Ultimate Guitar o LaCuerda): el renglón de acordes se vuelve [Acorde] dentro de la letra,
+// en la palabra que estaba debajo. Un renglón de puros acordes sin letra abajo no se canta.
+const CHORD_TOK=/^(?:[A-G]|Do|Re|Mi|Fa|Sol|La|Si)[#b♯♭]?(?:m(?!a)|maj7?|min|dim|aug|sus[24]?|add\d+|°|\+)?\d*(?:\/(?:[A-G]|Do|Re|Mi|Fa|Sol|La|Si)[#b♯♭]?)?$/;
+function isChordLine(ln){const t=String(ln).trim().split(/\s+/).filter(Boolean);return t.length>0&&!/[{}~]/.test(ln)&&t.every(x=>CHORD_TOK.test(x))&&(t.some(x=>/^[A-G]/.test(x))||t.length>1&&t.some(x=>/[m\d#b♯♭]/.test(x.slice(2))))}
+function mergeChordLines(text){
+  const L=String(text).split('\n'),out=[];
+  for(let i=0;i<L.length;i++){const ln=L[i];
+    if(!isChordLine(ln)){out.push(ln);continue}
+    const nx=L[i+1];
+    // canciones guardadas antes: el renglón de acordes ya trae su propia melodía; se deja igual para no desacomodarla
+    if(nx!=null&&/^\s*\{mel:/.test(nx)){out.push(ln);continue}
+    if(nx==null||!nx.trim()||isChordLine(nx)||/^\s*\{/.test(nx))continue;
+    let lyr=nx;const pos=[];ln.replace(/\S+/g,(c,o)=>{pos.push([o,c]);return c});
+    for(let k=pos.length-1;k>=0;k--){let[o,c]=pos[k];o=Math.min(o,lyr.length);if(/\s/.test(lyr[o]||'')){while(o<lyr.length&&/\s/.test(lyr[o]))o++}else while(o>0&&/\S/.test(lyr[o-1]))o--;lyr=lyr.slice(0,o)+'['+c+']'+lyr.slice(o)}
+    out.push(lyr);i++;
+  }
+  return out.join('\n');
+}
 function songParse(src){
   const S={meta:{},lines:[]};
-  src.split('\n').forEach(raw=>{
+  mergeChordLines(src).split('\n').forEach(raw=>{
     const ln=raw.trim();if(!ln)return;
     const tags=[...ln.matchAll(/\{(\w+):([^}]*)\}/g)];
     if(tags.length&&ln.replace(/\{[^}]*\}/g,'').trim()===''){

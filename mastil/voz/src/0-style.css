@@ -1302,3 +1302,12 @@ html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-heigh
 @media(max-width:420px){.vnote{min-width:88px;padding:6px 8px}.coach-how .how-steps li{font-size:15px}.mouth{width:76px;height:76px}}
 @media(max-height:650px){.coach.is-song .coach-lane{height:26svh}.coach.is-song .lyrics.concert{min-height:28svh}}
 .vnote #live-note{color:var(--fg)}.vnote.hit #live-note{color:var(--good)}.vnote.low #live-note,.vnote.high #live-note{color:#f5b43c}.vnote.quiet #live-note{color:var(--muted)}
+
+/* karaoke: todo cabe en la pantalla y el renglón iluminado siempre se ve */
+.coach{overflow-x:hidden}
+.coach.is-song{height:100svh;min-height:0;overflow:hidden}
+.coach.is-song .coach-hud{padding:2px 0 6px}.coach.is-song .coach-hud #phase{font-size:clamp(22px,4vw,32px)}
+.coach.is-song .hud-tools{margin-bottom:6px}
+.coach.is-song .coach-lane{height:26svh;min-height:130px}
+.coach.is-song .lyrics.concert{flex:1 1 auto;min-height:0;max-height:none}
+.coach.is-song .coach-controls{padding:10px 0}

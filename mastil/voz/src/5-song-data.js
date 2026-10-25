@@ -31,7 +31,8 @@ function silabas(word){
   }
   return[0,...cuts,chars.length].slice(0,-1).map((start,i)=>chars.slice(start,[...cuts,chars.length][i]).join(''));
 }
-function syllabify(text){return text.split('\n').map(line=>line.trim().split(/\s+/).map(w=>w.includes('~')?w:silabas(w).join('~')).join(' ')).filter(Boolean).join('\n')}
+// los acordes arriba de la letra se vuelven [Acorde] y no se parten en sílabas
+function syllabify(text){return mergeChordLines(text).split('\n').map(line=>line.trim().split(/\s+/).map(w=>{if(w.includes('~'))return w;const m=w.match(/^((?:\[[^\]]+\])*)(.*)$/);return m[1]+(m[2]?silabas(m[2]).join('~'):'')}).join(' ')).filter(Boolean).join('\n')}
 function cleanMeta(s){return String(s||'').replace(/[{}\r\n]/g,' ').trim().slice(0,150)}
 function melodyText(notes){return notes.map(n=>(n.cont?'+':'')+(n.m==null?'r':noteCode(n.m))+'/'+n.d).join(' ')}
 function strictMelody(text){
@@ -172,10 +173,12 @@ function timedSongSpec(song,buffer,{volume=.65,side=false}={}){
   const T0=AC.currentTime+.5,targets=[],lines=[],segs=[];let source=null,gain=null;
   (song.recording.notes||[]).forEach((notes,li)=>{let si=-1;notes.forEach(n=>{if(n.m==null)return;if(!n.cont)si++;if(!Number.isFinite(n.t0)||!Number.isFinite(n.t1))return;targets.push({...n,t0:T0+n.t0,t1:T0+n.t1,beats:n.d,li,si,n:0,h:0,ph:'S',syl:n.cont?'':song.lines[li]?.syl[si]?.x||''})});if(notes.length)lines.push({li,t0:T0+notes[0].t0,t1:T0+notes.at(-1).t1})});
   if(!targets.length)throw Error('Esta canción no tiene tiempos de grabación. Extrae la melodía de nuevo.');
+  // las notas que el detector mandó una octava arriba o abajo se acomodan alrededor de la mediana
+  const med=targets.map(g=>g.m).sort((a,b)=>a-b)[targets.length>>1];targets.forEach(g=>{while(g.m-med>7)g.m-=12;while(med-g.m>7)g.m+=12});
   let audio=buffer;
   if(side&&buffer.numberOfChannels>=2){audio=AC.createBuffer(2,buffer.length,buffer.sampleRate);const L=buffer.getChannelData(0),R=buffer.getChannelData(1);for(let c=0;c<2;c++){const dst=audio.getChannelData(c);for(let i=0;i<dst.length;i++)dst[i]=(L[i]-R[i])*.5}}
   segs.push({t0:T0,t1:T0+buffer.duration,ph:'S'});
-  return{targets,lines,segs,end:T0+buffer.duration,beat:60/song.bpm,tip:'Revisa las notas extraídas si la guía no coincide con la voz.',
+  return{octaveFree:true,targets,lines,segs,end:T0+buffer.duration,beat:60/song.bpm,tip:'Revisa las notas extraídas si la guía no coincide con la voz.',
     ev:[{t:T0,fn:t=>{source=AC.createBufferSource();source.buffer=audio;gain=AC.createGain();gain.gain.value=volume;source.connect(gain).connect(MASTER);source.start(t)}}],
     setVolume:v=>{volume=v;if(gain)gain.gain.value=v},cleanup:()=>{if(source){try{source.stop()}catch(e){}source.disconnect()}gain?.disconnect()}};
 }

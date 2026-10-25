@@ -85,7 +85,7 @@ function viewCoach(options={}){
       shell(`<div class="coach-center"><span class="acov coach-cover">${coverArt(x.hue,x.motif,null,'coach')}</span><span class="eyebrow">${daily?sess.minutes+' min · a tu ritmo':'Práctica guiada'}</span><h1>${daily?'Tu sesión de hoy':esc(x.t)}</h1><p>${daily?'Calienta, afina y termina cantando.':esc(x.tip)}</p><p class="cap">Usa audífonos para que la guía no se confunda con tu voz.</p><button class="kplayb" data-coach="begin">${IC.play}<span>${index?'Continuar':'Empezar'}</span></button>${settings(x)}</div>`);
     }
     function settings(x){
-      const song=x.song,original=song&&song.recording?.audioStored&&hasOriginalTimings(song)&&!!DB['original:'+song.id];
+      const song=x.song,original=song&&song.recording?.audioStored&&hasOriginalTimings(song)&&DB['original:'+song.id]!==false;
       return `<details class="coach-settings"><summary>Ajustes de práctica</summary><label>Tolerancia<select data-setting="tol">${[[25,'Estricta'],[50,'Normal'],[75,'Relajada']].map(([v,t])=>`<option value="${v}" ${DB.tol===v?'selected':''}>${t}</option>`).join('')}</select></label>${!daily&&!song&&!x.breath?`<label>Rondas<select data-setting="dir"><option value="up">Subir</option><option value="ud" ${DB.dir==='ud'?'selected':''}>Subir y bajar</option></select></label><label>Modo<select data-setting="mode"><option value="eco">Escucha y repite</option><option value="junto" ${DB.mode==='junto'?'selected':''}>Canta junto</option></select></label><label>Tempo<input type="number" data-setting="bpm:${x.id}" min="40" max="160" value="${DB['bpm:'+x.id]||x.bpm}"></label>`:''}${song&&!daily?`
       ${song.mine?`<a class="btn" href="#/canciones/editar/${song.id}">Editar canción</a><a class="btn" href="#/canciones/libre/${song.id}">Cantar libre</a>`:''}
       ${song.recording?.audioStored&&hasOriginalTimings(song)?`<label>Cantar sobre mi grabación<input type="checkbox" data-setting="original:${song.id}" ${original?'checked':''}></label>`:''}
@@ -97,7 +97,7 @@ function viewCoach(options={}){
       started=true;stage='loading';shell('<div class="coach-center"><h1>Prepara tu voz</h1><p>Activa el micrófono para ver tu afinación.</p></div>');
       if(!ac()){started=false;stage='ready';ready();toast('No se pudo iniciar el audio. Vuelve a intentar.');return}
       const selected=stepInfo(steps[index]).song;originalBuffer=null;
-      if(!daily&&selected&&selected.recording?.audioStored&&hasOriginalTimings(selected)&&DB['original:'+selected.id]){
+      if(!daily&&selected&&selected.recording?.audioStored&&hasOriginalTimings(selected)&&DB['original:'+selected.id]!==false){
         try{const file=await audioStore('get',selected.id);if(!file)throw Error('El audio no está en este dispositivo. Vuelve a subirlo desde Editar canción.');originalBuffer=await decodeSongFile(file,{signal:audioAbort.signal})}
         catch(e){if(!alive)return;started=false;stage='ready';ready();toast(esc(e.message),6500);return}
       }
@@ -136,7 +136,7 @@ function viewCoach(options={}){
       root.classList.toggle('is-song',!!song);
       shell(`<div class="coach-hud"><div class="hud-l"><span class="eyebrow">${esc(x.t)}${song?'':' · «'+esc(syl)+'»'}</span><h1 id="phase">${song?'Prepárate':'Escucha'}</h1><span id="round"></span><div class="rbar" aria-hidden="true"><i id="rbar"></i></div></div>
         <div class="vnote" id="vnote" aria-live="polite"><small>Tu nota</small><b id="live-note">—</b><span id="live-dir">${song?'Espera la cuenta':'Escucha primero'}</span></div></div>
-        <div class="hud-tools">${originalBuffer?'':speedHTML(id)}${song&&!originalBuffer?`<button class="chip" data-coach="guide" aria-pressed="${DB.sguide!==false}">Voz guía</button>`:''}</div>
+        <div class="hud-tools">${originalBuffer?'':speedHTML(id)}${song&&!originalBuffer?`<button class="chip" data-coach="guide" aria-pressed="${DB.sguide!==false}">Voz guía</button>`:''}${song&&song.recording?.audioStored&&hasOriginalTimings(song)?`<button class="chip" data-coach="orig" aria-pressed="${!!originalBuffer}">Mi grabación</button>`:''}</div>
         <div class="lane-wrap"><canvas class="lane coach-lane" id="coach-lane" aria-label="Notas objetivo y línea de tu voz"></canvas><div class="lane-rest" id="lane-rest" hidden><span class="brdisc"></span><b>Respira</b><span id="rest-n"></span></div></div>
         ${song?`<div class="lyrics concert" id="lyr">${lyricHTML(song)}</div>`:'<p id="rest-label" class="coach-hint">Las barras claras las canta la app. Las azules te tocan a ti.</p>'}${controls()}`);
       const speed=spdOf(id);
@@ -155,7 +155,7 @@ function viewCoach(options={}){
         const ph=$('#phase',root),r=$('#round',root),dir=$('#live-dir',root);
         if(!s){ph.textContent='Respira';return}
         ph.className=s.ph==='S'||s.ph==='J'?'sing':'';
-        if(song){ph.textContent=s.ph==='C'?'Prepárate':'Canta';r.textContent=s.ph==='C'?'Empieza en la cuenta de 4':'Sigue la letra';if(dir&&s.ph==='C')dir.textContent='Espera la cuenta';return}
+        if(song){ph.textContent=s.ph==='C'?'Prepárate':'Canta';r.textContent=s.ph==='C'?'Empieza en la cuenta de 4':'Sigue la letra';if(dir)dir.textContent=s.ph==='C'?'Espera la cuenta':(dir.textContent==='Espera la cuenta'?'Canta':dir.textContent);return}
         ph.textContent={L:'Escucha: la app canta',S:'Ahora tú: «'+syl+'»',J:'Canta junto: «'+syl+'»',R:'Respira'}[s.ph]||'';
         r.textContent=s.ri!=null?`Ronda ${s.ri+1} de ${spec.rounds}`+(s.ph==='S'||s.ph==='J'?` · ${spec.notes} ${spec.notes===1?'nota':'notas'}${spec.up?' ↑':''}`:''):'';
         if(dir&&s.ph==='L')dir.textContent='Escucha primero';
@@ -248,6 +248,7 @@ function viewCoach(options={}){
       if(action==='example'){example();return}
       if(action==='explain'){clock=null;$('#count',root)?.remove();const x=stepInfo(steps[index]),h=howFor(x);speakText(`${x.t}. ${h.steps.join(' ')} ${h.fix||''}`);return}
       if(action==='guide'){DB.sguide=DB.sguide===false;save();exercise();return}
+      if(action==='orig'){const id=stepInfo(steps[index]).song.id;DB['original:'+id]=!originalBuffer;save();clearStep();started=false;begin();return}
       if(action==='begin')begin();else if(action==='exit')exit();else if(action==='pause')setPaused(!paused);else if(action==='resume')setPaused(false);else if(action==='repeat'){if(daily){sess.res[index]=null;save()}intro()}else if(action==='skip')skip();else if(action==='now'&&stage==='intro')exercise();else if(action==='next')next();
     });
     const iv=setInterval(()=>{const now=performance.now(),dt=Math.min(.25,(now-previous)/1000);previous=now;if(!alive||paused||document.hidden)return;

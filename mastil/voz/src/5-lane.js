@@ -28,6 +28,7 @@ function laneDraw(cv,st,now){
   // barras
   // «Escucha» = barra clara (la canta la app), «Ahora tú» = azul sólido; la nota que toca brilla
   const bh=Math.max(12,Math.min(26,py*.9));
+  let sylEnd=-1e9;
   st.targets.forEach(g=>{
     if(g.t1<now-past-.2||g.t0>now+SEC+.2)return;
     const x0=X(g.t0)+1,x1=X(g.t1)-1,done=g.t1<now&&g.n>0,sc=done?g.h/g.n:0,live=g.t0<=now&&g.t1>now;
@@ -41,7 +42,7 @@ function laneDraw(cv,st,now){
     // nombre de la nota dentro de la barra (si cabe) y la sílaba completa arriba
     x.font='700 11px system-ui,-apple-system,Segoe UI,sans-serif';
     const name=nn(g.m);if(w>x.measureText(name).width+12){x.fillStyle=g.ph==='L'?C.bg:'#fff';x.globalAlpha=g.ph==='L'?.9:.95;x.fillText(name,x0+6,y0+bh/2+1);x.globalAlpha=1}
-    if(g.syl){x.font='700 13px system-ui,-apple-system,Segoe UI,sans-serif';x.fillStyle=C.fg;x.globalAlpha=live?1:.8;x.fillText(g.syl,x0+2,y0-10);x.globalAlpha=1}
+    if(g.syl){x.font='700 13px system-ui,-apple-system,Segoe UI,sans-serif';const sw=x.measureText(g.syl).width;if(x0>=sylEnd+4||live){x.fillStyle=C.fg;x.globalAlpha=live?1:.8;x.fillText(g.syl,x0+2,y0-10);x.globalAlpha=1;sylEnd=x0+2+sw}}
   });
   // línea de ahora
   x.strokeStyle=C.fg;x.globalAlpha=.35;x.lineWidth=1.5;x.beginPath();x.moveTo(PH,0);x.lineTo(PH,H);x.stroke();x.globalAlpha=1;
@@ -146,17 +147,19 @@ function practiceRun(cv,spec,o){
     if(!alive||paused)return;const s={t:d.t,m:d.m,hit:false,off:false};
     const g=spec.targets.find(x=>d.t>=x.t0&&d.t<x.t1);
     if(g&&g.ph==='S'){
-      const hit=d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol;
+      // melodías sacadas de una grabación: cantar en otra octava también cuenta
+      const dev=m=>{let e=m-tgtAt(g,d.t);if(spec.octaveFree)e-=12*Math.round(e/12);return e};
+      const hit=d.m!=null&&Math.abs(dev(d.m))<=tol;
       g.reads=(g.reads||0)+1;
       if(d.m==null)g.silent=(g.silent||0)+1;
-      else{const err=d.m-tgtAt(g,d.t);g.voiced=(g.voiced||0)+1;g.sum=(g.sum||0)+err;g.sq=(g.sq||0)+err*err}
+      else{const err=dev(d.m);g.voiced=(g.voiced||0)+1;g.sum=(g.sum||0)+err;g.sq=(g.sq||0)+err*err}
       const part=(d.t-g.t0)/(g.t1-g.t0),which=part<.3?'early':part>.7?'late':null;
       if(which){g[which+'N']=(g[which+'N']||0)+1;g[which+'H']=(g[which+'H']||0)+(hit?1:0)}
       const grace=Math.min(.18,(g.t1-g.t0)*.3);
       if(d.t>=g.t0+grace&&d.t<g.t1-.03){g.n++;if(hit){g.h++;s.hit=true}else if(d.m!=null)s.off=true;
         const note=Math.round(tgtAt(g,d.t));g.bins=g.bins||{};const b=g.bins[note]||(g.bins[note]={n:0,h:0});b.n++;if(hit)b.h++;
       }
-      else if(d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol)s.hit=true;
+      else if(d.m!=null&&Math.abs(dev(d.m))<=tol)s.hit=true;
     }
     st.trail.push(s);if(st.trail.length>400)st.trail.splice(0,100);
     o.onPitch&&o.onPitch(d,g);

@@ -62,6 +62,8 @@ Roberto: «hay que ser un genio para saber qué hacer». Programado por Claude (
 - Karaoke (`.coach.is-song`): carril compacto (30 % del alto) y la letra grande al centro con todos los renglones; el actual (28–42 px) se centra con scroll suave y se llena sílaba por sílaba.
 - `syl` de «Tres notas» pasó de «nu» a «no».
 
+- **Arreglos 24 oct (canciones propias):** `mergeChordLines()` (en `4-content.js`, lo usan `songParse` y `syllabify`) convierte «acordes arriba, letra abajo» en `[Acorde]` sobre la palabra (un renglón de acordes que ya trae su propio `{mel}` se deja igual para no desacomodar canciones guardadas antes). «Cantar sobre mi grabación» viene encendido si la canción tiene audio y tiempos (`DB['original:'+id]!==false`) y hay un chip «Mi grabación» en el karaoke para cambiar. `timedSongSpec` acomoda las notas extraídas a ±7 semitonos de la mediana y marca `octaveFree` (cantar en otra octava cuenta como acierto). El karaoke cabe en `100svh` y el renglón actual siempre se ve; el carril no encima sílabas. Botón «Tocar con un beat» en «Cómo se hace» de cada canción → `../estudio/#/nueva?...`.
+
 ### Rutas
 `#/` (Hoy) · `#/sesion` · `#/ejercicios` · `#/progreso` · `#/practicar/ej/<id>` · `#/practicar/afinador|rango|respiracion|metronomo` · `#/canciones` · `#/canciones/<id>` · `#/canciones/nueva` · `#/canciones/editar/<id>`.
 

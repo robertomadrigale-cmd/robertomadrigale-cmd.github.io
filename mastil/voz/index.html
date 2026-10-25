@@ -1325,6 +1325,15 @@ html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-heigh
 @media(max-height:650px){.coach.is-song .coach-lane{height:26svh}.coach.is-song .lyrics.concert{min-height:28svh}}
 .vnote #live-note{color:var(--fg)}.vnote.hit #live-note{color:var(--good)}.vnote.low #live-note,.vnote.high #live-note{color:#f5b43c}.vnote.quiet #live-note{color:var(--muted)}
 
+/* karaoke: todo cabe en la pantalla y el renglón iluminado siempre se ve */
+.coach{overflow-x:hidden}
+.coach.is-song{height:100svh;min-height:0;overflow:hidden}
+.coach.is-song .coach-hud{padding:2px 0 6px}.coach.is-song .coach-hud #phase{font-size:clamp(22px,4vw,32px)}
+.coach.is-song .hud-tools{margin-bottom:6px}
+.coach.is-song .coach-lane{height:26svh;min-height:130px}
+.coach.is-song .lyrics.concert{flex:1 1 auto;min-height:0;max-height:none}
+.coach.is-song .coach-controls{padding:10px 0}
+
 </style>
 </head>
 <body>
@@ -1724,9 +1733,27 @@ was [Em]blind, but [D]now I [G]see.
 {mel:D4/1 G4/2 B4/.5 +G4/.5 B4/2 A4/1 G4/3}`];
 const SONGHUE={'escala-do':205,vocales:180,cumple:328,estrellita:262,grace:26};
 const SONGM={'escala-do':'<path d="M14 80h12v-9h12v-9h12v-6h12v-9h12v-9h12"/>',vocales:'<circle cx="50" cy="48" r="20"/><path d="M42 48h16" stroke-opacity=".6"/>',cumple:'<path d="M30 80V50h40v30"/><path d="M40 50V36M50 50V32M60 50V36"/>',estrellita:'<path d="M50 20l8 18 20 2-15 13 5 20-18-11-18 11 5-20-15-13 20-2z"/>',grace:'<path d="M14 70c14-30 58-30 72 0"/><circle cx="50" cy="34" r="6" fill="#fff" stroke="none"/>'};
+// «Acordes arriba, letra abajo» (como Ultimate Guitar o LaCuerda): el renglón de acordes se vuelve [Acorde] dentro de la letra,
+// en la palabra que estaba debajo. Un renglón de puros acordes sin letra abajo no se canta.
+const CHORD_TOK=/^(?:[A-G]|Do|Re|Mi|Fa|Sol|La|Si)[#b♯♭]?(?:m(?!a)|maj7?|min|dim|aug|sus[24]?|add\d+|°|\+)?\d*(?:\/(?:[A-G]|Do|Re|Mi|Fa|Sol|La|Si)[#b♯♭]?)?$/;
+function isChordLine(ln){const t=String(ln).trim().split(/\s+/).filter(Boolean);return t.length>0&&!/[{}~]/.test(ln)&&t.every(x=>CHORD_TOK.test(x))&&(t.some(x=>/^[A-G]/.test(x))||t.length>1&&t.some(x=>/[m\d#b♯♭]/.test(x.slice(2))))}
+function mergeChordLines(text){
+  const L=String(text).split('\n'),out=[];
+  for(let i=0;i<L.length;i++){const ln=L[i];
+    if(!isChordLine(ln)){out.push(ln);continue}
+    const nx=L[i+1];
+    // canciones guardadas antes: el renglón de acordes ya trae su propia melodía; se deja igual para no desacomodarla
+    if(nx!=null&&/^\s*\{mel:/.test(nx)){out.push(ln);continue}
+    if(nx==null||!nx.trim()||isChordLine(nx)||/^\s*\{/.test(nx))continue;
+    let lyr=nx;const pos=[];ln.replace(/\S+/g,(c,o)=>{pos.push([o,c]);return c});
+    for(let k=pos.length-1;k>=0;k--){let[o,c]=pos[k];o=Math.min(o,lyr.length);if(/\s/.test(lyr[o]||'')){while(o<lyr.length&&/\s/.test(lyr[o]))o++}else while(o>0&&/\S/.test(lyr[o-1]))o--;lyr=lyr.slice(0,o)+'['+c+']'+lyr.slice(o)}
+    out.push(lyr);i++;
+  }
+  return out.join('\n');
+}
 function songParse(src){
   const S={meta:{},lines:[]};
-  src.split('\n').forEach(raw=>{
+  mergeChordLines(src).split('\n').forEach(raw=>{
     const ln=raw.trim();if(!ln)return;
     const tags=[...ln.matchAll(/\{(\w+):([^}]*)\}/g)];
     if(tags.length&&ln.replace(/\{[^}]*\}/g,'').trim()===''){
@@ -2000,7 +2027,7 @@ function viewCoach(options={}){
       shell(`<div class="coach-center"><span class="acov coach-cover">${coverArt(x.hue,x.motif,null,'coach')}</span><span class="eyebrow">${daily?sess.minutes+' min · a tu ritmo':'Práctica guiada'}</span><h1>${daily?'Tu sesión de hoy':esc(x.t)}</h1><p>${daily?'Calienta, afina y termina cantando.':esc(x.tip)}</p><p class="cap">Usa audífonos para que la guía no se confunda con tu voz.</p><button class="kplayb" data-coach="begin">${IC.play}<span>${index?'Continuar':'Empezar'}</span></button>${settings(x)}</div>`);
     }
     function settings(x){
-      const song=x.song,original=song&&song.recording?.audioStored&&hasOriginalTimings(song)&&!!DB['original:'+song.id];
+      const song=x.song,original=song&&song.recording?.audioStored&&hasOriginalTimings(song)&&DB['original:'+song.id]!==false;
       return `<details class="coach-settings"><summary>Ajustes de práctica</summary><label>Tolerancia<select data-setting="tol">${[[25,'Estricta'],[50,'Normal'],[75,'Relajada']].map(([v,t])=>`<option value="${v}" ${DB.tol===v?'selected':''}>${t}</option>`).join('')}</select></label>${!daily&&!song&&!x.breath?`<label>Rondas<select data-setting="dir"><option value="up">Subir</option><option value="ud" ${DB.dir==='ud'?'selected':''}>Subir y bajar</option></select></label><label>Modo<select data-setting="mode"><option value="eco">Escucha y repite</option><option value="junto" ${DB.mode==='junto'?'selected':''}>Canta junto</option></select></label><label>Tempo<input type="number" data-setting="bpm:${x.id}" min="40" max="160" value="${DB['bpm:'+x.id]||x.bpm}"></label>`:''}${song&&!daily?`
       ${song.mine?`<a class="btn" href="#/canciones/editar/${song.id}">Editar canción</a><a class="btn" href="#/canciones/libre/${song.id}">Cantar libre</a>`:''}
       ${song.recording?.audioStored&&hasOriginalTimings(song)?`<label>Cantar sobre mi grabación<input type="checkbox" data-setting="original:${song.id}" ${original?'checked':''}></label>`:''}
@@ -2012,7 +2039,7 @@ function viewCoach(options={}){
       started=true;stage='loading';shell('<div class="coach-center"><h1>Prepara tu voz</h1><p>Activa el micrófono para ver tu afinación.</p></div>');
       if(!ac()){started=false;stage='ready';ready();toast('No se pudo iniciar el audio. Vuelve a intentar.');return}
       const selected=stepInfo(steps[index]).song;originalBuffer=null;
-      if(!daily&&selected&&selected.recording?.audioStored&&hasOriginalTimings(selected)&&DB['original:'+selected.id]){
+      if(!daily&&selected&&selected.recording?.audioStored&&hasOriginalTimings(selected)&&DB['original:'+selected.id]!==false){
         try{const file=await audioStore('get',selected.id);if(!file)throw Error('El audio no está en este dispositivo. Vuelve a subirlo desde Editar canción.');originalBuffer=await decodeSongFile(file,{signal:audioAbort.signal})}
         catch(e){if(!alive)return;started=false;stage='ready';ready();toast(esc(e.message),6500);return}
       }
@@ -2051,7 +2078,7 @@ function viewCoach(options={}){
       root.classList.toggle('is-song',!!song);
       shell(`<div class="coach-hud"><div class="hud-l"><span class="eyebrow">${esc(x.t)}${song?'':' · «'+esc(syl)+'»'}</span><h1 id="phase">${song?'Prepárate':'Escucha'}</h1><span id="round"></span><div class="rbar" aria-hidden="true"><i id="rbar"></i></div></div>
         <div class="vnote" id="vnote" aria-live="polite"><small>Tu nota</small><b id="live-note">—</b><span id="live-dir">${song?'Espera la cuenta':'Escucha primero'}</span></div></div>
-        <div class="hud-tools">${originalBuffer?'':speedHTML(id)}${song&&!originalBuffer?`<button class="chip" data-coach="guide" aria-pressed="${DB.sguide!==false}">Voz guía</button>`:''}</div>
+        <div class="hud-tools">${originalBuffer?'':speedHTML(id)}${song&&!originalBuffer?`<button class="chip" data-coach="guide" aria-pressed="${DB.sguide!==false}">Voz guía</button>`:''}${song&&song.recording?.audioStored&&hasOriginalTimings(song)?`<button class="chip" data-coach="orig" aria-pressed="${!!originalBuffer}">Mi grabación</button>`:''}</div>
         <div class="lane-wrap"><canvas class="lane coach-lane" id="coach-lane" aria-label="Notas objetivo y línea de tu voz"></canvas><div class="lane-rest" id="lane-rest" hidden><span class="brdisc"></span><b>Respira</b><span id="rest-n"></span></div></div>
         ${song?`<div class="lyrics concert" id="lyr">${lyricHTML(song)}</div>`:'<p id="rest-label" class="coach-hint">Las barras claras las canta la app. Las azules te tocan a ti.</p>'}${controls()}`);
       const speed=spdOf(id);
@@ -2070,7 +2097,7 @@ function viewCoach(options={}){
         const ph=$('#phase',root),r=$('#round',root),dir=$('#live-dir',root);
         if(!s){ph.textContent='Respira';return}
         ph.className=s.ph==='S'||s.ph==='J'?'sing':'';
-        if(song){ph.textContent=s.ph==='C'?'Prepárate':'Canta';r.textContent=s.ph==='C'?'Empieza en la cuenta de 4':'Sigue la letra';if(dir&&s.ph==='C')dir.textContent='Espera la cuenta';return}
+        if(song){ph.textContent=s.ph==='C'?'Prepárate':'Canta';r.textContent=s.ph==='C'?'Empieza en la cuenta de 4':'Sigue la letra';if(dir)dir.textContent=s.ph==='C'?'Espera la cuenta':(dir.textContent==='Espera la cuenta'?'Canta':dir.textContent);return}
         ph.textContent={L:'Escucha: la app canta',S:'Ahora tú: «'+syl+'»',J:'Canta junto: «'+syl+'»',R:'Respira'}[s.ph]||'';
         r.textContent=s.ri!=null?`Ronda ${s.ri+1} de ${spec.rounds}`+(s.ph==='S'||s.ph==='J'?` · ${spec.notes} ${spec.notes===1?'nota':'notas'}${spec.up?' ↑':''}`:''):'';
         if(dir&&s.ph==='L')dir.textContent='Escucha primero';
@@ -2163,6 +2190,7 @@ function viewCoach(options={}){
       if(action==='example'){example();return}
       if(action==='explain'){clock=null;$('#count',root)?.remove();const x=stepInfo(steps[index]),h=howFor(x);speakText(`${x.t}. ${h.steps.join(' ')} ${h.fix||''}`);return}
       if(action==='guide'){DB.sguide=DB.sguide===false;save();exercise();return}
+      if(action==='orig'){const id=stepInfo(steps[index]).song.id;DB['original:'+id]=!originalBuffer;save();clearStep();started=false;begin();return}
       if(action==='begin')begin();else if(action==='exit')exit();else if(action==='pause')setPaused(!paused);else if(action==='resume')setPaused(false);else if(action==='repeat'){if(daily){sess.res[index]=null;save()}intro()}else if(action==='skip')skip();else if(action==='now'&&stage==='intro')exercise();else if(action==='next')next();
     });
     const iv=setInterval(()=>{const now=performance.now(),dt=Math.min(.25,(now-previous)/1000);previous=now;if(!alive||paused||document.hidden)return;
@@ -2208,6 +2236,7 @@ function laneDraw(cv,st,now){
   // barras
   // «Escucha» = barra clara (la canta la app), «Ahora tú» = azul sólido; la nota que toca brilla
   const bh=Math.max(12,Math.min(26,py*.9));
+  let sylEnd=-1e9;
   st.targets.forEach(g=>{
     if(g.t1<now-past-.2||g.t0>now+SEC+.2)return;
     const x0=X(g.t0)+1,x1=X(g.t1)-1,done=g.t1<now&&g.n>0,sc=done?g.h/g.n:0,live=g.t0<=now&&g.t1>now;
@@ -2221,7 +2250,7 @@ function laneDraw(cv,st,now){
     // nombre de la nota dentro de la barra (si cabe) y la sílaba completa arriba
     x.font='700 11px system-ui,-apple-system,Segoe UI,sans-serif';
     const name=nn(g.m);if(w>x.measureText(name).width+12){x.fillStyle=g.ph==='L'?C.bg:'#fff';x.globalAlpha=g.ph==='L'?.9:.95;x.fillText(name,x0+6,y0+bh/2+1);x.globalAlpha=1}
-    if(g.syl){x.font='700 13px system-ui,-apple-system,Segoe UI,sans-serif';x.fillStyle=C.fg;x.globalAlpha=live?1:.8;x.fillText(g.syl,x0+2,y0-10);x.globalAlpha=1}
+    if(g.syl){x.font='700 13px system-ui,-apple-system,Segoe UI,sans-serif';const sw=x.measureText(g.syl).width;if(x0>=sylEnd+4||live){x.fillStyle=C.fg;x.globalAlpha=live?1:.8;x.fillText(g.syl,x0+2,y0-10);x.globalAlpha=1;sylEnd=x0+2+sw}}
   });
   // línea de ahora
   x.strokeStyle=C.fg;x.globalAlpha=.35;x.lineWidth=1.5;x.beginPath();x.moveTo(PH,0);x.lineTo(PH,H);x.stroke();x.globalAlpha=1;
@@ -2326,17 +2355,19 @@ function practiceRun(cv,spec,o){
     if(!alive||paused)return;const s={t:d.t,m:d.m,hit:false,off:false};
     const g=spec.targets.find(x=>d.t>=x.t0&&d.t<x.t1);
     if(g&&g.ph==='S'){
-      const hit=d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol;
+      // melodías sacadas de una grabación: cantar en otra octava también cuenta
+      const dev=m=>{let e=m-tgtAt(g,d.t);if(spec.octaveFree)e-=12*Math.round(e/12);return e};
+      const hit=d.m!=null&&Math.abs(dev(d.m))<=tol;
       g.reads=(g.reads||0)+1;
       if(d.m==null)g.silent=(g.silent||0)+1;
-      else{const err=d.m-tgtAt(g,d.t);g.voiced=(g.voiced||0)+1;g.sum=(g.sum||0)+err;g.sq=(g.sq||0)+err*err}
+      else{const err=dev(d.m);g.voiced=(g.voiced||0)+1;g.sum=(g.sum||0)+err;g.sq=(g.sq||0)+err*err}
       const part=(d.t-g.t0)/(g.t1-g.t0),which=part<.3?'early':part>.7?'late':null;
       if(which){g[which+'N']=(g[which+'N']||0)+1;g[which+'H']=(g[which+'H']||0)+(hit?1:0)}
       const grace=Math.min(.18,(g.t1-g.t0)*.3);
       if(d.t>=g.t0+grace&&d.t<g.t1-.03){g.n++;if(hit){g.h++;s.hit=true}else if(d.m!=null)s.off=true;
         const note=Math.round(tgtAt(g,d.t));g.bins=g.bins||{};const b=g.bins[note]||(g.bins[note]={n:0,h:0});b.n++;if(hit)b.h++;
       }
-      else if(d.m!=null&&Math.abs(d.m-tgtAt(g,d.t))<=tol)s.hit=true;
+      else if(d.m!=null&&Math.abs(dev(d.m))<=tol)s.hit=true;
     }
     st.trail.push(s);if(st.trail.length>400)st.trail.splice(0,100);
     o.onPitch&&o.onPitch(d,g);
@@ -2459,7 +2490,8 @@ function silabas(word){
   }
   return[0,...cuts,chars.length].slice(0,-1).map((start,i)=>chars.slice(start,[...cuts,chars.length][i]).join(''));
 }
-function syllabify(text){return text.split('\n').map(line=>line.trim().split(/\s+/).map(w=>w.includes('~')?w:silabas(w).join('~')).join(' ')).filter(Boolean).join('\n')}
+// los acordes arriba de la letra se vuelven [Acorde] y no se parten en sílabas
+function syllabify(text){return mergeChordLines(text).split('\n').map(line=>line.trim().split(/\s+/).map(w=>{if(w.includes('~'))return w;const m=w.match(/^((?:\[[^\]]+\])*)(.*)$/);return m[1]+(m[2]?silabas(m[2]).join('~'):'')}).join(' ')).filter(Boolean).join('\n')}
 function cleanMeta(s){return String(s||'').replace(/[{}\r\n]/g,' ').trim().slice(0,150)}
 function melodyText(notes){return notes.map(n=>(n.cont?'+':'')+(n.m==null?'r':noteCode(n.m))+'/'+n.d).join(' ')}
 function strictMelody(text){
@@ -2600,10 +2632,12 @@ function timedSongSpec(song,buffer,{volume=.65,side=false}={}){
   const T0=AC.currentTime+.5,targets=[],lines=[],segs=[];let source=null,gain=null;
   (song.recording.notes||[]).forEach((notes,li)=>{let si=-1;notes.forEach(n=>{if(n.m==null)return;if(!n.cont)si++;if(!Number.isFinite(n.t0)||!Number.isFinite(n.t1))return;targets.push({...n,t0:T0+n.t0,t1:T0+n.t1,beats:n.d,li,si,n:0,h:0,ph:'S',syl:n.cont?'':song.lines[li]?.syl[si]?.x||''})});if(notes.length)lines.push({li,t0:T0+notes[0].t0,t1:T0+notes.at(-1).t1})});
   if(!targets.length)throw Error('Esta canción no tiene tiempos de grabación. Extrae la melodía de nuevo.');
+  // las notas que el detector mandó una octava arriba o abajo se acomodan alrededor de la mediana
+  const med=targets.map(g=>g.m).sort((a,b)=>a-b)[targets.length>>1];targets.forEach(g=>{while(g.m-med>7)g.m-=12;while(med-g.m>7)g.m+=12});
   let audio=buffer;
   if(side&&buffer.numberOfChannels>=2){audio=AC.createBuffer(2,buffer.length,buffer.sampleRate);const L=buffer.getChannelData(0),R=buffer.getChannelData(1);for(let c=0;c<2;c++){const dst=audio.getChannelData(c);for(let i=0;i<dst.length;i++)dst[i]=(L[i]-R[i])*.5}}
   segs.push({t0:T0,t1:T0+buffer.duration,ph:'S'});
-  return{targets,lines,segs,end:T0+buffer.duration,beat:60/song.bpm,tip:'Revisa las notas extraídas si la guía no coincide con la voz.',
+  return{octaveFree:true,targets,lines,segs,end:T0+buffer.duration,beat:60/song.bpm,tip:'Revisa las notas extraídas si la guía no coincide con la voz.',
     ev:[{t:T0,fn:t=>{source=AC.createBufferSource();source.buffer=audio;gain=AC.createGain();gain.gain.value=volume;source.connect(gain).connect(MASTER);source.start(t)}}],
     setVolume:v=>{volume=v;if(gain)gain.gain.value=v},cleanup:()=>{if(source){try{source.stop()}catch(e){}source.disconnect()}gain?.disconnect()}};
 }
