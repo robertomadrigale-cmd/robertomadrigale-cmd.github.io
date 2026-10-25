@@ -14,7 +14,15 @@
       "estudio/tools/**",
       "estudio/build.sh",
       "estudio/CLAUDE.md",
-      "comun/**"
+      "comun/**",
+      "bajo/src/**",
+      "bajo/tools/**",
+      "bajo/build.sh",
+      "bajo/CLAUDE.md",
+      "bateria/src/**",
+      "bateria/tools/**",
+      "bateria/build.sh",
+      "bateria/CLAUDE.md"
     ],
     "headers": [
       {
@@ -136,6 +144,78 @@
       },
       {
         "source": "/estudio/manifest.webmanifest",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bajo/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bajo/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bajo/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bajo/manifest.webmanifest",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bateria/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bateria/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bateria/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/bateria/manifest.webmanifest",
         "headers": [
           {
             "key": "Cache-Control",

@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <title>Roka · Guitarra, Voz y Estudio</title>
+  <title>Roka · Guitarra, Voz, Batería y Estudio</title>
   <meta name="description" content="Aprende música en tu celular. Elige Guitarra o Voz y empieza tu práctica con Roka.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_MX">
-  <meta property="og:title" content="Roka · Guitarra, Voz y Estudio">
+  <meta property="og:title" content="Roka · Guitarra, Voz, Batería y Estudio">
   <meta property="og:description" content="Aprende música en tu celular. Elige Guitarra o Voz y empieza tu práctica con Roka.">
   <meta property="og:image" content="../og.jpg">
   <meta property="og:image:alt" content="Roka Guitar for All">
@@ -34,12 +34,15 @@
     .enter{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:44px;margin-top:auto;padding:10px 20px;background:var(--blue);color:#fff;border-radius:999px;font-size:15px;font-weight:650;white-space:nowrap}
     .voice .enter{background:var(--pink);color:#190a11}
     .studio .enter{background:#f5b43c;color:#1a1000}
+    .drums .enter{background:#ff5a5a;color:#1a0505}
+    .album.drums:hover{border-color:#ff5a5a}
     .enter svg{width:18px;height:18px;flex:none}
     .preferences{margin-top:24px;display:flex;justify-content:center}
     .remember{display:inline-flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:15px;color:var(--muted)}
     input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--blue);cursor:pointer}
     a:focus-visible,input:focus-visible{outline:3px solid var(--fg);outline-offset:5px}
-    @media(min-width:900px){main{width:min(100%,1180px)}.albums{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(min-width:900px){main{width:min(100%,1180px)}.albums{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(min-width:1100px){.albums{grid-template-columns:repeat(4,minmax(0,1fr))}}
     @media(max-width:620px){main{padding-inline:20px}.albums{grid-template-columns:minmax(0,1fr);gap:20px}header{margin-bottom:26px}}
     @media(prefers-color-scheme:light){:root{--bg:#f6f7fb;--fg:#151a26;--muted:#566076;--line:#d8dce5;--card:#fff}}
     @media(prefers-reduced-motion:reduce){.album{transition:none}.album:hover{transform:none}}
@@ -97,6 +100,28 @@
           <span class="enter" id="voice-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
         </div>
       </a>
+      <a class="album drums" href="../bateria/" data-app="bateria" aria-labelledby="drums-title drums-enter">
+        <svg class="art" viewBox="0 0 400 400" aria-hidden="true">
+          <defs>
+            <radialGradient id="d-red" cx=".16" cy=".14" r="1"><stop stop-color="#ff5a5a"/><stop offset=".55" stop-color="#6e1b2a"/><stop offset="1" stop-color="#160810"/></radialGradient>
+            <radialGradient id="d-blue" cx=".95" cy=".95" r=".8"><stop stop-color="#2f7bff" stop-opacity=".85"/><stop offset="1" stop-color="#2f7bff" stop-opacity="0"/></radialGradient>
+          </defs>
+          <path fill="url(#d-red)" d="M0 0h400v400H0z"/>
+          <path fill="url(#d-blue)" d="M0 0h400v400H0z"/>
+          <g fill="none" stroke="#fff" stroke-linecap="round">
+            <circle cx="200" cy="200" r="142" opacity=".13"/>
+            <circle cx="200" cy="200" r="117" opacity=".13"/>
+            <ellipse cx="200" cy="230" rx="86" ry="30" stroke-width="3" opacity=".85"/>
+            <path d="M114 230v40c0 16 38 30 86 30s86-14 86-30v-40" stroke-width="3" opacity=".85"/>
+            <path d="M150 120l46 92M262 112l-50 96" stroke-width="5" opacity=".85"/>
+          </g>
+        </svg>
+        <div class="info">
+          <h2 id="drums-title">Batería <small>Roka Batería</small></h2>
+          <p class="phrase">Ritmo, precisión y groove.</p>
+          <span class="enter" id="drums-enter">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
+        </div>
+      </a>
       <a class="album studio" href="../estudio/" data-app="estudio" aria-labelledby="studio-title studio-enter">
         <svg class="art" viewBox="0 0 400 400" aria-hidden="true">
           <defs>
@@ -125,7 +150,7 @@
   <script>
     (()=>{
       const key='roka-portada:v1';
-      const destinations={guitarra:'../',voz:'../voz/',estudio:'../estudio/'};
+      const destinations={guitarra:'../',voz:'../voz/',bateria:'../bateria/',estudio:'../estudio/'};
       const checkbox=document.getElementById('remember');
       let last=null;
       try{
