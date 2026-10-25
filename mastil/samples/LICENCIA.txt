@@ -2,3 +2,9 @@ Muestras de guitarra acústica (g-*) y bajo eléctrico (b-*) tomadas de tonejs-i
 https://github.com/nbrosowsky/tonejs-instruments — autor: Nicholaus Brosowsky
 Licencia de las muestras: Creative Commons Attribution 3.0 (CC BY 3.0) https://creativecommons.org/licenses/by/3.0/
 Cambios: recortadas a 3 s (guitarra) y 2.4 s (bajo) con desvanecido, mono, MP3 64/56 kbps.
+
+Batería (d-*): golpes del kit «Black Pearl» de AVL Drumkits, por Glen MacArthur
+https://www.bandshed.net/avldrumkits/ — Licencia: Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0)
+https://creativecommons.org/licenses/by-sa/3.0/
+Cambios: una o dos capas de fuerza por pieza, recortadas (0.2–2.2 s) con desvanecido, normalizadas, mono, MP3 64 kbps.
+Estos archivos modificados se comparten bajo la misma licencia CC BY-SA 3.0.

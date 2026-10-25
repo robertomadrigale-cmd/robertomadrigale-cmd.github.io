@@ -157,24 +157,36 @@ function bandStep(id,beats,i,p,sh,t,spb,bar,ci){
   id=grooveFor(id,beats);const G=GROOVES[id],V=G[beats===3?3:4],sub=G.sub,cd=spb/sub,L=beats*sub;
   const v=voicing(p,sh),pc=(p.bass!=null?p.bass+sh:p.pc+sh+120)%12,rootLo=28+((pc-4+12)%12),minor=p.minor||/^(m(?!aj)|min|-)/.test(p.suf);
   const lev=(c,X,x,o)=>c==='X'?X:c==='x'?x:c==='o'?o:0;
+  // Humanización: cada músico se mueve como máximo 6 ms. El bombo del primer tiempo
+  // queda clavado; el 1 respira un poco más fuerte y el resto varía hasta 5 %.
+  const ht=lock=>Math.max(0,t+(lock?0:(Math.random()*2-1)*.006)),dyn=()=>((i===0)?1.08:1)*(.95+Math.random()*.1);
+  // Las tomas son más dinámicas que la síntesis. Se compensan por arreglo para mantener
+  // la batería cerca de 3 dB debajo de la guitarra sin tapar la guacharaca de la cumbia.
+  const kit=SMP.d&&SMP.d.kick1?(id==='balada'?4.4:id==='cumbia'?1:2.2):1;
   // percusión
   const dr=(k,f)=>{const c=V[k]&&V[k][i];if(c&&c!=='-')f(c)};
-  dr('k',c=>kick(t,lev(c,.55,.42,.25)));dr('s',c=>snare(t,lev(c,.26,.2,.07)));
-  dr('r',c=>noise(t,.04,'bandpass',1800,lev(c,.16,.11,.06),3));dr('h',c=>hat(t,lev(c,.07,.045,.025)));
-  dr('p',c=>noise(t,.05,'highpass',6500,lev(c,.06,.04,.022)));dr('g2',c=>guiro(t,c==='X'));dr('c',c=>clave(t,lev(c,.16,.11,.06)));
+  dr('k',c=>kick(ht(i===0),lev(c,.62,.46,.28)*dyn(),kit));
+  dr('s',c=>{const q=lev(c,.68,.5,.25)*dyn(),tt=ht();if(id==='urbano'){if(!percHit('clap',tt,q,{level:.62*kit,pan:.06,wet:.2}))snare(tt,q,kit)}else snare(tt,q,kit)});
+  dr('r',c=>{const q=lev(c,.62,.46,.25)*dyn(),tt=ht();if(!percHit('rim',tt,q,{level:.62*kit,pan:.06,wet:.16}))noise(tt,.04,'bandpass',1800,q*.25,3)});
+  dr('h',c=>hat(ht(),lev(c,.64,.48,.28)*dyn(),false,kit));
+  dr('p',c=>{const q=lev(c,.58,.43,.26)*dyn(),tt=ht();if(!percHit('mara',tt,q,{level:.42*kit,pan:.24,wet:.06}))noise(tt,.05,'highpass',6500,q*.1)});
+  dr('g2',c=>{const q=lev(c,.58,.43,.27)*dyn(),tt=ht();if(!percHit(id==='merengue'?'tamb':'mara',tt,q,{level:.46*kit,pan:.2,wet:.08}))guiro(tt,c==='X')});
+  dr('c',c=>{const q=lev(c,.62,.46,.26)*dyn(),tt=ht();if(!percHit(id==='son'?'cow':'click',tt,q,{level:.42*kit,pan:-.18,wet:.1}))clave(tt,q*.25)});
+  // Apertura del arreglo y cada ocho compases: solo en estilos donde un crash es natural.
+  if(i===0&&bar>=0&&bar%8===0&&['rock','pop','country'].includes(id))percHit('crash',ht(),.64*dyn(),{level:.48*kit,pan:-.12,wet:.3});
   // bajo: dura hasta su siguiente nota o un «.»
   // las líneas que caminan (rock and roll, shuffle) empiezan de nuevo cuando cambia el acorde
   const bi=G.walk&&ci!=null?ci%L:i;
   const B=V.b;if(B&&B[bi]&&B[bi]!=='-'&&B[bi]!=='.'){let n=1;while(bi+n<L&&B[bi+n]==='-')n++;
     const c=B[bi],w=c==='A'?(bar%2?'F':'R'):c,iv={R:0,F:7,O:12,'3':minor?3:4,'6':9,'7':10}[w]||0;let m=rootLo+iv;if(w==='F'&&m>40)m-=12;
-    bassNote(m,t,n*cd*.92,(id==='rock'?.3:.36)*(bi===0?1.08:bi%sub===0?.95:.78),true)}
+    bassNote(m,ht(),n*cd*.92,(id==='rock'?.3:.36)*(bi===0?1.08:bi%sub===0?.95:.78)*dyn(),true)}
   // guitarra: exactamente la línea que se ve
   const c=V.g&&V.g[i];if(!c||c==='-')return;
   const ring=G.ring*spb,lc=c.toLowerCase(),acc=c!==lc,sb=G.ring<.7?1.15:1;
   // acento natural del compás: el 1 manda, luego los demás tiempos, luego los «y», y los dieciseisavos son roces
   const pos=i%sub,met=i===0?1:pos===0?.86:(sub===4&&pos===2)||(sub===3&&pos===2)?.68:.5;
   // pequeño swing en los «y» (le da caminado al folk, pop, country, balada)
-  if(G.feel&&pos){t+=G.feel*spb*(sub===4&&pos===2?1:.5)}
+  t=ht();if(G.feel&&pos){t+=G.feel*spb*(sub===4&&pos===2?1:.5)}
   const vel=met*(acc?1.18:.9)*sb*(.95+Math.random()*.1);
   const bassStr=w=>{const want=(w==='b'?pc+7:pc)%12;let j=v.midi.findIndex((m,k)=>k<3&&m%12===want);if(j<0)j=w==='b'?Math.min(1,v.midi.length-1):0;return j};
   if(c==='B'||c==='b'||c==='C'){const j=bassStr(c==='C'?'B':c);gNote(v.midi[j],v.strs[j],t,Math.max(ring,spb*.9),.17)}
@@ -526,7 +538,7 @@ function viewSongPlay(id,slow){
   const panel=(k,t,h)=>`<div class="kpanel" data-p="${k}" hidden><div class="kph"><b>${t}</b><button class="kic" data-pclose aria-label="Cerrar">${IC.x||'×'}</button></div>${h}</div>`;
   return{title:P.title,back:slow?'#/practicar/lento':'#/cancionero',html:`<div class="kplay">
   <div class="kamb" aria-hidden="true">${coverHTML(P.title,s.mine||s.top?P.artist:'')}</div>
-  <div class="khead">${coverHTML(P.title,s.mine||s.top?P.artist:'',1)}<div class="kht"><span class="eyebrow">${esc(P.artist||'Tu canción')}</span><h2>${esc(P.title)}</h2><small class="kmeta" id="kmeta"></small></div>${s.mine?`<a class="kic" href="#/cancionero/editar/${id}" aria-label="Editar canción">${KIC.edit}</a>`:s.top?`<a class="btn sm pri" href="#/cancionero/editar/${id}">${IC.plus}Letra</a>`:''}</div>
+  <div class="khead">${coverHTML(P.title,s.mine||s.top?P.artist:'',1)}<div class="kht"><span class="eyebrow">${esc(P.artist||'Tu canción')}</span><h2>${esc(P.title)}</h2><small class="kmeta" id="kmeta"></small></div>${s.mine||s.trad&&P.hasMel?`<button class="btn sm" id="kretoplay">Jugar como reto</button>`:''}${s.mine?`<a class="kic" href="#/cancionero/editar/${id}" aria-label="Editar canción">${KIC.edit}</a>`:s.top?`<a class="btn sm pri" href="#/cancionero/editar/${id}">${IC.plus}Letra</a>`:''}</div>
   ${s.top?`<div class="card note">Esta es solo la <b>progresión principal</b> para practicar con la banda. Para tener la canción completa con letra, toca <b>Letra</b>.</div>`:''}
   <div class="ktools" role="toolbar" aria-label="Ajustes de la canción">${tool('tono','Tono')}${tool('tempo','Tempo')}${tool('son','Sonido')}${tool('grab','Grabación')}${tool('rep','Repetir')}${tool('mas','Ritmo')}</div>
   <div class="kpanels card kctl" hidden>
@@ -553,6 +565,7 @@ function viewSongPlay(id,slow){
    <button class="kic" id="kreset" aria-label="Desde el inicio">${KIC.restart}</button></div></div>
   </div>`,
   mount(r){
+    const kr=$('#kretoplay',r);if(kr)kr.onclick=()=>{RETO_PICK='song:'+id+':'+st.shift;location.hash='#/practicar/reto'};
     coverWatch(r);
     const toolVals=()=>{const set=(k,v)=>{const e=$('#kt-'+k,r);if(e)e.textContent=v};
       set('tono',keyLbl());set('tempo',Math.round(st.bpm*(st.sp||1)));set('son',KAR.band?'Música':'Silencio');set('grab',O.use&&O.blob?'Tuya':'Banda');set('rep',st.loop?st.loop+(st.loop>1?' renglones':' renglón'):'No');set('mas',BSTYLES[gid()]);

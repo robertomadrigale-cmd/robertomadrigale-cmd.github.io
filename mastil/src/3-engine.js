@@ -52,13 +52,14 @@ function pluck(m,t,d,v,o){
   src.connect(lp);lp.connect(g);g.connect(out());src.start(t);src.stop(end+.02);
   return{g,end};
 }
-/* ---------- muestras reales: guitarra acústica y bajo eléctrico ----------
-   Grabaciones de tonejs-instruments (Nicholaus Brosowsky, CC BY 3.0), recortadas. Una muestra cada tono entero
-   (guitarra) o cada tercera menor (bajo); las notas intermedias se afinan con la velocidad de reproducción,
-   corrigiendo los centésimos medidos de cada grabación. Si no cargan, la app usa la cuerda sintetizada. */
-const SMP={ready:false,loading:null,g:{},b:{}};
+/* ---------- muestras reales: guitarra, bajo y batería ----------
+   Guitarra/bajo: tonejs-instruments (CC BY 3.0). Batería: Black Pearl de AVL Drumkits
+   (CC BY-SA 3.0). El inicio de cada archivo se recorta al decodificarlo; si algo no carga,
+   guitarra/bajo vuelven a síntesis y la batería conserva el kit sintetizado. */
+const SMP={ready:false,loading:null,g:{},b:{},d:{}};
 const SMPLIST={g:[['D2',38,2],['E2',40,-3],['Fs2',42,1],['Gs2',44,-5],['As2',46,2],['C3',48,-4],['D3',50,2],['E3',52,-3],['Fs3',54,3],['Gs3',56,-13],['As3',58,11],['C4',60,6],['D4',62,2],['E4',64,-3],['Fs4',66,17],['Gs4',68,3],['As4',70,11],['C5',72,6],['D5',74,-21]],
-  b:[['E1',28,7],['G1',31,-4],['As1',34,2],['Cs2',37,1],['E2',40,-3],['G2',43,0],['As2',46,2],['Cs3',49,1],['E3',52,-3],['G3',55,8]]};
+  b:[['E1',28,7],['G1',31,-4],['As1',34,2],['Cs2',37,1],['E2',40,-3],['G2',43,0],['As2',46,2],['Cs3',49,1],['E3',52,-3],['G3',55,8]],
+  d:'kick1 kick2 snare1 snare2 rim hat1 hat2 hatp hato ride bell crash tom ftom clap tamb cow mara click'.split(' ').map(n=>[n,n,0])};
 function loadSamples(){
   if(SMP.loading)return SMP.loading;const c=ac();if(!c)return Promise.resolve(false);
   const dec=b=>new Promise((res,rej)=>{try{const p=c.decodeAudioData(b,res,rej);if(p&&p.catch)p.catch(rej)}catch(e){rej(e)}});
@@ -66,7 +67,8 @@ function loadSamples(){
     const d=buf.getChannelData(0),sr=buf.sampleRate;let pk=0;for(let i=0,L=Math.min(d.length,sr*.35|0);i<L;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}
     let on=0;const th=pk*.06;while(on<d.length&&Math.abs(d[on])<th)on++;
     SMP[k][m]={buf,off:Math.max(0,on-24)/sr,norm:.5/(pk||1),ct}});
-  SMP.loading=Promise.all(['g','b'].flatMap(k=>SMPLIST[k].map(x=>one(k,x)))).then(()=>{SMP.ready=true;return true}).catch(()=>{SMP.loading=null;return false});
+  const jobs=['g','b','d'].flatMap(k=>SMPLIST[k].map(x=>one(k,x).then(()=>true).catch(()=>false)));
+  SMP.loading=Promise.all(jobs).then(()=>{SMP.ready=Object.keys(SMP.g).length>0&&Object.keys(SMP.b).length>0;return SMP.ready||Object.keys(SMP.d).length>0}).catch(()=>{SMP.loading=null;return false});
   return SMP.loading;
 }
 function smpPlay(k,m,t,d,v,o){
@@ -83,6 +85,20 @@ function smpPlay(k,m,t,d,v,o){
   src.start(t,S.off);src.stop(end+.02);
   return{g,end};
 }
+/* Golpe del kit grabado. La vista del público coloca hi-hat a la derecha (+.30),
+   ride a la izquierda (-.25) y toms de izquierda a derecha. Las variaciones pequeñas
+   de afinación y volumen evitan repeticiones idénticas sin sacar el golpe de la rejilla. */
+function drumHit(name,t,v,o){
+  o=o||{};const c=AC,S=SMP.d[name];if(!c||!S)return false;
+  const src=c.createBufferSource(),g=c.createGain(),rate=(o.rate||1)*(.97+Math.random()*.06),level=o.level==null?1:o.level;
+  src.buffer=S.buf;src.playbackRate.value=rate;
+  const vol=Math.max(.0001,(v||.5)*S.norm*level*(.92+Math.random()*.16));
+  g.gain.setValueAtTime(vol,t);const end=t+Math.max(.04,(S.buf.duration-S.off)/rate-.01);g.gain.setValueAtTime(vol,Math.max(t,end-.035));g.gain.linearRampToValueAtTime(.0001,end);
+  src.connect(g);let node=g;if(o.pan&&c.createStereoPanner){const pn=c.createStereoPanner();pn.pan.value=o.pan;g.connect(pn);node=pn}
+  node.connect(out());if(REV&&o.wet){const send=c.createGain();send.gain.value=o.wet;node.connect(send);send.connect(REV)}
+  src.start(t,S.off);src.stop(end+.02);return true;
+}
+function percHit(name,t,v,o){return drumHit(name,t,v,Object.assign({level:.55,wet:.12},o||{}))}
 // raw = la nota ya viene en el registro del bajo (E1–D♯3); si no, se baja de octava
 function bassNote(m,t,d,v,raw){
   if(SMP.ready){let n=m;if(!raw)while(n>39)n-=12;smpPlay('b',n,t,Math.max(.12,d),(v||.4)*.9);return}
@@ -105,24 +121,27 @@ function noise(t,dur,type,freq,v,q){
   g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
   s.connect(f);f.connect(g);g.connect(out());s.start(t);s.stop(t+dur+.02);
 }
-/* batería sintetizada con más cuerpo: bombo con golpe + cuerpo, tarola con dos tonos + cuerdas, platillo metálico tipo 808 */
-function kick(t,v){
-  v=v||.9;const o=AC.createOscillator(),g=AC.createGain(),sh=AC.createWaveShaper();
+/* El kit grabado es la primera opción. La síntesis se conserva como respaldo sin conexión
+   durante la primera carga o si el navegador no logra decodificar un archivo. */
+function kick(t,v,mix){
+  v=v||.9;if(drumHit(v>=.55?'kick2':'kick1',t,v,{level:.96*(mix||1),pan:-.03}))return;
+  const o=AC.createOscillator(),g=AC.createGain(),sh=AC.createWaveShaper();
   const cv=new Float32Array(256);for(let i=0;i<256;i++){const x=i/128-1;cv[i]=Math.tanh(x*1.6)}sh.curve=cv;
   o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(52,t+.09);o.frequency.exponentialRampToValueAtTime(44,t+.3);
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(v*.5,t+.08);g.gain.exponentialRampToValueAtTime(.0001,t+.42);
   o.connect(sh);sh.connect(g);g.connect(out());o.start(t);o.stop(t+.45);
   noise(t,.012,'highpass',2500,v*.22); // el golpe del mazo
 }
-function snare(t,v){
-  v=v||.45;
+function snare(t,v,mix){
+  v=v||.45;if(drumHit(v>=.55?'snare2':'snare1',t,v,{level:.72*(mix||1),pan:.04,wet:.28}))return;
   [[185,.5],[330,.28]].forEach(([f,k])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.setValueAtTime(f*1.25,t);o.frequency.exponentialRampToValueAtTime(f,t+.03);
     g.gain.setValueAtTime(v*k,t);g.gain.exponentialRampToValueAtTime(.0001,t+.11);o.connect(g);g.connect(out());o.start(t);o.stop(t+.13)});
   noise(t,.2,'highpass',1800,v*.75);noise(t,.07,'bandpass',4200,v*.35,1.2);
 }
 const HATR=[2,3,4.16,5.43,6.79,8.21];
-function hat(t,v,open){
-  v=v||.16;const d=open?.3:.05,g=AC.createGain(),bp=AC.createBiquadFilter(),hp=AC.createBiquadFilter();
+function hat(t,v,open,mix){
+  v=v||.16;if(drumHit(open?'hato':v>=.55?'hat2':'hat1',t,v,{level:(open?.48:.42)*(mix||1),pan:.3,wet:open?.2:.08}))return;
+  const d=open?.3:.05,g=AC.createGain(),bp=AC.createBiquadFilter(),hp=AC.createBiquadFilter();
   bp.type='bandpass';bp.frequency.value=10000;bp.Q.value=.8;hp.type='highpass';hp.frequency.value=7000;
   HATR.forEach(r=>{const o=AC.createOscillator();o.type='square';o.frequency.value=40*r*1.02;o.connect(bp);o.start(t);o.stop(t+d+.02)});
   bp.connect(hp);hp.connect(g);g.connect(out());

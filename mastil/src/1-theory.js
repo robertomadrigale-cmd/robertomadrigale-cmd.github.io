@@ -41,6 +41,20 @@ const CT={
  sus4:{label:'sus4',semis:[0,5,7],steps:[0,3,4],f:['1','4','5'],suf:'sus4',ch:'Suspendido: pide bajar a la tercera.'},
  add9:{label:'add9',semis:[0,4,7,2],steps:[0,2,4,1],f:['1','3','5','9'],suf:'add9',ch:'Mayor con brillo añadido, sin séptima.'},
  dom9:{label:'9',semis:[0,4,7,10,2],steps:[0,2,4,6,1],f:['1','3','5','♭7','9'],suf:'9',ch:'Dominante con color: más rico y bluesero.'}};
+// Tipos adicionales del diccionario; las definiciones anteriores se conservan.
+Object.assign(CT,{
+ dim7:{label:'dim7',semis:[0,3,6,9],steps:[0,2,4,6],f:['1','♭3','♭5','♭♭7'],suf:'dim7',ch:'Séptima disminuida: tensión simétrica que resuelve por semitono.'},
+ sus7:{label:'7sus4',semis:[0,5,7,10],steps:[0,3,4,6],f:['1','4','5','♭7'],suf:'7sus4',ch:'Dominante suspendido: la cuarta sustituye a la tercera.'},
+ six:{label:'6',semis:[0,4,7,9],steps:[0,2,4,5],f:['1','3','5','6'],suf:'6',ch:'Mayor con sexta: reposo cálido, sin séptima.'},
+ m6:{label:'m6',semis:[0,3,7,9],steps:[0,2,4,5],f:['1','♭3','5','6'],suf:'m6',ch:'Menor con sexta mayor: color de jazz y cierre en menor.'},
+ m9:{label:'m9',semis:[0,3,7,10,2],steps:[0,2,4,6,1],f:['1','♭3','5','♭7','9'],suf:'m9',ch:'Menor con séptima y novena: un color amplio.'},
+ maj9:{label:'maj9',semis:[0,4,7,11,2],steps:[0,2,4,6,1],f:['1','3','5','7','9'],suf:'maj9',ch:'Mayor con séptima mayor y novena: reposo luminoso.'},
+ dom11:{label:'11',semis:[0,4,7,10,2,5],steps:[0,2,4,6,1,3],f:['1','3','5','♭7','9','11'],suf:'11',ch:'Dominante con oncena: la tercera y la oncena crean un roce intencional.'},
+ dom13:{label:'13',semis:[0,4,7,10,2,5,9],steps:[0,2,4,6,1,3,5],f:['1','3','5','♭7','9','11','13'],suf:'13',ch:'Dominante con trecena. En guitarra se pueden omitir quinta y oncena.'},
+ power:{label:'5 (quinta)',semis:[0,7],steps:[0,4],f:['1','5'],suf:'5',ch:'Raíz y quinta: no tiene tercera, así que no es mayor ni menor.'},
+ b9:{label:'7♭9',semis:[0,4,7,10,1],steps:[0,2,4,6,1],f:['1','3','5','♭7','♭9'],suf:'7♭9',ch:'Dominante con novena menor: tensión intensa, común hacia un acorde menor.'},
+ sharp9:{label:'7♯9',semis:[0,4,7,10,3],steps:[0,2,4,6,1],f:['1','3','5','♭7','♯9'],suf:'7♯9',ch:'Dominante con novena aumentada: conserva la tercera mayor y añade tensión.'}
+});
 const chordNotes=(root,t)=>CT[t].semis.map((s,i)=>spell(root,s,CT[t].steps[i]));
 const scaleNotes=(root,semis)=>semis.map((s,i)=>spell(root,s,i));
 const pos=(pcs,from,to)=>{const r=[];for(let s=1;s<=6;s++)for(let f=from;f<=to;f++)if(pcs.includes((OPEN_PC[s]+f)%12))r.push([s,f]);return r};
