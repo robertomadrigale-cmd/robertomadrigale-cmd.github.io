@@ -1,5 +1,5 @@
 /* ---------- logo ---------- */
-const logo=()=>omLogo({color:'#2f7bff'});
+const logo=()=>omLogo({color:INST.color});
 /* ---------- avisos ---------- */
 function toast(html,ms){
   let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}
@@ -29,8 +29,8 @@ function viewSongs(){
   mount(r){r.addEventListener('click',e=>{const b=e.target.closest('[data-song]');if(!b)return;const s=SONGBOOK[+b.dataset.song];Object.assign(TRK,{p:s.p,k:s.k,st:s.st,bpm:STYLES[s.st].bpm});location.hash='#/practicar/pistas'})}};
 }
 /* ---------- afinaciones ---------- */
-const TUNINGS={std:{n:'Estándar',m:[40,45,50,55,59,64]},half:{n:'Medio tono abajo',m:[39,44,49,54,58,63]},dropd:{n:'Drop D',m:[38,45,50,55,59,64]},full:{n:'Un tono abajo',m:[38,43,48,53,57,62]},openg:{n:'Open G',m:[38,43,50,55,59,62]},opend:{n:'Open D',m:[38,45,50,54,57,62]},dadgad:{n:'DADGAD',m:[38,45,50,55,57,62]}};
-const tuningStrings=()=>(TUNINGS[DB.tuning]||TUNINGS.std).m.map((m,i)=>({m,n:PCS[m%12][0],s:6-i}));
+const TUNINGS=INST.tunings;
+const tuningStrings=()=>(TUNINGS[DB.tuning]||TUNINGS.std).m.map((m,i)=>({m,n:PCS[m%12][0],s:(TUNINGS[DB.tuning]||TUNINGS.std).m.length-i}));
 /* ---------- modo reto: notas que caen ---------- */
 // cada canción: "cuerda,traste,tiempos" separados por espacios; "-,tiempos" es silencio
 const SONGS=[
@@ -43,6 +43,7 @@ const SONGS=[
  {id:'boogie',sty:'shuffle',chn:'0:A 16:D 24:A 32:E 36:D 40:A',n:'Boogie en La',sub:'Blues · bajo que camina',lvl:3,bpm:108,src:'5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 4,0,.5 4,4,.5 3,2,.5 3,4,.5 3,5,.5 3,4,.5 3,2,.5 4,4,.5 5,0,.5 5,4,.5 4,2,.5 4,4,.5 4,5,.5 4,4,.5 4,2,.5 5,4,.5 6,0,.5 6,4,.5 5,2,.5 5,4,.5 4,0,.5 4,4,.5 3,2,.5 3,4,.5 5,0,2'},
  {id:'pesado',sty:'rock',chn:'0:Em 16:A 24:Em',n:'Riff pesado en Mi',sub:'Original · cuerdas graves',lvl:3,bpm:100,src:'6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,6,.5 6,5,.5 6,3,.5 5,0,.5 5,0,.5 5,3,.5 5,0,.5 5,5,.5 5,3,.5 5,2,.5 5,0,.5 6,3,.5 6,2,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,2'},
  {id:'solo',sty:'shuffle',chb:'0:A7',n:'Solo de blues en La',sub:'Frases con la caja 1',lvl:3,bpm:96,src:'1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,1 -,1 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,1 -,1 3,5,.5 3,7,.5 2,5,.5 2,8,.5 1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,.5 4,5,.5 5,7,.5 5,5,2'}];
+if(INST.id==='bajo')SONGS.splice(0,SONGS.length,...bassChallenges());
 SONGS.forEach(S=>{let b=0;S.notes=[];S.src.trim().split(/\s+/).forEach(tok=>{const p=tok.split(',');if(p[0]==='-'){b+=+p[1];return}const s=+p[0],f=+p[1],d=+p[2];S.notes.push({s,f,d,b,m:OPEN_MIDI[s]+f});b+=d});S.beats=b});
 // acordes del acompañamiento en pulsos: chb = por pulso, chn = por número de nota
 SONGS.forEach(S=>{S.chords=[];if(S.chb)S.chb.split(' ').forEach(x=>{const[a,c]=x.split(':');S.chords.push([+a,c])});
@@ -57,11 +58,11 @@ const RETO_OWN_STYLE=`<style>
 .reto-own{display:grid;gap:14px}.reto-own h2{margin:8px 0 0}.reto-audio{display:grid;gap:12px}.reto-audio .row{align-items:end}.reto-edit{display:grid;gap:8px}.reto-notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;max-height:270px;overflow:auto}.reto-note{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 9px;border:1px solid var(--line);border-radius:10px}.reto-note b{font-family:'IBM Plex Mono',monospace}.reto-mini{display:flex;gap:4px}.reto-mini button{min-width:32px;min-height:32px}.chfall{font-family:'Barlow Condensed',sans-serif}.reto-row{display:flex;gap:8px;align-items:stretch}.reto-row>.song-pick{flex:1}.reto-del{align-self:center}@media(max-width:520px){.reto-audio .row{align-items:stretch}.reto-audio .row>*{width:100%}.reto-row{gap:5px}}
 </style>`;
 function retoCandidates(m,lo,hi){
-  const a=[];for(let oct=-3;oct<=3;oct++){const mm=m+oct*12;for(let s=6;s>=1;s--){const f=mm-OPEN_MIDI[s];if(f>=lo&&f<=hi)a.push({m:mm,s,f})}}return a;
+  const a=[];for(let oct=-3;oct<=3;oct++){const mm=m+oct*12;for(let s=INST.n;s>=1;s--){const f=mm-OPEN_MIDI[s];if(f>=lo&&f<=hi)a.push({m:mm,s,f})}}return a;
 }
 function retoFingering(events){
   const zones=[[0,7],[5,12],[0,12]],zone=zones.find(z=>events.every(e=>retoCandidates(e.m,z[0],z[1]).length))||zones[2];let prev=null;
-  return events.map(e=>{const C=retoCandidates(e.m,zone[0],zone[1]);let q=C[0]||{m:Math.max(40,Math.min(76,e.m)),s:1,f:0};
+  return events.map(e=>{const C=retoCandidates(e.m,zone[0],zone[1]);let q=C[0]||{m:Math.max(INST.rango[0],Math.min(INST.rango[1],e.m)),s:1,f:0};
     if(prev&&C.length)q=C.reduce((best,x)=>{const cost=Math.abs(x.f-prev.f)*1.2+Math.abs(x.s-prev.s)*.8+(x.s===prev.s?.25:0);return cost<best.cost?{x,cost}:best},{x:q,cost:1e9}).x;
     else if(C.length)q=C.reduce((a,x)=>x.f<a.f?x:a,C[0]);prev=q;return Object.assign({},e,q,{zone:zone[0]+'–'+zone[1]})});
 }
@@ -73,7 +74,7 @@ function retoFromSong(id,shift){
   const src=sbGet(id);if(!src)return null;const P=songParse(src.src),sh=shift==null?((DB.kt||{})[id]||0):shift,TL=songTimeline(P,0,P.beats);
   const ce=TL.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b),chords=[];ce.forEach(e=>{const n=chName(e.p,sh,P.key,false);if(!chords.length||chords[chords.length-1][0]!==e.b||chords[chords.length-1][1]!==n)chords.push([Math.max(0,e.b),n])});
   let kind='note',notes=[];const me=TL.ev.filter(e=>e.type==='note').map(e=>({m:e.m+sh,b:Math.max(0,e.b),d:e.d}));
-  if(me.length)notes=retoFingering(me);else{kind='chord';notes=ce.map((e,i)=>{const b=Math.max(0,e.b),nx=ce[i+1];return{b,d:Math.max(.5,(nx?nx.b:TL.total)-e.b),ch:chName(e.p,sh,P.key,DB.notation==='es'),raw:chName(e.p,sh,P.key,false),pcs:retoChordPCs(e.p,sh)}}).filter((e,i,a)=>!i||e.b!==a[i-1].b||e.raw!==a[i-1].raw)}
+  if(me.length)notes=retoFingering(me);else if(INST.id==='bajo')notes=bassSongNotes(P,TL,sh,(DB.kst||{})[id]||P.style,(DB.kbeats||{})[id]||P.beats);else{kind='chord';notes=ce.map((e,i)=>{const b=Math.max(0,e.b),nx=ce[i+1];return{b,d:Math.max(.5,(nx?nx.b:TL.total)-e.b),ch:chName(e.p,sh,P.key,DB.notation==='es'),raw:chName(e.p,sh,P.key,false),pcs:retoChordPCs(e.p,sh)}}).filter((e,i,a)=>!i||e.b!==a[i-1].b||e.raw!==a[i-1].raw)}
   if(!notes.length)return null;return{id:'song:'+id+':'+sh,songId:id,kind,n:P.title,sub:(kind==='note'?'Melodía':'Acordes')+' de tu cancionero',lvl:notes.length>45?3:notes.length>20?2:1,bpm:(DB.kbpm||{})[id]||P.bpm,beats:Math.max(TL.total,notes[notes.length-1].b+notes[notes.length-1].d),notes,chords,sty:(DB.kst||{})[id]||P.style,bt:(DB.kbeats||{})[id]||P.beats,shift:sh};
 }
 function retoOwn(){
@@ -162,11 +163,11 @@ function retoPlay(host,S,onExit){
   const css=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
   const col={lane:['#ff4d6d','#ffd23f','#3ddc97','#4cc9f0','#b388ff','#ff9f1c'],fg:css('--fg'),muted:css('--muted'),line:css('--line'),bg:css('--bg'),ink:'#111'};
   const N=S.notes.map(n=>Object.assign({},n,{t:0,hit:0,miss:0}));
-  const G={score:0,combo:0,max:0,perf:0,good:0,miss:0,run:true,t0:0,end:0,nextTick:0,tickN:0,flash:[0,0,0,0,0,0],bursts:[],raf:0,stream:null,iv:null,onset:-9,lvl:0,chold:0,chkey:'',audiosrc:null};
+  const G={score:0,combo:0,max:0,perf:0,good:0,miss:0,run:true,t0:0,end:0,nextTick:0,tickN:0,flash:Array(INST.n).fill(0),bursts:[],raf:0,stream:null,iv:null,onset:-9,lvl:0,chold:0,chkey:'',audiosrc:null};
   let W=0,H=0,dpr=1;
   const size=()=>{dpr=Math.min(2,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)};
   size();window.addEventListener('resize',size);
-  const laneOf=s=>LEFTY?s-1:6-s; // carril 0 = cuerda 6 a la izquierda
+  const laneOf=s=>LEFTY?s-1:INST.n-s; // carril 0 = cuerda 6 a la izquierda
   const hitY=()=>H-74,pps=()=>H*.5;
   // lo que se ve va con lo que se OYE: el sonido tarda outLat() en salir por la bocina
   const vt=()=>c.currentTime-outLat();
@@ -206,8 +207,8 @@ function retoPlay(host,S,onExit){
     let best=null;N.forEach(n=>{if(n.hit||n.miss||(!chord&&laneOf(n.s)!==l))return;const d=Math.abs(now-n.t);if(d<.2&&(!best||d<Math.abs(now-best.t)))best=n});
     if(best)award(best,Math.abs(now-best.t)<.075);else{noise(c.currentTime,.06,'lowpass',300,.18);if(G.combo){G.combo=0;hud()}}
   };
-  cv.addEventListener('pointerdown',e=>{e.preventDefault();const r=cv.getBoundingClientRect();tapLane(chord?0:Math.max(0,Math.min(5,Math.floor((e.clientX-r.left)/(r.width/6)))))});
-  const kd=e=>{const i='123456 '.indexOf(e.key);if(i>=0&&(chord||i<6)){e.preventDefault();tapLane(chord?0:laneOf(6-i))}};
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();const r=cv.getBoundingClientRect();tapLane(chord?0:Math.max(0,Math.min(INST.n-1,Math.floor((e.clientX-r.left)/(r.width/INST.n)))))});
+  const kd=e=>{const i=(INST.strings.join('')+' ').indexOf(e.key);if(i>=0&&(chord||i<INST.n)){e.preventDefault();tapLane(chord?0:laneOf(INST.n-i))}};
   document.addEventListener('keydown',kd);
   /* micrófono: ataque (subida de volumen) + altura que coincide con la nota esperada */
   const micLoop=()=>{
@@ -224,7 +225,7 @@ function retoPlay(host,S,onExit){
     if(!window.isSecureContext||!navigator.mediaDevices){$('#hmsg',host).textContent='Este navegador no permite el micrófono aquí. Usa los toques en pantalla.';return false}
     try{
       G.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-      const src=c.createMediaStreamSource(G.stream);G.an=c.createAnalyser();G.an.fftSize=chord?4096:2048;src.connect(G.an);G.buf=new Float32Array(G.an.fftSize);G.freq=new Float32Array(G.an.frequencyBinCount);G.src=src;
+      const src=c.createMediaStreamSource(G.stream);G.an=c.createAnalyser();G.an.fftSize=chord?4096:INST.fft;src.connect(G.an);G.buf=new Float32Array(G.an.fftSize);G.freq=new Float32Array(G.an.frequencyBinCount);G.src=src;
       G.iv=setInterval(micLoop,30);return true;
     }catch(e){$('#hmsg',host).textContent='No se pudo usar el micrófono. Permítelo en los ajustes del navegador o usa los toques en pantalla.';return false}
   };
@@ -245,10 +246,10 @@ function retoPlay(host,S,onExit){
   }
   function draw(now){
     ctx.clearRect(0,0,W,H);
-    const lw=W/6,hy=hitY(),p=pps();
+    const lw=W/INST.n,hy=hitY(),p=pps();
     const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(1,'rgba(0,0,0,.15)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    if(!chord)for(let l=0;l<6;l++){
-      const x=l*lw+lw/2,s=LEFTY?l+1:6-l,fl=Math.max(0,1-(performance.now()-G.flash[l])/220);
+    if(!chord)for(let l=0;l<INST.n;l++){
+      const x=l*lw+lw/2,s=LEFTY?l+1:INST.n-l,fl=Math.max(0,1-(performance.now()-G.flash[l])/220);
       if(fl>0){ctx.fillStyle=col.lane[s-1];ctx.globalAlpha=.18*fl;ctx.fillRect(l*lw,0,lw,H);ctx.globalAlpha=1}
       ctx.strokeStyle=col.muted;ctx.globalAlpha=.55;ctx.lineWidth=.8+(s-1)*.5;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();ctx.globalAlpha=1;
     }
@@ -258,7 +259,7 @@ function retoPlay(host,S,onExit){
     // línea de golpe
     ctx.fillStyle=col.fg;ctx.globalAlpha=.85;ctx.fillRect(0,hy-2,W,4);ctx.globalAlpha=1;
     const R=Math.min(lw*.36,24);
-    if(!chord)for(let l=0;l<6;l++){const s=LEFTY?l+1:6-l,x=l*lw+lw/2;ctx.lineWidth=3;ctx.strokeStyle=col.lane[s-1];ctx.beginPath();ctx.arc(x,hy,R+3,0,7);ctx.stroke();
+    if(!chord)for(let l=0;l<INST.n;l++){const s=LEFTY?l+1:INST.n-l,x=l*lw+lw/2;ctx.lineWidth=3;ctx.strokeStyle=col.lane[s-1];ctx.beginPath();ctx.arc(x,hy,R+3,0,7);ctx.stroke();
       ctx.fillStyle=col.muted;ctx.font=`600 11px ${'IBM Plex Mono'},monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(s),x,hy+R+18)}
     N.forEach(n=>{
       if(n.hit)return;const y=hy-(n.t-now)*p;const tail=n.d*spb*p;

@@ -40,7 +40,7 @@
 :root[data-theme="light"]{--bg:#f4efe4;--surface:#fffaf1;--surface2:#ebe2cf;--fg:#1a2236;--muted:#586380;--line:#d6cab0;--glass:rgba(250,246,238,.78);--accent-text:#955700;--root:#bf4128;--good:#2b8559;--bad:#bf4128;--blue:#2f7cae;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{margin:0;background:var(--bg);color:var(--fg)}
+html,body{margin:0;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--fg)}
 body{background-image:var(--art,none);background-attachment:fixed;background-repeat:no-repeat;background-size:100% 100%}
 .card,.ex,.widget{box-shadow:inset 0 1px 0 color-mix(in srgb,var(--fg) 5%,transparent),0 10px 28px -20px rgba(0,0,0,.6)}
 .glow{background:linear-gradient(95deg,var(--fg) 20%,var(--accent-text) 60%,var(--root));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -2257,6 +2257,15 @@ const bandFor=id=>{const g=G[id],list=bandBeats(g);if(!list.length)return null;c
 const TRACKG={'6c':'rock','6d':'half','10d':'vals','11a':'cumbia','11d':'pop'};
 const TRACKST={rock:'rock',balada:'balada',cumbia:'cumbia',ranchera:'vals'};
 
+/* ---------- información de la beta y reporte sin datos personales ---------- */
+const OM_BETA_VERSION='v20261026193524';
+let OM_LAST_ERROR='';
+const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
+if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){OM_LAST_ERROR=String(error&&error.message||message||'Error desconocido').slice(0,240);if(typeof OM_PREVIOUS_ONERROR==='function')return OM_PREVIOUS_ONERROR.apply(this,arguments)};
+function betaReport(app){const text=[`Reporte de ${app}`,`Versión: ${OM_BETA_VERSION}`,`Navegador: ${navigator.userAgent}`,`Ruta: ${location.pathname}${location.hash}`,`Pantalla: ${screen.width}×${screen.height} px`,`Último error: ${OM_LAST_ERROR||'ninguno capturado'}`].join('\n');if(navigator.clipboard)navigator.clipboard.writeText(text).catch(()=>{});const url='https://wa.me/?text='+encodeURIComponent(text),opened=window.open(url,'_blank','noopener');if(!opened)location.href=url}
+function betaAbout(){return `<section class="card coach-settings"><span class="eyebrow">Beta · ${OM_BETA_VERSION}</span><h2>Acerca de Om Batería</h2><p class="cap">Om · Centro de aprendizaje musical · ${automatiaMark()}</p><p class="cap">Sonidos: <a href="https://github.com/nbrosowsky/tonejs-instruments" target="_blank" rel="noopener">tonejs-instruments</a> (CC BY 3.0), <a href="https://www.bandshed.net/avldrumkits/" target="_blank" rel="noopener">AVL Drumkits Black Pearl</a> (CC BY-SA 3.0) y <a href="https://github.com/sgossner/VSCO-2-CE" target="_blank" rel="noopener">VSCO 2 CE</a> (CC0).</p><div class="row"><a class="btn" href="../roka/?cambiar">Ver todas las apps Om</a><button class="btn" data-beta-report>Reportar un problema</button></div></section>`}
+if(typeof document!=='undefined')document.addEventListener('click',e=>{if(e.target.closest('[data-beta-report]'))betaReport('Om Batería')});
+
 /* ---------- coach: sesión de hoy que avanza sola, «Cómo se hace», práctica calificada y resultado ---------- */
 const KIND={rud:['Calentamiento','Rudimento para soltar las manos'],groove:['Groove del día','Tócalo junto con el click'],prec:['Precisión','Mide qué tan a tiempo tocas'],band:['Con la banda','Tú pones la batería']};
 const dayNum=()=>Math.floor(new Date(today()+'T12:00:00')/864e5);
@@ -2942,7 +2951,7 @@ function viewSettings(){
     <section class="card coach-settings"><h2>Micrófono</h2><p class="cap">${DB.lat!=null?'Retraso medido: '+Math.round(DB.lat*1000)+' ms.':'Sin calibrar.'} Calibra en el medidor (Ajustes del micrófono).</p><a class="btn" href="#/practicar/precision">${IC.target}Ir al medidor</a></section>
     ${oldProgress()?`<section class="card coach-settings"><h2>Pulso a la Vista</h2><p class="cap">${DB.imported>0?'Ya trajiste tu progreso de la app anterior.':'Hay progreso de la app anterior en este dispositivo.'}</p><button class="btn" data-imp>${IC.down}Traer mi progreso</button></section>`:''}
     <section class="card coach-settings"><h2>Créditos</h2><p class="cap">Batería grabada: «${esc(k.nombre)}» de ${esc(k.autor)}, licencia ${k.licencia} (<a href="${k.url}" target="_blank" rel="noopener">${k.url}</a>). ${esc(k.credito)} Bajo y guitarra de la banda: tonejs-instruments (CC BY 3.0); metales, piano y órgano: VSCO 2 CE (CC0).</p>
-      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Om Batería es parte de la familia Om (guitarra, voz, estudio).</p></section>`,
+      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Om Batería es parte de la familia Om (guitarra, voz, bajo y estudio).</p></section>${betaAbout()}`,
   mount(r){
     r.addEventListener('change',e=>{const k=e.target.dataset.pref;if(!k)return;DB[k]=k==='clickVol'?+e.target.value:e.target.value;save();if(k==='theme')applyTheme()});
     let un=null;

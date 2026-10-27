@@ -22,7 +22,12 @@
       "bateria/src/**",
       "bateria/tools/**",
       "bateria/build.sh",
-      "bateria/CLAUDE.md"
+      "bateria/CLAUDE.md",
+      "bajo/tests/**",
+      "bateria/tests/**",
+      "**/*.test.cjs",
+      "**/tests/**",
+      "PRUEBAS-TELEFONO.md"
     ],
     "headers": [
       {

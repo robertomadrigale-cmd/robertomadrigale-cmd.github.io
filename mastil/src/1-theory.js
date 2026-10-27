@@ -4,8 +4,8 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const num=v=>/^-?\d+$/.test(v)?+v:v;
 /* ---------- teoría ---------- */
-const OPEN_PC={1:4,2:11,3:7,4:2,5:9,6:4};
-const OPEN_MIDI={1:64,2:59,3:55,4:50,5:45,6:40};
+const OPEN_PC=Object.fromEntries(Object.entries(INST.open).map(([s,m])=>[s,m%12]));
+const OPEN_MIDI=INST.open;
 const NAT=[0,2,4,5,7,9,11],ES=['Do','Re','Mi','Fa','Sol','La','Si'],US=['C','D','E','F','G','A','B'];
 const MAJ=[0,2,4,5,7,9,11];
 const acc=a=>a===1?'♯':a===-1?'♭':'';
@@ -57,7 +57,7 @@ Object.assign(CT,{
 });
 const chordNotes=(root,t)=>CT[t].semis.map((s,i)=>spell(root,s,CT[t].steps[i]));
 const scaleNotes=(root,semis)=>semis.map((s,i)=>spell(root,s,i));
-const pos=(pcs,from,to)=>{const r=[];for(let s=1;s<=6;s++)for(let f=from;f<=to;f++)if(pcs.includes((OPEN_PC[s]+f)%12))r.push([s,f]);return r};
+const pos=(pcs,from,to)=>{const r=[];for(let s=1;s<=INST.n;s++)for(let f=from;f<=to;f++)if(pcs.includes((OPEN_PC[s]+f)%12))r.push([s,f]);return r};
 const ACC_N=[0,1,2,3,4,5,6,-5,-4,-3,-2,-1];
 const SHARPS=['Fa♯','Do♯','Sol♯','Re♯','La♯','Mi♯'],FLATS=['Si♭','Mi♭','La♭','Re♭','Sol♭','Do♭'];
 /* ---------- mástil (SVG) ---------- */
@@ -72,7 +72,7 @@ function autoFingers(dots){
    Cejilla cuando ninguna cuerda que suena va al aire, hay 4+ notas pisadas y el traste más bajo se repite: el dedo 1 las pisa todas.
    Los demás dedos van por traste (del más bajo al más alto) y, en el mismo traste, de la cuerda grave a la aguda. */
 function chordFing(frets){
-  const fr=frets.map((f,j)=>({f,s:6-j})).filter(x=>x.f!=null&&x.f>0),fg={};if(!fr.length)return{fg,barre:null};
+  const fr=frets.map((f,j)=>({f,s:INST.n-j})).filter(x=>x.f!=null&&x.f>0),fg={};if(!fr.length)return{fg,barre:null};
   const lo=Math.min(...fr.map(x=>x.f)),atLo=fr.filter(x=>x.f===lo),open=frets.some(f=>f===0);let barre=null;
   if(!open&&fr.length>=4&&atLo.length>=2){const ss=atLo.map(x=>x.s);barre={f:lo,s1:Math.min(...ss),s2:Math.max(...ss)};atLo.forEach(x=>fg[x.s]=1)}
   // un dedo por traste a partir del más bajo; si dos notas caen en el mismo traste, la siguiente toma el dedo de al lado
@@ -84,18 +84,18 @@ function chordFing(frets){
 }
 function fretboard(o){
   const from=o.from||0,to=o.to==null?12:o.to,W=o.w||42,H=25,top=20,left=32,lane=from===0?24:0;
-  const start=from===0?1:from,cols=to-start+1,x0=left+lane,wood=cols*W,totalW=x0+wood+10,bottom=top+5*H,totalH=bottom+36;
+  const start=from===0?1:from,cols=to-start+1,x0=left+lane,wood=cols*W,totalW=x0+wood+10,bottom=top+(INST.n-1)*H,totalH=bottom+36;
   const X=x=>LEFTY?totalW-x:x,R=(x,w)=>LEFTY?totalW-x-w:x;
   const y=s=>top+(s-1)*H,cx=f=>X(f===0?x0-lane/2-1:x0+(f-start+.5)*W);
-  let g=`<rect class="wood" x="${R(x0,wood)}" y="${top-10}" width="${wood}" height="${5*H+20}" rx="4"/>`;
-  (o.zones||[]).forEach(z=>{const a=Math.max(z[0],start),b=Math.min(z[1],to);if(b>=a)g+=`<rect class="zone" x="${R(x0+(a-start)*W,(b-a+1)*W)}" y="${top-10}" width="${(b-a+1)*W}" height="${5*H+20}"/>`});
+  let g=`<rect class="wood" x="${R(x0,wood)}" y="${top-10}" width="${wood}" height="${(INST.n-1)*H+20}" rx="4"/>`;
+  (o.zones||[]).forEach(z=>{const a=Math.max(z[0],start),b=Math.min(z[1],to);if(b>=a)g+=`<rect class="zone" x="${R(x0+(a-start)*W,(b-a+1)*W)}" y="${top-10}" width="${(b-a+1)*W}" height="${(INST.n-1)*H+20}"/>`});
   for(let f=start;f<=to;f++){
     const m=f%12;
-    if([3,5,7,9].includes(m))g+=`<circle class="inlay" cx="${cx(f)}" cy="${top+2.5*H}" r="5"/>`;
-    if(m===0)g+=`<circle class="inlay" cx="${cx(f)}" cy="${top+1.5*H}" r="5"/><circle class="inlay" cx="${cx(f)}" cy="${top+3.5*H}" r="5"/>`;
+    if([3,5,7,9].includes(m))g+=`<circle class="inlay" cx="${cx(f)}" cy="${top+(INST.n-1)/2*H}" r="5"/>`;
+    if(m===0)g+=`<circle class="inlay" cx="${cx(f)}" cy="${top+((INST.n-1)/2-1)*H}" r="5"/><circle class="inlay" cx="${cx(f)}" cy="${top+((INST.n-1)/2+1)*H}" r="5"/>`;
   }
   for(let i=0;i<=cols;i++){const x=X(x0+i*W);g+=`<line class="${i===0&&from===0?'nut':'fret'}" x1="${x}" y1="${top-10}" x2="${x}" y2="${bottom+10}"/>`}
-  for(let s=1;s<=6;s++){g+=`<line class="str" x1="${X(x0)}" x2="${X(x0+wood)}" y1="${y(s)}" y2="${y(s)}" stroke-width="${(.8+(s-1)*.45).toFixed(2)}"/><text class="slab" x="${X(14)}" y="${y(s)}">${'eBGDAE'[s-1]}</text>`}
+  for(let s=1;s<=INST.n;s++){g+=`<line class="str" x1="${X(x0)}" x2="${X(x0+wood)}" y1="${y(s)}" y2="${y(s)}" stroke-width="${(.8+(s-1)*.45).toFixed(2)}"/><text class="slab" x="${X(14)}" y="${y(s)}">${INST.labels[s-1]}</text>`}
   for(let f=start;f<=to;f++)g+=`<text class="num" x="${cx(f)}" y="${bottom+30}">${f}</text>`;
   if(from===0)(o.muted||[]).forEach(s=>{g+=`<text class="mute" x="${cx(0)}" y="${y(s)}">×</text>`});
   // cejilla: una barra sobre las cuerdas que pisa el dedo 1, con su nombre arriba
@@ -108,12 +108,12 @@ function fretboard(o){
     const fgb=d.fg&&d.f>0?`<circle class="fgb" cx="${cx(d.f)+10}" cy="${y(d.s)-9}" r="7"/><text class="fgt" x="${cx(d.f)+10}" y="${y(d.s)-9}">${d.fg}</text>`:'';
     g+=`<g class="dg" data-s="${d.s}" data-f="${d.f}"><circle class="dot ${k}" cx="${cx(d.f)}" cy="${y(d.s)}" r="10"/>${t?`<text class="dtxt${t.length>2?' sm':''}${k==='root'?' r':''}${k==='dim'?' dm':''}" x="${cx(d.f)}" y="${y(d.s)}">${esc(t)}</text>`:''}${fgb}</g>`;
   });
-  if(o.tap)for(let s=1;s<=6;s++)for(let f=from;f<=to;f++){
+  if(o.tap)for(let s=1;s<=INST.n;s++)for(let f=from;f<=to;f++){
     if(f===0&&from>0)continue;
     const x=f===0?left:x0+(f-start)*W,w=f===0?lane:W;
     g+=`<rect class="cell" data-s="${s}" data-f="${f}" x="${R(x,w)}" y="${y(s)-H/2}" width="${w}" height="${H}"/>`;
   }
   const fgLegend=(o.dots||[]).some(x=>x.fg&&x.f>0)?`<p class="fglegend">Dedos: <b>1</b> índice · <b>2</b> medio · <b>3</b> anular · <b>4</b> meñique${o.barre?' · la barra es <b>cejilla</b> con el dedo 1':''}</p>`:'';
   const hint=totalW*.78>360?`<p class="hint">Desliza para ver todo el mástil ${LEFTY?'←':'→'}</p>`:'';
-  return`${hint}<div class="fbwrap"${LEFTY?' dir="rtl"':''}><svg class="fb" viewBox="0 0 ${totalW} ${totalH}" style="min-width:${Math.round(totalW*.78)}px;max-width:${Math.round(totalW*1.7)}px" role="img" aria-label="${esc(o.label||'Diagrama del mástil de guitarra')}">${g}</svg></div>${fgLegend}`;
+  return`${hint}<div class="fbwrap"${LEFTY?' dir="rtl"':''}><svg class="fb" viewBox="0 0 ${totalW} ${totalH}" style="min-width:${Math.round(totalW*.78)}px;max-width:${Math.round(totalW*1.7)}px" role="img" aria-label="${esc(o.label||'Diagrama del mástil de '+INST.instrumento)}">${g}</svg></div>${fgLegend}`;
 }

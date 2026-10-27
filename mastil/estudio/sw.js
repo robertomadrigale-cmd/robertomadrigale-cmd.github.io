@@ -1,4 +1,4 @@
-const CACHE='roka-estudio-20261025104443',SMPC='roka-estudio-muestras-v1';
+const CACHE='roka-estudio-20261026193523',SMPC='roka-estudio-muestras-v1';
 const SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 // solo borra versiones viejas de esta app (nunca los cachés de guitarra, voz ni muestras)

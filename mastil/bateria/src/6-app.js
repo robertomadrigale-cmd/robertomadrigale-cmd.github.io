@@ -128,7 +128,7 @@ function viewSettings(){
     <section class="card coach-settings"><h2>Micrófono</h2><p class="cap">${DB.lat!=null?'Retraso medido: '+Math.round(DB.lat*1000)+' ms.':'Sin calibrar.'} Calibra en el medidor (Ajustes del micrófono).</p><a class="btn" href="#/practicar/precision">${IC.target}Ir al medidor</a></section>
     ${oldProgress()?`<section class="card coach-settings"><h2>Pulso a la Vista</h2><p class="cap">${DB.imported>0?'Ya trajiste tu progreso de la app anterior.':'Hay progreso de la app anterior en este dispositivo.'}</p><button class="btn" data-imp>${IC.down}Traer mi progreso</button></section>`:''}
     <section class="card coach-settings"><h2>Créditos</h2><p class="cap">Batería grabada: «${esc(k.nombre)}» de ${esc(k.autor)}, licencia ${k.licencia} (<a href="${k.url}" target="_blank" rel="noopener">${k.url}</a>). ${esc(k.credito)} Bajo y guitarra de la banda: tonejs-instruments (CC BY 3.0); metales, piano y órgano: VSCO 2 CE (CC0).</p>
-      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Om Batería es parte de la familia Om (guitarra, voz, estudio).</p></section>`,
+      <p class="cap">Grooves y lecciones vienen de Pulso a la Vista. Om Batería es parte de la familia Om (guitarra, voz, bajo y estudio).</p></section>${betaAbout()}`,
   mount(r){
     r.addEventListener('change',e=>{const k=e.target.dataset.pref;if(!k)return;DB[k]=k==='clickVol'?+e.target.value:e.target.value;save();if(k==='theme')applyTheme()});
     let un=null;

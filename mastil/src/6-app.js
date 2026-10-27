@@ -1,9 +1,10 @@
 /* ---------- datos locales ---------- */
 IC.levels=sv('<path d="M5 20v-6M10 20V9M15 20V5M20 20v-9"/>');
 IC.note=sv('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>');
-const DBK='mastil-a-la-vista:v2';
-let DB={done:{},secs:{},days:{},game:{},bpm:{},theme:'auto',last:1,met:80,meter:'4/4',sub:1};
+const DBK=INST.db;
+let DB={done:{},secs:{},days:{},game:{},bpm:{},theme:INST.id==='bajo'?'estudio':'auto',last:1,met:80,meter:'4/4',sub:1};
 try{Object.assign(DB,JSON.parse(localStorage.getItem(DBK)||'{}'))}catch(e){}
+if(INST.migrate)DB=INST.migrate(DB);
 function persist(){try{localStorage.setItem(DBK,JSON.stringify(DB))}catch(e){}}
 function save(){persist();if(checkAch())persist()}
 MET.bpm=DB.met||80;MET.meter=DB.meter||'4/4';MET.sub=DB.sub||1;
@@ -36,6 +37,7 @@ const THEMES=[
  ['surf','Surf rock','Playa, reverb y sol',0,'#e9f6f4 #f9fffd #d3ece8 #0f2b33 #4d6b72 #b7dad5 #ff6b4a #2a0800 #c7402a #0a8f9c #fff #2b8a57 #c7402a #2875b8','radial-gradient(circle at 100% 0,rgba(255,107,74,.2),transparent 42%),radial-gradient(circle at 0 100%,rgba(10,143,156,.14),transparent 45%)'],
  ['indie','Indie','Años 2000 · cuarto de ensayo',0,'#f3eef7 #fffcff #e7dff0 #2a2433 #6d6479 #d8cde3 #7c5cff #fff #5b3fd6 #ff7a59 #fff #2e9e6a #d6453a #2f86c9','radial-gradient(circle at 85% 5%,rgba(124,92,255,.16),transparent 45%),radial-gradient(circle at 5% 95%,rgba(255,122,89,.12),transparent 45%)'],
 ];
+if(INST.id==='bajo'){THEMES[0][2]='Negro y verde ? para tu bajo';THEMES[0][4]=THEMES[0][4].replaceAll('#2f7bff',INST.color).replace('#ffffff','#052e22').replace('#5b9cff','#6ee7b7');}
 const TVARS='bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue'.split(' ');
 const themeById=id=>THEMES.find(t=>t[0]===id);
 if(DB.theme==='dark')DB.theme='clasico';else if(DB.theme==='light')DB.theme='claro';
@@ -166,8 +168,8 @@ function songShelf(){
 function viewHome(){
   const nx=nextEx(),[d,t]=doneCount();
   const inst=standalone()||DB.hideInstall?'':DEFERRED?`<div class="card install"><div><h3>Instala la app</h3><p class="cap" style="margin:4px 0 0">Ábrela desde tu pantalla de inicio y úsala sin internet.</p></div><div class="row"><button class="btn pri" data-h="install">${IC.down}Instalar</button><button class="btn sm" data-h="hideinst">Ahora no</button></div></div>`:isIOS?`<div class="card install"><div><h3>Instala la app en tu iPhone o iPad</h3><p class="cap" style="margin:4px 0 0">En Safari toca el botón Compartir y elige «Agregar a inicio».</p></div><button class="btn sm" data-h="hideinst">Entendido</button></div>`:'';
-  return{title:'Om Guitarra',html:`
-  <div class="brandhero brandhero-roka"><span class="logo">${logo()}</span><div class="brandhero-copy"><div class="brandhero-greeting"><span class="eyebrow">${greet()}</span><a class="roka-switch" href="roka/?cambiar">Voz</a></div><h1 class="glow">Tu práctica de hoy</h1></div></div>
+  return{title:INST.nombre,html:`
+  <div class="brandhero brandhero-roka"><span class="logo">${logo()}</span><div class="brandhero-copy"><div class="brandhero-greeting"><span class="eyebrow">${greet()}</span><a class="roka-switch" href="${INST.root}roka/?cambiar">Voz</a></div><h1 class="glow">Tu práctica de hoy</h1></div></div>
   <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
     <div class="stat"><b>${streak()}</b><span>días de racha</span></div>
     <div class="stat"><b>${weekMins()}</b><span>min esta semana</span></div>
@@ -192,7 +194,8 @@ function viewHome(){
     <div id="bkw" hidden><textarea id="bkt" rows="3" placeholder="Pega aquí el código que copiaste en tu otro dispositivo"></textarea><div class="row" style="margin-top:8px"><button class="btn sm pri" data-h="bk-load">Restaurar progreso</button><span class="cap" id="bkm" style="margin:0"></span></div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Progreso guardado en este dispositivo</span><span id="rstw"><button class="btn sm" data-h="reset">Reiniciar progreso</button></span></div>
   </div>
-  <p class="foot">Om Guitarra · ${automatiaMark()} · funciona sin conexión<br>Guitarra y bajo grabados: tonejs-instruments de Nicholaus Brosowsky (licencia CC BY 3.0)<br>Batería grabada: kit Black Pearl de AVL Drumkits, Glen MacArthur (licencia CC BY-SA 3.0)</p>`,
+  ${betaAbout()}
+  <p class="foot">${INST.nombre} · ${automatiaMark()} · funciona sin conexión<br>Guitarra y bajo grabados: tonejs-instruments de Nicholaus Brosowsky (licencia CC BY 3.0)<br>Batería grabada: kit Black Pearl de AVL Drumkits, Glen MacArthur (licencia CC BY-SA 3.0)</p>`,
   mount(r){
     coverWatch(r);
     if(DB.onb==null)setTimeout(()=>{if(DB.onb==null&&(!location.hash||location.hash==='#/'))onboardShow()},400);
@@ -243,7 +246,7 @@ function albCard(href,art,title,sub,pct,done){
 }
 const lessonAlb=i=>{const l=LESSONS.find(x=>x.id===i),[d,t]=doneCount(i);return albCard(`#/leccion/${i}`,lessonArt(i),l.title,`${d} de ${t} · ${l.sub}`,d/t,d===t)};
 function viewLessons(){
-  return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">11 lecciones · ${ALLEX.filter(x=>typeof x.lesson==='number').length} ejercicios</span><h1>Lecciones</h1><p class="sub">Cada lección se apoya en la anterior. Lee la idea, mira el mástil y haz los ejercicios con la guitarra en la mano.</p></div>
+  return{title:'Lecciones',html:`<div class="lhead"><span class="eyebrow">${LESSONS.length} lecciones · ${ALLEX.filter(x=>typeof x.lesson==='number').length} ejercicios</span><h1>Lecciones</h1><p class="sub">Cada lección se apoya en la anterior. Lee la idea, mira el mástil y haz los ejercicios con la guitarra en la mano.</p></div>
   ${courseCards()}
   ${PARTS2.map(p=>`<section class="albsec"><div class="sech"><h2>Parte ${p.n} · ${p.t}</h2></div><div class="albs">${p.m.map(lessonAlb).join('')}</div></section>`).join('')}`};
 }
@@ -293,7 +296,7 @@ function viewReference(){
 }
 let NOTENAT=0;
 function viewNotes(){
-  const board=()=>{const all=[];for(let s=1;s<=6;s++)for(let f=0;f<=12;f++){const pc=(OPEN_PC[s]+f)%12,nat=NATPC.includes(pc);if(NOTENAT&&!nat)continue;all.push({s,f,t:PCS[pc][0],k:nat?'note':'dim'})}return fretboard({dots:all,label:'Mapa de notas'})};
+  const board=()=>{const all=[];for(let s=1;s<=INST.n;s++)for(let f=0;f<=12;f++){const pc=(OPEN_PC[s]+f)%12,nat=NATPC.includes(pc);if(NOTENAT&&!nat)continue;all.push({s,f,t:PCS[pc][0],k:nat?'note':'dim'})}return fretboard({dots:all,label:'Mapa de notas'})};
   return{title:'Mapa de notas',back:'#/referencia',html:`<div class="card"><div class="row" style="margin-bottom:12px"><div class="seg"><button data-n="0" aria-pressed="${!NOTENAT}">Las 12</button><button data-n="1" aria-pressed="${!!NOTENAT}">Solo naturales</button></div></div><div id="nb">${board()}</div><p class="cap">Toca cualquier nota para escucharla. Naturales en color; sostenidos en contorno.</p></div>`,
   mount(r){$$('[data-n]',r).forEach(b=>b.onclick=()=>{NOTENAT=+b.dataset.n;$$('[data-n]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#nb',r).innerHTML=board()})}};
 }
@@ -330,11 +333,12 @@ function route(){
   if(SEQ.id==='fig')seqStop();
   const sec=p[0]===''?'':(p[0]==='lecciones'||p[0]==='punteo')?'leccion':p[0]==='acordes'?'referencia':p[0]==='logros'?'practicar':p[0];
   $$('[data-nav]').forEach(a=>{const on=a.dataset.nav===sec;if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  if(INST.id==='bajo')v=bassAdaptView(v);
   $('#ttl').textContent=v.title;
   const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
   // página nueva en cada vista: así no se acumulan los clics de vistas anteriores
   const old=$('#page'),pg=old.cloneNode(false);old.replaceWith(pg);pg.innerHTML=v.html;
-  document.title=v.title==='Om Guitarra'?v.title:v.title+' · Om Guitarra';
+  document.title=v.title===INST.nombre?v.title:v.title+' · '+INST.nombre;
   if(v.mount)UNMOUNT=v.mount(pg)||null;
   if(!(p[0]==='leccion'&&p[2]))window.scrollTo(0,0);
   paintPlayer();
@@ -349,7 +353,7 @@ document.addEventListener('click',e=>{
 });
 /* ---------- arranque ---------- */
 document.body.insertAdjacentHTML('afterbegin',`<div class="shell">
- <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Om<br>Guitarra</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
+ <nav class="side" aria-label="Secciones"><div class="brand"><span class="logo">${logo()}</span>Om<br>${INST.corto}</div>${NAV.map(([h,l,ic,k])=>`<a href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>
  <main><header class="topbar"><div class="in"><a class="icon-btn" id="back" href="#/" aria-label="Volver" hidden>${IC.back}</a><span class="ttl" id="ttl"></span></div></header><div class="page" id="page"></div></main>
 </div>
 <nav class="tabs" aria-label="Secciones">${NAV.map(([h,l,ic,k])=>`<a class="tab" href="${h}" data-nav="${k}">${ic}${l}</a>`).join('')}</nav>`);

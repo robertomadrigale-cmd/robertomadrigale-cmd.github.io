@@ -1,0 +1,6 @@
+/* Local adjustments only; the shared guitar CSS is unchanged. */
+button,.btn,.chip{white-space:nowrap}
+.thc b,.thc small{white-space:normal}
+:root[data-theme="estudio"]{--accent:#34d399;--accent-ink:#052e22;--accent-text:#6ee7b7;--blue:#34d399;--art:radial-gradient(ellipse at 85% -15%,#34d39924,transparent 55%)}
+.bass-line{display:grid;gap:8px;min-width:0}.bass-cells{display:flex;gap:4px;overflow-x:auto;padding:4px 0}.bass-cell{flex:0 0 42px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:6px 2px}.bass-cell small{display:block;font-size:10px}.bass-cell.on{background:var(--accent);color:var(--accent-ink)}.bass-line .dg.on .dot{fill:var(--accent);stroke:var(--fg);stroke-width:3}.bass-line .fbwrap{max-width:100%}.kside{min-width:0}.bass-setting{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.bass-arps{display:grid;gap:16px}
+@media(max-width:520px){.kplay [data-t="bassPlayer"]{justify-self:start;max-width:100%}.strs{flex-wrap:wrap}.reto-note{min-width:0}}

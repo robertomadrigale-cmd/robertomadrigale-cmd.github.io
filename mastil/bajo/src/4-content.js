@@ -1,6 +1,10 @@
-/* Material original de Roka Bajo. Cada tupla = cuerda, traste, duración en pulsos. */
-const P=rows=>rows.map(([s,f,d=1])=>({s,f,d}));
-const E=o=>({type:'exercise',bpm:60,beats:4,...o,fig:{notes:P(o.notes),...(o.five?{five:P(o.five)}:{})}});
+/* Original bass lessons, in the guitar block/exercise contract. IDs never change. */
+const nm=pc=>PCS[pc][0];
+const pts=(arr,o)=>({type:'seq',arr,o:o||{}});
+const chords=(list,beats)=>({type:'chords',list,beats:beats||4});
+const CH={},ch=(...names)=>names.map(n=>[n,CH[n]]);
+const bySound=a=>a.slice().sort((x,y)=>(OPEN_MIDI[x[0]]+x[1])-(OPEN_MIDI[y[0]]+y[1]));
+const E=o=>{if(!o.notes)return {ex:o};const notes=INST.n===5&&o.five?o.five:o.notes;return {ex:{...o,min:o.min||3,fig:{...pts(notes.map(([s,f])=>[s,f]),{to:Math.max(5,...notes.map(n=>n[1]+1))}),durs:notes.map(n=>n[2]||1),beats:o.beats||4}}}};
 const LESSONS=[
 {id:1,title:'Tu primer sonido',sub:'Postura y apagado de cuerdas',hue:220,blocks:[
  {aim:['Sostener el bajo sin cargar la muñeca.','Tocar una cuerda y apagar las demás.']},
@@ -127,5 +131,10 @@ const LESSONS=[
  {trick:['Escucha → repite → cambia una cosa.','Termina en la raíz para una respuesta estable.','El reto mide precisión; la música también necesita intención y escucha.']}
 ]}
 ];
-const ALLEX=LESSONS.flatMap(l=>l.blocks.filter(b=>b.type==='exercise').map(x=>Object.assign(x,{lesson:l.id})));
-const CHALLENGES=[['cumbia','Patio de cumbia','b8-cumbia'],['banda','Paso de banda','b8-banda'],['norteno','Camino norteño','b8-norteno'],['rock','Motor de cuatro cuerdas','b8-rock'],['reggaeton','Pulso de noche','b8-reggaeton'],['bossa','Vuelta suave','b8-bossa']].map(([id,t,ex])=>({id,t,ex:ALLEX.find(x=>x.id===ex)}));
+
+const PARTS2=[{n:1,t:'Sonido y pulso',m:[1,2,3]},{n:2,t:'Notas que acompañan',m:[4,5,6]},{n:3,t:'Ritmos y técnica',m:[7,8]},{n:4,t:'Oído y creación',m:[9,10]}];
+const ALLEX=[];LESSONS.forEach(l=>{l.part=PARTS2.find(p=>p.m.includes(l.id)).n;l.lead=l.sub+'. Escucha el ejemplo, ubica cada nota y después toca al pulso.';l.blocks=l.blocks.map(b=>b.errors?{box:'Errores comunes',ul:b.errors}:b);l.blocks.forEach(b=>{if(b.ex){b.ex.lesson=l.id;ALLEX.push(b.ex)}})});
+const GLOS=[['Pulso','El paso regular de la música.'],['BPM','Pulsos por minuto: velocidad del pulso.'],['Compás','Grupo de pulsos que se repite; 4/4 agrupa cuatro.'],['Tablatura','Líneas para cuerdas y números para trastes; 0 significa al aire.'],['Raíz','Nota que da nombre al acorde.'],['Quinta','Nota siete semitonos arriba de la raíz.'],['Octava','Mismo nombre de nota, doce semitonos arriba o abajo.'],['Arpegio','Notas de un acorde tocadas una después de otra.'],['Groove','Patrón de ritmo que se repite y sostiene a la banda.'],['Walking','Línea que camina con una nota por pulso, enlazando acordes.'],['Nota fantasma','Ataque apagado sin altura definida; se escucha como un golpe seco.'],['Slap','Ataque breve con el costado del pulgar; rebota sin empujar la cuerda.'],['Ligado','Dos alturas con un solo ataque de la mano que pulsa.'],['Slide','Deslizar el dedo sin perder contacto para llegar a otro traste.'],['Apagado','Contacto suave que detiene una vibración.'],['Semitono','Distancia de un traste.'],['Tono','Dos semitonos.']];
+// These voicings belong only to the accompanying guitar. Bass diagrams use bassVoicing.
+const OC=GUITAR_OC;
+WID.openchords={init:{i:0},controls:[{k:'i',label:'Arpegio',opts:OC.map((c,i)=>({v:i,l:c[0]}))}],view:s=>{const p=chParse(OC[s.i][0]),v=bassVoicing(p,0);return bassChordSVG(v)+playBtn(v.midi,'seq','Escuchar arpegio',.65)}};

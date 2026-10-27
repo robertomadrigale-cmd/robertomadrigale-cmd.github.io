@@ -5,7 +5,7 @@ const FBV='10.12.2',FBU=n=>`https://www.gstatic.com/firebasejs/${FBV}/firebase-$
 const cloudOn=()=>typeof FIREBASE_CONFIG!=='undefined'&&!!(FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey);
 // el correo y contraseña se muestran solo cuando se active ese método en Firebase (Authentication → Método de acceso)
 const CLOUD_EMAIL=false;
-const SYNC=['done','secs','days','bpm','figbest','reto','ach','game','tried'];
+const SYNC=['done','secs','days','bpm','figbest','reto','ach','game','tried',...(INST.id==='bajo'?['songs','onb','retobest']:[])];
 async function cloudInit(){
   if(!cloudOn()||CLOUD.app)return;
   try{
@@ -31,9 +31,9 @@ function mergeVal(a,b){
 const uref=()=>CLOUD.M.doc(CLOUD.db,'users',CLOUD.user.uid);
 async function cloudPull(){
   const M=CLOUD.M,snap=await M.getDoc(uref()),d=snap.exists()?snap.data():{};
-  const p=d.progress||{};SYNC.forEach(k=>{DB[k]=mergeVal(DB[k],p[k])});
-  if((!DB.songs||!DB.songs.length)&&Array.isArray(d.songs))DB.songs=d.songs;
-  if(DB.onb==null&&d.onb)DB.onb=d.onb;
+  const p=d[INST.cloud.field]||{};SYNC.forEach(k=>{DB[k]=mergeVal(DB[k],p[k])});
+  if((!DB.songs||!DB.songs.length)&&Array.isArray(INST.id==='bajo'?p.songs:d.songs))DB.songs=INST.id==='bajo'?p.songs:d.songs;
+  if(DB.onb==null&&(INST.id==='bajo'?p.onb:d.onb))DB.onb=INST.id==='bajo'?p.onb:d.onb;
   CLOUD.group=d.group||null;persist();await cloudPush(true);
 }
 function memberStats(){const[d,t]=doneCount();const fb=Object.values(DB.figbest||{});return{done:d,total:t,mins7:weekMins(),streak:streak(),last:DB.last||1,mic:fb.length?Math.round(fb.reduce((a,b)=>a+b,0)/fb.length):null}}
@@ -41,8 +41,8 @@ async function cloudPush(now){
   if(!CLOUD.user)return;
   if(!now){clearTimeout(CLOUD.pushT);CLOUD.pushT=setTimeout(()=>cloudPush(true).catch(()=>{}),2500);return}
   const M=CLOUD.M,u=CLOUD.user,progress={};SYNC.forEach(k=>{if(DB[k]!=null)progress[k]=DB[k]});
-  await M.setDoc(uref(),{name:u.displayName||u.email||'Sin nombre',email:u.email||'',photo:u.photoURL||'',updated:M.serverTimestamp(),progress,songs:DB.songs||[],onb:DB.onb||null,group:CLOUD.group||null},{mergeFields:['name','email','photo','updated','progress','songs','onb','group']});
-  if(CLOUD.group)await M.setDoc(M.doc(CLOUD.db,'groups',CLOUD.group,'members',u.uid),{name:u.displayName||u.email||'Alumno',photo:u.photoURL||'',lastSeen:M.serverTimestamp(),stats:memberStats()},{merge:true});
+  await M.setDoc(uref(),{name:u.displayName||u.email||'Sin nombre',email:u.email||'',photo:u.photoURL||'',updated:M.serverTimestamp(),[INST.cloud.field]:progress,...(INST.id==='bajo'?{}:{songs:DB.songs||[],onb:DB.onb||null}),group:CLOUD.group||null},{mergeFields:['name','email','photo','updated',INST.cloud.field,...(INST.id==='bajo'?[]:['songs','onb']),'group']});
+  if(CLOUD.group)await M.setDoc(M.doc(CLOUD.db,'groups',CLOUD.group,'members',u.uid),{name:u.displayName||u.email||'Alumno',photo:u.photoURL||'',lastSeen:M.serverTimestamp(),[INST.cloud.stats]:memberStats()},{merge:true});
 }
 const _localSave=save;save=function(){_localSave.apply(this,arguments);if(CLOUD.user)cloudPush()};
 async function cloudGoogle(){
@@ -75,10 +75,10 @@ const GLOGO='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d=
 function welcomeShow(){
   if(!cloudOn()||CLOUD.user||DB.welcomed||document.getElementById('welcome'))return;
   const H=[218,262,328,26,150,352,200,28,265,330,205,180],tiles=[];
-  for(let i=0;i<24;i++){const l=i%11+1;tiles.push(i%3===1?coverArt(H[i%12],ARTM[(i*5)%11+1],null,'w'+i):lessonArt(l))}
+  for(let i=0;i<24;i++){const l=i%LESSONS.length+1;tiles.push(i%3===1?coverArt(H[i%12],ARTM[(i*5)%11+1],null,'w'+i):lessonArt(l))}
   document.body.insertAdjacentHTML('beforeend',`<div id="welcome" role="dialog" aria-modal="true" aria-labelledby="wtitle">
    <div class="wmos" aria-hidden="true">${tiles.map(t=>`<span class="acov">${t}</span>`).join('')}</div><div class="wfade" aria-hidden="true"></div>
-    <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">Om Guitarra</h1>
+    <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">${INST.nombre}</h1>
     <p class="wsub">Aprende guitarra viendo el mástil: lecciones, canciones con karaoke y una banda que te acompaña.</p>
     <button class="wgoogle" data-w="google">${GLOGO}Continuar con Google</button>
     <button class="wskip" data-w="skip">Seguir sin cuenta</button>
@@ -131,7 +131,7 @@ function viewAccount(){
 function groupsHTML(gs){
   if(!gs.length)return'<p class="cap">Todavía no tienes clases.</p>';
   return gs.map(g=>`<div class="clg"><div class="row" style="justify-content:space-between"><div style="min-width:0"><b>${esc(g.name)}</b><span class="cap" style="display:block;margin:0">${g.members.length} ${g.members.length===1?'alumno':'alumnos'}</span></div><button class="btn sm" data-cl="copy" data-code="${g.code}">Código: <b class="mono">${g.code}</b></button></div>
-   ${g.members.length?`<div class="cltable"><div class="clr h"><span>Alumno</span><span>Hechos</span><span>Min/sem</span><span>Racha</span></div>${g.members.sort((a,b)=>((b.stats||{}).mins7||0)-((a.stats||{}).mins7||0)).map(m=>{const s=m.stats||{};return`<div class="clr"><span class="clname">${esc(m.name||'Alumno')}<small>Lección ${s.last||1} · ${ago(m.lastSeen)}${s.mic!=null?' · mic '+s.mic+' %':''}</small></span><span>${s.done||0}/${s.total||ALLEX.length}</span><span>${s.mins7||0}</span><span>${s.streak||0} d</span></div>`}).join('')}</div>`:'<p class="cap">Comparte el código para que tus alumnos se unan.</p>'}</div>`).join('');
+   ${g.members.length?`<div class="cltable"><div class="clr h"><span>Alumno</span><span>Hechos</span><span>Min/sem</span><span>Racha</span></div>${g.members.sort((a,b)=>((b[INST.cloud.stats]||{}).mins7||0)-((a[INST.cloud.stats]||{}).mins7||0)).map(m=>{const s=m[INST.cloud.stats]||{};return`<div class="clr"><span class="clname">${esc(m.name||'Alumno')}<small>Lección ${s.last||1} · ${ago(m.lastSeen)}${s.mic!=null?' · mic '+s.mic+' %':''}</small></span><span>${s.done||0}/${s.total||ALLEX.length}</span><span>${s.mins7||0}</span><span>${s.streak||0} d</span></div>`}).join('')}</div>`:'<p class="cap">Comparte el código para que tus alumnos se unan.</p>'}</div>`).join('');
 }
 function cloudMount(r){
   const err=t=>{const e=$('#clerr',r);if(e){e.hidden=!t;e.textContent=t||''}};
@@ -148,7 +148,7 @@ function cloudMount(r){
     else if(k==='join')busy(async()=>{const n=await cloudJoin($('#clcode',r).value);toast(`Te uniste a la clase «${esc(n)}».`);cloudRefresh()});
     else if(k==='leave')busy(()=>cloudLeave());
     else if(k==='create')busy(async()=>{const n=$('#clgnew',r).value.trim();if(!n)throw{msg:'Ponle nombre a la clase.'};const c=await cloudCreateGroup(n);toast(`Clase creada. Código: ${c}`,5000);cloudRefresh()});
-    else if(k==='copy'){const c=b.dataset.code,t=`Únete a mi clase en Om Guitarra: abre ${location.href.split('#')[0]}#/cuenta y escribe el código ${c}`;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Invitación copiada. Pégala en WhatsApp.'),()=>toast('Código: '+c,5000))}
+    else if(k==='copy'){const c=b.dataset.code,t=`Únete a mi clase en ${INST.nombre}: abre ${location.href.split('#')[0]}#/cuenta y escribe el código ${c}`;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Invitación copiada. Pégala en WhatsApp.'),()=>toast('Código: '+c,5000))}
   });
 }
 cloudInit();

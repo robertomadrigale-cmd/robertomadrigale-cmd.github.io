@@ -43,7 +43,7 @@ function ksBuffer(m){
   return KS[m]={b,rate:(sr/N)/f};
 }
 function pluck(m,t,d,v,o){
-  if(SMP.ready&&m>=37&&m<=79)return smpPlay('g',m,t,d,(v||.2)*1.15,o);
+  if(SMP.ready&&m>=INST.sampleRange[0]&&m<=INST.sampleRange[1])return smpPlay(INST.pack,m,t,d,(v||.2)*1.15,o);
   const c=AC,K=ksBuffer(Math.round(m)),src=c.createBufferSource(),g=c.createGain(),lp=c.createBiquadFilter();
   src.buffer=K.b;src.playbackRate.value=K.rate;
   lp.type='lowpass';lp.frequency.value=m<55?3200:5200;lp.Q.value=.4;
@@ -63,7 +63,7 @@ const SMPLIST={g:[['D2',38,2],['E2',40,-3],['Fs2',42,1],['Gs2',44,-5],['As2',46,
 function loadSamples(){
   if(SMP.loading)return SMP.loading;const c=ac();if(!c)return Promise.resolve(false);
   const dec=b=>new Promise((res,rej)=>{try{const p=c.decodeAudioData(b,res,rej);if(p&&p.catch)p.catch(rej)}catch(e){rej(e)}});
-  const one=(k,[n,m,ct])=>fetch('samples/'+k+'-'+n+'.mp3').then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer()}).then(dec).then(buf=>{
+  const one=(k,[n,m,ct])=>fetch(INST.root+'samples/'+k+'-'+n+'.mp3').then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer()}).then(dec).then(buf=>{
     const d=buf.getChannelData(0),sr=buf.sampleRate;let pk=0;for(let i=0,L=Math.min(d.length,sr*.35|0);i<L;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}
     let on=0;const th=pk*.06;while(on<d.length&&Math.abs(d[on])<th)on++;
     SMP[k][m]={buf,off:Math.max(0,on-24)/sr,norm:.5/(pk||1),ct}});

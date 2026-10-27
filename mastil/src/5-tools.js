@@ -101,6 +101,7 @@ function viewMetronome(){
 /* ---------- afinador ---------- */
 const TUN={stream:null,an:null,src:null,iv:null,buf:null,hist:[]};
 function detectPitch(buf,sr){
+  if(INST.id==='bajo')return bassPitch(buf,sr);
   let n=buf.length,rms=0;for(let i=0;i<n;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/n);
   if(rms<.01)return -1;
   let r1=0,r2=n-1;const th=.2;
@@ -119,7 +120,7 @@ async function tunerStart(onData,onErr){
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){onErr('nosupport');return}
   try{
     const s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-    const c=ac();TUN.stream=s;TUN.src=c.createMediaStreamSource(s);TUN.an=c.createAnalyser();TUN.an.fftSize=2048;
+    const c=ac();TUN.stream=s;TUN.src=c.createMediaStreamSource(s);TUN.an=c.createAnalyser();TUN.an.fftSize=INST.fft;
     TUN.src.connect(TUN.an);TUN.buf=new Float32Array(TUN.an.fftSize);TUN.hist=[];
     TUN.iv=setInterval(()=>{
       TUN.an.getFloatTimeDomainData(TUN.buf);const f=detectPitch(TUN.buf,c.sampleRate);
@@ -154,7 +155,7 @@ function viewTuner(){
   </div>`,
   mount(r){
     const go=$('#tgo',r),tn=$('#tn',r),hz=$('#thz',r),nd=$('#needle',r),g=$('#gauge',r),msg=$('#tmsg',r);
-    const paint=()=>{go.innerHTML=playLbl(!!TUN.stream,'Activar micrófono','Detener micrófono',TKIC.mic);$('#tdst',r).textContent=TUN.stream?'Escuchando tu guitarra…':'Micrófono apagado';const m=$('#tmeta',r);if(m)m.textContent='Afinación '+((TUNINGS[DB.tuning||'std']||TUNINGS.std).n).toLowerCase()};
+    const paint=()=>{go.innerHTML=playLbl(!!TUN.stream,'Activar micrófono','Detener micrófono',TKIC.mic);$('#tdst',r).textContent=TUN.stream?'Escuchando tu '+INST.instrumento+'…':'Micrófono apagado';const m=$('#tmeta',r);if(m)m.textContent='Afinación '+((TUNINGS[DB.tuning||'std']||TUNINGS.std).n).toLowerCase()};
     const show=f=>{
       if(!f){g.classList.remove('in');return}
       const m=69+12*Math.log2(f/440),n=Math.round(m),c=Math.round((m-n)*100);
@@ -180,7 +181,7 @@ function gameKey(){return[GAME.mode,GAME.range,GAME.str,GAME.nat].join('-')}
 function gameComponent(host,opts){
   opts=opts||{};let st=null,iv=null;
   const pcsAllowed=()=>GAME.nat?NATPC:[0,1,2,3,4,5,6,7,8,9,10,11];
-  const strings=()=>GAME.str?[GAME.str]:[1,2,3,4,5,6];
+  const strings=()=>GAME.str?[GAME.str]:INST.strings;
   const newTarget=()=>{
     const cand=[];strings().forEach(s=>{for(let f=0;f<=GAME.range;f++){const pc=(OPEN_PC[s]+f)%12;if(pcsAllowed().includes(pc))cand.push({s,f,pc})}});
     let t;do{t=cand[Math.floor(Math.random()*cand.length)]}while(st&&st.t&&cand.length>1&&t.pc===st.t.pc&&(GAME.mode==='find'||t.s===st.t.s));
@@ -232,7 +233,7 @@ function viewGame(){
   ${toolHead('game','Juego del mástil','Contra reloj')}
   ${toolBar([['mode','Modo',TKIC.mode],['range','Trastes',TKIC.frets],['str','Cuerdas',TKIC.strs],['nat','Notas',TKIC.abc]])}
   ${toolPanels([['mode','Modo',chipRow('mode','Modo',[{v:'find',l:'Encuentra la nota'},{v:'name',l:'¿Qué nota es?'}],GAME.mode)],['range','Trastes',chipRow('range','Trastes',[{v:5,l:'0 a 5'},{v:12,l:'0 a 12'}],GAME.range)],
-    ['str','Cuerdas',chipRow('str','Cuerdas',[{v:0,l:'Todas'},...[6,5,4,3,2,1].map(v=>({v,l:'Cuerda '+v}))],GAME.str)],['nat','Notas',chipRow('nat','Notas',[{v:1,l:'Solo naturales'},{v:0,l:'Las 12'}],GAME.nat)]])}
+    ['str','Cuerdas',chipRow('str','Cuerdas',[{v:0,l:'Todas'},...INST.desc.map(v=>({v,l:'Cuerda '+v}))],GAME.str)],['nat','Notas',chipRow('nat','Notas',[{v:1,l:'Solo naturales'},{v:0,l:'Las 12'}],GAME.nat)]])}
   <div class="card" id="gamehost"></div></div>`,
   mount(r){
     let stop=gameComponent($('#gamehost',r));

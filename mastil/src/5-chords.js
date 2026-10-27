@@ -142,6 +142,7 @@ function chordKeyHTML(k,mode){
  return `<div class="chord-grid">${rows.concat(extra).map(c=>{const v=chordVoicings(c.r,c.t)[0];return `<article class="card chord-mini"><h3>${c.g} · ${chordLabel(c.r,c.t)}</h3>${v?chordDiagram(v,c.r):''}<div class="row"><button class="btn sm" data-keyhear="${c.r}:${c.t}">Escuchar</button><a class="btn sm" href="#/acordes/${c.r}/${c.t}">Posiciones</a></div></article>`}).join('')}</div>`;
 }
 function viewChordDictionary(rawRoot,rawType){
+ if(INST.id==='bajo')return bassArpeggios(rawRoot,rawType);
  try{rawRoot=decodeURIComponent(rawRoot||'');rawType=decodeURIComponent(rawType||'')}catch(e){rawRoot='0';rawType='maj'}
  let r=Number(rawRoot),t=rawType||'maj';if(!Number.isInteger(r)||r<0||r>11){const parsed=rawRoot&&parseChordName(rawRoot);r=parsed?parsed.root:0}if(!CHORD_TYPES.includes(t)){const p=parseChordName('C'+t);t=p?p.type:'maj'}
  const vs=chordVoicings(r,t),ps=chordProgressions(r,t),functions=chordFunctions(r,t),root=chordRoot(r);

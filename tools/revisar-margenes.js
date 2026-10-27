@@ -1,14 +1,15 @@
 // Revisa todas las pantallas buscando botones partidos, textos cortados y elementos fuera del margen.
-// Uso: sirve el repo (python3 -m http.server 8790) y corre: node tools/revisar-margenes.js <ancho> <escala-de-texto>
+// Uso: sirve el repo (python3 -m http.server 8790) y corre: node tools/revisar-margenes.js <ancho> <escala-de-texto> [URL]
 // Ejemplos: 390 1.25 · 360 1.15 · 320 1 · 1280 1  (la tira de acordes y los diagramas del mástil se desplazan a propósito)
-const {chromium}=require('playwright');
-(async()=>{const W=+process.argv[2],Z=+process.argv[3];const b=await chromium.launch();const p=await b.newPage({viewport:{width:W,height:780}});
-await p.goto('http://localhost:8790/mastil/');await p.waitForTimeout(500);
-const R=new Set(['#/','#/lecciones','#/practicar','#/referencia','#/practicar/metronomo']);for(let i=1;i<=11;i++)R.add('#/leccion/'+i);
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function launch(){try{const {chromium}=require('playwright');const b=await chromium.launch();return {b,p:await b.newPage()}}catch(e){const puppeteer=require(process.env.TEMP+'/roka-bajo-qa-node/node_modules/puppeteer-core');const b=await puppeteer.launch({executablePath:process.env.LOCALAPPDATA+'/ms-playwright/chromium-1243/chrome-win64/chrome.exe',headless:true,args:['--no-sandbox']});return {b,p:await b.newPage()}}}
+(async()=>{const W=+process.argv[2],Z=+process.argv[3];const {b,p}=await launch();const url=process.argv[4]||'http://localhost:8790/mastil/';if(p.setViewport)await p.setViewport({width:W,height:780});else await p.setViewportSize({width:W,height:780});
+await p.goto(url,{waitUntil:'domcontentloaded'});await wait(500);await p.evaluate(()=>{if(typeof welcomeClose==='function')welcomeClose(true);if(typeof DB!=='undefined'){DB.onb={skip:true};save()}document.querySelector('#onboard')?.remove()});
+const R=new Set(['#/','#/lecciones','#/practicar','#/referencia','#/practicar/metronomo']);for(let i=1;i<=await p.evaluate(()=>LESSONS.length);i++)R.add('#/leccion/'+i);
 const issues=[];const visited=new Set();
 while(true){const r=[...R].find(x=>!visited.has(x));if(!r)break;visited.add(r);
- await p.evaluate(h=>location.hash=h,r);await p.waitForTimeout(300);
- (await p.evaluate(()=>[...document.querySelectorAll('a[href^="#/"]')].map(a=>a.getAttribute('href')))).forEach(x=>{if(!/\/leccion\/\d+\/./.test(x))R.add(x)});
+ await p.evaluate(h=>location.hash=h,r);await wait(300);
+ (await p.evaluate(()=>[...document.querySelectorAll('a[href^="#/"]')].map(a=>a.getAttribute('href')))).forEach(x=>{if(!/\/leccion\/\d+\/./.test(x)&&!/^#\/acordes\/.+/.test(x))R.add(x)});
  const found=await p.evaluate(({W,Z})=>{
   // escala el texto como lo hace Android con letra grande
   document.querySelectorAll('#page *').forEach(el=>{if(el.closest('svg')||el.dataset.zz)return;el.dataset.zz=1;const fs=parseFloat(getComputedStyle(el).fontSize);el.style.fontSize=(fs*Z)+'px'});
@@ -25,4 +26,4 @@ while(true){const r=[...R].find(x=>!visited.has(x));if(!r)break;visited.add(r);
   });
   return [...new Set(out)];},{W,Z});
  found.forEach(f=>issues.push(r+' → '+f));}
-console.log('ancho',W,'texto x'+Z,'| pantallas:',visited.size,'| problemas:',issues.length);console.log(issues.slice(0,120).join('\n'));await b.close()})();
+console.log('ancho',W,'texto x'+Z,'| pantallas:',visited.size,'| problemas:',issues.length);console.log(issues.slice(0,120).join('\n'));await b.close();if(issues.length)process.exitCode=1})().catch(e=>{console.error(e);process.exitCode=1});

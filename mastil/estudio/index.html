@@ -32,7 +32,7 @@ svg{flex:none}.ic svg,.btn svg{width:18px;height:18px}
 .chip{min-height:32px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);font-size:13px;font-weight:600;white-space:nowrap}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .chips{display:flex;gap:6px;flex-wrap:wrap}.hscroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.hscroll::-webkit-scrollbar{display:none}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text)}
 .muted{color:var(--muted)}.cap{font-size:13px;color:var(--muted)}
 h1{font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-height:1.08;margin:4px 0}h2{font-size:20px;margin:0}h3{font-size:16px;margin:0}
@@ -96,12 +96,12 @@ h1{font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-height:1.08;margin:
 .strip b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.strip label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted)}
 .strip input[type=range]{width:100%;accent-color:var(--tc,var(--accent))}
 .meter{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--good),var(--warn) 75%,#ff453a)}
-.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.toolbar>*{max-width:100%}
 .mtabs{display:none}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-weight:600;z-index:50;transition:transform .25s;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 32px)}
 #toast.show{transform:translateX(-50%) translateY(0)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:grid;place-items:center;z-index:40;padding:16px}.modal .card{max-width:440px;width:100%;display:flex;flex-direction:column;gap:12px}
-.lic{display:flex;flex-direction:column;gap:12px}.lic .card b{display:block}
+.lic{display:flex;flex-direction:column;gap:12px}.lic .card b{display:block}.lic a{overflow-wrap:anywhere;word-break:break-word}
 /* teléfono: biblioteca y mezcla en pestañas */
 @media(max-width:860px){
  :root{--hw:118px;--row:70px}
@@ -472,9 +472,18 @@ function trackFor(S,rol,nombre){
   if(!t){t={id:uid(),nombre:nombre||ROLES[rol].n,rol,vol:rol==='bateria'?.8:.85,pan:0,mute:false,solo:false,eq:[0,0,0],rev:rol==='armonia'||rol==='metales'||rol==='voz'?.18:.06,clips:[]};S.pistas.push(t)}
   return t;
 }
-// respaldo sin audios: archivo .roka.json
-const sessionJSON=S=>JSON.stringify({app:'roka-estudio',version:1,sesion:S},null,1);
-function sessionFromJSON(txt){const o=JSON.parse(txt);if(!o||o.app!=='roka-estudio'||!o.sesion)throw Error('No es una sesión de Om Estudio.');const S=o.sesion;S.id=uid();S.nombre+=' (importada)';S.pistas.forEach(p=>p.clips=p.clips.filter(c=>c.fuente.beat));return S}
+// respaldos sin audios: una sesión (.roka.json) o todas (.roka-estudio.json)
+function sessionWithoutAudio(input,suffix=''){
+  const S=JSON.parse(JSON.stringify(input));
+  if(!S||typeof S!=='object'||!Array.isArray(S.pistas))throw Error('El respaldo contiene una sesión no válida.');
+  S.id=uid();S.nombre=String(S.nombre||'Sesión')+suffix;
+  S.pistas=S.pistas.map(p=>Object.assign({},p,{clips:Array.isArray(p.clips)?p.clips.filter(c=>c&&c.fuente&&c.fuente.beat):[]}));
+  S.editada=Date.now();return S;
+}
+const sessionJSON=S=>JSON.stringify({app:'roka-estudio',version:1,sesion:sessionWithoutAudio(S)},null,1);
+function sessionFromJSON(txt){const o=JSON.parse(txt);if(!o||o.app!=='roka-estudio'||!o.sesion)throw Error('No es una sesión de Om Estudio.');return sessionWithoutAudio(o.sesion,' (importada)')}
+function sessionsJSON(rows){return JSON.stringify({app:'roka-estudio',version:1,creado:new Date().toISOString(),sesiones:rows.map(S=>sessionWithoutAudio(S))},null,1)}
+function sessionsFromJSON(txt){const o=JSON.parse(txt);if(!o||o.app!=='roka-estudio'||!Array.isArray(o.sesiones)||!o.sesiones.length)throw Error('No es un respaldo de sesiones de Om Estudio.');if(o.sesiones.length>500)throw Error('El respaldo contiene demasiadas sesiones.');return o.sesiones.map(S=>sessionWithoutAudio(S,' (restaurada)'))}
 
 /* ---------- motor del estudio: búferes, reproducción con ciclo, metrónomo, grabación, importar y exportar ---------- */
 const BUF=new Map();            // clipId → AudioBuffer
@@ -596,20 +605,29 @@ async function exportMix(S,soloTrack){
 }
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
 
+/* ---------- información de la beta y reporte sin datos personales ---------- */
+const OM_BETA_VERSION='v20261026193523';
+let OM_LAST_ERROR='';
+const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
+if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){OM_LAST_ERROR=String(error&&error.message||message||'Error desconocido').slice(0,240);if(typeof OM_PREVIOUS_ONERROR==='function')return OM_PREVIOUS_ONERROR.apply(this,arguments)};
+function betaReport(app){const text=[`Reporte de ${app}`,`Versión: ${OM_BETA_VERSION}`,`Navegador: ${navigator.userAgent}`,`Ruta: ${location.pathname}${location.hash}`,`Pantalla: ${screen.width}×${screen.height} px`,`Último error: ${OM_LAST_ERROR||'ninguno capturado'}`].join('\n');if(navigator.clipboard)navigator.clipboard.writeText(text).catch(()=>{});const url='https://wa.me/?text='+encodeURIComponent(text),opened=window.open(url,'_blank','noopener');if(!opened)location.href=url}
+function betaAbout(){return `<div class="card"><span class="eyebrow">Beta · ${OM_BETA_VERSION}</span><b>Acerca de Om Estudio</b><p class="cap">Om · Centro de aprendizaje musical · ${automatiaMark()}</p><p class="cap">Sonidos: <a href="https://github.com/nbrosowsky/tonejs-instruments" target="_blank" rel="noopener">tonejs-instruments</a> (CC BY 3.0), <a href="https://www.bandshed.net/avldrumkits/" target="_blank" rel="noopener">AVL Drumkits Black Pearl</a> (CC BY-SA 3.0) y <a href="https://github.com/sgossner/VSCO-2-CE" target="_blank" rel="noopener">VSCO 2 CE</a> (CC0).</p><div class="toolbar"><a class="btn" href="../roka/?cambiar">Ver todas las apps Om</a><button class="btn" data-beta-report>Reportar un problema</button></div></div>`}
+if(typeof document!=='undefined')document.addEventListener('click',e=>{if(e.target.closest('[data-beta-report]'))betaReport('Om Estudio')});
+
 /* ---------- pantallas: sesiones, estudio y licencias ---------- */
 const KEYOPTS=NOTE_ES.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
 function viewHome(){
   return{html:`<div class="page"><div class="top"><span class="logo">${logo()}</span><div class="grow"><span class="eyebrow">Om Estudio</span><h1>Tus sesiones</h1><span class="cap">${automatiaMark()}</span></div><a class="btn sm" href="../roka/?cambiar">Apps</a></div>
     <p class="muted" style="margin:0">Elige un beat por género, cambia el tono y el tempo, y graba tu instrumento o tu voz encima.</p>
-    <div class="toolbar"><button class="btn pri" data-h="new">${IC.plus}Nueva sesión</button><label class="btn">${IC.file}Abrir respaldo<input type="file" accept=".json,application/json" data-h="imp" hidden></label><a class="btn" href="#/licencias">${IC.info}Sonidos y licencias</a></div>
+    <div class="toolbar"><button class="btn pri" data-h="new">${IC.plus}Nueva sesión</button><button class="btn" data-h="all-out">${IC.save}Respaldar todas</button><label class="btn">${IC.file}Restaurar todas<input type="file" accept=".roka-estudio.json,application/json" data-h="all-in" hidden></label><label class="btn">${IC.file}Abrir una sesión<input type="file" accept=".roka.json,.json,application/json" data-h="imp" hidden></label><a class="btn" href="#/licencias">${IC.info}Sonidos y licencias</a></div>
     <div id="cont"></div><h2>Sesiones guardadas</h2><div class="grid" id="list"><p class="muted">Cargando…</p></div>
-    <p class="cap">Todo se guarda en este dispositivo. Batería: AVL Drumkits (CC BY-SA 3.0) · guitarra y bajo: tonejs-instruments (CC BY 3.0) · metales y teclados: VSCO 2 CE (CC0).</p></div>`,
+    <p class="cap">El respaldo de todas las sesiones usa un archivo .roka-estudio.json y no incluye audios ni grabaciones.</p>${betaAbout()}</div>`,
   async mount(r){
     const list=await sesAll().catch(()=>[]);list.sort((a,b)=>b.editada-a.editada);
     $('#list',r).innerHTML=list.length?list.map(S=>{const b=S.genero&&beatById(S.genero);return`<a class="scard" href="#/s/${S.id}"><span class="cov">${b?beatArt(b):coverArt(218,'<path d="M10 50h80"/>','s'+S.id)}</span><span class="grow"><b>${esc(S.nombre)}</b><small>${noteName(S.tono.pc)}${S.tono.minor?' menor':''} · ${S.bpm} bpm · ${S.pistas.length} pistas</small></span></a>`}).join(''):'<p class="muted">Todavía no tienes sesiones. Crea una con el botón de arriba.</p>';
     const last=list.find(s=>s.id===DB.last);if(last)$('#cont',r).innerHTML=`<a class="scard" href="#/s/${last.id}" style="border-color:var(--accent)"><span class="cov">${last.genero&&beatById(last.genero)?beatArt(beatById(last.genero)):coverArt(218,'<path d="M10 50h80"/>','c')}</span><span class="grow"><span class="eyebrow">Continuar</span><b>${esc(last.nombre)}</b><small>Abierta por última vez ${new Date(last.editada).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'})}</small></span></a>`;
-    r.addEventListener('click',async e=>{const b=e.target.closest('[data-h="new"]');if(!b)return;const S=newSession();await sesPut(S);location.hash='#/s/'+S.id+'?beats=1'});
-    r.addEventListener('change',async e=>{const f=e.target.closest('[data-h="imp"]');if(!f||!f.files[0])return;try{const S=sessionFromJSON(await f.files[0].text());await sesPut(S);location.hash='#/s/'+S.id}catch(err){toast(esc(err.message))}});
+    r.addEventListener('click',async e=>{const b=e.target.closest('[data-h]');if(!b)return;if(b.dataset.h==='new'){const S=newSession();await sesPut(S);location.hash='#/s/'+S.id+'?beats=1'}else if(b.dataset.h==='all-out'){try{const rows=await sesAll();if(!rows.length)throw Error('Todavía no hay sesiones para respaldar.');download(new Blob([sessionsJSON(rows)],{type:'application/json'}),'om-estudio-'+new Date().toISOString().slice(0,10)+'.roka-estudio.json');toast(rows.length===1?'Se respaldó 1 sesión.':`Se respaldaron ${rows.length} sesiones.`)}catch(err){toast(esc(err.message))}}});
+    r.addEventListener('change',async e=>{const f=e.target.closest('[data-h]');if(!f||!f.files[0])return;try{if(f.dataset.h==='all-in'){const rows=sessionsFromJSON(await f.files[0].text());for(const S of rows)await sesPut(S);toast(rows.length===1?'Se restauró 1 sesión.':`Se restauraron ${rows.length} sesiones.`);route()}else if(f.dataset.h==='imp'){const S=sessionFromJSON(await f.files[0].text());await sesPut(S);location.hash='#/s/'+S.id}}catch(err){toast(esc(err.message))}finally{f.value=''}});
   }};
 }
 function viewLicenses(){

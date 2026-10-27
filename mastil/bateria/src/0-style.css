@@ -18,7 +18,7 @@
 :root[data-theme="light"]{--bg:#f4efe4;--surface:#fffaf1;--surface2:#ebe2cf;--fg:#1a2236;--muted:#586380;--line:#d6cab0;--glass:rgba(250,246,238,.78);--accent-text:#955700;--root:#bf4128;--good:#2b8559;--bad:#bf4128;--blue:#2f7cae;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{margin:0;background:var(--bg);color:var(--fg)}
+html,body{margin:0;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--fg)}
 body{background-image:var(--art,none);background-attachment:fixed;background-repeat:no-repeat;background-size:100% 100%}
 .card,.ex,.widget{box-shadow:inset 0 1px 0 color-mix(in srgb,var(--fg) 5%,transparent),0 10px 28px -20px rgba(0,0,0,.6)}
 .glow{background:linear-gradient(95deg,var(--fg) 20%,var(--accent-text) 60%,var(--root));-webkit-background-clip:text;background-clip:text;color:transparent}

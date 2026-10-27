@@ -13,7 +13,7 @@ const INTS=[
  {n:10,sym:'♭7',name:'Séptima menor',ch:'Bluesera: queda en suspenso.'},
  {n:11,sym:'7',name:'Séptima mayor',ch:'Muy tensa; pide resolver a la octava.'},
  {n:12,sym:'8',name:'Octava',ch:'La misma nota, más aguda: el reposo total.'}];
-const OCT={6:[4,2],5:[3,2],4:[2,3],3:[1,3]};
+const OCT=INST.id==='bajo'?{5:[3,2],4:[2,2],3:[1,2]}:{6:[4,2],5:[3,2],4:[2,3],3:[1,3]};
 const PROGS={
  pop:{n:'I–V–vi–IV',it:[[0,'maj'],[4,'maj'],[5,'min'],[3,'maj']]},
  s50:{n:'I–vi–IV–V',it:[[0,'maj'],[5,'min'],[3,'maj'],[4,'maj']]},
@@ -38,6 +38,7 @@ function pentaData(s){
   return{dots,zones:wins,nt,blue};
 }
 function cagedData(s){
+  if(INST.id==='bajo')return bassCaged(s);
   const K=KEYS[s.k],sh=SHAPES[s.s],shift=(K.pc-sh.r+12)%12,dots=[],muted=[];
   sh.f.forEach((f,i)=>{const st=6-i;if(f==null){muted.push(st);return}const fr=f+shift,pc=(OPEN_PC[st]+fr)%12,d=(pc-K.pc+12)%12;dots.push({s:st,f:fr,k:d===0?'root':'note',t:d===0?'1':d===4?'3':'5'})});
   const fr=sh.f.filter(x=>x!=null).map(x=>x+shift);
@@ -64,16 +65,16 @@ noteFinder:{
     return fretboard({dots:d,label:'Posiciones de '+PCS[s.n][0]})+`<p class="cap"><b>${PCS[s.n][0]}</b> aparece en ${d.length} posiciones entre el traste 0 y el 12.${PRINT?'':' Toca cualquier punto para escucharlo.'}</p>`},
   snaps:[{n:0},{n:7},{n:9}]},
 octave:{
-  init:{s:6,f:5},
-  controls:[{k:'s',label:'Cuerda de partida',opts:[6,5,4,3].map(v=>({v,l:'Cuerda '+v+' → '+(v-2)}))},{k:'f',label:'Traste',opts:[0,1,2,3,4,5,6,7,8].map(v=>({v,l:String(v)}))}],
+  init:{s:INST.n,f:5},
+  controls:[{k:'s',label:'Cuerda de partida',opts:INST.desc.filter(s=>s>=3).map(v=>({v,l:'Cuerda '+v+' → '+(v-2)}))},{k:'f',label:'Traste',opts:[0,1,2,3,4,5,6,7,8].map(v=>({v,l:String(v)}))}],
   view:s=>{const[ts,df]=OCT[s.s],f2=s.f+df,m1=(OPEN_PC[s.s]+s.f)%12;
     const d=[{s:s.s,f:s.f,k:'root',t:PCS[m1][0]},{s:ts,f:f2,k:'note',t:PCS[m1][0]}];
     return fretboard({dots:d,label:'Forma de octava'})+`<p class="cap">Desde la cuerda ${s.s}, sube <b>${s.s-ts} cuerdas</b> y <b>${df} trastes</b> más: es la misma nota, una octava arriba.</p><div class="row-act">${playBtn([OPEN_MIDI[s.s]+s.f,OPEN_MIDI[ts]+f2],'seq','Escuchar la octava')}</div>`},
   snaps:[{s:6,f:5},{s:5,f:3},{s:4,f:0},{s:3,f:5}]},
 intervals:{
-  init:{i:3},controls:[{k:'i',label:'Intervalo desde Do (cuerda 5, traste 3)',opts:INTS.map((x,i)=>({v:i,l:x.sym,s:String(x.n)}))}],
-  view:s=>{const iv=INTS[s.i],rs=5,rf=3,rm=OPEN_MIDI[rs]+rf,tm=rm+iv.n;const c=[];
-    for(let st=1;st<=6;st++){const f=tm-OPEN_MIDI[st];if(f>=0&&f<=12&&!(st===rs&&f===rf))c.push({s:st,f,t:iv.sym})}
+  init:{i:3},controls:[{k:'i',label:'Intervalo desde Do (cuerda '+(INST.id==='bajo'?3:5)+', traste 3)',opts:INTS.map((x,i)=>({v:i,l:x.sym,s:String(x.n)}))}],
+  view:s=>{const iv=INTS[s.i],rs=INST.id==='bajo'?3:5,rf=3,rm=OPEN_MIDI[rs]+rf,tm=rm+iv.n;const c=[];
+    for(let st=1;st<=INST.n;st++){const f=tm-OPEN_MIDI[st];if(f>=0&&f<=12&&!(st===rs&&f===rf))c.push({s:st,f,t:iv.sym})}
     c.sort((a,b)=>Math.abs(a.s-rs)-Math.abs(b.s-rs)||Math.abs(a.f-rf)-Math.abs(b.f-rf));
     const d=[{s:rs,f:rf,k:'root',t:'Do'},...c.map((x,i)=>({...x,k:i===0?'note':'faint'}))];
     return fretboard({dots:d,label:iv.name})+`<p class="cap"><b>${iv.name}</b> · ${iv.n} semitonos. ${iv.ch}</p><div class="row-act">${playBtn([rm,tm],'seq','Una tras otra')}${playBtn([rm,tm],'chord','Juntas')}</div>`},

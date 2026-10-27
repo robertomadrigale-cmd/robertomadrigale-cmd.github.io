@@ -14,10 +14,10 @@ function seqData(F){
 function chordBoard(F,i){
   const [name,frets]=F.list[i],to=Math.max(5,...F.list.map(c=>Math.max(...c[1].filter(v=>v!=null))+1)),d=[],m=[];
   const{fg,barre}=chordFing(frets);
-  frets.forEach((f,j)=>{const s=6-j;if(f==null){m.push(s);return}d.push({s,f,t:nm((OPEN_PC[s]+f)%12),k:'note',fg:fg[s]})});
+  frets.forEach((f,j)=>{const s=INST.n-j;if(f==null){m.push(s);return}d.push({s,f,t:nm((OPEN_PC[s]+f)%12),k:'note',fg:fg[s]})});
   return fretboard({to,dots:d,muted:m,barre,label:'Acorde '+name});
 }
-const chordMidiF=frets=>frets.map((f,j)=>f==null?null:OPEN_MIDI[6-j]+f).filter(v=>v!=null);
+const chordMidiF=frets=>frets.map((f,j)=>f==null?null:OPEN_MIDI[INST.n-j]+f).filter(v=>v!=null);
 // cada opción del ejercicio es un interruptor: ícono, valor actual y qué es; al tocarlo cambia al otro valor
 const FTOG={updown:[['Ida y vuelta',true],['Solo ida',false],'Recorrido','<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],per:[['1 por pulso',1],['2 por pulso',2],'Notas','<path d="M8 18V6l8-2v12"/><circle cx="6" cy="18" r="2"/><circle cx="14" cy="16" r="2"/>'],
   guide:[['Con guía',true],['Solo click',false],'Guía','<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'],mic:[['Sin calificar',false],['Con micrófono',true],'Calificar','<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'],
@@ -53,6 +53,7 @@ function figChord(id,F,i){
 function figStatus(id,t){const e=document.querySelector(`[data-fx="st"][data-id="${id}"]`);if(e)e.textContent=t}
 function figStop(){if(SEQ.id==='fig')seqStop()}
 function figStart(x,preview){
+  if(INST.id==='bajo'&&x.fig.type==='seq')return bassFigStart(x,preview);
   const F=x.fig,st=figState(x),own='fig:'+x.id+(preview?':p':'');
   OWNER=own;
   if(F.type==='seq'){
@@ -96,7 +97,7 @@ function figStart(x,preview){
 const FIGPREV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',FIGNEXT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
 // dónde va cada nota: cuerda, traste y dedo (para leerlo sin adivinar)
 function figWhere(F,s,f){if(f===0)return`cuerda ${s} al aire`;const{dots}=seqData(F);if(!F.nofg)autoFingers(dots);const d=dots.find(x=>x.s===s&&x.f===f);return`cuerda ${s}, traste ${f}${d&&d.fg?', dedo '+d.fg:''}`}
-function figChordWhere(F,i){const[name,frets]=F.list[i],{fg,barre}=chordFing(frets);const parts=frets.map((f,j)=>({f,s:6-j})).filter(x=>x.f!=null&&x.f>0&&!(barre&&x.f===barre.f&&fg[x.s]===1)).map(x=>`dedo ${fg[x.s]} en cuerda ${x.s} traste ${x.f}`);
+function figChordWhere(F,i){const[name,frets]=F.list[i],{fg,barre}=chordFing(frets);const parts=frets.map((f,j)=>({f,s:INST.n-j})).filter(x=>x.f!=null&&x.f>0&&!(barre&&x.f===barre.f&&fg[x.s]===1)).map(x=>`dedo ${fg[x.s]} en cuerda ${x.s} traste ${x.f}`);
   return`${name}: ${barre?`cejilla en el traste ${barre.f} (cuerdas ${barre.s2} a ${barre.s1})${parts.length?', ':''}`:''}${parts.join(', ')}`}
 const FIGHEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>';
 function paintFig(root){
@@ -172,7 +173,7 @@ function fmPitch(fr){
   if(!fr||!FM.id||!(SEQ.id==='fig'&&OWNER==='fig:'+FM.id)){FM.run=0;return}
   const n=Math.round(69+12*Math.log2(fr/440)),pc=((n%12)+12)%12;
   FM.run=(FM.lastPc===pc)?FM.run+1:1;FM.lastPc=pc;if(FM.run<2)return;
-  const ok=t=>t&&!t.hit&&!t.done&&((t.m%12)===pc);
+  const ok=t=>t&&!t.hit&&!t.done&&(INST.id==='bajo'?t.m===n:(t.m%12)===pc);
   if(ok(FM.target)){FM.target.hit=true;fmDot(FM.target,'hit')}
   else if(FM.prev&&performance.now()<FM.prev.until&&ok(FM.prev.t)){FM.prev.t.hit=true;fmDot(FM.prev.t,'hit')}
 }
