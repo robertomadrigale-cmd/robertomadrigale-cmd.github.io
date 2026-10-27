@@ -13,6 +13,9 @@
   <meta property="og:image" content="../og.jpg">
   <meta property="og:image:alt" content="Om · Centro de aprendizaje musical">
   <link rel="icon" href="../icons/icon-192.png" type="image/png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#04050b">
   <style>
     :root{color-scheme:dark;--bg:#04050b;--fg:#f6f7fb;--muted:#aab1c4;--line:rgba(255,255,255,.12);--card:rgba(14,17,30,.62);--blue:#2f7bff;--pink:#ff4fa3;--teal:#2ec4b6}
     *{box-sizing:border-box}
@@ -226,6 +229,7 @@
   </main>
   <script>
     (()=>{
+      if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
       const key='roka-portada:v1';
       const version='v20261025';let lastError='';
       window.onerror=(message,source,line,column,error)=>{lastError=String(error&&error.message||message||'Error desconocido').slice(0,240)};

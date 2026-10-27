@@ -1,0 +1,25 @@
+{
+  "name": "Om · Centro de aprendizaje musical",
+  "short_name": "Om",
+  "description": "Practica guitarra, bajo, batería, voz y producción musical desde tu celular, también sin internet.",
+  "lang": "es-MX",
+  "id": "/roka/",
+  "start_url": "./",
+  "scope": "../",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#04050b",
+  "theme_color": "#04050b",
+  "categories": ["education", "music"],
+  "icons": [
+    {"src": "../icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "../icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "../icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Om Guitarra", "url": "../"},
+    {"name": "Om Bajo", "url": "../bajo/"},
+    {"name": "Om Batería", "url": "../bateria/"},
+    {"name": "Om Voz", "url": "../voz/"}
+  ]
+}
