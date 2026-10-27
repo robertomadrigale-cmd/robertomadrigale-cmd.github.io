@@ -2,12 +2,12 @@
 const gSteps=g=>g.meter*g.sub*(g.bars||1);
 const COUNT={1:[''],2:['','y'],3:['','ta','ti'],4:['','e','y','a']};
 const LEVELS={1:'Base',2:'Groove',3:'Fills y ternarios'};
-const LVL={1:['q','e','tr','s','rudS','rudD','para','hhbd','rock','half'],
+const DRUM_LEVELS={1:['q','e','tr','s','rudS','rudD','para','hhbd','rock','half'],
   2:['rock2','rock3','rock16','slow','ghost','acc','cumbia','pop','disco','dembow'],
   3:['fill1','fill2','fill4','shuffle','b68','b128','vals','swing','polka']};
-const lvlOf=id=>+Object.keys(LVL).find(l=>LVL[l].includes(id))||1;
+const lvlOf=id=>+Object.keys(DRUM_LEVELS).find(l=>DRUM_LEVELS[l].includes(id))||1;
 const starsFor=p=>p>=.85?3:p>=.7?2:p>=.5?1:0;
-const levelStars=l=>l<1?99:LVL[l].reduce((s,id)=>s+(DB.stars[id]||0),0);
+const levelStars=l=>l<1?99:DRUM_LEVELS[l].reduce((s,id)=>s+(DB.stars[id]||0),0);
 const levelOpen=l=>l<=1||levelStars(l-1)>=10;
 const currentLevel=()=>levelOpen(3)?3:levelOpen(2)?2:1;
 const SPEEDS={lento:[.75,'Lento'],normal:[1,'Normal'],rapido:[1.15,'Rápido']};
@@ -81,9 +81,9 @@ function grooveArt(id,label){
 }
 /* Banda para tocar encima: estilos de BEATS (núcleo) que encajan con el compás del groove. Ternarios: sin banda. */
 const BANDFOR={rock:'rock',rock2:'rock',rock3:'rock',rock16:'rock',hhbd:'rock',fill1:'rock',fill2:'rock',fill4:'rock',half:'balada',slow:'balada',pop:'balada',
-  ghost:'pop',disco:'pop',cumbia:'cumbia',dembow:'reggaeton',vals:'vals',polka:'polka'};
-const bandOK=g=>g.sub!==3;
-const bandBeats=g=>!bandOK(g)?[]:BEATS.filter(b=>b.beats===(g.meter===3?3:4));
+  ghost:'pop',disco:'pop',cumbia:'cumbia',dembow:'urbano',vals:'vals',polka:'ranchera'};
+const bandOK=g=>[2,3,4].includes(g.meter);
+const bandBeats=g=>!bandOK(g)?[]:drumBandStyles(g);
 const bandFor=id=>{const g=G[id],list=bandBeats(g);if(!list.length)return null;const want=DB.band&&DB.band[id]||BANDFOR[id]||(g.meter===3?'vals':'pop');return(list.find(b=>b.id===want)||list[0]).id};
 // lecciones con «pista sin batería»: qué groove tocar encima y con qué estilo
 const TRACKG={'6c':'rock','6d':'half','10d':'vals','11a':'cumbia','11d':'pop'};

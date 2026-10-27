@@ -28,7 +28,7 @@ function unlockAudio(){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC&&AC.state!=='running')AC.resume()});
 const out=()=>MASTER;
 // retraso del sonido + ajuste manual (audífonos Bluetooth; Safari no informa ese retraso)
-const outLat=()=>AC?Math.min(.8,(AC.outputLatency||0)+(AC.baseLatency||0)+(+DB.lat||0)/1000):0;
+const outLat=()=>AC?Math.min(.8,(AC.outputLatency||0)+(AC.baseLatency||0)+(+(INST.id==='bateria'?DB.visualLat:DB.lat)||0)/1000):0;
 /* Cuerda pulsada (Karplus-Strong): un ruido corto que circula por un retardo filtrado suena como cuerda. */
 const KS={};
 function ksBuffer(m){
@@ -151,11 +151,11 @@ const guiro=(t,long)=>{if(long){for(let i=0;i<5;i++)noise(t+i*.022,.02,'bandpass
 function tickSound(t,kind){
   const o=AC.createOscillator(),g=AC.createGain();
   o.type='sine';o.frequency.value=kind==='acc'?1760:kind==='beat'?1180:880;
-  const v=kind==='acc'?.55:kind==='beat'?.38:.18;
+  const v=(kind==='acc'?.55:kind==='beat'?.38:.18)*(INST.id==='bateria'?(DB.clickVol??1):1);
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+.05);
   o.connect(g);g.connect(out());o.start(t);o.stop(t+.06);
 }
-function bell(){if(!ac())return;const t=AC.currentTime+.02;[76,83,88].forEach((m,i)=>pluck(m,t+i*.16,1.4,.22))}
+function bell(){if(INST.id==='bateria'){ac();hit('cr',AC.currentTime+.02,'x');return}if(!ac())return;const t=AC.currentTime+.02;[76,83,88].forEach((m,i)=>pluck(m,t+i*.16,1.4,.22))}
 function playNotes(list,mode,step){
   if(!ac())return;const t0=AC.currentTime+.03;
   list.forEach((m,i)=>pluck(m,t0+(mode==='chord'?i*.035:mode==='seq'?i*(step||.5):0),mode==='seq'?1.1:1.8,.2));
@@ -194,6 +194,7 @@ function seqStop(silent){
 const METERS={'2/4':{b:2,acc:[0]},'3/4':{b:3,acc:[0]},'4/4':{b:4,acc:[0]},'6/8':{b:6,acc:[0,3]}};
 const MET={bpm:80,meter:'4/4',sub:1};
 function metStart(opts,ui){
+  if(INST.id==='bateria')return drumMetStart(opts,ui);
   Object.assign(MET,opts||{});
   return seqStart('met','Metrónomo '+MET.bpm,()=>60/MET.bpm/MET.sub,(s,t)=>{
     const m=METERS[MET.meter],isBeat=s%MET.sub===0,b=Math.floor(s/MET.sub)%m.b;

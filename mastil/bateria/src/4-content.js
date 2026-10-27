@@ -33,6 +33,8 @@ Object.keys(G).forEach(k=>G[k].id=k);
 const GCATS=['Subdivisión','Rudimentos','Básicos','Fills','Ternarios','Estilos'];
 /* ---------- lecciones ---------- */
 const E=o=>({ex:o});
+const pts=(arr,o)=>({type:'seq',arr,o:o||{}}),chords=(list,beats)=>({type:'chords',list,beats:beats||4});
+const CH={},ch=(...ns)=>ns.map(n=>[n,CH[n]]),nm=pc=>PCS[pc][0],OC=GUITAR_OC;
 const LESSONS=[
 {id:1,part:1,title:'Tu reloj interno',sub:'Pulso, tempo y por qué se corre',lead:'Antes de corregir, mide. Tres pruebas cortas te dicen dónde estás.',
  blocks:[

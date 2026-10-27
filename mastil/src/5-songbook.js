@@ -35,6 +35,7 @@ const ESHAPE={maj:[0,2,2,1,0,0],min:[0,2,2,0,0,0],dom7:[0,2,0,1,0,0],m7:[0,2,0,0
 const ASHAPE={maj:[null,0,2,2,2,0],min:[null,0,2,2,1,0],dom7:[null,0,2,0,2,0],m7:[null,0,2,0,1,0],maj7:[null,0,2,1,2,0],sus2:[null,0,2,2,0,0],sus4:[null,0,2,2,3,0],add9:[null,0,2,2,0,0],dim:[null,0,1,2,1,null],m7b5:[null,0,1,0,1,null],aug:[null,0,3,2,2,null]};
 const VCACHE={};
 function voicing(p,shift){
+  if(INST.id==='bateria')return guitarVoicing(p,shift);
   if(INST.id==='bajo')return bassVoicing(p,shift);
   const pc=(p.pc+shift+120)%12,t=chType(p.suf),bass=p.bass==null?null:(p.bass+shift+120)%12,key=pc+'|'+t+'|'+bass;
   if(VCACHE[key])return VCACHE[key];
@@ -54,6 +55,7 @@ function voicing(p,shift){
   return VCACHE[key]={frets,midi,strs,root:36+((bass!=null?bass:pc)<4?(bass!=null?bass:pc)+12:(bass!=null?bass:pc))};
 }
 function chordSVG(v){
+  if(INST.id==='bateria')return '';
   if(INST.id==='bajo')return bassChordSVG(v);
   const F=v.frets,ns=F.filter(f=>f!=null&&f>0),lo=ns.length?Math.min(...ns):1,base=Math.max(...F.filter(f=>f!=null))>4?lo:1,W=10,H=11;
   let s=`<svg viewBox="-6 -12 ${5*W+14} ${4*H+16}" class="mch">`;
@@ -71,7 +73,7 @@ const GSTR={};
 function gNote(m,s,t,len,vol,o){
   const pv=GSTR[s];if(pv&&pv.end>t){try{const G=pv.g.gain;if(G.cancelAndHoldAtTime)G.cancelAndHoldAtTime(t);else G.cancelScheduledValues(t);G.setTargetAtTime(0,t,.015)}catch(e){}}
   // cada cuerda un poco a su lado del estéreo, como si la guitarra estuviera enfrente
-  const n=(INST.id==='bajo'?guitarPluck:pluck)(m,t,len,vol,Object.assign({pan:(3.5-s)*.06},o||{}));if(n)GSTR[s]=n;
+  const n=(INST.id!=='guitarra'?guitarPluck:pluck)(m,t,len,vol,Object.assign({pan:(3.5-s)*.06},o||{}));if(n)GSTR[s]=n;
 }
 /* Rasgueo: abajo = de la 6ª a la 1ª, arriba = de la 1ª hacia las graves pero solo 3-4 cuerdas.
    La púa tarda ~10 ms entre cuerdas (menos si el golpe es suave), con variaciones mínimas para que no suene a máquina. */
@@ -157,7 +159,7 @@ function clave(t,v){const o=AC.createOscillator(),g=AC.createGain();o.frequency.
 // i = celda dentro del compás (beats·sub celdas)
 function bandStep(id,beats,i,p,sh,t,spb,bar,ci){
   id=grooveFor(id,beats);const G=GROOVES[id],V=G[beats===3?3:4],sub=G.sub,cd=spb/sub,L=beats*sub;
-  const v=INST.id==='bajo'?guitarVoicing(p,sh):voicing(p,sh),pc=(p.bass!=null?p.bass+sh:p.pc+sh+120)%12,rootLo=28+((pc-4+12)%12),minor=p.minor||/^(m(?!aj)|min|-)/.test(p.suf);
+  const v=INST.id!=='guitarra'?guitarVoicing(p,sh):voicing(p,sh),pc=(p.bass!=null?p.bass+sh:p.pc+sh+120)%12,rootLo=28+((pc-4+12)%12),minor=p.minor||/^(m(?!aj)|min|-)/.test(p.suf);
   const lev=(c,X,x,o)=>c==='X'?X:c==='x'?x:c==='o'?o:0;
   // Humanización: cada músico se mueve como máximo 6 ms. El bombo del primer tiempo
   // queda clavado; el 1 respira un poco más fuerte y el resto varía hasta 5 %.
@@ -166,7 +168,7 @@ function bandStep(id,beats,i,p,sh,t,spb,bar,ci){
   // la batería cerca de 3 dB debajo de la guitarra sin tapar la guacharaca de la cumbia.
   const kit=SMP.d&&SMP.d.kick1?(id==='balada'?4.4:id==='cumbia'?1:2.2):1;
   // percusión
-  const dr=(k,f)=>{const c=V[k]&&V[k][i];if(c&&c!=='-')f(c)};
+  const dr=(k,f)=>{if(INST.id==='bateria'&&drumPlayer())return;const c=V[k]&&V[k][i];if(c&&c!=='-')f(c)};
   dr('k',c=>kick(ht(i===0),lev(c,.62,.46,.28)*dyn(),kit));
   dr('s',c=>{const q=lev(c,.68,.5,.25)*dyn(),tt=ht();if(id==='urbano'){if(!percHit('clap',tt,q,{level:.62*kit,pan:.06,wet:.2}))snare(tt,q,kit)}else snare(tt,q,kit)});
   dr('r',c=>{const q=lev(c,.62,.46,.25)*dyn(),tt=ht();if(!percHit('rim',tt,q,{level:.62*kit,pan:.06,wet:.16}))noise(tt,.04,'bandpass',1800,q*.25,3)});
@@ -175,7 +177,7 @@ function bandStep(id,beats,i,p,sh,t,spb,bar,ci){
   dr('g2',c=>{const q=lev(c,.58,.43,.27)*dyn(),tt=ht();if(!percHit(id==='merengue'?'tamb':'mara',tt,q,{level:.46*kit,pan:.2,wet:.08}))guiro(tt,c==='X')});
   dr('c',c=>{const q=lev(c,.62,.46,.26)*dyn(),tt=ht();if(!percHit(id==='son'?'cow':'click',tt,q,{level:.42*kit,pan:-.18,wet:.1}))clave(tt,q*.25)});
   // Apertura del arreglo y cada ocho compases: solo en estilos donde un crash es natural.
-  if(i===0&&bar>=0&&bar%8===0&&['rock','pop','country'].includes(id))percHit('crash',ht(),.64*dyn(),{level:.48*kit,pan:-.12,wet:.3});
+  if(!(INST.id==='bateria'&&drumPlayer())&&i===0&&bar>=0&&bar%8===0&&['rock','pop','country'].includes(id))percHit('crash',ht(),.64*dyn(),{level:.48*kit,pan:-.12,wet:.3});
   // bajo: dura hasta su siguiente nota o un «.»
   // las líneas que caminan (rock and roll, shuffle) empiezan de nuevo cuando cambia el acorde
   const bi=G.walk&&ci!=null?ci%L:i;
@@ -485,6 +487,7 @@ function viewSongEdit(id){
 /* ---------- cancionero: reproductor karaoke ---------- */
 const KAR={show:'both',met:false,band:true,voice:true,size:1};
 function capoHint(key,shift){
+  if(INST.id==='bateria')return 'Sigue la rejilla: cada columna indica cuándo tocar.';
   if(INST.id==='bajo')return 'Raíz = R · quinta = 5 · octava = 8. Toca una nota a la vez.';
   const target=(key.pc+shift+120)%12,easy=key.minor?[9,4,2]:[0,7,2,9,4];
   for(let c=0;c<=7;c++){const shape=(target-c+12)%12;if(easy.includes(shape))return c===0?'Se toca con acordes abiertos, sin capo.':`Truco: capo en el traste ${c} y toca con las formas de ${noteName(shape,false,DB.notation==='es')}${key.minor?'m':''}.`}
@@ -530,6 +533,7 @@ function viewSongPlay(id,slow){
   const styChips=()=>Object.entries(GROOVES).filter(([k,g])=>g[st.beats===3?3:4]).map(([k,g])=>`<button class="chip" data-sty="${k}" aria-pressed="${gid()===k}">${g.n}</button>`).join('');
   Object.assign(KAR,DB.kar||{});
   if(INST.id==='bajo')KAR.bassPlayer=DB.bassPlayer!==false;
+  if(INST.id==='bateria')KAR.drumPlayer=DB.drumPlayer!==false;
   const es=()=>DB.notation==='es';
   const keyLbl=()=>chName(P.key,st.shift,P.key,es())+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':'');
   const lineHTML=(l,i)=>{
@@ -559,7 +563,7 @@ function viewSongPlay(id,slow){
    ${panel('tempo','Tempo y velocidad',`<div class="row"><button class="btn sm" data-b="-4" aria-label="Más lento">${IC.minus}</button><b class="kkey" id="kbpm">${st.bpm}</b><button class="btn sm" data-b="4" aria-label="Más rápido">${IC.plus}</button><button class="btn sm" id="ktap" title="Toca 4 veces al ritmo de la canción">Marcar</button></div>
     <div class="kslow${slow?' hl':''}"><div><span class="cl">Velocidad${slow?' · cámara lenta':''}</span><div class="chips">${[.5,.6,.75,.9,1].map(v=>`<button class="chip" data-sp="${v}" aria-pressed="${st.sp===v}">${Math.round(v*100)} %</button>`).join('')}</div></div><p class="cap" id="kspd" style="margin:0"></p></div>`)}
    ${panel('son','Sonido',`<div class="krow ksnd"><button class="btn ${KAR.band?'on':''}" data-t="band">${IC.wave}<span>${KAR.band?'Con música':'Sin música'}</span></button><button class="btn ${KAR.met?'on':''}" data-t="met">${IC.play2}Metrónomo</button>${P.hasMel?`<button class="btn ${KAR.voice?'on':''}" data-t="voice">${IC.note}Voz guía</button>`:''}</div>
-    <div><span class="cl">Sincronizar luces con el sonido</span><div class="seg">${[[0,'Normal'],[150,'+150 ms'],[300,'+300 ms'],[450,'+450 ms']].map(([v,l])=>`<button data-lat="${v}" aria-pressed="${(+DB.lat||0)===v}">${l}</button>`).join('')}</div><p class="cap" style="margin:6px 0 0">Si la letra se ilumina antes de que suene (pasa con audífonos Bluetooth), sube el ajuste.</p></div>`)}
+    <div><span class="cl">Sincronizar luces con el sonido</span><div class="seg">${[[0,'Normal'],[150,'+150 ms'],[300,'+300 ms'],[450,'+450 ms']].map(([v,l])=>`<button data-lat="${v}" aria-pressed="${(+(INST.id==='bateria'?DB.visualLat:DB.lat)||0)===v}">${l}</button>`).join('')}</div><p class="cap" style="margin:6px 0 0">Si la letra se ilumina antes de que suene (pasa con audífonos Bluetooth), sube el ajuste.</p></div>`)}
    ${panel('grab','Tu grabación',`<div class="korig" id="korig"></div>`)}
    ${panel('rep','Repetir',`<div><span class="cl">Desde el renglón elegido</span><div class="seg">${[[0,'No'],[1,'1 renglón'],[2,'2'],[4,'4']].map(([v,l])=>`<button data-lp="${v}" aria-pressed="${st.loop===v}">${l}</button>`).join('')}</div></div><p class="cap" style="margin:0">Toca un renglón de la letra para empezar ahí.</p>`)}
    ${panel('mas','Ritmo, compás y vista',`<div><span class="cl">Ritmo de la banda</span><div class="chips" id="kstys">${styChips()}</div></div>
@@ -570,7 +574,7 @@ function viewSongPlay(id,slow){
   </div>
   <div class="kchips" id="kchips">${chips()}</div>
   <div class="kwrap"><div class="karaoke show-${KAR.show}" id="kar" style="--kz:${KAR.size}">${P.lines.map(lineHTML).join('')}</div>
-  ${INST.id==='bajo'?`<button class="btn ${DB.bassPlayer!==false?'on':''}" data-t="bassPlayer" aria-pressed="${DB.bassPlayer!==false}">Yo toco el bajo</button>`:''}<aside class="kside" id="kside"></aside></div>
+  ${INST.id==='bajo'?`<button class="btn ${DB.bassPlayer!==false?'on':''}" data-t="bassPlayer" aria-pressed="${DB.bassPlayer!==false}">Yo toco el bajo</button>`:''}${INST.id==='bateria'?`<div class="drum-sidebar"><button class="btn ${drumPlayer()?'on':''}" data-t="drumPlayer" aria-pressed="${drumPlayer()}">Yo toco la batería</button>`:''}<aside class="kside" id="kside"></aside>${INST.id==='bateria'?'</div>':''}</div>
   <div class="ksync" id="ksync" hidden></div>
   <div class="kbar"><div class="kprog"><i id="kprogi"></i></div><div class="kbrow"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${st.beats}/4 · ${BSTYLES[gid()]} · listo</span>
    <div class="ktrans"><button class="kic" data-step="-1" aria-label="Renglón anterior">${KIC.prev}</button><button class="kplayb" id="kgo" aria-label="Empezar">${IC.play}</button><button class="kic" data-step="1" aria-label="Renglón siguiente">${KIC.next}</button></div>
@@ -593,6 +597,7 @@ function viewSongPlay(id,slow){
     // panel lateral: tono, rasgueo sugerido y acorde que suena
     const side=()=>{const s=$('#kside',r);if(!s)return;
       if(INST.id==='bajo'){s.innerHTML=bassSide(curCh,st);return;}
+      if(INST.id==='bateria'){s.innerHTML=drumSide(st);return;}
       s.innerHTML=`<div class="ks-row"><div><span class="cl">Tono</span><b class="ks-key">${esc(keyLbl())}</b></div><div><span class="cl">Tempo</span><b class="ks-num">${st.bpm}</b><small>bpm · ${st.beats}/4</small></div></div>
        <p class="ks-capo">${esc(capoHint(P.key,st.shift))}</p>
        <div><span class="cl">Rasgueo sugerido · ${BSTYLES[gid()]}</span>${patHTML(st.style,st.beats)}<p class="ks-tip">${GROOVES[gid()].tip}</p></div>
@@ -663,6 +668,7 @@ function viewSongPlay(id,slow){
         if(LP&&k>0&&a===LP.s){for(let g=LP.g0;g<LP.g1;g++){const e=$(`.kl[data-li="${TL.lines[g].li}"]`,kar);if(e){e.classList.remove('cur','past');$$('.pc',e).forEach(x=>x.classList.remove('lit','now'))}}}
         if(a>=N){seqStop();pos=0;$('#kpos',r).textContent='Fin · '+P.title;paint();markDay();return}
         if(INST.id==='bajo')bassLight(r,cell(k));
+        if(INST.id==='bateria')drumLight(r,cell(k));
         if(a%stp===0){const rel2=a-Math.round(P.pickup*Q),L2=bt*Q,sl=((rel2%L2)+L2)%L2/stp;$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'));const q=$(`.kpat [data-sl="${sl}"]`,r);if(q)q.classList.add('on')}
         if(a%Q===0){const rl=a-Math.round(P.pickup*Q);beatPulse(r,((rl%(bt*Q))+bt*Q)%(bt*Q)===0);const bd=$('#kbd',r);if(bd){const rel=a-Math.round(P.pickup*Q);bd.classList.add('on');bd.classList.toggle('acc',((rel%(bt*Q))+bt*Q)%(bt*Q)===0);setTimeout(()=>bd.classList.remove('on'),100)}}
         (BK[a]||[]).forEach(e=>{
@@ -683,8 +689,8 @@ function viewSongPlay(id,slow){
       const b=e.target.closest('[data-b]');if(b){st.bpm=Math.max(40,Math.min(220,st.bpm+ +b.dataset.b));DB.kbpm[id]=st.bpm;save();$('#kbpm',r).textContent=st.bpm;side();spdTxt();restart();return}
       const sh=e.target.closest('[data-show]');if(sh){KAR.show=sh.dataset.show;kar.className='karaoke show-'+KAR.show;$$('[data-show]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sh)));DB.kar=Object.assign({},KAR);save();return}
       const n=e.target.closest('[data-not]');if(n){DB.notation=n.dataset.not;save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===n)));rerender();return}
-      const t=e.target.closest('[data-t]');if(t){const k=t.dataset.t;KAR[k]=!KAR[k];if(k==='bassPlayer'){DB.bassPlayer=KAR.bassPlayer;$$('[data-t="bassPlayer"]',r).forEach(x=>x.setAttribute('aria-pressed',String(KAR.bassPlayer)));restart()}if(k==='band'){restart();if(O.el)O.el.muted=!KAR.band&&!O.syncing;$$('[data-t="band"] span',r).forEach(x=>x.textContent=KAR.band?'Con música':'Sin música')}$$(`[data-t="${k}"]`,r).forEach(x=>x.classList.toggle('on',KAR[k]));if(k==='met'&&KAR.met)toast(logo()+'<span>Metrónomo encendido</span>');DB.kar=Object.assign({},KAR);save();return}
-      const lt=e.target.closest('[data-lat]');if(lt){DB.lat=+lt.dataset.lat;save();$$('[data-lat]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lt)));return}
+      const t=e.target.closest('[data-t]');if(t){const k=t.dataset.t;KAR[k]=!KAR[k];if(k==='drumPlayer'&&INST.id==='bateria'){DB.drumPlayer=KAR.drumPlayer;$$('[data-t="drumPlayer"]',r).forEach(x=>x.setAttribute('aria-pressed',String(KAR.drumPlayer)));restart()}if(k==='bassPlayer'){DB.bassPlayer=KAR.bassPlayer;$$('[data-t="bassPlayer"]',r).forEach(x=>x.setAttribute('aria-pressed',String(KAR.bassPlayer)));restart()}if(k==='band'){restart();if(O.el)O.el.muted=!KAR.band&&!O.syncing;$$('[data-t="band"] span',r).forEach(x=>x.textContent=KAR.band?'Con música':'Sin música')}$$(`[data-t="${k}"]`,r).forEach(x=>x.classList.toggle('on',KAR[k]));if(k==='met'&&KAR.met)toast(logo()+'<span>Metrónomo encendido</span>');DB.kar=Object.assign({},KAR);save();return}
+      const lt=e.target.closest('[data-lat]');if(lt){DB[INST.id==='bateria'?'visualLat':'lat']=+lt.dataset.lat;save();$$('[data-lat]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lt)));return}
       const sp=e.target.closest('[data-sp]');if(sp){st.sp=+sp.dataset.sp;if(O.el)O.el.playbackRate=st.sp;if(slow){DB.ksp[id]=st.sp;save()}$$('[data-sp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sp)));spdTxt();restart();return}
       const lp=e.target.closest('[data-lp]');if(lp){const was=running();if(was)seqStop();st.loop=+lp.dataset.lp;$$('[data-lp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lp)));if(was)go();paint();return}
       const bb=e.target.closest('[data-beats]');if(bb){const was=running();if(was)seqStop();st.beats=+bb.dataset.beats;DB.kbeats[id]=st.beats;sumK();save();$$('[data-beats]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===bb)));build();if(pos>=TL.lines.length)pos=0;$('#kstys',r).innerHTML=styChips();sumK();side();paint();$('#kpos',r).textContent=`${st.beats}/4 · ${BSTYLES[gid()]} · listo`;return}
@@ -755,6 +761,7 @@ function viewSongPlay(id,slow){
       const g=curLine(now);if(g>=0){const t0=lineRaw(g),m=now-off(),lb=TL.lines[g].start+(O.grid?gridIdx(O.grid,m)-gridIdx(O.grid,t0):(m-t0)*(DB.kbpm[id]||P.bpm)/60),bt=st.beats,bi=Math.floor(lb+1e-3);
         if(O.lastBeat!==null&&bi!==O.lastBeat&&bi>O.lastBeat){const isBar=((bi%bt)+bt)%bt===0;beatPulse(r,isBar);if(KAR.met)tick(AC.currentTime+.005,isBar?'acc':'beat',isBar?'bar':'beat');else pulseBeat(isBar)}
         O.lastBeat=bi;const G=GROOVES[gid()],stp=+(($('.kpat',r)||{}).dataset||{}).step||1,cell=Math.floor((((lb%bt)+bt)%bt)*G.sub/stp+1e-3);
+        if(INST.id==='bateria')drumLight(r,{G:gid(),bt,i:cell,bar:Math.floor(lb/bt)});
         if(INST.id==='bajo'){const k=Math.max(0,Math.floor(lb*G.sub)),L=bt*G.sub; bassLight(r,{G:gid(),bt,i:cell,bar:Math.floor(lb/bt),p:TL.chAt[k]||curCh,sh:st.shift,ci:k-(TL.chS[k]||0)})}
         const q=$(`.kpat [data-sl="${cell}"]`,r);if(q&&!q.classList.contains('on')){$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'));q.classList.add('on')}
         // repetir renglones

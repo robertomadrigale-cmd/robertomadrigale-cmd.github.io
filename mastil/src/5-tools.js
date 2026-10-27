@@ -310,7 +310,7 @@ function viewRoutine(){
       const b=B()[RT.i];
       $('#rtctl',r).innerHTML=on?`<span class="tm">${b?esc(b.t):''}</span><div class="ktrans"><button class="kic" data-rt="end" aria-label="Terminar">${IC.x}</button><button class="kplayb" data-rt="pause">${playLbl(!TMR.paused,'Reanudar','Pausa',IC.play,IC.pause)}</button><button class="kic" data-rt="next" aria-label="Siguiente bloque">${IC.next}</button></div><span></span>`
         :`<span class="tm">${RT.len} min · 4 bloques</span><div class="ktrans"><button class="kplayb" data-rt="start">${playLbl(false,'Empezar rutina','')}</button></div><span></span>`;
-      const m=$('#tmeta',r);if(m)m.textContent=`${RT.len} minutos: calentamiento, mástil, lección e improvisación`;
+      const m=$('#tmeta',r);if(m)m.textContent=`${RT.len} minutos: ${INST.id==='bateria'?'rudimentos, groove, lección y banda':'calentamiento, mástil, lección e improvisación'}`;
       $('#rtlen',r).style.display=on?'none':'';
     };
     const body=()=>{

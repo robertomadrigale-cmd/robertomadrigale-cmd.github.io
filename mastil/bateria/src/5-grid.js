@@ -41,7 +41,7 @@ function kitSVG(g,extra){
   Object.keys(KITPOS).forEach(r=>{const[x,y]=KITPOS[r];s+=`<text class="klimb" data-l="${r}" x="${x}" y="${(r==='bd'||r==='hf'?y-21:y+5)}"></text>`});
   return s+'</svg>';
 }
-const LIMBS_HTML=`<div class="limbs">${Object.entries(LIMB).map(([k,n])=>`<span data-limb="${k}">${n}</span>`).join('')}</div>`;
+const limbsHTML=()=>`<div class="limbs">${Object.entries(LIMB).map(([k,n])=>`<span data-limb="${k}">${n}</span>`).join('')}</div>`;
 function kitFlash(root,row,limb){
   if(!root)return;const r=row==='rim'?'sn':row,el=$(`.kit [data-r="${r}"]`,root),lb=$(`.kit [data-l="${r}"]`,root);
   if(el){el.classList.remove('on');void el.getBBox;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),150)}
@@ -55,14 +55,14 @@ function grooveRun(o){
   const st={T0:0,step,n,cnt,end:null,o};Object.assign(GRUN,st);
   let ended=false;
   seqStart(o.id||'grv',o.label||g.n,()=>step,(s,t)=>{
-    if(s===0){st.T0=GRUN.T0=t+cnt*step;if(o.loops)st.end=GRUN.end=st.T0+o.loops*n*step;if(o.band)bandPlay(o.band,st.T0,o.bandVol);if(o.onStart)o.onStart(st)}
+    if(s===0){st.T0=GRUN.T0=t+cnt*step;if(o.loops)st.end=GRUN.end=st.T0+o.loops*n*step;if(o.band)drumBandPlay(o.band,st.T0,o.bandVol);if(o.onStart)o.onStart(st)}
     if(s<cnt){if(s%g.sub===0)tick(t,s%bar===0?'acc':'beat');return}
     const k=s-cnt,i=k%n,loop=Math.floor(k/n);
     if(o.loops&&loop>=o.loops){if(!ended){ended=true;const c=ac();setTimeout(()=>{if(SEQ.id!==(o.id||'grv'))return;grooveStop();if(o.onEnd)o.onEnd(st)},Math.max(0,(t-c.currentTime+.45+outLat())*1000))}return}
     const click=typeof o.click==='function'?o.click(loop):o.click;
     if(click&&i%g.sub===0)tick(t,i%bar===0?'acc':'beat');
     const drums=typeof o.drums==='function'?o.drums(loop):o.drums;
-    if(drums)for(const r in g.rows){const c=g.rows[r][i];if(c&&c!=='-'&&!(o.muted||[]).includes(r))hit(r,t,c)}
+    if(drums)for(const r in g.rows){const c=g.rows[r][i];if(c&&c!=='-'&&!(o.muted||[]).includes(r)){if(g.grace&&r==='sn'&&c==='X')for(let j=g.grace;j>0;j--)hit(r,Math.max(AC.currentTime,t-j*.018),'g');hit(r,t,c)}}
   },(s)=>{
     if(s<cnt){if(o.onCount&&s%g.sub===0)o.onCount(Math.floor(s/g.sub)%g.meter+1,s===0);return}
     const k=s-cnt,i=k%n,loop=Math.floor(k/n);if(o.loops&&loop>=o.loops)return;
@@ -70,7 +70,7 @@ function grooveRun(o){
   });
   return st;
 }
-function grooveStop(){if(SEQ.id)seqStop();bandStop()}
+function grooveStop(){if(SEQ.id)seqStop();drumBandStop()}
 // ilumina la rejilla y la batería al compás de lo que suena (para ejemplos y el reproductor)
 function lightStep(root,g,i,muted){
   gridNow(root,i);

@@ -2,7 +2,7 @@
 IC.levels=sv('<path d="M5 20v-6M10 20V9M15 20V5M20 20v-9"/>');
 IC.note=sv('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>');
 const DBK=INST.db;
-let DB={done:{},secs:{},days:{},game:{},bpm:{},theme:INST.id==='bajo'?'estudio':'auto',last:1,met:80,meter:'4/4',sub:1};
+let DB={done:{},secs:{},days:{},game:{},bpm:{},theme:INST.id!=='guitarra'?'estudio':'auto',last:1,met:80,meter:'4/4',sub:1};
 try{Object.assign(DB,JSON.parse(localStorage.getItem(DBK)||'{}'))}catch(e){}
 if(INST.migrate)DB=INST.migrate(DB);
 function persist(){try{localStorage.setItem(DBK,JSON.stringify(DB))}catch(e){}}
@@ -38,6 +38,7 @@ const THEMES=[
  ['indie','Indie','Años 2000 · cuarto de ensayo',0,'#f3eef7 #fffcff #e7dff0 #2a2433 #6d6479 #d8cde3 #7c5cff #fff #5b3fd6 #ff7a59 #fff #2e9e6a #d6453a #2f86c9','radial-gradient(circle at 85% 5%,rgba(124,92,255,.16),transparent 45%),radial-gradient(circle at 5% 95%,rgba(255,122,89,.12),transparent 45%)'],
 ];
 if(INST.id==='bajo'){THEMES[0][2]='Negro y verde ? para tu bajo';THEMES[0][4]=THEMES[0][4].replaceAll('#2f7bff',INST.color).replace('#ffffff','#052e22').replace('#5b9cff','#6ee7b7');}
+if(INST.id==='bateria'){THEMES[0][2]='Negro y coral · para tu batería';THEMES[0][4]=THEMES[0][4].replaceAll('#2f7bff',INST.color).replace('#5b9cff','#ff85a7');}
 const TVARS='bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue'.split(' ');
 const themeById=id=>THEMES.find(t=>t[0]===id);
 if(DB.theme==='dark')DB.theme='clasico';else if(DB.theme==='light')DB.theme='claro';
@@ -129,6 +130,7 @@ document.addEventListener('tmrdone',e=>{
   paintEx();
 });
 function exAction(b){
+  if(INST.id==='bateria'&&drumExAction(b))return true;
   const id=b.dataset.id,x=ALLEX.find(z=>z.id===id),k=b.dataset.x;if(!x)return false;
   if(k==='done'){if(DB.done[id])delete DB.done[id];else{DB.done[id]=true;markDay()}save();paintEx();refreshProgress();return true}
   if(k==='met'){if(SEQ.id==='met'&&OWNER==='ex:'+id)seqStop();else{OWNER='ex:'+id;metStart({bpm:DB.bpm[id]||x.bpm,meter:'4/4',sub:1},(bt,isB)=>{if(!isB)return;const d=document.querySelector(`[data-bd="${id}"]`);if(!d)return;d.classList.toggle('acc',bt===0);d.classList.add('on');setTimeout(()=>d.classList.remove('on'),110)})}paintEx();return true}
@@ -271,6 +273,7 @@ function viewLesson(id,exId){
   }};
 }
 function blockHTML(b,ws){
+  if(INST.id==='bateria'&&b.groove)return `<div class="card">${grooveGrid(G[b.groove])}<a class="btn" href="#/groove/${b.groove}">Escuchar y practicar</a></div>`;
   if(b.w){ws.push(b);return`<div class="widget" data-wi="${ws.length-1}"></div>`}
   if(b.ex)return exCard(b.ex);
   if(b.sec)return`<div class="prose"><p class="blockh">${b.sec}</p><p>${b.p}</p></div>`;
@@ -316,8 +319,9 @@ const NAV=[['#/','Inicio',IC.home,''],['#/lecciones','Lecciones',IC.book,'leccio
 let UNMOUNT=null;
 function route(){
   const h=location.hash.replace(/^#\/?/,''),p=h.split('/');
-  let v;
-  if(!p[0])v=viewHome();
+  let v=INST.id==='bateria'?drumRoute(h):null;
+  if(v){}
+  else if(!p[0])v=viewHome();
   else if(p[0]==='acordes')v=viewChordDictionary(p[1],p[2]);
   else if(p[0]==='punteo')v=p[1]?viewLeadLesson(+p[1]):viewLeadCourse();
   else if(p[0]==='lecciones')v=viewLessons();
@@ -334,6 +338,7 @@ function route(){
   const sec=p[0]===''?'':(p[0]==='lecciones'||p[0]==='punteo')?'leccion':p[0]==='acordes'?'referencia':p[0]==='logros'?'practicar':p[0];
   $$('[data-nav]').forEach(a=>{const on=a.dataset.nav===sec;if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   if(INST.id==='bajo')v=bassAdaptView(v);
+  if(INST.id==='bateria'){v=drumAdaptView(v);document.documentElement.classList.toggle('fs',!!v.fs);drumFigStop();}
   $('#ttl').textContent=v.title;
   const bk=$('#back');bk.hidden=!v.back;if(v.back)bk.href=v.back;
   // página nueva en cada vista: así no se acumulan los clics de vistas anteriores

@@ -3,7 +3,7 @@ const KIND={rud:['Calentamiento','Rudimento para soltar las manos'],groove:['Gro
 const dayNum=()=>Math.floor(new Date(today()+'T12:00:00')/864e5);
 function buildSession(){
   if(DB.sess&&DB.sess.d===today()&&DB.sess.steps&&DB.sess.steps.length)return DB.sess;
-  const lvl=currentLevel(),dn=dayNum(),pool=[...LVL[1],...(lvl>1?LVL[2]:[]),...(lvl>2?LVL[3]:[])].filter(id=>!['Subdivisión','Rudimentos'].includes(G[id].cat));
+  const lvl=currentLevel(),dn=dayNum(),pool=[...DRUM_LEVELS[1],...(lvl>1?DRUM_LEVELS[2]:[]),...(lvl>2?DRUM_LEVELS[3]:[])].filter(id=>!['Subdivisión','Rudimentos'].includes(G[id].cat));
   const fresh=pool.filter(id=>(DB.stars[id]||0)<3),from=(lvl>1?fresh.filter(id=>lvlOf(id)===lvl):[]).concat(fresh.length?fresh:pool);
   const rud=(lvl>1?['rudS','rudD','para','acc']:['rudS','rudD','para'])[dn%(lvl>1?4:3)],gr=from[dn%from.length],pr=lvl===1?['q','e'][dn%2]:lvl===2?['e','tr'][dn%2]:['s','tr'][dn%2];
   const bandG=bandOK(G[gr])?gr:'rock';
@@ -31,7 +31,7 @@ function viewCoach(id,kind){
     let timers=[],unpads=null,run=null,live=null,band=null,destroyed=false;
     const T=(f,ms)=>{const t=setTimeout(f,ms);timers.push(t);return t},clearT=()=>{timers.forEach(clearTimeout);timers=[]};
     COACH={get active(){return!!run}};
-    const stopAll=()=>{clearT();grooveStop();if(unpads){unpads();unpads=null}MIC.onHit=null;run=null};
+    const stopAll=()=>{if(live){document.removeEventListener('miclv',live);live=null}clearT();grooveStop();if(unpads){unpads();unpads=null}MIC.onHit=null;run=null};
     const step=()=>S.steps[S.i],g=()=>G[step().id];
     const head=(txt)=>`<div class="coach-head"><a class="icon-btn" href="${single?'#/groove/'+id:'#/'}" aria-label="Salir">${IC.x}</a><span>${txt}</span><span class="coach-mic">${DB.input==='mic'?(MIC.ready?'Micrófono listo':'Micrófono'):'Toques en pantalla'}</span></div>`;
     const stepTxt=()=>single?KIND[step().k][0]:`Paso ${S.i+1} de ${S.steps.length} · ${KIND[step().k][0]}`;
@@ -42,7 +42,7 @@ function viewCoach(id,kind){
       root.innerHTML=head(stepTxt())+`<div class="coach-center coach-how">
         <div class="how-top"><span class="coach-cover dcover">${grooveArt(st.id)}</span><div class="how-ttl"><span class="eyebrow">${KIND[st.k][0]} · ${KIND[st.k][1]}</span><h1>${esc(gg.n)}</h1><p class="cap">${bpm} bpm · ${meterTxt(gg)} · Nivel ${lvlOf(st.id)} · ${(gg.bars||1)>1?'2 compases':'1 compás'}</p></div></div>
         <p class="coach-tip">${how.tip}</p>
-        <div class="kitwrap">${kitSVG(gg)}${LIMBS_HTML}</div>
+        <div class="kitwrap">${kitSVG(gg)}${limbsHTML()}</div>
         <ul class="howrows">${how.rows.map(x=>`<li><b>${x.n}</b><span>${x.limbs}: ${x.where}</span></li>`).join('')}</ul>
         <div class="gridbox">${grooveGrid(gg)}</div>
         <ol class="how-steps">${how.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
@@ -54,7 +54,7 @@ function viewCoach(id,kind){
         ${auto?`<p class="cap" id="autot">Empieza solo en <b id="autos">5</b> s</p>`:''}
       </div>`;
       const prepBand=async()=>{if(st.k!=='band')return;const b=$('#bst',root),go=$('#go',root);go.disabled=true;band=null;
-        try{const sid=$('#bsty',root).value,beat=beatById(sid);band=await bandRender(sid,bpmFor(st.id),parseKey(beat.key));if(destroyed)return;b.textContent=`Banda lista: ${beat.n} en ${band.acordes.slice(0,4).join(' · ')}`}catch(e){band=null;b.textContent='No se pudo preparar la banda; tocarás solo con el click.'}
+        try{const sid=$('#bsty',root).value,beat=drumBeatById(sid);band=await drumBandRender(sid,bpmFor(st.id),drumKey(beat.key),G[st.id].meter);if(destroyed)return;b.textContent=`Banda lista: ${beat.n} en ${band.acordes.slice(0,4).join(' · ')}`}catch(e){band=null;b.textContent='No se pudo preparar la banda; tocarás solo con el click.'}
         go.disabled=false};
       prepBand();
       if(auto){let n=5;const tk=()=>{if(!$('#autos',root))return;n--;if(n<=0){exercise();return}$('#autos',root).textContent=n;T(tk,1000)};T(tk,1000)}
@@ -85,7 +85,7 @@ function viewCoach(id,kind){
         const off=best?(t-best.t)*1000:null,cl=best?gradeOf(off)[0]:'miss';if(best){matched.add(best);gridMark(root,best.i,cl)}
         fbv.textContent=best?(off>0?'+':'')+Math.round(off)+' ms':'—';fbt.textContent=best?offTxt(off):'Golpe de más';fb.className='vnote '+({ok:'hit',mid:'low',bad:'high',miss:'quiet'}[cl]);
         if(mode==='tap'){const b=$(`[data-pad="${pad}"]`,root);if(b)padFlash(b,cl)}};
-      if(mode==='tap')unpads=padsMount(root,onHit);else{MIC.onHit=(t)=>onHit(t-micLat(),null);live=()=>{const m=$('#mlv',root);if(m)m.style.width=Math.min(100,MIC.lv*250)+'%'};document.addEventListener('miclv',live)}
+      if(mode==='tap')unpads=padsMount(root,(t,pad)=>{hit({plat:'hh',tar:'sn',bom:'bd'}[pad],ac().currentTime+.005,'x');onHit(t,pad)});else{MIC.onHit=(t)=>onHit(t-micLat(),null);live=()=>{const m=$('#mlv',root);if(m)m.style.width=Math.min(100,MIC.lv*250)+'%'};document.addEventListener('miclv',live)}
       run={end:Infinity};
       grooveRun({id:'coach',g:gg,bpm,loops:listen+loops,click:true,drums:L=>L<listen,band:st.k==='band'?band:null,
         onStart:s=>{exp=expectedHits(gg,s.T0+listen*n*s.step,s.step,loops,mode);run.end=s.end;run.T0=s.T0},

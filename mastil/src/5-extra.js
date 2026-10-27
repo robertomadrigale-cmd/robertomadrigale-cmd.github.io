@@ -44,6 +44,7 @@ const SONGS=[
  {id:'pesado',sty:'rock',chn:'0:Em 16:A 24:Em',n:'Riff pesado en Mi',sub:'Original · cuerdas graves',lvl:3,bpm:100,src:'6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,.5 6,3,.5 6,0,.5 6,5,.5 6,6,.5 6,5,.5 6,3,.5 5,0,.5 5,0,.5 5,3,.5 5,0,.5 5,5,.5 5,3,.5 5,2,.5 5,0,.5 6,3,.5 6,2,.5 6,0,.5 6,3,.5 6,2,.5 6,0,.5 6,0,2'},
  {id:'solo',sty:'shuffle',chb:'0:A7',n:'Solo de blues en La',sub:'Frases con la caja 1',lvl:3,bpm:96,src:'1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,1 -,1 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,1 -,1 3,5,.5 3,7,.5 2,5,.5 2,8,.5 1,5,.5 1,8,.5 1,5,.5 2,8,.5 2,5,.5 3,7,.5 3,5,.5 4,7,.5 4,5,.5 5,7,.5 5,5,2'}];
 if(INST.id==='bajo')SONGS.splice(0,SONGS.length,...bassChallenges());
+if(INST.id==='bateria')SONGS.splice(0,SONGS.length);
 SONGS.forEach(S=>{let b=0;S.notes=[];S.src.trim().split(/\s+/).forEach(tok=>{const p=tok.split(',');if(p[0]==='-'){b+=+p[1];return}const s=+p[0],f=+p[1],d=+p[2];S.notes.push({s,f,d,b,m:OPEN_MIDI[s]+f});b+=d});S.beats=b});
 // acordes del acompañamiento en pulsos: chb = por pulso, chn = por número de nota
 SONGS.forEach(S=>{S.chords=[];if(S.chb)S.chb.split(' ').forEach(x=>{const[a,c]=x.split(':');S.chords.push([+a,c])});
@@ -71,6 +72,7 @@ function retoChordPCs(p,shift){
   return ints.map(x=>(p.pc+shift+x+120)%12);
 }
 function retoFromSong(id,shift){
+  if(INST.id==='bateria')return drumRetoFromSong(id,shift);
   const src=sbGet(id);if(!src)return null;const P=songParse(src.src),sh=shift==null?((DB.kt||{})[id]||0):shift,TL=songTimeline(P,0,P.beats);
   const ce=TL.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b),chords=[];ce.forEach(e=>{const n=chName(e.p,sh,P.key,false);if(!chords.length||chords[chords.length-1][0]!==e.b||chords[chords.length-1][1]!==n)chords.push([Math.max(0,e.b),n])});
   let kind='note',notes=[];const me=TL.ev.filter(e=>e.type==='note').map(e=>({m:e.m+sh,b:Math.max(0,e.b),d:e.d}));
@@ -82,6 +84,7 @@ function retoOwn(){
 }
 const retoCard=S=>{const r=(DB.reto||{})[S.id],type=S.audio?'Audio propio':S.kind==='chord'?'Reto de acordes':S.songId?'Del cancionero':LVL[S.lvl];return`<button class="card song-pick" data-rs="${esc(S.id)}"><span class="lv l${S.lvl||1}">${type}</span><b>${esc(S.n)}</b><span class="cap" style="margin:0">${esc(S.sub||'Tu reto')} · ${S.bpm} bpm</span><span class="row" style="justify-content:space-between;width:100%">${stars(r?r.stars:0)}<span class="tm">${r?r.score.toLocaleString('es-MX'):'—'}</span></span></button>`};
 function viewReto(){
+  if(INST.id==='bateria')return viewDrumReto();
   DB.reto=DB.reto||{};DB.retos=Array.isArray(DB.retos)?DB.retos:[];const own=retoOwn(),all=[...SONGS,...own],byId=new Map(all.map(x=>[x.id,x]));
   const ownList=own.length?own.map(S=>S.audio?`<div class="reto-row">${retoCard(S)}<button class="btn sm reto-del" data-rdel="${esc(S.id)}">Borrar</button></div>`:retoCard(S)).join(''):'<div class="card"><b>Todavía no tienes retos propios.</b><p class="cap">Agrega una canción al cancionero o carga un audio aquí.</p></div>';
   return{title:'Modo reto',back:'#/practicar',html:`${RETO_OWN_STYLE}<div id="retohost"><div class="hero-reto"><span class="eyebrow">Modo reto</span><h1 class="glow">Sube al escenario</h1><p class="sub">Practica notas o acordes justo cuando lleguen a la línea. Tus canciones del cancionero también pueden convertirse en reto.</p></div>
@@ -151,6 +154,7 @@ function retoChroma(an,buf,pcs){
   return hits/pcs.length*.72+Math.min(1,target*2)*.28;
 }
 function retoPlay(host,S,onExit){
+  if(INST.id==='bateria')return drumRetoPlay(host,S,onExit);
   const c=ac();if(!c){onExit();return null}
   seqStop();tmrStop();GAMEON=true;
   const spb=60/(S.bpm*RETO.speed),mic=RETO.input==='mic',chord=S.kind==='chord',bt=S.bt||4;
@@ -399,5 +403,5 @@ function restoreCode(txt){
   txt=String(txt||'').trim();let o=null;
   try{o=txt.startsWith('MGH1:')?JSON.parse(decodeURIComponent(escape(atob(txt.slice(5))))):JSON.parse(txt)}catch(e){return false}
   if(!o||typeof o!=='object'||typeof o.done!=='object')return false;
-  Object.keys(DB).forEach(k=>delete DB[k]);Object.assign(DB,{done:{},secs:{},days:{},game:{},bpm:{},theme:'auto'},o);save();applyTheme();return true;
+  Object.keys(DB).forEach(k=>delete DB[k]);Object.assign(DB,{done:{},secs:{},days:{},game:{},bpm:{},theme:'auto'},o);if(INST.id==='bateria')DB=drumMigrate(DB);save();applyTheme();return true;
 }

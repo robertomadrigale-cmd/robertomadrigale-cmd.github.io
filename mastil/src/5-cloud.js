@@ -5,7 +5,7 @@ const FBV='10.12.2',FBU=n=>`https://www.gstatic.com/firebasejs/${FBV}/firebase-$
 const cloudOn=()=>typeof FIREBASE_CONFIG!=='undefined'&&!!(FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey);
 // el correo y contraseña se muestran solo cuando se active ese método en Firebase (Authentication → Método de acceso)
 const CLOUD_EMAIL=false;
-const SYNC=['done','secs','days','bpm','figbest','reto','ach','game','tried',...(INST.id==='bajo'?['songs','onb','retobest']:[])];
+const SYNC=[...(INST.id==='bateria'?['stars','best','hist','ses','setlist','spd','gbpm','sess','band','input','lat','visualLat','clickLvl','sens','tapLat','clickVol','theme','imported','seen','played','drumPlayer','drumSchema']:[]),'done','secs','days','bpm','figbest','reto','ach','game','tried',...(INST.id!=='guitarra'?['songs','onb','retobest']:[])];
 async function cloudInit(){
   if(!cloudOn()||CLOUD.app)return;
   try{
@@ -31,9 +31,9 @@ function mergeVal(a,b){
 const uref=()=>CLOUD.M.doc(CLOUD.db,'users',CLOUD.user.uid);
 async function cloudPull(){
   const M=CLOUD.M,snap=await M.getDoc(uref()),d=snap.exists()?snap.data():{};
-  const p=d[INST.cloud.field]||{};SYNC.forEach(k=>{DB[k]=mergeVal(DB[k],p[k])});
-  if((!DB.songs||!DB.songs.length)&&Array.isArray(INST.id==='bajo'?p.songs:d.songs))DB.songs=INST.id==='bajo'?p.songs:d.songs;
-  if(DB.onb==null&&(INST.id==='bajo'?p.onb:d.onb))DB.onb=INST.id==='bajo'?p.onb:d.onb;
+  const p=INST.id==='bateria'?drumCloudData(d[INST.cloud.field]):d[INST.cloud.field]||{};SYNC.forEach(k=>{DB[k]=INST.id==='bateria'?drumCloudMerge(k,DB[k],p[k]):mergeVal(DB[k],p[k])});
+  if((!DB.songs||!DB.songs.length)&&Array.isArray(INST.id!=='guitarra'?p.songs:d.songs))DB.songs=INST.id!=='guitarra'?p.songs:d.songs;
+  if(DB.onb==null&&(INST.id!=='guitarra'?p.onb:d.onb))DB.onb=INST.id!=='guitarra'?p.onb:d.onb;
   CLOUD.group=d.group||null;persist();await cloudPush(true);
 }
 function memberStats(){const[d,t]=doneCount();const fb=Object.values(DB.figbest||{});return{done:d,total:t,mins7:weekMins(),streak:streak(),last:DB.last||1,mic:fb.length?Math.round(fb.reduce((a,b)=>a+b,0)/fb.length):null}}
@@ -41,7 +41,7 @@ async function cloudPush(now){
   if(!CLOUD.user)return;
   if(!now){clearTimeout(CLOUD.pushT);CLOUD.pushT=setTimeout(()=>cloudPush(true).catch(()=>{}),2500);return}
   const M=CLOUD.M,u=CLOUD.user,progress={};SYNC.forEach(k=>{if(DB[k]!=null)progress[k]=DB[k]});
-  await M.setDoc(uref(),{name:u.displayName||u.email||'Sin nombre',email:u.email||'',photo:u.photoURL||'',updated:M.serverTimestamp(),[INST.cloud.field]:progress,...(INST.id==='bajo'?{}:{songs:DB.songs||[],onb:DB.onb||null}),group:CLOUD.group||null},{mergeFields:['name','email','photo','updated',INST.cloud.field,...(INST.id==='bajo'?[]:['songs','onb']),'group']});
+  await M.setDoc(uref(),{name:u.displayName||u.email||'Sin nombre',email:u.email||'',photo:u.photoURL||'',updated:M.serverTimestamp(),[INST.cloud.field]:progress,...(INST.id!=='guitarra'?{}:{songs:DB.songs||[],onb:DB.onb||null}),group:CLOUD.group||null},{mergeFields:['name','email','photo','updated',INST.cloud.field,...(INST.id!=='guitarra'?[]:['songs','onb']),'group']});
   if(CLOUD.group)await M.setDoc(M.doc(CLOUD.db,'groups',CLOUD.group,'members',u.uid),{name:u.displayName||u.email||'Alumno',photo:u.photoURL||'',lastSeen:M.serverTimestamp(),[INST.cloud.stats]:memberStats()},{merge:true});
 }
 const _localSave=save;save=function(){_localSave.apply(this,arguments);if(CLOUD.user)cloudPush()};
@@ -79,7 +79,7 @@ function welcomeShow(){
   document.body.insertAdjacentHTML('beforeend',`<div id="welcome" role="dialog" aria-modal="true" aria-labelledby="wtitle">
    <div class="wmos" aria-hidden="true">${tiles.map(t=>`<span class="acov">${t}</span>`).join('')}</div><div class="wfade" aria-hidden="true"></div>
     <div class="wbox"><span class="wlogo">${logo()}</span><h1 id="wtitle">${INST.nombre}</h1>
-    <p class="wsub">Aprende guitarra viendo el mástil: lecciones, canciones con karaoke y una banda que te acompaña.</p>
+    <p class="wsub">${INST.id==='bateria'?'Aprende batería con una sesión diaria: grooves, rudimentos, canciones con karaoke y una banda que te acompaña.':INST.id==='bajo'?'Aprende bajo viendo el mástil: lecciones, canciones con karaoke y una banda que te acompaña.':'Aprende guitarra viendo el mástil: lecciones, canciones con karaoke y una banda que te acompaña.'}</p>
     <button class="wgoogle" data-w="google">${GLOGO}Continuar con Google</button>
     <button class="wskip" data-w="skip">Seguir sin cuenta</button>
     <p class="msg err" id="werr" hidden></p>

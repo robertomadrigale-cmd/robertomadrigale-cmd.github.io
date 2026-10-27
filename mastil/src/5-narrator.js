@@ -29,6 +29,7 @@ function sayText(html){
 const sentences=html=>{const t=String(html).replace(/<[^>]+>/g,'');return t.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿«0-9])/).map(s=>s.trim()).filter(Boolean)};
 const NOTEPC={do:0,re:2,mi:4,fa:5,sol:7,la:9,si:11};
 function mentions(text){
+  if(INST.id==='bateria')return [];
   const ev=[];let m;
   const r1=/cuerda (\d)[^.;]{0,40}?traste (\d+)/gi;while((m=r1.exec(text)))ev.push({i:m.index+m[0].length-m[2].length,s:+m[1],f:+m[2]});
   const r2=/cuerda (\d):? trastes? ((?:\d+(?:, | y )?)+)/gi;while((m=r2.exec(text))){const base=m.index+m[0].indexOf(m[2]);let n,r=/\d+/g;while((n=r.exec(m[2])))ev.push({i:base+n.index,s:+m[1],f:+n[0]})}
@@ -67,7 +68,7 @@ function buildNarration(l,root){
     else if(b.w){it.push({el,text:'Mira el diagrama.',demo:'widget'})}
     else if(b.ex){const x=b.ex,lis=$$('ol li',el);it.push({el,text:`Ejercicio: ${x.t}.`});x.steps.forEach((s,k)=>it.push({el,li:lis[k],text:s}));it.push({el,li:el.querySelector('.goal'),text:'Lo logras cuando: '+x.goal});if(x.fig)it.push({el,text:'Escucha la demostración.',demo:'fig',x})}
   });
-  it.push({el:null,text:'Fin de la lección. Ahora haz los ejercicios con la guitarra en la mano.'});
+  it.push({el:null,text:INST.id==='bateria'?'Fin de la lección. Ahora practica con la batería o los pads.':'Fin de la lección. Ahora haz los ejercicios con la guitarra en la mano.'});
   return it;
 }
 function speak(text,onB){
