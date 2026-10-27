@@ -1,4 +1,4 @@
-const CACHE='roka-bajo-20261026203128',SMPC='roka-bajo-muestras-v1';
+const CACHE='roka-bajo-20261026212219',SMPC='roka-bajo-muestras-v1';
 const SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('roka-bajo-')&&k!==CACHE&&k!==SMPC).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

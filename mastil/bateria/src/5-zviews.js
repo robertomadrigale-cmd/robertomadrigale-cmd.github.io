@@ -59,7 +59,7 @@ function viewProgress(){
 function viewSettings(){
   const k={nombre:'Black Pearl',autor:'Glen MacArthur',licencia:'CC BY-SA 3.0',url:'https://www.bandshed.net/avldrumkits/',credito:'AVL Drumkits.'};
   return{title:'Ajustes',back:'#/',html:`<div class="lhead"><h1>Ajustes</h1></div>
-    <section class="card coach-settings"><h2>Apariencia y sonido</h2><label>Tema<select data-pref="theme">${[['estudio','Estudio'],['punk','Escenario'],['claro','Aluminio (claro)'],['auto','Automático']].map(([v,n])=>`<option value="${v}" ${DB.theme===v?'selected':''}>${n}</option>`).join('')}</select></label>
+    <section class="card coach-settings"><h2>Apariencia y sonido</h2><label>Tema<select data-pref="theme">${[['auto','Automático'],...THEMES.map(t=>[t[0],t[1]])].map(([v,n])=>`<option value="${v}" ${DB.theme===v?'selected':''}>${n}</option>`).join('')}</select></label>
       <label>Volumen del click<select data-pref="clickVol">${[[.5,'Bajo'],[1,'Normal'],[1.6,'Fuerte']].map(([v,n])=>`<option value="${v}" ${(DB.clickVol||1)==v?'selected':''}>${n}</option>`).join('')}</select></label>
       <label>Cómo te escucho<select data-pref="input"><option value="tap" ${DB.input!=='mic'?'selected':''}>Toques en pantalla</option><option value="mic" ${DB.input==='mic'?'selected':''}>Micrófono</option></select></label>
       <p class="cap">Sonido de batería: ${KIT?'kit grabado listo':KIT===false?'sintetizado (no se pudo cargar el kit grabado)':'kit grabado (se carga al primer toque)'}.</p></section>

@@ -26,7 +26,28 @@ const ART={
    return cover('#16140f',[[620,160,480,'#d06a3a',.26],[140,480,440,'#8fae45',.18]],pl)},
  blues:()=>cover('#0a1424',[[400,-40,600,'#c9a24a',.30],[120,520,460,'#3b6fd1',.20],[720,700,380,'#6fb2ff',.12]],waves(260,6,30,'#eef2f8',.05)),
  surf:()=>cover('#e9f6f4',[[660,120,420,'#ff6b4a',.30],[120,460,520,'#0a8f9c',.22]],waves(520,8,18,'#0a8f9c',.12)+`<circle cx="660" cy="150" r="110" fill="#ff6b4a" fill-opacity=".22"/>`),
- indie:()=>cover('#f3eef7',[[640,140,500,'#7c5cff',.26],[140,480,460,'#ff7a59',.20],[500,760,360,'#2f86c9',.12]],rings(140,160,8,34,'#2a2433',.06))
+ indie:()=>cover('#f3eef7',[[640,140,500,'#7c5cff',.26],[140,480,460,'#ff7a59',.20],[500,760,360,'#2f86c9',.12]],rings(140,160,8,34,'#2a2433',.06)),
+ // mañana de domingo: sol bajo que entra por la ventana, rayos largos
+ domingo:()=>cover('#faf5ec',[[700,60,560,'#ffb45a',.34],[100,620,420,'#2f6a9a',.12],[520,900,360,'#d9622b',.10]],
+   [0,1,2,3,4].map(i=>`<path d="M800 ${-40+i*70} L-40 ${560+i*150} L-40 ${600+i*150} L800 ${-10+i*70} Z" fill="#fff6e4" fill-opacity="${.22-i*.03}"/>`).join('')+`<circle cx="700" cy="70" r="90" fill="#ffd28a" fill-opacity=".35"/>`),
+ // lado oscuro: luna en eclipse con un arco fino de colores
+ prisma:()=>{const C=['#ff5a5a','#ffb347','#ffe066','#5fd38a','#5aa9ff','#b49bff'];
+   return cover('#050507',[[400,260,460,'#b49bff',.14],[700,700,380,'#5aa9ff',.08]],
+   `<circle cx="400" cy="300" r="170" fill="#0c0c10" stroke="#f2f2f5" stroke-opacity=".18" stroke-width="2"/><circle cx="452" cy="276" r="150" fill="#050507"/>`+
+   C.map((c,i)=>`<path d="M-40 ${640+i*9} Q400 ${440+i*9} 840 ${640+i*9}" fill="none" stroke="${c}" stroke-opacity=".5" stroke-width="7"/>`).join('')+
+   `<path d="M-40 640 Q400 440 840 640" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>`)},
+ // corrido tumbado: noche, luces de ciudad y trazos dorados como cuerdas de requinto
+ tumbado:()=>{let s='';for(let i=0;i<6;i++)s+=`<line x1="${120+i*22}" y1="-20" x2="${420+i*22}" y2="1420" stroke="#c9a34e" stroke-opacity="${.16-i*.015}" stroke-width="${2.4-i*.25}"/>`;
+   let d='';for(let i=0;i<40;i++){const x=(i*137)%800,y=980+((i*71)%260);d+=`<rect x="${x}" y="${y}" width="${4+i%3*2}" height="${4+i%3*2}" fill="${i%4?'#c9a34e':'#2fa36b'}" fill-opacity="${.18+i%5*.05}"/>`}
+   return cover('#07090a',[[680,80,460,'#c9a34e',.20],[100,900,480,'#2fa36b',.18]],s+d)},
+ // cumbia sonidera: rayos de luz de colores que salen del escenario y la bola de espejos
+ sonidera:()=>{const C=['#ff3fa4','#36c8ff','#ffd23f','#3ee6a0','#ff3fa4','#ffd23f'];
+   const beams=C.map((c,i)=>{const a=-60+i*24,x=400+Math.sin(a*Math.PI/180)*1500,y=1400-Math.cos(a*Math.PI/180)*1500;return`<path d="M400 1400 L${x-90} ${y} L${x+90} ${y} Z" fill="${c}" fill-opacity=".10"/>`}).join('');
+   let ball='';for(let r=0;r<6;r++)for(let c=0;c<8;c++)ball+=`<rect x="${340+c*15}" y="${150+r*15}" width="13" height="13" fill="#fdf3ff" fill-opacity="${.05+((r*3+c*5)%7)*.035}"/>`;
+   return cover('#120624',[[160,80,420,'#ff3fa4',.30],[680,160,420,'#36c8ff',.24],[400,1100,520,'#ffd23f',.18]],beams+`<g clip-path="url(#ball)">${ball}</g>`,`<clipPath id="ball"><circle cx="400" cy="195" r="58"/></clipPath>`)},
+ // bolero de luna: luna llena, reflejo en el agua y ondas suaves
+ bolero:()=>cover('#0b0f1f',[[620,200,420,'#f0e2be',.20],[120,700,460,'#c9a7ff',.14]],
+   `<circle cx="620" cy="220" r="96" fill="#f4efe6" fill-opacity=".55"/>`+[0,1,2,3,4,5].map(i=>`<rect x="${560-i*8}" y="${700+i*34}" width="${120+i*16}" height="5" rx="2.5" fill="#f4efe6" fill-opacity="${.22-i*.03}"/>`).join('')+waves(690,7,10,'#a4a7b8',.06))
 };
 const ARTURL={};
 Object.keys(ART).forEach(k=>{try{ARTURL[k]="url('data:image/svg+xml,"+encodeURIComponent(ART[k]()).replace(/'/g,'%27')+"')"}catch(e){}});

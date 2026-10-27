@@ -1129,6 +1129,10 @@ html.welcome-on{overflow:hidden}
 
 /* fila bajo la cabecera del reproductor: jugar como reto y tocar con un beat (Roka Estudio) */
 .kplay .kextra{display:flex;gap:8px;flex-wrap:wrap;margin-top:-6px}
+/* temas temáticos: cada época trae su letra de títulos y su radio de tarjetas (variables en THEMES, 6-app.js) */
+:root[data-hs] h1,:root[data-hs] h2,:root[data-hs] .lhead h1{font-family:var(--hf);text-transform:var(--htt);letter-spacing:var(--htr);font-style:var(--hst)}
+:root[data-hs] .thc > b{font-family:var(--font-body);text-transform:none;letter-spacing:-.01em;font-style:normal}
+:root[data-theme="domingo"] .card,:root[data-theme="domingo"] .ex,:root[data-theme="domingo"] .widget{box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 30px -22px rgba(0,0,0,.35)}
 
 </style>
 </head>
@@ -1969,7 +1973,7 @@ WID.openchords={
   view:s=>{const c=OC[s.i],{d,m}=ocDots(c),cf=chordFing(c[2]);d.forEach(x=>{x.fg=cf.fg[x.s]});return fretboard({to:5,dots:d,muted:m,barre:cf.barre,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261026203128';
+const OM_BETA_VERSION='v20261026212219';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -4649,7 +4653,28 @@ const ART={
    return cover('#16140f',[[620,160,480,'#d06a3a',.26],[140,480,440,'#8fae45',.18]],pl)},
  blues:()=>cover('#0a1424',[[400,-40,600,'#c9a24a',.30],[120,520,460,'#3b6fd1',.20],[720,700,380,'#6fb2ff',.12]],waves(260,6,30,'#eef2f8',.05)),
  surf:()=>cover('#e9f6f4',[[660,120,420,'#ff6b4a',.30],[120,460,520,'#0a8f9c',.22]],waves(520,8,18,'#0a8f9c',.12)+`<circle cx="660" cy="150" r="110" fill="#ff6b4a" fill-opacity=".22"/>`),
- indie:()=>cover('#f3eef7',[[640,140,500,'#7c5cff',.26],[140,480,460,'#ff7a59',.20],[500,760,360,'#2f86c9',.12]],rings(140,160,8,34,'#2a2433',.06))
+ indie:()=>cover('#f3eef7',[[640,140,500,'#7c5cff',.26],[140,480,460,'#ff7a59',.20],[500,760,360,'#2f86c9',.12]],rings(140,160,8,34,'#2a2433',.06)),
+ // mañana de domingo: sol bajo que entra por la ventana, rayos largos
+ domingo:()=>cover('#faf5ec',[[700,60,560,'#ffb45a',.34],[100,620,420,'#2f6a9a',.12],[520,900,360,'#d9622b',.10]],
+   [0,1,2,3,4].map(i=>`<path d="M800 ${-40+i*70} L-40 ${560+i*150} L-40 ${600+i*150} L800 ${-10+i*70} Z" fill="#fff6e4" fill-opacity="${.22-i*.03}"/>`).join('')+`<circle cx="700" cy="70" r="90" fill="#ffd28a" fill-opacity=".35"/>`),
+ // lado oscuro: luna en eclipse con un arco fino de colores
+ prisma:()=>{const C=['#ff5a5a','#ffb347','#ffe066','#5fd38a','#5aa9ff','#b49bff'];
+   return cover('#050507',[[400,260,460,'#b49bff',.14],[700,700,380,'#5aa9ff',.08]],
+   `<circle cx="400" cy="300" r="170" fill="#0c0c10" stroke="#f2f2f5" stroke-opacity=".18" stroke-width="2"/><circle cx="452" cy="276" r="150" fill="#050507"/>`+
+   C.map((c,i)=>`<path d="M-40 ${640+i*9} Q400 ${440+i*9} 840 ${640+i*9}" fill="none" stroke="${c}" stroke-opacity=".5" stroke-width="7"/>`).join('')+
+   `<path d="M-40 640 Q400 440 840 640" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>`)},
+ // corrido tumbado: noche, luces de ciudad y trazos dorados como cuerdas de requinto
+ tumbado:()=>{let s='';for(let i=0;i<6;i++)s+=`<line x1="${120+i*22}" y1="-20" x2="${420+i*22}" y2="1420" stroke="#c9a34e" stroke-opacity="${.16-i*.015}" stroke-width="${2.4-i*.25}"/>`;
+   let d='';for(let i=0;i<40;i++){const x=(i*137)%800,y=980+((i*71)%260);d+=`<rect x="${x}" y="${y}" width="${4+i%3*2}" height="${4+i%3*2}" fill="${i%4?'#c9a34e':'#2fa36b'}" fill-opacity="${.18+i%5*.05}"/>`}
+   return cover('#07090a',[[680,80,460,'#c9a34e',.20],[100,900,480,'#2fa36b',.18]],s+d)},
+ // cumbia sonidera: rayos de luz de colores que salen del escenario y la bola de espejos
+ sonidera:()=>{const C=['#ff3fa4','#36c8ff','#ffd23f','#3ee6a0','#ff3fa4','#ffd23f'];
+   const beams=C.map((c,i)=>{const a=-60+i*24,x=400+Math.sin(a*Math.PI/180)*1500,y=1400-Math.cos(a*Math.PI/180)*1500;return`<path d="M400 1400 L${x-90} ${y} L${x+90} ${y} Z" fill="${c}" fill-opacity=".10"/>`}).join('');
+   let ball='';for(let r=0;r<6;r++)for(let c=0;c<8;c++)ball+=`<rect x="${340+c*15}" y="${150+r*15}" width="13" height="13" fill="#fdf3ff" fill-opacity="${.05+((r*3+c*5)%7)*.035}"/>`;
+   return cover('#120624',[[160,80,420,'#ff3fa4',.30],[680,160,420,'#36c8ff',.24],[400,1100,520,'#ffd23f',.18]],beams+`<g clip-path="url(#ball)">${ball}</g>`,`<clipPath id="ball"><circle cx="400" cy="195" r="58"/></clipPath>`)},
+ // bolero de luna: luna llena, reflejo en el agua y ondas suaves
+ bolero:()=>cover('#0b0f1f',[[620,200,420,'#f0e2be',.20],[120,700,460,'#c9a7ff',.14]],
+   `<circle cx="620" cy="220" r="96" fill="#f4efe6" fill-opacity=".55"/>`+[0,1,2,3,4,5].map(i=>`<rect x="${560-i*8}" y="${700+i*34}" width="${120+i*16}" height="5" rx="2.5" fill="#f4efe6" fill-opacity="${.22-i*.03}"/>`).join('')+waves(690,7,10,'#a4a7b8',.06))
 };
 const ARTURL={};
 Object.keys(ART).forEach(k=>{try{ARTURL[k]="url('data:image/svg+xml,"+encodeURIComponent(ART[k]()).replace(/'/g,'%27')+"')"}catch(e){}});
@@ -5018,38 +5043,49 @@ setInterval(()=>{
   if(SEQ.id||(TMR.id&&!TMR.paused)||TUN.stream||GAMEON){const k=today();DB.secs[k]=(DB.secs[k]||0)+1;if(DB.secs[k]>=60)DB.days[k]=true;if(DB.secs[k]%10===0)save()}
 },1000);
 LEFTY=!!DB.lefty;
-/* ---------- temas: épocas y estilos del rock ---------- */
+/* ---------- temas: épocas, géneros y guiños a canciones (sin bandas, fotos ni logos) ---------- */
 // orden de c: bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue
+// [id, nombre, frase, oscuro, colores, luz de fondo, grupo, estilo]
+// estilo: hf letra de títulos ('d' condensada, 's' con patines), tt mayúsculas, tr espaciado, st itálica, r radio de tarjetas
 const THEMES=[
- ['estudio','Estudio','Negro y azul eléctrico · como apps de audio',1,'#000000 #111114 #1b1b20 #f4f4f7 #8b8b95 #26262c #2f7bff #ffffff #5b9cff #ff4fa3 #fff #34d399 #ff453a #2f7bff','radial-gradient(ellipse at 85% -15%,rgba(47,123,255,.14),transparent 55%),radial-gradient(ellipse at 0% 0%,rgba(255,79,163,.06),transparent 45%)'],
- ['clasico','Grafito','El estándar · sobrio y oscuro',1,'#0b0b0c #161618 #1f1f22 #f5f5f7 #98989f #2c2c30 #ff9f0a #1a1000 #ffb340 #ff453a #fff #30d158 #ff453a #0a84ff','radial-gradient(ellipse at 70% -20%,rgba(255,159,10,.07),transparent 60%)'],
- ['claro','Aluminio','Claro y limpio',0,'#f5f5f7 #ffffff #ebebf0 #1d1d1f #6e6e73 #d9d9de #ff9500 #ffffff #b85f00 #d70015 #fff #248a3d #d70015 #0071e3','none'],
- ['rocknroll','Rock and Roll','Años 50 · rocola y cromo',0,'#f6efe0 #fffaf0 #f1e0c8 #1d1a24 #6b6270 #e2cfb3 #d7263d #fff #b0182c #0f8b8d #fff #2b8559 #c0392b #2f7cae','repeating-linear-gradient(45deg,rgba(215,38,61,.045) 0 16px,transparent 16px 32px)'],
- ['psico','Psicodelia','Años 60 · color y fuzz',1,'#1a0b2e #26123f #341a56 #fdeee0 #c3a6d9 #4a2a70 #ff8a1f #200a00 #ffa64d #ff3d9a #fff #9be15d #ff5c7a #5ee0e6','radial-gradient(circle at 12% 8%,rgba(255,61,154,.24),transparent 45%),radial-gradient(circle at 92% 30%,rgba(255,138,31,.2),transparent 42%),radial-gradient(circle at 50% 105%,rgba(94,224,230,.16),transparent 50%)'],
- ['estadio','Rock de estadio','Años 70 · oro y reflectores',1,'#0d0b08 #17140f #221d15 #f5ecd8 #a8987a #3a3122 #d4a537 #1a1205 #e6bb55 #c8452c #fff #7fb069 #d9583b #7aa7c7','radial-gradient(ellipse at 50% -20%,rgba(255,226,150,.2),transparent 50%),linear-gradient(180deg,rgba(212,165,55,.06),transparent 40%)'],
- ['punk','Punk','1977 · fotocopia y alfileres',1,'#0b0b0b #161616 #222222 #fafafa #a0a0a0 #333333 #ff2d95 #120008 #ff5cab #f5e400 #111 #39e07a #ff4040 #29c5f6','repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 10px)'],
- ['metal','Heavy Metal','Años 80 · cromo y fuego',1,'#08090b #121419 #1b1f27 #e8ebf0 #8e96a5 #2b313d #c9ced8 #0b0d12 #dfe4ec #d3122c #fff #4fbf7f #e0263f #5b8fd6','linear-gradient(160deg,rgba(255,255,255,.06),transparent 30%),radial-gradient(ellipse at 50% 115%,rgba(211,18,44,.26),transparent 55%)'],
- ['synth','Synthwave','Años 80 · neón y sintes',1,'#0f0624 #1a0c3a #251450 #f7ecff #b39ad6 #3d2470 #ff3ea5 #1b0016 #ff6fbf #2de2e6 #04121a #6dfcb0 #ff5470 #7b8cff','linear-gradient(180deg,transparent 55%,rgba(255,62,165,.18)),repeating-linear-gradient(0deg,rgba(45,226,230,.06) 0 1px,transparent 1px 36px)'],
- ['rockmx','Rock mexicano','Años 80-90 · rock en tu idioma',1,'#0e0c0c #1a1615 #251f1d #f4ede6 #a89a90 #3a302c #e23b3b #fff #ff6a5f #21a66a #fff #5fd39a #ff5a4f #6aa8d8','linear-gradient(90deg,rgba(33,166,106,.12),transparent 28%,transparent 72%,rgba(226,59,59,.12))'],
- ['grunge','Grunge','Años 90 · franela y distorsión',1,'#16140f #201d16 #2b271d #ece4d2 #a69c85 #3d3729 #d06a3a #170a03 #e08155 #8fae45 #0f1405 #6fae7c #d9483b #6a95a8','repeating-linear-gradient(90deg,rgba(208,106,58,.05) 0 26px,transparent 26px 52px),repeating-linear-gradient(0deg,rgba(208,106,58,.05) 0 26px,transparent 26px 52px)'],
- ['blues','Blues y jazz','Club de medianoche',1,'#0a1424 #11203a #182b4c #eef2f8 #94a6c4 #243a60 #c9a24a #161003 #dcb85e #e05a4f #fff #5fbf8f #e05a4f #6fb2ff','radial-gradient(ellipse at 50% -10%,rgba(201,162,74,.22),transparent 55%)'],
- ['surf','Surf rock','Playa, reverb y sol',0,'#e9f6f4 #f9fffd #d3ece8 #0f2b33 #4d6b72 #b7dad5 #ff6b4a #2a0800 #c7402a #0a8f9c #fff #2b8a57 #c7402a #2875b8','radial-gradient(circle at 100% 0,rgba(255,107,74,.2),transparent 42%),radial-gradient(circle at 0 100%,rgba(10,143,156,.14),transparent 45%)'],
- ['indie','Indie','Años 2000 · cuarto de ensayo',0,'#f3eef7 #fffcff #e7dff0 #2a2433 #6d6479 #d8cde3 #7c5cff #fff #5b3fd6 #ff7a59 #fff #2e9e6a #d6453a #2f86c9','radial-gradient(circle at 85% 5%,rgba(124,92,255,.16),transparent 45%),radial-gradient(circle at 5% 95%,rgba(255,122,89,.12),transparent 45%)'],
+ ['estudio','Estudio','Negro y azul eléctrico · como apps de audio',1,'#000000 #111114 #1b1b20 #f4f4f7 #8b8b95 #26262c #2f7bff #ffffff #5b9cff #ff4fa3 #fff #34d399 #ff453a #2f7bff','radial-gradient(ellipse at 85% -15%,rgba(47,123,255,.14),transparent 55%),radial-gradient(ellipse at 0% 0%,rgba(255,79,163,.06),transparent 45%)','base'],
+ ['clasico','Grafito','El estándar · sobrio y oscuro',1,'#0b0b0c #161618 #1f1f22 #f5f5f7 #98989f #2c2c30 #ff9f0a #1a1000 #ffb340 #ff453a #fff #30d158 #ff453a #0a84ff','radial-gradient(ellipse at 70% -20%,rgba(255,159,10,.07),transparent 60%)','base'],
+ ['claro','Aluminio','Claro y limpio',0,'#f5f5f7 #ffffff #ebebf0 #1d1d1f #6e6e73 #d9d9de #ff9500 #1a0f00 #a35400 #d70015 #fff #248a3d #d70015 #0071e3','none','base'],
+ ['domingo','Mañana de domingo','Claro y cálido · café y acústica',0,'#faf5ec #fffdf8 #f1e8d8 #24201b #675e52 #e3d8c4 #d9622b #1f0d02 #a5461a #2f6a9a #fff #2d7a4a #b8382a #2f6a9a','radial-gradient(circle at 90% -5%,rgba(255,180,90,.22),transparent 45%),radial-gradient(circle at 0% 100%,rgba(47,106,154,.08),transparent 45%)','base',{hf:'s',tr:'-.02em',r:'22px'}],
+ ['rocknroll','Rock de la cárcel','50s · rocola, cromo y pista',0,'#f6efe0 #fffaf0 #f1e0c8 #1d1a24 #625a68 #e2cfb3 #d7263d #fff #b0182c #0f7f81 #fff #2b8559 #c0392b #2f7cae','repeating-linear-gradient(45deg,rgba(215,38,61,.045) 0 16px,transparent 16px 32px)','rock',{hf:'d',tt:'uppercase',tr:'.01em',r:'24px'}],
+ ['psico','Nubes de colores','60s · flores, fuzz y caleidoscopio',1,'#1a0b2e #26123f #341a56 #fdeee0 #c3a6d9 #4a2a70 #ff8a1f #200a00 #ffa64d #ff3d9a #fff #9be15d #ff5c7a #5ee0e6','radial-gradient(circle at 12% 8%,rgba(255,61,154,.24),transparent 45%),radial-gradient(circle at 92% 30%,rgba(255,138,31,.2),transparent 42%),radial-gradient(circle at 50% 105%,rgba(94,224,230,.16),transparent 50%)','rock',{hf:'s',st:'italic',tr:'-.01em',r:'28px'}],
+ ['estadio','Escalera al cielo','70s · oro, humo y reflectores',1,'#0d0b08 #17140f #221d15 #f5ecd8 #a8987a #3a3122 #d4a537 #1a1205 #e6bb55 #c8452c #fff #7fb069 #d9583b #7aa7c7','radial-gradient(ellipse at 50% -20%,rgba(255,226,150,.2),transparent 50%),linear-gradient(180deg,rgba(212,165,55,.06),transparent 40%)','rock',{hf:'s',tr:'.005em'}],
+ ['prisma','Lado oscuro','70s · progresivo, prisma y luna',1,'#050507 #0f0f13 #18181e #f2f2f5 #9a9aa6 #26262e #b49bff #120a2a #c4b0ff #ff6b5a #1a0300 #5fd38a #ff5a5a #5aa9ff','linear-gradient(100deg,transparent 30%,rgba(255,90,90,.07) 40%,rgba(255,210,80,.07) 46%,rgba(95,211,138,.07) 52%,rgba(90,169,255,.07) 58%,rgba(180,155,255,.08) 64%,transparent 74%)','rock',{tr:'-.03em',r:'14px'}],
+ ['punk','Anarquía en la calle','77 · fotocopia y alfileres',1,'#0b0b0b #161616 #222222 #fafafa #a0a0a0 #333333 #ff2d95 #120008 #ff5cab #f5e400 #111 #39e07a #ff4040 #29c5f6','repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 10px)','rock',{hf:'d',tt:'uppercase',tr:'.02em',r:'4px'}],
+ ['metal','Maestro de títeres','80s · cromo, fuego y velocidad',1,'#08090b #121419 #1b1f27 #e8ebf0 #8e96a5 #2b313d #c9ced8 #0b0d12 #dfe4ec #e0263f #fff #4fbf7f #ff4d63 #5b8fd6','linear-gradient(160deg,rgba(255,255,255,.06),transparent 30%),radial-gradient(ellipse at 50% 115%,rgba(211,18,44,.26),transparent 55%)','rock',{hf:'d',tt:'uppercase',tr:'.04em',r:'8px'}],
+ ['synth','Synthwave 84','80s · neón, sintes y cuadrícula',1,'#0f0624 #1a0c3a #251450 #f7ecff #b39ad6 #3d2470 #ff3ea5 #1b0016 #ff6fbf #2de2e6 #04121a #6dfcb0 #ff5470 #7b8cff','linear-gradient(180deg,transparent 55%,rgba(255,62,165,.18)),repeating-linear-gradient(0deg,rgba(45,226,230,.06) 0 1px,transparent 1px 36px)','rock',{hf:'d',tt:'uppercase',st:'italic',tr:'.03em',r:'14px'}],
+ ['rockmx','Rock en tu idioma','80s-90s · el rock en español',1,'#0e0c0c #1a1615 #251f1d #f4ede6 #a89a90 #3a302c #e23b3b #fff #ff6a5f #21a66a #fff #5fd39a #ff5a4f #6aa8d8','linear-gradient(90deg,rgba(33,166,106,.12),transparent 28%,transparent 72%,rgba(226,59,59,.12))','rock',{hf:'d',tt:'uppercase',tr:'.01em'}],
+ ['grunge','Espíritu adolescente','90s · franela y distorsión',1,'#16140f #201d16 #2b271d #ece4d2 #a69c85 #3d3729 #d06a3a #170a03 #e08155 #8fae45 #0f1405 #6fae7c #e0554a #6a95a8','repeating-linear-gradient(90deg,rgba(208,106,58,.05) 0 26px,transparent 26px 52px),repeating-linear-gradient(0deg,rgba(208,106,58,.05) 0 26px,transparent 26px 52px)','rock',{tr:'-.01em',r:'6px'}],
+ ['indie','Cuarto de ensayo','2000s · amplis, cinta y alfombra',0,'#f3eef7 #fffcff #e7dff0 #2a2433 #665d72 #d8cde3 #7c5cff #fff #5b3fd6 #e2603f #fff #2e9e6a #d6453a #2f86c9','radial-gradient(circle at 85% 5%,rgba(124,92,255,.16),transparent 45%),radial-gradient(circle at 5% 95%,rgba(255,122,89,.12),transparent 45%)','rock',{r:'26px'}],
+ ['surf','Misirlou','Surf · playa, reverb y sol',0,'#e9f6f4 #f9fffd #d3ece8 #0f2b33 #46646b #b7dad5 #ff6b4a #2a0800 #b83a24 #0a7f8a #fff #2b8a57 #c7402a #2875b8','radial-gradient(circle at 100% 0,rgba(255,107,74,.2),transparent 42%),radial-gradient(circle at 0 100%,rgba(10,143,156,.14),transparent 45%)','rock',{hf:'d',tt:'uppercase',tr:'.02em',r:'26px'}],
+ ['tumbado','Corrido tumbado','Requinto, charcha y noche',1,'#07090a #111416 #1a1f22 #f1efe8 #9ea39f #262c2f #c9a34e #140e02 #d8b765 #2fa36b #031a0e #4cc38a #e5534b #6aa5d8','radial-gradient(ellipse at 100% -10%,rgba(201,163,78,.14),transparent 50%),radial-gradient(ellipse at 0% 110%,rgba(47,163,107,.12),transparent 50%)','latino',{hf:'d',tt:'uppercase',tr:'.03em',r:'10px'}],
+ ['sonidera','Cumbia sonidera','Luces de pista y güiro',1,'#120624 #1c0b36 #271248 #fdf3ff #c2a8de #3a1d63 #ffd23f #1d1300 #ffde6b #ff3fa4 #1f0012 #3ee6a0 #ff5a6e #36c8ff','radial-gradient(circle at 15% 0%,rgba(255,63,164,.22),transparent 40%),radial-gradient(circle at 85% 10%,rgba(54,200,255,.18),transparent 40%),radial-gradient(circle at 50% 110%,rgba(255,210,63,.14),transparent 50%)','latino',{hf:'d',tt:'uppercase',tr:'.02em',r:'22px'}],
+ ['bolero','Bolero de luna','Trío, requinto y serenata',1,'#0b0f1f #141a2e #1c2440 #f4efe6 #a4a7b8 #2a3352 #e8b4a0 #1d0d07 #f0c2ae #c9a7ff #1a0d33 #6fcf97 #ef6f6c #8ab4ff','radial-gradient(circle at 80% 0%,rgba(240,226,190,.16),transparent 38%),radial-gradient(ellipse at 10% 100%,rgba(201,167,255,.1),transparent 50%)','noche',{hf:'s',st:'italic',tr:'-.01em',r:'24px'}],
+ ['blues','Jazz de humo','Club de medianoche · sax y contrabajo',1,'#0a1424 #11203a #182b4c #eef2f8 #94a6c4 #243a60 #c9a24a #161003 #dcb85e #e05a4f #fff #5fbf8f #f06a5f #6fb2ff','radial-gradient(ellipse at 50% -10%,rgba(201,162,74,.22),transparent 55%)','noche',{hf:'s',tr:'-.015em',r:'16px'}],
 ];
-if(INST.id==='bajo'){THEMES[0][2]='Negro y verde ? para tu bajo';THEMES[0][4]=THEMES[0][4].replaceAll('#2f7bff',INST.color).replace('#ffffff','#052e22').replace('#5b9cff','#6ee7b7');}
-if(INST.id==='bateria'){THEMES[0][2]='Negro y coral · para tu batería';THEMES[0][4]=THEMES[0][4].replaceAll('#2f7bff',INST.color).replace('#5b9cff','#ff85a7');}
+const THGROUPS=[['base','Básicos'],['rock','Rock por épocas'],['latino','Latinos'],['noche','Noche y bohemia']];
+if(INST.id==='bajo'){THEMES[0][2]='Negro y verde · para tu bajo';THEMES[0][4]=THEMES[0][4].replaceAll('#2f7bff',INST.color).replace('#ffffff','#052e22').replace('#5b9cff','#6ee7b7');}
+if(INST.id==='bateria'){THEMES[0][2]='Negro y coral · para tu batería';THEMES[0][4]=THEMES[0][4].replaceAll('#2f7bff',INST.color).replace('#ffffff','#1f0010').replace('#5b9cff','#ff85a7');}
 const TVARS='bg surface surface2 fg muted line accent accent-ink accent-text root root-ink good bad blue'.split(' ');
 const themeById=id=>THEMES.find(t=>t[0]===id);
-if(DB.theme==='dark')DB.theme='clasico';else if(DB.theme==='light')DB.theme='claro';
-document.head.insertAdjacentHTML('beforeend','<style>'+THEMES.map(([id,,,dark,c,art])=>{
+if(DB.theme==='dark')DB.theme='clasico';else if(DB.theme==='light')DB.theme='claro';else if(DB.theme!=='auto'&&!themeById(DB.theme))DB.theme='auto';
+const THFONT={d:"'Barlow Condensed','Arial Narrow',sans-serif",s:"Georgia,'Times New Roman',serif"};
+document.head.insertAdjacentHTML('beforeend','<style>'+THEMES.map(([id,,,dark,c,art,,s])=>{
   const v=c.split(' ');
-  return`:root[data-theme="${id}"]{${TVARS.map((k,i)=>`--${k}:${v[i]}`).join(';')};--art:${art};--artimg:${ARTURL[id]||'none'};--arto:${dark?.62:.75};--glass:color-mix(in srgb,${v[0]} 80%,transparent);color-scheme:${dark?'dark':'light'}}`;
+  const hs=s?`;--hf:${THFONT[s.hf]||'var(--font-body)'};--htt:${s.tt||'none'};--htr:${s.tr||'-.025em'};--hst:${s.st||'normal'}${s.r?';--r:'+s.r:''}`:'';
+  return`:root[data-theme="${id}"]{${TVARS.map((k,i)=>`--${k}:${v[i]}`).join(';')};--art:${art};--artimg:${ARTURL[id]||'none'};--arto:${dark?.62:.75};--glass:color-mix(in srgb,${v[0]} 80%,transparent);color-scheme:${dark?'dark':'light'}${hs}}`;
 }).join('')+'</style>');
 function applyTheme(){
-  const id=DB.theme!=='auto'&&themeById(DB.theme)?DB.theme:matchMedia('(prefers-color-scheme: light)').matches?'claro':'estudio';
+  const id=DB.theme!=='auto'&&themeById(DB.theme)?DB.theme:matchMedia('(prefers-color-scheme: light)').matches?'claro':'estudio',t=themeById(id);
   document.documentElement.setAttribute('data-theme',id);document.documentElement.classList.toggle('arty',!!ARTURL[id]);
+  if(t[7])document.documentElement.setAttribute('data-hs','');else document.documentElement.removeAttribute('data-hs');
   if(!document.getElementById('artbg'))document.body.insertAdjacentHTML('afterbegin','<div id="artbg" aria-hidden="true"></div>');
-  $$('meta[name="theme-color"]').forEach(m=>{m.removeAttribute('media');m.content=themeById(id)[4].split(' ')[0]});
+  $$('meta[name="theme-color"]').forEach(m=>{m.removeAttribute('media');m.content=t[4].split(' ')[0]});
 }
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(DB.theme==='auto')applyTheme()});
 applyTheme();
@@ -5064,10 +5100,8 @@ function themeCards(ids){
   return ids.map(id=>{if(id==='auto')return cov('auto','Automático','Oscuro o claro según tu teléfono',themeById('estudio')[4],'linear-gradient(115deg,#000 50%,#f5f5f7 50%)');const t=themeById(id);return cov(t[0],t[1],t[2],t[4],t[5])}).join('');
 }
 function viewLook(){
-  const eras=THEMES.map(t=>t[0]).filter(id=>id!=='clasico'&&id!=='claro'&&id!=='estudio');
-  return{title:'Apariencia',back:'#/',html:`<div class="lhead"><span class="eyebrow">Tema</span><h1>Apariencia</h1><p class="sub">Los colores y la luz de fondo de toda la app. Se aplica al instante.</p></div>
-  <section class="thsec"><p class="blockh">Básicos</p><div class="thcgrid">${themeCards(['auto','estudio','clasico','claro'])}</div></section>
-  <section class="thsec"><p class="blockh">Épocas del rock</p><div class="thcgrid">${themeCards(eras)}</div></section>`,
+  return{title:'Apariencia',back:'#/',html:`<div class="lhead"><span class="eyebrow">Tema</span><h1>Apariencia</h1><p class="sub">Cada tema es una época o un género: colores, luz de fondo y letra de los títulos. Se aplica al instante.</p></div>
+  ${THGROUPS.map(([g,n])=>`<section class="thsec"><p class="blockh">${n}</p><div class="thcgrid">${themeCards((g==='base'?['auto']:[]).concat(THEMES.filter(t=>t[6]===g).map(t=>t[0])))}</div></section>`).join('')}`,
   mount(r){r.addEventListener('click',e=>{const th=e.target.closest('[data-theme-set]');if(!th)return;DB.theme=th.dataset.themeSet;DB.tried=DB.tried||{};DB.tried[DB.theme]=1;save();applyTheme();$$('[data-theme-set]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===th)))})}};
 }
 /* ---------- widgets interactivos ---------- */
