@@ -487,19 +487,29 @@ function viewSongEdit(id){
       const i=DB.songs.findIndex(s=>s.id===sid);if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
       if(E.strum){DB.kai=DB.kai||{};DB.kai[sid]=Object.assign({},DB.kai[sid],{pat:{sub:4,beats:E.beatsPdf||4,tip:'Rasgueo de la hoja de la canción.',secs:{verso:{g:E.strum,b:null,f:1}}},useP:true})}
       const open=()=>{SBTAB='mine';location.hash='#/cancionero/ver/'+sid};
-      if(E.audio){DB.kuse=DB.kuse||{};DB.kuse[sid]=true;DB.kautosync=sid;save();toast(logo()+'<span>Canción guardada con tu audio</span>');
-        slowIDB().then(db=>new Promise(res=>{const tx=db.transaction('f','readwrite');tx.objectStore('f').put({blob:E.audio,name:E.audio.name||'grabacion.mp3',type:E.audio.type||'audio/mpeg'},'orig:'+sid);tx.oncomplete=res;tx.onerror=res})).catch(()=>{}).then(open);return}
+      if(E.audio){DB.kuse=DB.kuse||{};DB.kuse[sid]=true;const rec={blob:E.audio,name:E.audio.name||'grabacion.mp3',type:E.audio.type||'audio/mpeg'};
+        /* creada desde el audio: ya se sabe en qué segundo empieza cada renglón y cada acorde (no se vuelve a adivinar).
+           Si cambiaste renglones en el editor y ya no cuadran, la app la sincroniza sola al abrirla. */
+        const PL=P.lines.map((L,li)=>[L,li]).filter(([L])=>L.pieces),S=E.sync;
+        if(S&&S.TM.length===PL.length){DB.ksync=DB.ksync||{};DB.ksync[sid]={};const pch={};PL.forEach(([L,li],k)=>{DB.ksync[sid][li]=+S.TM[k].t.toFixed(3);pch[li]=S.TM[k].ch.map(t=>+t.toFixed(3))});
+          DB.kbpm=DB.kbpm||{};DB.kbpm[sid]=S.bpm;Object.assign(rec,{grid:S.grid,dur:S.dur,pch})}
+        else DB.kautosync=sid;
+        save();toast(logo()+'<span>Canción guardada con tu audio</span>');
+        slowIDB().then(db=>new Promise(res=>{const tx=db.transaction('f','readwrite');tx.objectStore('f').put(rec,'orig:'+sid);tx.oncomplete=res;tx.onerror=res})).catch(()=>{}).then(open);return}
       save();toast(logo()+'<span>Canción guardada</span>');open();
     };
     /* como Moises: de un audio salen el pulso y los acordes (la app sola) y la letra con sus tiempos (la IA);
        al guardar, la canción queda con ese audio y se sincroniza al abrirla */
     const fromAudio=async f=>{const msg=t=>{const m=$('#sbmsg',r);if(m)m.textContent=t};
       try{msg('Escuchando el audio: pulso y acordes…');const{x,xs,sr}=await syncDecode(f);
-        const A=await syncAnalyze(x,sr,0,p=>msg(`Escuchando el audio: pulso y acordes… ${Math.round(p*100)} %`),xs),R=chordsFromAudio(A);if(!R)throw new Error('No encontré el pulso de este audio.');
-        const meta=isTop?{title:ex.top.t,artist:ex.top.a}:{title:(f.name||'Mi canción').replace(/\.[^.]+$/,'')};let lyr=null,why='';
-        if(iaHears()){const t0=Date.now(),tk=setInterval(()=>msg(`La IA está sacando la letra… ${Math.round((Date.now()-t0)/1000)} s`),1000);msg('La IA está sacando la letra…');
-          try{const L=await iaLyricsTimed(f);lyr=L.lines;if(!isTop){if(L.title)meta.title=L.title;if(L.artist)meta.artist=L.artist}}catch(err){why=err.message}clearInterval(tk)}
-        ta.value=songFromAudio(R,lyr,meta);E.touched={};E.audio=f;prev();
+        const A=await syncAnalyze(x,sr,0,p=>msg(`Escuchando el audio: pulso y acordes… ${Math.round(p*100)} %`),xs);if(!A||A.beats.length<8)throw new Error('No encontré el pulso de este audio.');
+        const meta=isTop?{title:ex.top.t,artist:ex.top.a}:{title:(f.name||'Mi canción').replace(/\.[^.]+$/,'')};let lyr=null,why='',allowed=null;
+        // primero la IA: letra con tiempos y los acordes que usa la canción; luego el audio elige entre esos acordes
+        if(iaHears()){const t0=Date.now(),tk=setInterval(()=>msg(`La IA está sacando la letra y los acordes… ${Math.round((Date.now()-t0)/1000)} s`),1000);msg('La IA está sacando la letra y los acordes…');
+          try{const L=await iaLyricsTimed(f);lyr=L.lines;allowed=L.chords;if(!isTop){if(L.title)meta.title=L.title;if(L.artist)meta.artist=L.artist}}catch(err){why=err.message}clearInterval(tk)}
+        if(!allowed&&isTop)allowed=ex.top.prog.split(' ');
+        const R=chordsFromAudio(A,allowed);if(!R)throw new Error('No encontré el pulso de este audio.');
+        const SF=songFromAudio(R,lyr,meta);ta.value=SF.src;E.touched={};E.audio=f;E.sync={grid:R.grid.map(t=>+t.toFixed(3)),TM:SF.TM,bpm:Math.round(R.bpm),dur:x.length/sr,lines:SF.src.split('\n').length};prev();
         const n=new Set(R.ch.filter(Boolean).map(c=>c.pc+c.suf)).size;
         msg(`Listo: ${Math.round(R.bpm)} bpm y ${n} acordes${lyr&&lyr.length?` con ${lyr.length} renglones de letra`:''}.${!lyr?(iaHears()?' No salió la letra: '+why:' Para sacar también la letra conecta Gemini u OpenAI en Asistente IA.'):''} Revisa y toca «Guardar y abrir»: la canción queda con tu audio y sincronizada.`)}
       catch(err){msg(err.message||'No pude escuchar ese audio.')}};
@@ -567,10 +577,13 @@ function viewSongPlay(id,slow){
   const AIo=()=>DB.kai[id]||{},usingAI=()=>!!(AIo().src&&AIo().on!==false),srcNow=()=>usingAI()?AIo().src:CHONLY&&REC.on&&REC.dur?expandProg(s.src,REC.dur):s.src,SK=()=>id+(usingAI()?'~ia':'');
   // la versión de la IA puede no traer tempo, compás o ritmo: se toman de la original
   const fixP=Q=>{if(usingAI()){const O0=songParse(s.src);if(Q.title==='Sin título')Q.title=O0.title;if(!Q.artist)Q.artist=O0.artist;if(!Q.set.bpm&&!Q.set.tempo)Q.bpm=O0.bpm;if(!Q.set.time){Q.time=O0.time;Q.beats=O0.beats}if(!Q.set.style)Q.style=O0.style;if(!Q.set.pickup)Q.pickup=O0.pickup}return Q};
-  const mkP=()=>{const Q=fixP(songParse(srcNow()));if(KAR.simple&&INST.id!=='bateria')simplifyP(Q);return Q};
+  /* acordes: 0 originales · 1 sencillos (mismo tono: tríadas, sin 7, sus ni bajos; se toca igual con la grabación, sin capo)
+     · 2 fáciles (además el tono con acordes abiertos; el capo solo se sugiere si quieres sonar igual que la original) */
+  if(KAR.easy==null)KAR.easy=KAR.simple?2:0;const EZ=()=>INST.id==='bateria'?0:INST.id!=='guitarra'?Math.min(1,KAR.easy):KAR.easy;
+  const mkP=()=>{const Q=fixP(songParse(srcNow()));if(EZ()>=1)simplifyP(Q);return Q};
   let P0=fixP(songParse(srcNow())),P=mkP(),secs=lineSections(P);DB.kt=DB.kt||{};DB.kbpm=DB.kbpm||{};DB.kst=DB.kst||{};
   DB.kbeats=DB.kbeats||{};DB.ksp=DB.ksp||{};const st={sp:slow?(DB.ksp[id]&&DB.ksp[id]<1?DB.ksp[id]:.75):1,loop:0,shift:DB.kt[id]||0,bpm:DB.kbpm[id]||P.bpm,bars:0,style:GROOVES[DB.kst[id]]?DB.kst[id]:P.style,beats:DB.kbeats[id]||P.beats};
-  const EASYT=()=>KAR.simple&&INST.id==='guitarra';if(EASYT())st.shift=easyShift(P);
+  const EASYT=()=>EZ()===2;if(EASYT())st.shift=easyShift(P);
   const gid=()=>grooveFor(st.style,st.beats),RES=()=>GROOVES[gid()].sub;
   const styChips=()=>Object.entries(GROOVES).filter(([k,g])=>g[st.beats===3?3:4]).map(([k,g])=>`<button class="chip" data-sty="${k}" aria-pressed="${gid()===k}">${g.n}</button>`).join('');
   Object.assign(KAR,DB.kar||{});
@@ -620,8 +633,10 @@ function viewSongPlay(id,slow){
   </div>
   <div class="kfab" role="toolbar" aria-label="Cómo se ven los acordes">
    <button class="kfb" data-nott title="Cifrado: C D E o Do Re Mi"><b id="kfnot"></b></button>
-   ${INST.id!=='bateria'?`<button class="kfb" data-simple aria-pressed="${!!KAR.simple}" title="Acordes fáciles: sin séptimas, sus ni bajos"><b>Fácil</b></button>`:''}
+   ${INST.id!=='bateria'?`<button class="kfb" data-easy="${EZ()?0:INST.id==='guitarra'?2:1}" aria-pressed="${EZ()>0}" title="Acordes fáciles"><b>Fácil</b></button>`:''}
    <button class="kfb" data-z="-1" aria-label="Letra más chica"><b>A−</b></button><button class="kfb" data-z="1" aria-label="Letra más grande"><b>A+</b></button></div>
+  <div class="kchead">${INST.id!=='bateria'?`<div class="kcg"><span class="cl">Acordes</span><div class="seg" id="kez">${[[0,'Originales'],[1,'Sencillos'],...(INST.id==='guitarra'?[[2,'Fáciles']]:[])].map(([v,l])=>`<button data-easy="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>`:''}
+   <div class="kcg"><span class="cl">Escuchar</span><div class="kmutes" id="kmutes"></div></div></div>
   <p class="keasy" id="keasy" hidden></p>
   <div class="kchips" id="kchips">${chips()}</div>
   <div class="kwrap"><div class="kmain">
@@ -815,9 +830,10 @@ function viewSongPlay(id,slow){
     r.addEventListener('click',e=>{
       const vw=e.target.closest('[data-view]');if(vw){KAR.view=vw.dataset.view;DB.kar=Object.assign({},KAR);save();views();if(VIEW()==='acordes'&&pos)kgridAt(r,TL.lines[pos]?TL.lines[pos].start:0);return}
       const nt=e.target.closest('[data-nott]');if(nt){DB.notation=es()?'us':'es';save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.not===DB.notation)));rerender();toolVals();return}
-      const sm=e.target.closest('[data-simple]');if(sm){KAR.simple=!KAR.simple;DB.kar=Object.assign({},KAR);save();sm.setAttribute('aria-pressed',String(KAR.simple));reloadSong();
-        if(INST.id==='guitarra'){st.shift=KAR.simple?easyShift(P):(DB.kt[id]||0);rerender();toolVals();restart()}
-        toast(logo()+`<span>${KAR.simple?'Versión fácil'+(EASYT()&&st.shift?' en '+esc(keyLbl()):'')+': acordes abiertos, sin séptimas, sus ni bajos':'Acordes originales'}</span>`,3000);return}
+      const sm=e.target.closest('[data-easy]');if(sm){KAR.easy=+sm.dataset.easy;KAR.simple=KAR.easy>0;DB.kar=Object.assign({},KAR);save();reloadSong();
+        if(INST.id==='guitarra'){st.shift=EASYT()?easyShift(P):(DB.kt[id]||0);rerender();restart()}easyUI();toolVals();
+        toast(logo()+`<span>${EZ()===2?'Acordes fáciles'+(st.shift?' en '+esc(keyLbl()):'')+': acordes abiertos':EZ()===1?'Acordes sencillos: mismo tono, sin séptimas, sus ni bajos':'Acordes originales'}</span>`,3000);return}
+      const mu=e.target.closest('[data-mute]');if(mu){const k=mu.dataset.mute,M=mixOf();M[k]=M[k]||{};M[k].m=!M[k].m;save();applyMix(true);muteUI();if(VIEW()==='pistas')stemsPaint();return}
       const mx=e.target.closest('[data-mixm],[data-mixs]');if(mx){const k=mx.dataset.mixm||mx.dataset.mixs,f=mx.dataset.mixm?'m':'s',M=mixOf();M[k]=M[k]||{};M[k][f]=!M[k][f];mx.classList.toggle('on',M[k][f]);save();applyMix(true);return}
       const kt=e.target.closest('.kst-t');if(kt&&!e.target.closest('input,button')){const rc=kt.getBoundingClientRect();seekFrac((e.clientX-rc.left)/rc.width);return}
       const io=e.target.closest('[data-iaon]');if(io){DB.kai[id]=Object.assign({},AIo(),{on:io.dataset.iaon==='1'});save();reloadSong();return}
@@ -827,7 +843,7 @@ function viewSongPlay(id,slow){
       const b=e.target.closest('[data-b]');if(b){st.bpm=Math.max(40,Math.min(220,st.bpm+ +b.dataset.b));DB.kbpm[id]=st.bpm;save();$('#kbpm',r).textContent=st.bpm;side();spdTxt();restart();return}
       const sh=e.target.closest('[data-show]');if(sh){KAR.show=sh.dataset.show;kar.className='karaoke show-'+KAR.show;$$('[data-show]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sh)));DB.kar=Object.assign({},KAR);save();return}
       const n=e.target.closest('[data-not]');if(n){DB.notation=n.dataset.not;save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===n)));rerender();return}
-      const t=e.target.closest('[data-t]');if(t){const k=t.dataset.t;KAR[k]=!KAR[k];if(k==='drumPlayer'&&INST.id==='bateria'){DB.drumPlayer=KAR.drumPlayer;$$('[data-t="drumPlayer"]',r).forEach(x=>x.setAttribute('aria-pressed',String(KAR.drumPlayer)));restart()}if(k==='bassPlayer'){DB.bassPlayer=KAR.bassPlayer;$$('[data-t="bassPlayer"]',r).forEach(x=>x.setAttribute('aria-pressed',String(KAR.bassPlayer)));restart()}if(k==='band'){restart();if(O.el)O.el.muted=!KAR.band&&!O.syncing;$$('[data-t="band"] span',r).forEach(x=>x.textContent=KAR.band?'Con música':'Sin música')}$$(`[data-t="${k}"]`,r).forEach(x=>x.classList.toggle('on',KAR[k]));if(k==='met'&&KAR.met)toast(logo()+'<span>Metrónomo encendido</span>');if(k==='met'&&VIEW()==='pistas')stemsPaint();DB.kar=Object.assign({},KAR);save();return}
+      const t=e.target.closest('[data-t]');if(t){const k=t.dataset.t;KAR[k]=!KAR[k];if(k==='drumPlayer'&&INST.id==='bateria'){DB.drumPlayer=KAR.drumPlayer;$$('[data-t="drumPlayer"]',r).forEach(x=>x.setAttribute('aria-pressed',String(KAR.drumPlayer)));restart()}if(k==='bassPlayer'){DB.bassPlayer=KAR.bassPlayer;$$('[data-t="bassPlayer"]',r).forEach(x=>x.setAttribute('aria-pressed',String(KAR.bassPlayer)));restart()}if(k==='band'){restart();if(O.el)O.el.muted=!KAR.band&&!O.syncing;$$('[data-t="band"] span',r).forEach(x=>x.textContent=KAR.band?'Con música':'Sin música')}$$(`[data-t="${k}"]`,r).forEach(x=>x.classList.toggle('on',KAR[k]));if(k==='met'&&KAR.met)toast(logo()+'<span>Metrónomo encendido</span>');if(k==='met'&&VIEW()==='pistas')stemsPaint();if(k==='voice')muteUI();DB.kar=Object.assign({},KAR);save();return}
       const lt=e.target.closest('[data-lat]');if(lt){DB[INST.id==='bateria'?'visualLat':'lat']=+lt.dataset.lat;save();$$('[data-lat]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lt)));return}
       const sp=e.target.closest('[data-sp]');if(sp){st.sp=+sp.dataset.sp;if(O.el)O.el.playbackRate=st.sp;if(slow){DB.ksp[id]=st.sp;save()}$$('[data-sp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sp)));spdTxt();restart();return}
       const lp=e.target.closest('[data-lp]');if(lp){const was=running();if(was)seqStop();st.loop=+lp.dataset.lp;$$('[data-lp]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===lp)));if(was)go();paint();return}
@@ -871,6 +887,10 @@ function viewSongPlay(id,slow){
         if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();O.dl=0;origUI();paint();views(true);toast(logo()+'<span>Tu grabación llegó de tu cuenta</span>',3000)}
       catch(e){O.dl=0;origUI();toast('No se pudo bajar la grabación de tu cuenta. Revisa tu internet.',4000)}});
     const semis=k=>Math.abs(k)===1?'medio tono':Math.abs(k)%2?Math.abs(k)+' semitonos':Math.abs(k)/2+(Math.abs(k)===2?' tono':' tonos');
+    const easyUI=()=>{$$('[data-easy]',r).forEach(b=>{if(b.closest('#kez'))b.setAttribute('aria-pressed',String(+b.dataset.easy===EZ()));else{b.setAttribute('aria-pressed',String(EZ()>0));b.dataset.easy=EZ()?0:INST.id==='guitarra'?2:1}})};
+    // silenciar al vuelo: con la banda, cada instrumento; con tu grabación, la separación aproximada
+    const muteUI=()=>{const k=$('#kmutes',r);if(!k)return;const M=mixOf(),L=recMode()?[['v','Voz'],['s','Guitarras'],['b','Bajo']]:[['g','Guitarra'],['b','Bajo'],['d','Batería']];
+      k.innerHTML=L.map(([x,l])=>`<button class="kmu${M[x]&&M[x].m?' off':''}" data-mute="${x}" aria-pressed="${!(M[x]&&M[x].m)}">${l}</button>`).join('')+(recMode()||!P.hasMel?'':`<button class="kmu${KAR.voice?'':' off'}" data-t="voice">Voz guía</button>`)};
     const iaUI=()=>{const k=$('#kia',r);if(!k)return;
       if(!iaReady()){k.innerHTML=`<p class="cap" style="margin:0">Conecta tu IA (Gemini, ChatGPT, Claude, Ollama…) para ordenar la letra, acomodar y simplificar acordes, proponer el rasgueo de cada sección y sacar la letra de tu grabación.</p><div class="row"><a class="btn pri" href="#/ia">${KIC.ia}Conectar una IA</a></div>`;return}
       const A=AIo();
@@ -894,7 +914,7 @@ function viewSongPlay(id,slow){
           DB.kai[id]=Object.assign({},AIo(),{src:t,on:true});save();reloadSong();toast(logo()+'<span>Listo: letra sacada de tu grabación. Ahora sincronízala.</span>',4000)}
       }catch(e){if(msg)msg.textContent=e.message;$$('[data-ia]',r).forEach(b=>b.disabled=false);return}
       iaUI();toolVals()};
-    const origUI=()=>{iaUI();const k=$('#korig',r);if(!k)return;
+    const origUI=()=>{iaUI();muteUI();easyUI();const k=$('#korig',r);if(!k)return;
       if(!O.blob&&O.dl){k.innerHTML=`<p class="cap" style="margin:0">Bajando tu grabación de tu cuenta… ${Math.round(O.dl*100)} %</p>`;return}
       if(!O.blob){k.innerHTML=`${(DB.kaudio||{})[id]?`<div class="row korow"><span class="cap" style="margin:0">Tu grabación de esta canción está en tu cuenta.</span><button class="btn sm pri" data-o="down">Bajarla</button></div>`:''}<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La app la escucha y la letra sigue a la canción real.</span></div>`;
         $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;DB.kuse[id]=true;delete DB.ksync[SK()];save();
@@ -1026,7 +1046,10 @@ function viewSongPlay(id,slow){
       else if(k==='del'){if(O.playing)origStop();cloudAudioDel(id);slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
         O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+(((+DB.ksyncOff[SK()]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[SK()]>0?'+':''}${DB.ksyncOff[SK()]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();if((DB.kaudio||{})[id]!==O.blob.size)recCloud()}else if((DB.kaudio||{})[id])recDown();origUI();paint();views(true);
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;O.pch=rec.pch||null;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();
+        if(O.pch&&!ancNow()){const a=[];Object.entries(O.pch).forEach(([li,ts])=>{const ev=TL.ev.filter(e=>e.type==='chord'&&e.li===+li).sort((x,y)=>x.b-y.b);if(ev.length===ts.length)ev.forEach((e,k)=>a.push([+e.b.toFixed(3),ts[k]]))});
+          a.sort((x,y)=>x[0]-y[0]);O.ancs=Object.assign({},O.ancs,{[SK()]:{a,sig:sigTL()}});O.pch=null;recIDB()}
+        if((DB.kaudio||{})[id]!==O.blob.size)recCloud()}else if((DB.kaudio||{})[id])recDown();origUI();paint();views(true);
       if(DB.kautosync===id&&O.blob){delete DB.kautosync;save();autoSync()}}).catch(()=>origUI());
     origUI();
     const openP=k=>{const box=$('.kpanels',r),cur=box.hidden?null:box.dataset.open;$$('.ktool',r).forEach(b=>b.setAttribute('aria-pressed','false'));

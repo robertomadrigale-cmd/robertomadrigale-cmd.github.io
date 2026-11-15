@@ -1213,3 +1213,12 @@ html.welcome-on{overflow:hidden}
 @media(max-width:480px){.kviews{align-self:stretch}.kviews button{flex:1 1 0;min-width:0;justify-content:center;padding:9px 4px}}
 .keasy{margin:-4px 0 0;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.4;background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
 .keasy[hidden]{display:none}
+.kchead{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.kcg{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.kcg .cl{margin:0}
+.kmutes{display:flex;gap:6px;flex-wrap:wrap}
+.kmu{height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--hair,var(--line));background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--fg);font:600 13px/1 var(--font-body);cursor:pointer;white-space:nowrap}
+.kmu.off{background:none;color:var(--muted);text-decoration:line-through}
+/* los botones C/Do y tamaño van en fila arriba (el «Fácil» ya está en la barra de Acordes) */
+@media(min-width:1180px){.kfab,html.pulse-on .kfab{position:static;transform:none;flex-direction:row;margin:-4px 0 -6px;right:auto;top:auto}.kfb{width:auto;min-width:44px;padding:0 12px}}
+.kfab [data-easy]{display:none}
