@@ -185,23 +185,24 @@ function gridT(g,x){const n=g.length;if(n<2)return g[0]||0;if(x<=0)return g[0]+x
    Con la rejilla de pulsos y el croma de cada pulso (medios + graves) se compara contra las 24 tríadas mayores y
    menores; Viterbi elige la sucesión más probable (cambiar de acorde cuesta, para no saltar en cada pulso).
    Pulsos casi en silencio = sin acorde. Devuelve un acorde (o null) por pulso. */
-/* allowed = acordes que usa la canción (los dice la IA si la conoce): solo se elige entre esos. Sin esa lista, el tono
-   se saca del croma de toda la canción (perfiles de Krumhansl) y los acordes del tono tienen ventaja. */
+/* allowed = acordes que usa la canción (los dice la IA si la conoce): solo se elige entre esos.
+   Sin esa lista, se reconocen las 24 tríadas ANTES de inferir el tono: un perfil global equivocado
+   no debe convertir sus acordes en mayores/menores para confirmar su propia suposición. */
 const KS_MAJ=[6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88],KS_MIN=[6.33,2.68,3.52,5.38,2.6,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
-function audioKey(C,E){const t=new Float32Array(12);C.forEach((v,j)=>{for(let q=0;q<12;q++)t[q]+=v[q]*Math.sqrt(E[j]||0)});let best=null,bs=-1e9;
+function audioKey(C,E){const t=new Float32Array(12),em=E.slice().sort((a,b)=>a-b)[E.length>>1]||0,peak=E.reduce((a,b)=>Math.max(a,b),0);if(!peak)return null;
+  // Cada pulso audible cuenta una vez. El croma ya está normalizado: ponderarlo otra vez
+  // por volumen hacía que un vi fuerte pesara más que toda la cadencia mayor.
+  C.forEach((v,j)=>{if(E[j]<=Math.max(em*.08,peak*.005))return;for(let q=0;q<12;q++)t[q]+=v[q]});let best=null,bs=-1e9;
   for(let k=0;k<12;k++)for(const[m,pr]of[[0,KS_MAJ],[1,KS_MIN]]){let mx=0,my=0;for(let q=0;q<12;q++){mx+=t[q];my+=pr[(q-k+12)%12]}mx/=12;my/=12;let a=0,b=0,c=0;for(let q=0;q<12;q++){const x=t[q]-mx,y=pr[(q-k+12)%12]-my;a+=x*y;b+=x*x;c+=y*y}const r=a/Math.sqrt(b*c||1);if(r>bs){bs=r;best={pc:k,minor:!!m}}}return best}
 function chordsFromAudio(A,allowed){
   const grid=A.beats;if(grid.length<8)return null;
   const{C,BS,E}=gridChroma(A,grid),N=grid.length,eMed=E.slice().sort((a,b)=>a-b)[N>>1]||1;
   let TP=[];for(let pc=0;pc<12;pc++){TP.push({pc,suf:'',bass:null,minor:false});TP.push({pc,suf:'m',bass:null,minor:true})}
   const al=(allowed||[]).map(x=>chParse(String(x))).filter(Boolean).map(p=>({pc:p.pc,suf:/^(m(?!aj)|min|-)/.test(p.suf)?'m':''}));
-  const key=audioKey(C,E),tonic=key?(key.minor?(key.pc+3)%12:key.pc):0,DIA={0:'',2:'m',4:'m',5:'',7:'',9:'m'};
-  const dia=p=>{const iv=(p.pc-tonic+12)%12;return DIA[iv]===p.suf||(iv===4&&p.suf==='')||(iv===10&&p.suf==='')};// III y bVII mayores también son comunes
-  let bonus=()=>0;
-  if(al.length>=2){const ok=new Set(al.map(p=>p.pc+'|'+p.suf));TP=TP.filter(p=>ok.has(p.pc+'|'+p.suf))}else bonus=p=>dia(p)?.06:-.07;
+  if(al.length>=2){const ok=new Set(al.map(p=>p.pc+'|'+p.suf));TP=TP.filter(p=>ok.has(p.pc+'|'+p.suf))}
   const tplH=p=>{const t=new Float32Array(12),r=p.pc,iv=[0,p.suf==='m'?3:4,7],w=[1.2,1.05,.8];iv.forEach((v,i)=>{const n=(r+v)%12;t[n]+=w[i];t[(n+7)%12]+=w[i]*.3;t[(n+4)%12]+=w[i]*.12});return nrm(t)};
   const TT=TP.map(tplH),TB=TP.map(p=>{const u=new Float32Array(12);u[p.pc]=1;u[(p.pc+7)%12]=.25;return nrm(u)});
-  const SC=new Float32Array(N*TP.length);for(let j=0;j<N;j++)for(let k=0;k<TP.length;k++){let d=0,e=0;for(let q=0;q<12;q++){d+=TT[k][q]*C[j][q];e+=TB[k][q]*BS[j][q]}SC[j*TP.length+k]=.7*d+.3*e+bonus(TP[k])}
+  const SC=new Float32Array(N*TP.length);for(let j=0;j<N;j++)for(let k=0;k<TP.length;k++){let d=0,e=0;for(let q=0;q<12;q++){d+=TT[k][q]*C[j][q];e+=TB[k][q]*BS[j][q]}SC[j*TP.length+k]=.7*d+.3*e}
   const K=TP.length+1,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:SC[j*TP.length+k]);
   // Viterbi; sw(j) = costo de cambiar de acorde en el pulso j (más barato en el 1 del compás, luego en el 3)
   const vit=sw=>{let D=new Float32Array(K),B=[];for(let k=0;k<K;k++)D[k]=score(0,k);
@@ -215,21 +216,21 @@ function chordsFromAudio(A,allowed){
   // cambios de un solo pulso entre dos iguales se quitan (suelen ser notas de paso)
   for(let j=1;j+1<N;j++)if(path[j]!==path[j-1]&&path[j-1]===path[j+1])path[j]=path[j-1];
   // qué tan bien suenan los acordes elegidos (para comparar con otra lista)
-  let fs=0,fn=0;for(let j=0;j<N;j++){const q=path[j];if(q<TP.length){fs+=SC[j*TP.length+q]-bonus(TP[q]);fn++}}
-  return{grid,ch:path.map(q=>q===TP.length?null:TP[q]),bpm:A.bpm,key,ph,fit:fn?fs/fn:0};
+  let fs=0,fn=0;for(let j=0;j<N;j++){const q=path[j];if(q<TP.length){fs+=SC[j*TP.length+q];fn++}}
+  const ch=path.map(q=>q===TP.length?null:TP[q]),heard=ch.filter(Boolean),key=heard.length?detectKey(heard):audioKey(C,E);
+  return{grid,ch,bpm:A.bpm,key,ph,fit:fn?fs/fn:0};
 }
 /* la canción completa en ChordPro a partir de los acordes por pulso y (si hay) la letra con tiempos de la IA:
    lyr = [{t: segundo en que empieza, text, sec}] */
 function songFromAudio(R,lyr,meta){
-  const g=R.grid,ch=R.ch,nm=p=>p?US12F[p.pc].replace('♭','b')+p.suf:'',bt=4,beatAt=t=>Math.max(0,Math.min(g.length-1,Math.round(gridIdx(g,t))));
+  const g=R.grid,ch=R.ch,keyObj=detectKey(ch.filter(Boolean)),nm=p=>p?chName(p,0,keyObj,false).replace(/♭/g,'b').replace(/♯/g,'#'):'',bt=4,beatAt=t=>Math.max(0,Math.min(g.length-1,Math.round(gridIdx(g,t))));
   const chordAtBeat=j=>{for(let q=j;q>=0;q--)if(ch[q])return ch[q];return null};
   // compases de solo acordes entre dos pulsos (4 compases por renglón)
   // renglones de solo acordes (4 compases cada uno); TM guarda el segundo en que empieza cada renglón y sus cambios de acorde
   const TM=[],push=(line,t,cht)=>{L.push(line);TM.push({t,ch:cht||[]})};
   const barsLine=(j0,j1)=>{const out=[];let row=[],rt=[],t0=null,prev=null;for(let j=j0;j<j1;j+=bt){if(t0==null)t0=g[j];const seg=[];for(let q=j;q<Math.min(j+bt,j1);q++){const c=ch[q];if(c&&(!seg.length||nm(seg[seg.length-1][0])!==nm(c)))seg.push([c,g[q]])}
       const s=seg.length?seg:[[chordAtBeat(j),g[j]]].filter(x=>x[0]);s.forEach(([c,t])=>{row.push('['+nm(c)+']');rt.push(t)});if(row.length>=4){out.push([row.join(' '),t0,rt]);row=[];rt=[];t0=null}}if(row.length)out.push([row.join(' '),t0,rt]);return out};
-  const L=[];const all=ch.map(nm).filter(Boolean);
-  const key=(()=>{try{const k=detectKey(all.map(x=>chParse(x)));return chName(k,0,k,false)+(k.minor&&!/m/.test(k.suf||'')?'m':'')}catch(e){return''}})();
+  const L=[],key=ch.some(Boolean)?nm(keyObj):'';
   L.push(`{title:${meta.title||'Mi canción'}}`);if(meta.artist)L.push(`{artist:${meta.artist}}`);L.push(`{bpm:${Math.round(R.bpm)}}`);if(key)L.push(`{key:${key}}`);L.push('');
   const lines=(lyr||[]).filter(x=>x&&x.text&&isFinite(x.t)).sort((a,b)=>a.t-b.t);
   if(!lines.length){L.push('{c:Acordes de la grabación}');barsLine(0,g.length).forEach(x=>push(...x));return{src:L.join('\n'),TM}}

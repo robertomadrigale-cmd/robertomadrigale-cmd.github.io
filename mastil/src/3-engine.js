@@ -166,7 +166,7 @@ function playSeq(chords,beat){
 }
 function chordMidi(root,t){const rm=40+((root.pc-4+12)%12);return[...CT[t].semis.map(s=>rm+s),rm+12]}
 /* ---------- secuenciador (metrónomo y pistas) ---------- */
-const SEQ={id:null,label:'',timer:null,next:0,step:0,dur:null,on:null,ui:null};
+const SEQ={id:null,label:'',timer:null,next:0,step:0,dur:null,on:null,ui:null,gen:0};
 function seqStart(id,label,getDur,onStep,ui){
   seqStop(true);
   const c=ac();if(!c)return false;
@@ -181,13 +181,13 @@ function seqPump(){
     const s=SEQ.step,t=SEQ.next;
     SEQ.on(s,t);
     // lo visual se retrasa lo mismo que tarda el sonido en salir por la bocina (en Android 0.1–0.3 s, más con Bluetooth)
-    if(SEQ.ui){const d=Math.max(0,(t-AC.currentTime+outLat())*1000);setTimeout(()=>{if(SEQ.id&&SEQ.ui)SEQ.ui(s)},d)}
+    if(SEQ.ui){const d=Math.max(0,(t-AC.currentTime+outLat())*1000),ui=SEQ.ui,gen=SEQ.gen;setTimeout(()=>{if(SEQ.id&&SEQ.gen===gen&&SEQ.ui===ui)ui(s)},d)}
     SEQ.next+=SEQ.dur();SEQ.step++;
   }
 }
 function seqStop(silent){
   if(SEQ.timer)clearInterval(SEQ.timer);
-  SEQ.timer=null;SEQ.id=null;SEQ.ui=null;
+  SEQ.gen++;SEQ.timer=null;SEQ.id=null;SEQ.ui=null;
   if(!silent){wake(false);emitState()}
 }
 /* ---------- metrónomo ---------- */
