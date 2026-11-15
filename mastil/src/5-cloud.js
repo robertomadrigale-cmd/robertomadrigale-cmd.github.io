@@ -5,7 +5,10 @@ const FBV='10.12.2',FBU=n=>`https://www.gstatic.com/firebasejs/${FBV}/firebase-$
 const cloudOn=()=>typeof FIREBASE_CONFIG!=='undefined'&&!!(FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey);
 // el correo y contraseña se muestran solo cuando se active ese método en Firebase (Authentication → Método de acceso)
 const CLOUD_EMAIL=false;
-const SYNC=[...(INST.id==='bateria'?['stars','best','hist','ses','setlist','spd','gbpm','sess','band','input','lat','visualLat','clickLvl','sens','tapLat','clickVol','theme','imported','seen','played','drumPlayer','drumSchema']:[]),'done','secs','days','bpm','figbest','reto','ach','game','tried',...(INST.id!=='guitarra'?['songs','onb','retobest']:[])];
+/* ajustes de cada canción (versión de la IA, rasgueo, sincronización con tu grabación, tono, tempo, ritmo, mezcla):
+   se juntan por canción; si las dos partes tienen la misma canción, se queda la de este dispositivo */
+const SONGK=['kai','ksync','ksyncOff','kbpm','kt','kst','kbeats','kuse','kmix'];
+const SYNC=[...SONGK,...(INST.id==='bateria'?['stars','best','hist','ses','setlist','spd','gbpm','sess','band','input','lat','visualLat','clickLvl','sens','tapLat','clickVol','theme','imported','seen','played','drumPlayer','drumSchema']:[]),'done','secs','days','bpm','figbest','reto','ach','game','tried',...(INST.id!=='guitarra'?['songs','onb','retobest']:[])];
 async function cloudInit(){
   if(!cloudOn()||CLOUD.app)return;
   try{
@@ -31,8 +34,9 @@ function mergeVal(a,b){
 const uref=()=>CLOUD.M.doc(CLOUD.db,'users',CLOUD.user.uid);
 async function cloudPull(){
   const M=CLOUD.M,snap=await M.getDoc(uref()),d=snap.exists()?snap.data():{};
-  const p=INST.id==='bateria'?drumCloudData(d[INST.cloud.field]):d[INST.cloud.field]||{};SYNC.forEach(k=>{DB[k]=INST.id==='bateria'?drumCloudMerge(k,DB[k],p[k]):mergeVal(DB[k],p[k])});
-  if((!DB.songs||!DB.songs.length)&&Array.isArray(INST.id!=='guitarra'?p.songs:d.songs))DB.songs=INST.id!=='guitarra'?p.songs:d.songs;
+  const p=INST.id==='bateria'?drumCloudData(d[INST.cloud.field]):d[INST.cloud.field]||{};SYNC.forEach(k=>{if(SONGK.includes(k)){if(p[k]&&typeof p[k]==='object')DB[k]=Object.assign({},p[k],DB[k]||{});return}DB[k]=INST.id==='bateria'?drumCloudMerge(k,DB[k],p[k]):k==='songs'?DB[k]:mergeVal(DB[k],p[k])});
+  // canciones: se juntan por id (las nuevas de otro dispositivo llegan; las que ya tienes se quedan como están)
+  const cs=INST.id!=='guitarra'?p.songs:d.songs;if(Array.isArray(cs)){const have=new Set((DB.songs||[]).map(x=>x.id));DB.songs=[...(DB.songs||[]),...cs.filter(x=>x&&x.id&&!have.has(x.id))]}
   if(DB.onb==null&&(INST.id!=='guitarra'?p.onb:d.onb))DB.onb=INST.id!=='guitarra'?p.onb:d.onb;
   CLOUD.group=d.group||null;persist();await cloudPush(true);
 }
