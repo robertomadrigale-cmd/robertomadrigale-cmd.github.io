@@ -7,7 +7,7 @@ const cloudOn=()=>typeof FIREBASE_CONFIG!=='undefined'&&!!(FIREBASE_CONFIG&&FIRE
 const CLOUD_EMAIL=false;
 /* ajustes de cada canción (versión de la IA, rasgueo, sincronización con tu grabación, tono, tempo, ritmo, mezcla):
    se juntan por canción; si las dos partes tienen la misma canción, se queda la de este dispositivo */
-const SONGK=['kai','ksync','ksyncOff','kbpm','kt','kst','kbeats','kuse','kmix'];
+const SONGK=['kaudio','kai','ksync','ksyncOff','kbpm','kt','kst','kbeats','kuse','kmix'];
 const SYNC=[...SONGK,...(INST.id==='bateria'?['stars','best','hist','ses','setlist','spd','gbpm','sess','band','input','lat','visualLat','clickLvl','sens','tapLat','clickVol','theme','imported','seen','played','drumPlayer','drumSchema']:[]),'done','secs','days','bpm','figbest','reto','ach','game','tried',...(INST.id!=='guitarra'?['songs','onb','retobest']:[])];
 async function cloudInit(){
   if(!cloudOn()||CLOUD.app)return;
@@ -156,3 +156,27 @@ function cloudMount(r){
   });
 }
 cloudInit();
+/* ---------- grabaciones en la nube ----------
+   El audio de cada canción va en la misma base de datos, en tu cuenta: users/{uid}/audio/{canción} (nombre, tipo,
+   tamaño, y la sincronización: pulsos, voz, anclas) + parts/{n} con pedazos de 700 KB. Así la grabación y su
+   sincronización llegan a tus otros dispositivos. DB.kaudio[id] = tamaño (sube a la nube con las canciones). */
+const AUD_CH=700*1024,audKey=id=>String(id).replace(/[\/.#$\[\]]/g,'_');
+const cloudAudioOn=()=>!!(typeof CLOUD!=='undefined'&&CLOUD.user&&CLOUD.M);
+async function cloudAudioPut(id,blob,extra,prog){
+  if(!cloudAudioOn())return false;const M=CLOUD.M,base=['users',CLOUD.user.uid,'audio',audKey(id)],buf=new Uint8Array(await blob.arrayBuffer()),n=Math.max(1,Math.ceil(buf.length/AUD_CH));
+  for(let i=0;i<n;i++){await M.setDoc(M.doc(CLOUD.db,...base,'parts',String(i)),{b:M.Bytes.fromUint8Array(buf.subarray(i*AUD_CH,(i+1)*AUD_CH))});if(prog)prog((i+1)/n)}
+  await M.setDoc(M.doc(CLOUD.db,...base),Object.assign({name:blob.name||'grabacion',type:blob.type||'audio/mpeg',size:buf.length,n,updated:M.serverTimestamp()},extra||{}));
+  DB.kaudio=DB.kaudio||{};DB.kaudio[id]=buf.length;save();return true;
+}
+async function cloudAudioMeta(id,extra){if(!cloudAudioOn()||!(DB.kaudio||{})[id])return;const M=CLOUD.M;try{await M.setDoc(M.doc(CLOUD.db,'users',CLOUD.user.uid,'audio',audKey(id)),extra,{merge:true})}catch(e){}}
+async function cloudAudioGet(id,prog){
+  if(!cloudAudioOn())return null;const M=CLOUD.M,base=['users',CLOUD.user.uid,'audio',audKey(id)],s=await M.getDoc(M.doc(CLOUD.db,...base));if(!s.exists())return null;
+  const d=s.data(),parts=[];for(let i=0;i<d.n;i++){const p=await M.getDoc(M.doc(CLOUD.db,...base,'parts',String(i)));if(!p.exists())throw new Error('Falta un pedazo de la grabación en la nube.');parts.push(p.data().b.toUint8Array());if(prog)prog((i+1)/d.n)}
+  return{blob:new Blob(parts,{type:d.type||'audio/mpeg'}),meta:d};
+}
+async function cloudAudioDel(id){
+  if(DB.kaudio){delete DB.kaudio[id];save()}if(!cloudAudioOn())return;const M=CLOUD.M,base=['users',CLOUD.user.uid,'audio',audKey(id)];
+  try{const s=await M.getDoc(M.doc(CLOUD.db,...base));const n=s.exists()?s.data().n||0:0;for(let i=0;i<n;i++)await M.deleteDoc(M.doc(CLOUD.db,...base,'parts',String(i)));await M.deleteDoc(M.doc(CLOUD.db,...base))}catch(e){}
+}
+// espera a que la cuenta esté lista (al abrir la app tarda un momento)
+function cloudWhenReady(cb,tries){tries=tries??20;if(cloudAudioOn())return cb();if(typeof CLOUD==='undefined'||!cloudOn()||(CLOUD.ready&&!CLOUD.user)||tries<=0)return;setTimeout(()=>cloudWhenReady(cb,tries-1),700)}

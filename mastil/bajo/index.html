@@ -2090,7 +2090,7 @@ function bassAdaptView(v){
 }
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261115185406';
+const OM_BETA_VERSION='v20261115185727';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -2285,7 +2285,7 @@ const cloudOn=()=>typeof FIREBASE_CONFIG!=='undefined'&&!!(FIREBASE_CONFIG&&FIRE
 const CLOUD_EMAIL=false;
 /* ajustes de cada canción (versión de la IA, rasgueo, sincronización con tu grabación, tono, tempo, ritmo, mezcla):
    se juntan por canción; si las dos partes tienen la misma canción, se queda la de este dispositivo */
-const SONGK=['kai','ksync','ksyncOff','kbpm','kt','kst','kbeats','kuse','kmix'];
+const SONGK=['kaudio','kai','ksync','ksyncOff','kbpm','kt','kst','kbeats','kuse','kmix'];
 const SYNC=[...SONGK,...(INST.id==='bateria'?['stars','best','hist','ses','setlist','spd','gbpm','sess','band','input','lat','visualLat','clickLvl','sens','tapLat','clickVol','theme','imported','seen','played','drumPlayer','drumSchema']:[]),'done','secs','days','bpm','figbest','reto','ach','game','tried',...(INST.id!=='guitarra'?['songs','onb','retobest']:[])];
 async function cloudInit(){
   if(!cloudOn()||CLOUD.app)return;
@@ -2434,6 +2434,30 @@ function cloudMount(r){
   });
 }
 cloudInit();
+/* ---------- grabaciones en la nube ----------
+   El audio de cada canción va en la misma base de datos, en tu cuenta: users/{uid}/audio/{canción} (nombre, tipo,
+   tamaño, y la sincronización: pulsos, voz, anclas) + parts/{n} con pedazos de 700 KB. Así la grabación y su
+   sincronización llegan a tus otros dispositivos. DB.kaudio[id] = tamaño (sube a la nube con las canciones). */
+const AUD_CH=700*1024,audKey=id=>String(id).replace(/[\/.#$\[\]]/g,'_');
+const cloudAudioOn=()=>!!(typeof CLOUD!=='undefined'&&CLOUD.user&&CLOUD.M);
+async function cloudAudioPut(id,blob,extra,prog){
+  if(!cloudAudioOn())return false;const M=CLOUD.M,base=['users',CLOUD.user.uid,'audio',audKey(id)],buf=new Uint8Array(await blob.arrayBuffer()),n=Math.max(1,Math.ceil(buf.length/AUD_CH));
+  for(let i=0;i<n;i++){await M.setDoc(M.doc(CLOUD.db,...base,'parts',String(i)),{b:M.Bytes.fromUint8Array(buf.subarray(i*AUD_CH,(i+1)*AUD_CH))});if(prog)prog((i+1)/n)}
+  await M.setDoc(M.doc(CLOUD.db,...base),Object.assign({name:blob.name||'grabacion',type:blob.type||'audio/mpeg',size:buf.length,n,updated:M.serverTimestamp()},extra||{}));
+  DB.kaudio=DB.kaudio||{};DB.kaudio[id]=buf.length;save();return true;
+}
+async function cloudAudioMeta(id,extra){if(!cloudAudioOn()||!(DB.kaudio||{})[id])return;const M=CLOUD.M;try{await M.setDoc(M.doc(CLOUD.db,'users',CLOUD.user.uid,'audio',audKey(id)),extra,{merge:true})}catch(e){}}
+async function cloudAudioGet(id,prog){
+  if(!cloudAudioOn())return null;const M=CLOUD.M,base=['users',CLOUD.user.uid,'audio',audKey(id)],s=await M.getDoc(M.doc(CLOUD.db,...base));if(!s.exists())return null;
+  const d=s.data(),parts=[];for(let i=0;i<d.n;i++){const p=await M.getDoc(M.doc(CLOUD.db,...base,'parts',String(i)));if(!p.exists())throw new Error('Falta un pedazo de la grabación en la nube.');parts.push(p.data().b.toUint8Array());if(prog)prog((i+1)/d.n)}
+  return{blob:new Blob(parts,{type:d.type||'audio/mpeg'}),meta:d};
+}
+async function cloudAudioDel(id){
+  if(DB.kaudio){delete DB.kaudio[id];save()}if(!cloudAudioOn())return;const M=CLOUD.M,base=['users',CLOUD.user.uid,'audio',audKey(id)];
+  try{const s=await M.getDoc(M.doc(CLOUD.db,...base));const n=s.exists()?s.data().n||0:0;for(let i=0;i<n;i++)await M.deleteDoc(M.doc(CLOUD.db,...base,'parts',String(i)));await M.deleteDoc(M.doc(CLOUD.db,...base))}catch(e){}
+}
+// espera a que la cuenta esté lista (al abrir la app tarda un momento)
+function cloudWhenReady(cb,tries){tries=tries??20;if(cloudAudioOn())return cb();if(typeof CLOUD==='undefined'||!cloudOn()||(CLOUD.ready&&!CLOUD.user)||tries<=0)return;setTimeout(()=>cloudWhenReady(cb,tries-1),700)}
 
 /* ---------- logo ---------- */
 const logo=()=>omLogo({color:INST.color});
@@ -4503,7 +4527,21 @@ function viewSongPlay(id,slow){
     const mediaEl=()=>{if(O.el)return O.el;const v=!!O.forceVideo;const el=document.createElement(v?'video':'audio');el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');
       if(v){el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;left:0';document.body.appendChild(el)}
       el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
-    const recIDB=()=>slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0},'orig:'+id)).catch(()=>{});
+    const recIDB=()=>{recCloud();return slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0},'orig:'+id)).catch(()=>{})};
+    /* la grabación también va a tu cuenta, para tenerla en tus otros dispositivos (con su sincronización) */
+    const recExtra=()=>({rec:JSON.stringify({grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0})});
+    const recCloud=()=>cloudWhenReady(()=>{if(!O.blob||O.upl)return;if((DB.kaudio||{})[id]===O.blob.size){cloudAudioMeta(id,recExtra());return}
+      O.upl=0.01;origUI();cloudAudioPut(id,O.blob,recExtra(),p=>{O.upl=Math.max(.01,p);const s=$('.kocloud',r);if(s)s.textContent=` · subiendo a tu cuenta ${Math.round(p*100)} %`})
+        .then(ok=>{O.upl=0;origUI();if(ok)toast(logo()+'<span>Tu grabación quedó en tu cuenta: ya está en tus otros dispositivos</span>',3500)})
+        .catch(e=>{O.upl=0;origUI();toast('No se pudo subir la grabación a tu cuenta'+(/permission|insufficient/i.test(e&&e.message||'')?': falta publicar la regla nueva de la base de datos.':'. Se intentará de nuevo.'),5000)})});
+    const recDown=()=>cloudWhenReady(async()=>{if(O.blob||O.dl)return;O.dl=0.01;origUI();
+      try{const R=await cloudAudioGet(id,p=>{O.dl=Math.max(.01,p);origUI()});if(!document.body.contains(r))return;
+        if(!R){if(DB.kaudio){delete DB.kaudio[id];save()}O.dl=0;origUI();return}
+        const x=(()=>{try{return JSON.parse(R.meta.rec||'{}')}catch(e){return{}}})();
+        O.blob=R.blob;O.fname=R.meta.name||'grabacion';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=R.meta.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=x.grid||null;O.voc=x.voc||null;O.recK=x.k||0;O.ancs=x.ancs||null;O.dur=x.dur||0;
+        slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs,dur:O.dur},'orig:'+id)).catch(()=>{});
+        if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();O.dl=0;origUI();paint();views(true);toast(logo()+'<span>Tu grabación llegó de tu cuenta</span>',3000)}
+      catch(e){O.dl=0;origUI();toast('No se pudo bajar la grabación de tu cuenta. Revisa tu internet.',4000)}});
     const semis=k=>Math.abs(k)===1?'medio tono':Math.abs(k)%2?Math.abs(k)+' semitonos':Math.abs(k)/2+(Math.abs(k)===2?' tono':' tonos');
     const iaUI=()=>{const k=$('#kia',r);if(!k)return;
       if(!iaReady()){k.innerHTML=`<p class="cap" style="margin:0">Conecta tu IA (Gemini, ChatGPT, Claude, Ollama…) para ordenar la letra, acomodar y simplificar acordes, proponer el rasgueo de cada sección y sacar la letra de tu grabación.</p><div class="row"><a class="btn pri" href="#/ia">${KIC.ia}Conectar una IA</a></div>`;return}
@@ -4529,12 +4567,13 @@ function viewSongPlay(id,slow){
       }catch(e){if(msg)msg.textContent=e.message;$$('[data-ia]',r).forEach(b=>b.disabled=false);return}
       iaUI();toolVals()};
     const origUI=()=>{iaUI();const k=$('#korig',r);if(!k)return;
-      if(!O.blob){k.innerHTML=`<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La app la escucha y la letra sigue a la canción real.</span></div>`;
+      if(!O.blob&&O.dl){k.innerHTML=`<p class="cap" style="margin:0">Bajando tu grabación de tu cuenta… ${Math.round(O.dl*100)} %</p>`;return}
+      if(!O.blob){k.innerHTML=`${(DB.kaudio||{})[id]?`<div class="row korow"><span class="cap" style="margin:0">Tu grabación de esta canción está en tu cuenta.</span><button class="btn sm pri" data-o="down">Bajarla</button></div>`:''}<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La app la escucha y la letra sigue a la canción real.</span></div>`;
         $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;DB.kuse[id]=true;delete DB.ksync[SK()];save();
           recIDB();if(O.el){O.el.remove&&O.el.remove();O.el=null}build();origUI();autoSync()};return}
       const T=synced(),B=O.busy;
       k.innerHTML=`<div class="seg">${[[0,'Banda de la app'],[1,'Mi grabación']].map(([v,l])=>`<button data-ou="${v}" aria-pressed="${O.use===!!v}">${l}</button>`).join('')}</div>
-        ${O.use?`<div class="row korow"><span class="cap koname" style="margin:0">${B?(O.bmsg||`Escuchando la canción… ${Math.round(O.prog*100)} %`):esc(O.name)+(T?' · sincronizada':' · falta sincronizar')}</span><button class="btn sm ${T||B?'':'pri'}" data-o="auto" ${B?'disabled':''}>${T?'Repetir':'Sincronizar'}</button><button class="btn sm" data-o="sync" ${B?'disabled':''}>A mano</button>${T&&iaHears()?`<button class="btn sm" data-o="ia" ${B?'disabled':''}>${KIC.ia}Revisar con IA</button>`:''}<button class="btn sm" data-o="del" ${B?'disabled':''}>Quitar</button></div>
+        ${O.use?`<div class="row korow"><span class="cap koname" style="margin:0">${B?(O.bmsg||`Escuchando la canción… ${Math.round(O.prog*100)} %`):esc(O.name)+(T?' · sincronizada':' · falta sincronizar')}<span class="kocloud">${O.upl?` · subiendo a tu cuenta ${Math.round(O.upl*100)} %`:(DB.kaudio||{})[id]===(O.blob&&O.blob.size)?' · en tu cuenta':''}</span></span><button class="btn sm ${T||B?'':'pri'}" data-o="auto" ${B?'disabled':''}>${T?'Repetir':'Sincronizar'}</button><button class="btn sm" data-o="sync" ${B?'disabled':''}>A mano</button>${T&&iaHears()?`<button class="btn sm" data-o="ia" ${B?'disabled':''}>${KIC.ia}Revisar con IA</button>`:''}<button class="btn sm" data-o="del" ${B?'disabled':''}>Quitar</button></div>
         ${T&&!B?`<div class="row korow"><span class="cap" style="margin:0">Ajuste fino de la letra</span><button class="btn sm" data-o="-">−0.1 s</button><button class="btn sm" data-o="+">+0.1 s</button></div>`:''}
         ${T&&!B&&O.recK&&O.recK!==st.shift?`<div class="row korow"><span class="cap koname" style="margin:0;white-space:normal">Tu grabación suena ${semis(O.recK)} más ${O.recK<0?'abajo':'arriba'} que estos acordes.</span><button class="btn sm" data-o="tk">Ver como suena</button></div>`:''}
         ${CHONLY&&!usingAI()?`<div class="row korow"><span class="cap koname" style="margin:0;white-space:normal">Esta canción solo trae la progresión. Saca la letra y los acordes de tu grabación:</span><a class="btn sm pri" href="#/cancionero/editar/${id}">Crear canción completa</a></div>`:''}
@@ -4655,10 +4694,11 @@ function viewSongPlay(id,slow){
       else if(k==='sync'){if(O.playing)origStop();syncStart()}
       else if(k==='ia')iaFixSync(false);
       else if(k==='tk'){st.shift=((O.recK+18)%12)-6;DB.kt[id]=st.shift;save();rerender();origUI()}
-      else if(k==='del'){if(O.playing)origStop();slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
+      else if(k==='down')recDown();
+      else if(k==='del'){if(O.playing)origStop();cloudAudioDel(id);slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
         O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+(((+DB.ksyncOff[SK()]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[SK()]>0?'+':''}${DB.ksyncOff[SK()]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build()}origUI();paint();views(true);
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();if((DB.kaudio||{})[id]!==O.blob.size)recCloud()}else if((DB.kaudio||{})[id])recDown();origUI();paint();views(true);
       if(DB.kautosync===id&&O.blob){delete DB.kautosync;save();autoSync()}}).catch(()=>origUI());
     origUI();
     const openP=k=>{const box=$('.kpanels',r),cur=box.hidden?null:box.dataset.open;$$('.ktool',r).forEach(b=>b.setAttribute('aria-pressed','false'));
