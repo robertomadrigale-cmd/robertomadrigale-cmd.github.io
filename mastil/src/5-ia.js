@@ -152,3 +152,37 @@ Responde SOLO JSON: {"title":"","artist":"","key":"tono como C o Am","bpm":núme
   const hd=(meta.title?`{title:${meta.title}}\n`:'')+(meta.artist?`{artist:${meta.artist}}\n`:'')+(meta.key?`{key:${meta.key}}\n`:'')+(meta.bpm?`{bpm:${meta.bpm}}\n`:'')+(beats===3?'{time:3/4}\n':'')+(meta.capo?`{comment:Capo en el traste ${meta.capo}}\n`:'');
   return{src:hd+'\n'+src.replace(/^\s*\{(title|t|artist|a|key|bpm|time)\s*:[^}]*\}\s*$/gim,'').trim()+'\n',meta,strum,ia:true};
 }
+/* ---------- la IA revisa la sincronización con la grabación ----------
+   Gemini escucha el audio y dice en qué segundo empieza a cantarse cada renglón; con OpenAI, el transcriptor da los
+   tiempos de cada frase y se emparejan con la letra en orden. La app solo usa esos tiempos para corregir renglones
+   que quedaron lejos (y los acomoda en el pulso real); el ajuste fino sigue siendo el análisis de acordes. */
+const iaNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9ñ ]+/g,' ').replace(/\s+/g,' ').trim();
+async function iaLineTimes(blob,lines){
+  const c=iaCfg();if(!iaHears())throw new Error('Para revisar con el audio conecta Gemini u OpenAI.');
+  if(blob.size>19.5e6)throw new Error('La grabación es muy grande para la IA (máximo ~19 MB).');
+  if(c.prov==='gemini'){
+    const t=await iaChat('Eres un ingeniero de audio que sincroniza letras (como un archivo LRC). Escuchas la canción completa y marcas el segundo exacto en que empieza a cantarse cada renglón.',
+      `Estos son los ${lines.length} renglones de la letra, en orden (los coros repetidos aparecen cada vez que se cantan):\n${lines.map((l,i)=>(i+1)+'. '+l).join('\n')}\n\nResponde SOLO JSON {"t":[...]} con exactamente ${lines.length} números: el segundo (con un decimal) en que empieza a cantarse cada renglón en esta grabación, o null si no se canta. Los tiempos van en aumento.`,{audio:blob});
+    const J=iaJSON(t);return(J.t||[]).slice(0,lines.length).map(v=>v==null||!isFinite(+v)?null:+v);
+  }
+  // OpenAI: frases con tiempo del transcriptor, emparejadas en orden con los renglones por palabras en común
+  const fd=new FormData();fd.append('file',blob,'cancion.'+((blob.type||'').split('/')[1]||'mp3'));fd.append('model','whisper-1');fd.append('response_format','verbose_json');fd.append('timestamp_granularities[]','segment');
+  const j=await iaFetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+c.key.trim()},body:fd});
+  const seg=(j.segments||[]).map(s=>({t:s.start,w:new Set(iaNorm(s.text).split(' ').filter(x=>x.length>2))}));let k=0;
+  return lines.map(l=>{const w=iaNorm(l).split(' ').filter(x=>x.length>2);if(!w.length)return null;let best=-1,bs=0;
+    for(let i=k;i<Math.min(seg.length,k+8);i++){const s=w.filter(x=>seg[i].w.has(x)).length/w.length;if(s>bs+.05){bs=s;best=i}}
+    if(best<0||bs<.34)return null;k=best+1;return seg[best].t});
+}
+/* letra con el segundo en que empieza cada renglón y su sección (para crear la canción desde el audio) */
+async function iaLyricsTimed(blob){
+  const c=iaCfg();if(!iaHears())throw new Error('Para sacar la letra del audio conecta Gemini u OpenAI.');
+  if(blob.size>19.5e6)throw new Error('La grabación es muy grande para la IA (máximo ~19 MB). Usa un MP3.');
+  if(c.prov==='gemini'){
+    const t=await iaChat('Eres un transcriptor profesional de canciones en español e inglés que hace archivos LRC (letra sincronizada).',
+      'Escucha toda la canción y transcribe SOLO lo que se canta, un verso por renglón (frases cortas de 4 a 10 palabras), con el segundo exacto (un decimal) en que empieza cada renglón y su sección. Responde SOLO JSON {"title":"si lo reconoces","artist":"si lo reconoces","lines":[{"t":12.3,"sec":"Verso 1","text":"…"}]}. Secciones en español: Intro, Verso 1, Verso 2, Pre-coro, Coro, Puente, Solo, Final.',{audio:blob});
+    const J=iaJSON(t);return{title:J.title||'',artist:J.artist||'',lines:(J.lines||[]).map(x=>({t:+x.t,text:String(x.text||'').trim(),sec:x.sec?String(x.sec):null})).filter(x=>x.text&&isFinite(x.t))};
+  }
+  const fd=new FormData();fd.append('file',blob,'cancion.'+((blob.type||'').split('/')[1]||'mp3'));fd.append('model','whisper-1');fd.append('response_format','verbose_json');fd.append('timestamp_granularities[]','segment');
+  const j=await iaFetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+c.key.trim()},body:fd});
+  return{title:'',artist:'',lines:(j.segments||[]).map(s=>({t:+s.start,text:String(s.text||'').trim(),sec:null})).filter(x=>x.text)};
+}

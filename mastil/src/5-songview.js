@@ -113,3 +113,7 @@ function easyShift(P){if(!P.all.length)return 0;let best=0,bs=1e9;
   return best}
 // qué capo deja la versión fácil sonando como la original (si se bajó el tono)
 function easyCapoTxt(sh,orig,es){if(!sh)return'';if(sh<0)return`Con capo en el traste ${-sh} suena igual que la original (${orig}).`;return`Suena ${sh===1?'medio tono':sh/2+(sh===2?' tono':' tonos')} más agudo que la original (${orig}).`}
+// repite los renglones de acordes hasta cubrir la duración de la grabación (canciones de solo progresión)
+function expandProg(src,dur){const body=src.split('\n').filter(l=>l.includes('[')&&!/^\s*\{/.test(l));if(!body.length)return src;
+  const P=songParse(src),cyc=Math.max(4,songTimeline(P,0,P.beats).total),need=dur*Math.max(150,P.bpm*1.35)/60,reps=Math.min(80,Math.ceil(need/cyc));
+  let out=src;for(let i=1;i<reps;i++)out+='\n'+body.join('\n');return out}

@@ -2085,7 +2085,7 @@ WID.openchords={
   view:s=>{const c=OC[s.i],{d,m}=ocDots(c),cf=chordFing(c[2]);d.forEach(x=>{x.fg=cf.fg[x.s]});return fretboard({to:5,dots:d,muted:m,barre:cf.barre,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261115182758';
+const OM_BETA_VERSION='v20261115184154';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -3168,6 +3168,40 @@ Responde SOLO JSON: {"title":"","artist":"","key":"tono como C o Am","bpm":núme
   const hd=(meta.title?`{title:${meta.title}}\n`:'')+(meta.artist?`{artist:${meta.artist}}\n`:'')+(meta.key?`{key:${meta.key}}\n`:'')+(meta.bpm?`{bpm:${meta.bpm}}\n`:'')+(beats===3?'{time:3/4}\n':'')+(meta.capo?`{comment:Capo en el traste ${meta.capo}}\n`:'');
   return{src:hd+'\n'+src.replace(/^\s*\{(title|t|artist|a|key|bpm|time)\s*:[^}]*\}\s*$/gim,'').trim()+'\n',meta,strum,ia:true};
 }
+/* ---------- la IA revisa la sincronización con la grabación ----------
+   Gemini escucha el audio y dice en qué segundo empieza a cantarse cada renglón; con OpenAI, el transcriptor da los
+   tiempos de cada frase y se emparejan con la letra en orden. La app solo usa esos tiempos para corregir renglones
+   que quedaron lejos (y los acomoda en el pulso real); el ajuste fino sigue siendo el análisis de acordes. */
+const iaNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9ñ ]+/g,' ').replace(/\s+/g,' ').trim();
+async function iaLineTimes(blob,lines){
+  const c=iaCfg();if(!iaHears())throw new Error('Para revisar con el audio conecta Gemini u OpenAI.');
+  if(blob.size>19.5e6)throw new Error('La grabación es muy grande para la IA (máximo ~19 MB).');
+  if(c.prov==='gemini'){
+    const t=await iaChat('Eres un ingeniero de audio que sincroniza letras (como un archivo LRC). Escuchas la canción completa y marcas el segundo exacto en que empieza a cantarse cada renglón.',
+      `Estos son los ${lines.length} renglones de la letra, en orden (los coros repetidos aparecen cada vez que se cantan):\n${lines.map((l,i)=>(i+1)+'. '+l).join('\n')}\n\nResponde SOLO JSON {"t":[...]} con exactamente ${lines.length} números: el segundo (con un decimal) en que empieza a cantarse cada renglón en esta grabación, o null si no se canta. Los tiempos van en aumento.`,{audio:blob});
+    const J=iaJSON(t);return(J.t||[]).slice(0,lines.length).map(v=>v==null||!isFinite(+v)?null:+v);
+  }
+  // OpenAI: frases con tiempo del transcriptor, emparejadas en orden con los renglones por palabras en común
+  const fd=new FormData();fd.append('file',blob,'cancion.'+((blob.type||'').split('/')[1]||'mp3'));fd.append('model','whisper-1');fd.append('response_format','verbose_json');fd.append('timestamp_granularities[]','segment');
+  const j=await iaFetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+c.key.trim()},body:fd});
+  const seg=(j.segments||[]).map(s=>({t:s.start,w:new Set(iaNorm(s.text).split(' ').filter(x=>x.length>2))}));let k=0;
+  return lines.map(l=>{const w=iaNorm(l).split(' ').filter(x=>x.length>2);if(!w.length)return null;let best=-1,bs=0;
+    for(let i=k;i<Math.min(seg.length,k+8);i++){const s=w.filter(x=>seg[i].w.has(x)).length/w.length;if(s>bs+.05){bs=s;best=i}}
+    if(best<0||bs<.34)return null;k=best+1;return seg[best].t});
+}
+/* letra con el segundo en que empieza cada renglón y su sección (para crear la canción desde el audio) */
+async function iaLyricsTimed(blob){
+  const c=iaCfg();if(!iaHears())throw new Error('Para sacar la letra del audio conecta Gemini u OpenAI.');
+  if(blob.size>19.5e6)throw new Error('La grabación es muy grande para la IA (máximo ~19 MB). Usa un MP3.');
+  if(c.prov==='gemini'){
+    const t=await iaChat('Eres un transcriptor profesional de canciones en español e inglés que hace archivos LRC (letra sincronizada).',
+      'Escucha toda la canción y transcribe SOLO lo que se canta, un verso por renglón (frases cortas de 4 a 10 palabras), con el segundo exacto (un decimal) en que empieza cada renglón y su sección. Responde SOLO JSON {"title":"si lo reconoces","artist":"si lo reconoces","lines":[{"t":12.3,"sec":"Verso 1","text":"…"}]}. Secciones en español: Intro, Verso 1, Verso 2, Pre-coro, Coro, Puente, Solo, Final.',{audio:blob});
+    const J=iaJSON(t);return{title:J.title||'',artist:J.artist||'',lines:(J.lines||[]).map(x=>({t:+x.t,text:String(x.text||'').trim(),sec:x.sec?String(x.sec):null})).filter(x=>x.text&&isFinite(x.t))};
+  }
+  const fd=new FormData();fd.append('file',blob,'cancion.'+((blob.type||'').split('/')[1]||'mp3'));fd.append('model','whisper-1');fd.append('response_format','verbose_json');fd.append('timestamp_granularities[]','segment');
+  const j=await iaFetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+c.key.trim()},body:fd});
+  return{title:'',artist:'',lines:(j.segments||[]).map(s=>({t:+s.start,text:String(s.text||'').trim(),sec:null})).filter(x=>x.text)};
+}
 
 /* ---------- importar canciones desde archivo: PDF de Ultimate Guitar, TXT o ChordPro ----------
    El PDF se lee con pdf.js (se descarga de cdnjs la primera vez que se usa; el resto de la app sigue sin conexión).
@@ -4092,7 +4126,7 @@ function viewSongEdit(id){
   return{title:ex&&ex.mine?'Editar canción':isTop?ex.top.t:'Nueva canción',back:'#/cancionero',html:`
   ${isTop?`<div class="card note"><b>Paso 1.</b> Busca la letra con acordes. <b>Paso 2.</b> Copia toda la canción. <b>Paso 3.</b> Regresa y toca «Pegar del portapapeles».<div class="row" style="margin-top:10px"><a class="btn sm pri" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(ex.top.t+' '+ex.top.a+' letra y acordes')}">Buscar letra y acordes</a></div></div>`:''}
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
-   <div class="row"><label class="btn sm pri" for="sbfile">${IC.down}Subir PDF o archivo</label><input type="file" id="sbfile" accept=".pdf,.txt,.pro,.cho,.chopro,.crd,application/pdf,text/plain" hidden><button class="btn sm" id="sbpaste">Pegar del portapapeles</button>${iaReady()?`<button class="btn sm" id="sbia">Ordenar con IA</button>`:`<a class="btn sm" href="#/ia">Conectar IA</a>`}<span class="cap" style="margin:0">o pega con el teclado dentro del cuadro</span></div>
+   <div class="row"><label class="btn sm pri" for="sbaud">${IC.wave}Crear desde audio</label><input type="file" id="sbaud" accept="audio/*,video/*" hidden><span id="sbrecw"></span><label class="btn sm" for="sbfile">${IC.down}Subir PDF o archivo</label><input type="file" id="sbfile" accept=".pdf,.txt,.pro,.cho,.chopro,.crd,application/pdf,text/plain" hidden><button class="btn sm" id="sbpaste">Pegar del portapapeles</button>${iaReady()?`<button class="btn sm" id="sbia">Ordenar con IA</button>`:`<a class="btn sm" href="#/ia">Conectar IA</a>`}<span class="cap" style="margin:0">o pega con el teclado dentro del cuadro</span></div>
    <textarea id="sbsrc" rows="16" spellcheck="false" placeholder="Pega aquí la canción: acordes arriba y letra abajo, o [Sol]letra con [Re]acordes">${esc(tpl)}</textarea>
    <div id="sbprev" class="cap" style="margin:0"></div>
    <div class="sbopts" id="sbopts"><div><span class="cl">Ritmo de la banda</span><select class="inp" id="sbsty"></select></div>
@@ -4129,8 +4163,27 @@ function viewSongEdit(id){
       DB.songs=DB.songs||[];const sid=ex&&ex.mine?id:'u'+Date.now().toString(36);
       const i=DB.songs.findIndex(s=>s.id===sid);if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
       if(E.strum){DB.kai=DB.kai||{};DB.kai[sid]=Object.assign({},DB.kai[sid],{pat:{sub:4,beats:E.beatsPdf||4,tip:'Rasgueo de la hoja de la canción.',secs:{verso:{g:E.strum,b:null,f:1}}},useP:true})}
-      save();toast(logo()+'<span>Canción guardada</span>');SBTAB='mine';location.hash='#/cancionero/ver/'+sid;
+      const open=()=>{SBTAB='mine';location.hash='#/cancionero/ver/'+sid};
+      if(E.audio){DB.kuse=DB.kuse||{};DB.kuse[sid]=true;DB.kautosync=sid;save();toast(logo()+'<span>Canción guardada con tu audio</span>');
+        slowIDB().then(db=>new Promise(res=>{const tx=db.transaction('f','readwrite');tx.objectStore('f').put({blob:E.audio,name:E.audio.name||'grabacion.mp3',type:E.audio.type||'audio/mpeg'},'orig:'+sid);tx.oncomplete=res;tx.onerror=res})).catch(()=>{}).then(open);return}
+      save();toast(logo()+'<span>Canción guardada</span>');open();
     };
+    /* como Moises: de un audio salen el pulso y los acordes (la app sola) y la letra con sus tiempos (la IA);
+       al guardar, la canción queda con ese audio y se sincroniza al abrirla */
+    const fromAudio=async f=>{const msg=t=>{const m=$('#sbmsg',r);if(m)m.textContent=t};
+      try{msg('Escuchando el audio: pulso y acordes…');const{x,xs,sr}=await syncDecode(f);
+        const A=await syncAnalyze(x,sr,0,p=>msg(`Escuchando el audio: pulso y acordes… ${Math.round(p*100)} %`),xs),R=chordsFromAudio(A);if(!R)throw new Error('No encontré el pulso de este audio.');
+        const meta=isTop?{title:ex.top.t,artist:ex.top.a}:{title:(f.name||'Mi canción').replace(/\.[^.]+$/,'')};let lyr=null,why='';
+        if(iaHears()){const t0=Date.now(),tk=setInterval(()=>msg(`La IA está sacando la letra… ${Math.round((Date.now()-t0)/1000)} s`),1000);msg('La IA está sacando la letra…');
+          try{const L=await iaLyricsTimed(f);lyr=L.lines;if(!isTop){if(L.title)meta.title=L.title;if(L.artist)meta.artist=L.artist}}catch(err){why=err.message}clearInterval(tk)}
+        ta.value=songFromAudio(R,lyr,meta);E.touched={};E.audio=f;prev();
+        const n=new Set(R.ch.filter(Boolean).map(c=>c.pc+c.suf)).size;
+        msg(`Listo: ${Math.round(R.bpm)} bpm y ${n} acordes${lyr&&lyr.length?` con ${lyr.length} renglones de letra`:''}.${!lyr?(iaHears()?' No salió la letra: '+why:' Para sacar también la letra conecta Gemini u OpenAI en Asistente IA.'):''} Revisa y toca «Guardar y abrir»: la canción queda con tu audio y sincronizada.`)}
+      catch(err){msg(err.message||'No pude escuchar ese audio.')}};
+    $('#sbaud',r).onchange=e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(f)fromAudio(f)};
+    // si ya subiste la grabación de esta canción en el reproductor, se puede usar esa
+    if(ex)slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{const w=$('#sbrecw',r);if(!rec||!rec.blob||!w)return;
+      w.innerHTML=`<button class="btn sm" id="sbrec">Usar mi grabación</button>`;$('#sbrec',r).onclick=()=>fromAudio(new File([rec.blob],rec.name||'grabacion.mp3',{type:rec.type||rec.blob.type||'audio/mpeg'}))}).catch(()=>{});
     // PDF de Ultimate Guitar (o TXT / ChordPro): título, artista, tono, tempo, secciones y acordes sin copiar y pegar
     $('#sbfile',r).onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;$('#sbmsg',r).textContent='Leyendo '+f.name+'…';
       const tk=setInterval(()=>{const m=$('#sbmsg',r);if(m&&/^Leyendo/.test(m.textContent))m.textContent=m.textContent.replace(/( · \d+ s)?$/,' · '+Math.round((Date.now()-t0)/1000)+' s')},1000),t0=Date.now();
@@ -4186,7 +4239,9 @@ function bandStop(){BR.gen++;BR.src.forEach(x=>{try{x.stop()}catch(e){}});BR.src
 function viewSongPlay(id,slow){
   const s=sbGet(id);if(!s)return viewSongbook();
   Object.assign(KAR,DB.kar||{});DB.kai=DB.kai||{};
-  const AIo=()=>DB.kai[id]||{},usingAI=()=>!!(AIo().src&&AIo().on!==false),srcNow=()=>usingAI()?AIo().src:s.src,SK=()=>id+(usingAI()?'~ia':'');
+  // canciones con solo la progresión (Las 100): con tu grabación, la progresión se repite toda la canción
+  const REC={dur:0,on:false},CHONLY=!songParse(s.src).lines.some(l=>l.pieces&&l.pieces.some(p=>p.text.trim()));
+  const AIo=()=>DB.kai[id]||{},usingAI=()=>!!(AIo().src&&AIo().on!==false),srcNow=()=>usingAI()?AIo().src:CHONLY&&REC.on&&REC.dur?expandProg(s.src,REC.dur):s.src,SK=()=>id+(usingAI()?'~ia':'');
   // la versión de la IA puede no traer tempo, compás o ritmo: se toman de la original
   const fixP=Q=>{if(usingAI()){const O0=songParse(s.src);if(Q.title==='Sin título')Q.title=O0.title;if(!Q.artist)Q.artist=O0.artist;if(!Q.set.bpm&&!Q.set.tempo)Q.bpm=O0.bpm;if(!Q.set.time){Q.time=O0.time;Q.beats=O0.beats}if(!Q.set.style)Q.style=O0.style;if(!Q.set.pickup)Q.pickup=O0.pickup}return Q};
   const mkP=()=>{const Q=fixP(songParse(srcNow()));if(KAR.simple&&INST.id!=='bateria')simplifyP(Q);return Q};
@@ -4477,7 +4532,7 @@ function viewSongPlay(id,slow){
     const mediaEl=()=>{if(O.el)return O.el;const v=!!O.forceVideo;const el=document.createElement(v?'video':'audio');el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');
       if(v){el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;left:0';document.body.appendChild(el)}
       el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
-    const recIDB=()=>slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null},'orig:'+id)).catch(()=>{});
+    const recIDB=()=>slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0},'orig:'+id)).catch(()=>{});
     const semis=k=>Math.abs(k)===1?'medio tono':Math.abs(k)%2?Math.abs(k)+' semitonos':Math.abs(k)/2+(Math.abs(k)===2?' tono':' tonos');
     const iaUI=()=>{const k=$('#kia',r);if(!k)return;
       if(!iaReady()){k.innerHTML=`<p class="cap" style="margin:0">Conecta tu IA (Gemini, ChatGPT, Claude, Ollama…) para ordenar la letra, acomodar y simplificar acordes, proponer el rasgueo de cada sección y sacar la letra de tu grabación.</p><div class="row"><a class="btn pri" href="#/ia">${KIC.ia}Conectar una IA</a></div>`;return}
@@ -4508,9 +4563,10 @@ function viewSongPlay(id,slow){
           recIDB();if(O.el){O.el.remove&&O.el.remove();O.el=null}build();origUI();autoSync()};return}
       const T=synced(),B=O.busy;
       k.innerHTML=`<div class="seg">${[[0,'Banda de la app'],[1,'Mi grabación']].map(([v,l])=>`<button data-ou="${v}" aria-pressed="${O.use===!!v}">${l}</button>`).join('')}</div>
-        ${O.use?`<div class="row korow"><span class="cap koname" style="margin:0">${B?`Escuchando la canción… ${Math.round(O.prog*100)} %`:esc(O.name)+(T?' · sincronizada':' · falta sincronizar')}</span><button class="btn sm ${T||B?'':'pri'}" data-o="auto" ${B?'disabled':''}>${T?'Repetir':'Sincronizar'}</button><button class="btn sm" data-o="sync" ${B?'disabled':''}>A mano</button><button class="btn sm" data-o="del" ${B?'disabled':''}>Quitar</button></div>
+        ${O.use?`<div class="row korow"><span class="cap koname" style="margin:0">${B?(O.bmsg||`Escuchando la canción… ${Math.round(O.prog*100)} %`):esc(O.name)+(T?' · sincronizada':' · falta sincronizar')}</span><button class="btn sm ${T||B?'':'pri'}" data-o="auto" ${B?'disabled':''}>${T?'Repetir':'Sincronizar'}</button><button class="btn sm" data-o="sync" ${B?'disabled':''}>A mano</button>${T&&iaHears()?`<button class="btn sm" data-o="ia" ${B?'disabled':''}>${KIC.ia}Revisar con IA</button>`:''}<button class="btn sm" data-o="del" ${B?'disabled':''}>Quitar</button></div>
         ${T&&!B?`<div class="row korow"><span class="cap" style="margin:0">Ajuste fino de la letra</span><button class="btn sm" data-o="-">−0.1 s</button><button class="btn sm" data-o="+">+0.1 s</button></div>`:''}
         ${T&&!B&&O.recK&&O.recK!==st.shift?`<div class="row korow"><span class="cap koname" style="margin:0;white-space:normal">Tu grabación suena ${semis(O.recK)} más ${O.recK<0?'abajo':'arriba'} que estos acordes.</span><button class="btn sm" data-o="tk">Ver como suena</button></div>`:''}
+        ${CHONLY&&!usingAI()?`<div class="row korow"><span class="cap koname" style="margin:0;white-space:normal">Esta canción solo trae la progresión. Saca la letra y los acordes de tu grabación:</span><a class="btn sm pri" href="#/cancionero/editar/${id}">Crear canción completa</a></div>`:''}
         <p class="cap" style="margin:0">${T?'Si un renglón no cae, tócalo y usa «A mano» desde ahí.':'La app escucha tu archivo y encuentra el pulso y los cambios de acorde.'} La grabación suena en su tono original.</p>`:''}`};
     /* tiempos reales: cada renglón tiene su inicio (sincronizado solo o a mano) y dentro del renglón todo avanza
        pulso a pulso sobre la rejilla de la grabación. Los renglones sin marcar se calculan desde el marcado más cercano. */
@@ -4576,16 +4632,32 @@ function viewSongPlay(id,slow){
       if(O.playing)origStop();if(O.syncing){O.syncing=false;if(O.el)O.el.pause();syncPaint()}
       O.busy=true;O.prog=0;origUI();paint();
       const show=p=>{O.prog=p;const s=$('.koname',r);if(s)s.textContent=`Escuchando la canción… ${Math.round(p*100)} %`};
-      try{const{x,xs,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;
+      try{const{x,xs,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;O.dur=x.length/sr;if(CHONLY){REC.dur=O.dur;REC.on=true;reloadSong();O.busy=true;origUI()}
         const A=await syncAnalyze(x,sr,DB.kbpm[id]||(P.set.bpm?P.bpm:0),show,xs);if(!document.body.contains(r))return;
         const bpm=Math.max(40,Math.min(220,Math.round(A.bpm)));O.grid=A.beats;st.bpm=bpm;DB.kbpm[id]=bpm;build();
         const T0=songTimeline(Object.assign({},P0,{bpm}),st.bars,st.beats),Q=RES();T0.res=Q;{const ch=T0.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b);T0.chAt=[];let j=-1;for(let k=0;k<Math.ceil(T0.total*Q);k++){while(j+1<ch.length&&Math.round(ch[j+1].b*Q)<=k)j++;T0.chAt[k]=j>=0?ch[j].p:null}}
         const R=syncAlign(A,T0,st.beats);if(!R)throw new Error('sin acordes');build();
         O.grid=R.grid;O.voc=R.voc;O.recK=R.k;O.ancs=Object.assign({},O.ancs,{[SK()]:{a:R.anc||[],sig:sigTL()}});DB.ksync[SK()]=R.T;if(DB.ksyncOff)delete DB.ksyncOff[SK()];save();recIDB();
         $('#kbpm',r).textContent=bpm;side();spdTxt();pos=0;clearHL();buildO();
-        toast(logo()+`<span>Listo: la letra sigue a tu grabación (${bpm} bpm). Toca Empezar.</span>`,4000)}
+        toast(logo()+`<span>Listo: la letra sigue a tu grabación (${bpm} bpm).${iaHears()?' Ahora la IA la revisa…':' Toca Empezar.'}</span>`,4000)}
       catch(e){toast('No pude escuchar este archivo. Usa «A mano».',4000)}
-      O.busy=false;origUI();paint()};
+      O.busy=false;origUI();paint();if(synced()&&iaHears()&&!(CHONLY&&!usingAI()))iaFixSync(true)};
+    /* la IA escucha la grabación y corrige los renglones que quedaron lejos (más de 1.2 s): los pone en el pulso real
+       más cercano a donde empieza a cantarse. Lo demás se queda como lo dejó el análisis de acordes. */
+    const iaFixSync=async auto=>{if(!O.blob||O.busy)return;if(O.playing)origStop();O.busy=true;O.prog=0;O.bmsg='La IA está escuchando tu grabación…';origUI();
+      try{const sung=TL.lines.map((L,g)=>({g,t:P.lines[L.li].pieces.map(p=>(p.sp?' ':'')+p.text).join('').replace(/\s+/g,' ').trim()})).filter(x=>x.t);
+        if(!sung.length)throw new Error('Esta canción no tiene letra para revisar.');
+        const times=await iaLineTimes(O.blob,sung.map(x=>x.t)),T=Object.assign({},DB.ksync[SK()]||{}),snap=t=>O.grid?gridT(O.grid,Math.round(gridIdx(O.grid,t))):t;let n=0,heard=0;
+        sung.forEach((x,i)=>{const ta=times[i];if(ta==null||ta<0)return;heard++;const L=TL.lines[x.g],cur=T[L.li]??lineRaw(x.g);
+          if(cur==null||Math.abs(cur-ta)>1.2){const nt=+snap(ta).toFixed(3),pv=TL.lines.slice(0,x.g).map(q=>T[q.li]).filter(v=>v!=null).pop(),nx=TL.lines.slice(x.g+1).map(q=>T[q.li]).find(v=>v!=null);
+            if((pv==null||nt>pv+.3)&&(nx==null||nt<nx-.3||Math.abs((nx??0)-ta)>1.2)){T[L.li]=nt;n++}}});
+        // en orden: si algo quedó al revés, se quita el renglón que no cuadra (se recalcula con el pulso)
+        let last=-1;TL.lines.forEach(L=>{const v=T[L.li];if(v==null)return;if(v<=last+.2)delete T[L.li];else last=v});
+        if(!heard)throw new Error('La IA no reconoció la letra en la grabación.');
+        DB.ksync[SK()]=T;save();buildO();clearHL();pos=0;
+        toast(logo()+`<span>${n?`La IA corrigió ${n} renglón${n>1?'es':''}`:'La IA revisó la sincronización: todo cuadra'}. Toca Empezar.</span>`,4000)}
+      catch(e){toast((auto?'La IA no pudo revisar: ':'')+e.message,5000)}
+      O.busy=false;O.bmsg='';origUI();paint()};
     // a mano: escuchar y tocar cuando empieza cada renglón; los que no se tocan se acomodan solos con el pulso
     let SY={i:0,T:{}};
     const syncPaint=()=>{const box=$('#ksync',r);if(!O.syncing){box.hidden=true;return}box.hidden=false;const L=TL.lines[SY.i];
@@ -4606,15 +4678,17 @@ function viewSongPlay(id,slow){
       el.play().then(()=>{syncPaint();$('#ksync',r).scrollIntoView({block:'nearest',behavior:'smooth'})}).catch(()=>{O.syncing=false;toast('No se pudo reproducir este archivo en tu navegador.')})};
     const syncEnd=()=>{O.syncing=false;if(O.el)O.el.pause();if(Object.keys(SY.T).length>=(O.grid?1:2)){DB.ksync[SK()]=SY.T;save();toast(logo()+'<span>Listo: canción sincronizada</span>');pos=0;clearHL();buildO()}syncPaint();origUI();paint()};
     r.addEventListener('click',e=>{
-      const ou=e.target.closest('[data-ou]');if(ou){if(O.playing)origStop();if(running()){seqStop();bandStop()}O.use=ou.dataset.ou==='1';DB.kuse[id]=O.use;save();build();if(!O.use)applyMix(false);origUI();paint();views(true);return}
+      const ou=e.target.closest('[data-ou]');if(ou){if(O.playing)origStop();if(running()){seqStop();bandStop()}O.use=ou.dataset.ou==='1';DB.kuse[id]=O.use;save();if(CHONLY&&REC.dur){REC.on=O.use;reloadSong()}build();if(!O.use)applyMix(false);origUI();paint();views(true);return}
       const o=e.target.closest('[data-o]');if(!o)return;const k=o.dataset.o;
       if(k==='auto')autoSync();
       else if(k==='sync'){if(O.playing)origStop();syncStart()}
+      else if(k==='ia')iaFixSync(false);
       else if(k==='tk'){st.shift=((O.recK+18)%12)-6;DB.kt[id]=st.shift;save();rerender();origUI()}
       else if(k==='del'){if(O.playing)origStop();slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
         O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+(((+DB.ksyncOff[SK()]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[SK()]>0?'+':''}${DB.ksyncOff[SK()]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;build()}origUI();paint();views(true)}).catch(()=>origUI());
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build()}origUI();paint();views(true);
+      if(DB.kautosync===id&&O.blob){delete DB.kautosync;save();autoSync()}}).catch(()=>origUI());
     origUI();
     const openP=k=>{const box=$('.kpanels',r),cur=box.hidden?null:box.dataset.open;$$('.ktool',r).forEach(b=>b.setAttribute('aria-pressed','false'));
       if(!k||cur===k){box.hidden=true;box.dataset.open='';return}box.hidden=false;box.dataset.open=k;$$('.kpanel',r).forEach(p=>p.hidden=p.dataset.p!==k);const tb=$(`.ktool[data-panel="${k}"]`,r);if(tb)tb.setAttribute('aria-pressed','true');box.scrollIntoView({block:'nearest',behavior:'smooth'})};
@@ -5128,6 +5202,57 @@ function syncAlign(A,TL,bt){
 function gridIdx(g,t){const n=g.length;if(n<2)return 0;if(t<=g[0])return(t-g[0])/(g[1]-g[0]);if(t>=g[n-1])return n-1+(t-g[n-1])/(g[n-1]-g[n-2]);
   let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(g[m]<=t)lo=m;else hi=m}return lo+(t-g[lo])/(g[hi]-g[lo])}
 function gridT(g,x){const n=g.length;if(n<2)return g[0]||0;if(x<=0)return g[0]+x*(g[1]-g[0]);if(x>=n-1)return g[n-1]+(x-n+1)*(g[n-1]-g[n-2]);const i=Math.floor(x);return g[i]+(x-i)*(g[i+1]-g[i])}
+/* ---------- acordes desde el audio (sin IA, como Moises) ----------
+   Con la rejilla de pulsos y el croma de cada pulso (medios + graves) se compara contra las 24 tríadas mayores y
+   menores; Viterbi elige la sucesión más probable (cambiar de acorde cuesta, para no saltar en cada pulso).
+   Pulsos casi en silencio = sin acorde. Devuelve un acorde (o null) por pulso. */
+function chordsFromAudio(A){
+  const grid=A.beats;if(grid.length<8)return null;
+  const{C,BS,E}=gridChroma(A,grid),N=grid.length,eMed=E.slice().sort((a,b)=>a-b)[N>>1]||1;
+  const TP=[];for(let pc=0;pc<12;pc++){TP.push({pc,suf:'',bass:null,minor:false});TP.push({pc,suf:'m',bass:null,minor:true})}
+  const K=TP.length+1,SW=.11,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:chordMatch(TP[k],0,C[j],BS[j]));
+  let D=new Float32Array(K),B=[];for(let k=0;k<K;k++)D[k]=score(0,k);
+  for(let j=1;j<N;j++){let bk=0;for(let k=1;k<K;k++)if(D[k]>D[bk])bk=k;const nd=new Float32Array(K),bb=new Uint8Array(K);
+    for(let k=0;k<K;k++){const stay=D[k],sw=D[bk]-SW;if(stay>=sw){nd[k]=stay;bb[k]=k}else{nd[k]=sw;bb[k]=bk}nd[k]+=score(j,k)}B.push(bb);D=nd}
+  let k=0;for(let q=1;q<K;q++)if(D[q]>D[k])k=q;const path=new Array(N);path[N-1]=k;for(let j=N-1;j>0;j--){k=B[j-1][k];path[j-1]=k}
+  // cambios de un solo pulso entre dos iguales se quitan (suelen ser notas de paso)
+  for(let j=1;j+1<N;j++)if(path[j]!==path[j-1]&&path[j-1]===path[j+1])path[j]=path[j-1];
+  return{grid,ch:path.map(q=>q===TP.length?null:TP[q]),bpm:A.bpm};
+}
+/* la canción completa en ChordPro a partir de los acordes por pulso y (si hay) la letra con tiempos de la IA:
+   lyr = [{t: segundo en que empieza, text, sec}] */
+function songFromAudio(R,lyr,meta){
+  const g=R.grid,ch=R.ch,nm=p=>p?US12F[p.pc].replace('♭','b')+p.suf:'',bt=4,beatAt=t=>Math.max(0,Math.min(g.length-1,Math.round(gridIdx(g,t))));
+  const chordAtBeat=j=>{for(let q=j;q>=0;q--)if(ch[q])return ch[q];return null};
+  // compases de solo acordes entre dos pulsos (4 compases por renglón)
+  const barsLine=(j0,j1)=>{const out=[];let row=[],last=null;for(let j=j0;j<j1;j+=bt){const seg=[];for(let q=j;q<Math.min(j+bt,j1);q++){const c=ch[q];if(c&&(!seg.length||nm(seg[seg.length-1])!==nm(c)))seg.push(c)}
+      const s=seg.length?seg:[chordAtBeat(j)].filter(Boolean);s.forEach(c=>{row.push('['+nm(c)+']')});if(row.length>=4){out.push(row.join(' '));row=[]}}if(row.length)out.push(row.join(' '));return out};
+  const L=[];const all=ch.map(nm).filter(Boolean);
+  const key=(()=>{try{const k=detectKey(all.map(x=>chParse(x)));return chName(k,0,k,false)+(k.minor&&!/m/.test(k.suf||'')?'m':'')}catch(e){return''}})();
+  L.push(`{title:${meta.title||'Mi canción'}}`);if(meta.artist)L.push(`{artist:${meta.artist}}`);L.push(`{bpm:${Math.round(R.bpm)}}`);if(key)L.push(`{key:${key}}`);L.push('');
+  const lines=(lyr||[]).filter(x=>x&&x.text&&isFinite(x.t)).sort((a,b)=>a.t-b.t);
+  if(!lines.length){L.push('{c:Acordes de la grabación}');barsLine(0,g.length).forEach(x=>L.push(x));return L.join('\n')}
+  let sec=null;const j0=beatAt(lines[0].t);
+  if(j0>=bt){L.push('{c:Intro}');barsLine(0,j0).forEach(x=>L.push(x))}
+  lines.forEach((x,i)=>{
+    if(x.sec&&x.sec!==sec){sec=x.sec;L.push('');L.push(`{c:${sec}}`)}
+    const t0=x.t,tn=i+1<lines.length?lines[i+1].t:g[g.length-1],words=x.text.trim().split(/\s+/),txt=words.join(' ');
+    // lo que dura lo cantado: ~0.3 s por sílaba, sin pasar del siguiente renglón
+    const syl=(txt.match(/[aeiouáéíóúü]+/gi)||[]).length||words.length,tend=Math.min(tn,t0+Math.max(1.4,syl*.38)),ja=beatAt(t0),jb=Math.max(ja+1,beatAt(tend));
+    const marks=[];let prev=null;const c0=chordAtBeat(ja);if(c0){marks.push([0,nm(c0)]);prev=nm(c0)}
+    for(let j=ja+1;j<jb;j++){const c=ch[j];if(c&&nm(c)!==prev){prev=nm(c);marks.push([(g[j]-t0)/Math.max(.5,tend-t0),prev])}}
+    // cada acorde va al inicio de la palabra más cercana a su momento
+    const pos=[];let acc=0;words.forEach(w=>{pos.push(acc/txt.length);acc+=w.length+1});const at={};
+    marks.forEach(([f,c])=>{let w=0,bd=9;pos.forEach((p,k)=>{const d=Math.abs(p-f);if(d<bd){bd=d;w=k}});at[w]=(at[w]||[]);if(!at[w].includes(c))at[w].push(c)});
+    // interludio: si hasta el siguiente renglón quedan 3 compases o más sin canto, van como renglones de acordes;
+    // si es menos, los cambios de acorde mientras se sostiene la nota quedan al final del renglón
+    const jn=i+1<lines.length?beatAt(lines[i+1].t):g.length,inter=jn-jb>=bt*3,tail=[];
+    if(!inter)for(let j=jb;j<jn;j++){const c=ch[j];if(c&&nm(c)!==prev){prev=nm(c);tail.push('['+prev+']')}}
+    L.push(words.map((w,k)=>(at[k]?at[k].map(c=>'['+c+']').join(''):'')+w).join(' ')+(tail.length?' '+tail.join(' '):''));
+    if(inter){const ins=barsLine(jb+(jb%bt?bt-jb%bt:0),jn);if(ins.length){L.push('');L.push(i+1<lines.length?'{c:Instrumental}':'{c:Final}');ins.forEach(y=>L.push(y));sec=null}}
+  });
+  return L.join('\n');
+}
 
 /* ---------- reproductor del cancionero: vistas Letras · Acordes · Formas · Pistas ----------
    Letras = karaoke de siempre. Acordes = rejilla compás por compás con la letra debajo. Formas = diagramas grandes
@@ -5244,6 +5369,10 @@ function easyShift(P){if(!P.all.length)return 0;let best=0,bs=1e9;
   return best}
 // qué capo deja la versión fácil sonando como la original (si se bajó el tono)
 function easyCapoTxt(sh,orig,es){if(!sh)return'';if(sh<0)return`Con capo en el traste ${-sh} suena igual que la original (${orig}).`;return`Suena ${sh===1?'medio tono':sh/2+(sh===2?' tono':' tonos')} más agudo que la original (${orig}).`}
+// repite los renglones de acordes hasta cubrir la duración de la grabación (canciones de solo progresión)
+function expandProg(src,dur){const body=src.split('\n').filter(l=>l.includes('[')&&!/^\s*\{/.test(l));if(!body.length)return src;
+  const P=songParse(src),cyc=Math.max(4,songTimeline(P,0,P.beats).total),need=dur*Math.max(150,P.bpm*1.35)/60,reps=Math.min(80,Math.ceil(need/cyc));
+  let out=src;for(let i=1;i<reps;i++)out+='\n'+body.join('\n');return out}
 
 /* ---------- arte por época: portadas abstractas (luz, color y un motivo geométrico), sin dibujos ---------- */
 const W8=800,H14=1400;
