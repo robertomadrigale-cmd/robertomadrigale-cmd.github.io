@@ -78,7 +78,48 @@ function viewCoach(options={}){
     const header=()=>`<header class="coach-head"><button class="icon-btn" data-coach="exit" aria-label="Salir">${IC.x}</button><span>${daily?'Tu sesión de hoy':'Práctica'} · ${Math.min(index+1,steps.length)} de ${steps.length}</span><span class="coach-mic">${started?(micOK?'Micrófono activo':'Sin calificación'):''}</span></header>`;
     const shell=html=>{root.innerHTML=header()+html};
     const controls=()=>`<footer class="coach-controls"><button class="btn" data-coach="pause">${IC.pause}<span>Pausa</span></button><button class="btn" data-coach="repeat">${IC.redo}<span>Repetir</span></button><button class="btn" data-coach="skip">${IC.next}<span>Saltar</span></button></footer>`;
-    const clearStep=()=>{clock=null;paused=false;root.classList.remove('is-song');try{HAS_TTS&&speechSynthesis.cancel()}catch(e){}root.classList.remove('is-paused');$('.coach-pause',root)?.remove();if(run){const old=run;run=null;old.stop()}if(rangeCleanup){rangeCleanup();rangeCleanup=null}MIC.on=null;rangeMic=null};
+
+    /* ---------- modo escenario: la letra a pantalla completa mientras cantas una canción ----------
+       renglón anterior, actual grande (lo cantado en dorado), siguientes; tu nota en vivo; opciones a la mano:
+       notas (el carril), acordes, música, volumen de tu grabación y «Antes / Después» (DB.lat). */
+    const VS={on:false,fs:false,song:null,sh:0,li:-1,music:true};
+    const US_SH=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+    const trCh=(c,sh)=>{if(!sh)return c;return String(c).replace(/([A-G])([#b]?)/g,(_,a,b)=>US_SH[((CHPC[a]+(b==='#'?1:b==='b'?-1:0)+sh)%12+12)%12])};
+    const vsHasCh=S=>S.lines.some(L=>L.syl&&L.syl.some(x=>x.ch));
+    // palabra por palabra (sin partirse entre renglones); la sílaba con acorde lo lleva encima
+    const vsLine=li=>{const L=VS.song.lines[li];if(!L)return'';let h='',w='';L.syl.forEach((s,si)=>{const sy=`<span class="syl" data-si="${si}">${esc(s.x)}</span>`;
+      w+=s.ch?`<span class="vw"><b class="vch">${esc(trCh(s.ch,VS.sh))}</b>${sy}</span>`:sy;if(s.sp||si===L.syl.length-1){h+=`<span class="vwd">${w}</span>`+(s.sp?' ':'');w=''}});
+      return`<p class="lyl" data-li="${li}">${h}</p>`};
+    const vsHTML=(S,orig)=>`<div class="vstage" id="vstage" hidden role="dialog" aria-modal="true" tabindex="-1" aria-label="Modo escenario">
+      <div class="vsg-top"><span class="vsg-t"><b>${esc(S.title)}</b>${S.artist?' · '+esc(S.artist):''}</span><span class="vsg-note" id="vsgnote"><b>—</b><small>Tu nota</small></span><button class="icon-btn" data-vst="close" aria-label="Salir del modo escenario">${IC.x}</button></div>
+      <div class="vsg-lane" id="vsglane"></div>
+      <div class="vsg-lines" id="vsgl"></div>
+      <div class="vsg-options" id="vsgopt" hidden><div class="vsg-head"><b>Opciones</b><button class="icon-btn" data-vst="opts" aria-label="Cerrar opciones">${IC.x}</button></div>
+        ${orig?`<label class="vsg-vol">Volumen de tu grabación<input type="range" min="0" max="1" step=".05" data-original-volume value="${DB.originalVolume??.65}"></label>`:''}
+        <p class="cap">¿La letra va adelantada o atrasada?</p><div class="vsg-row vsg-off"><button class="kmu" data-vst="off" data-d="-1">‹ Antes</button><b id="vsgoff">0.00 s</b><button class="kmu" data-vst="off" data-d="1">Después ›</button></div></div>
+      <div class="vsg-bot"><div class="vsg-prog"><i id="vsgp"></i></div>
+        <div class="vsg-row">${vsHasCh(S)?'<button class="kmu" data-vst="chords">Acordes</button>':''}<button class="kmu" data-vst="lane">Notas</button><button class="kmu" data-vst="music">Música</button><button class="kmu" data-vst="opts">${IC.cog||''}Opciones</button></div>
+        <div class="vsg-row"><button class="kplayb" data-vst="pause" aria-label="Pausa">${IC.pause}</button></div></div></div>`;
+    const vsPaint=()=>{const st=$('#vstage',root);if(!st)return;
+      st.classList.toggle('no-chords',DB.vsChords===false);st.classList.toggle('no-lane',DB.vsLane===false);
+      for(const[k,on]of[['chords',DB.vsChords!==false],['lane',DB.vsLane!==false],['music',VS.music]])$$(`[data-vst="${k}"]`,st).forEach(b=>{b.setAttribute('aria-pressed',String(on));b.classList.toggle('off',!on)});
+      const o=$('#vsgoff',st);if(o){const v=(+DB.lat||0)/1000;o.textContent=(v>0?'+':'')+v.toFixed(2)+' s'}
+      const p=$('[data-vst="pause"]',st);if(p){p.innerHTML=paused?IC.play:IC.pause;p.setAttribute('aria-label',paused?'Seguir':'Pausa')}};
+    const vsRender=li=>{const box=$('#vsgl',root);if(!box||!VS.song)return;VS.li=li;const rows=[];
+      for(let k=li-1;k<=li+2;k++)rows.push(`<div class="vsg-r ${k<li?'pv':k===li?'cur':k===li+1?'nx':'nx2'}">${k>=0&&VS.song.lines[k]?vsLine(k):''}</div>`);box.innerHTML=rows.join('');
+      // lo que ya se encendió del renglón actual en la letra normal
+      $$(`#lyr [data-li="${li}"] .syl.go`,root).forEach(x=>{const q=$(`.vsg-r.cur [data-si="${x.dataset.si}"]`,box);if(q){q.style.setProperty('--sd','0s');q.classList.add('go');['hit','miss'].forEach(c=>x.classList.contains(c)&&q.classList.add(c))}});
+      const p=$('#vsgp',root);if(p)p.style.width=((li+1)/VS.song.lines.length*100)+'%'};
+    const vsLaneHome=()=>{const cv=$('#coach-lane',root),w=$('.lane-wrap',root);if(cv&&w&&cv.parentElement!==w)w.prepend(cv)};
+    const vsOpen=()=>{const st=$('#vstage',root);if(!st||VS.on)return;VS.on=true;st.hidden=false;document.documentElement.classList.add('vstage-on');
+      const cv=$('#coach-lane',root);if(cv)$('#vsglane',root).appendChild(cv);vsRender(Math.max(0,VS.li));vsPaint();st.focus({preventScroll:true});
+      try{const fe=st.requestFullscreen||st.webkitRequestFullscreen;if(fe&&!document.fullscreenElement){const q=fe.call(st);if(q&&q.catch)q.catch(()=>{})}}catch(e){}};
+    const vsClose=()=>{if(!VS.on)return;VS.on=false;const st=$('#vstage',root);if(st)st.hidden=true;vsLaneHome();document.documentElement.classList.remove('vstage-on');
+      try{if(document.fullscreenElement&&document.fullscreenElement===st)(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}};
+    const vsOnFs=()=>{const st=$('#vstage',root);if(st&&document.fullscreenElement===st)VS.fs=true;else if(VS.fs){VS.fs=false;vsClose()}};document.addEventListener('fullscreenchange',vsOnFs);
+    const vsKey=e=>{if(VS.on&&e.key==='Escape'){e.preventDefault();const o=$('#vsgopt',root);if(o&&!o.hidden)o.hidden=true;else vsClose()}};document.addEventListener('keydown',vsKey);
+    const vsMusic=()=>{if(run&&run.bus)run.bus.gain.value=VS.music?1:0};
+    const clearStep=()=>{vsClose();VS.song=null;VS.li=-1;VS.music=true;clock=null;paused=false;root.classList.remove('is-song');try{HAS_TTS&&speechSynthesis.cancel()}catch(e){}root.classList.remove('is-paused');$('.coach-pause',root)?.remove();if(run){const old=run;run=null;old.stop()}if(rangeCleanup){rangeCleanup();rangeCleanup=null}MIC.on=null;rangeMic=null};
     function timer(seconds,paint,done){clock={left:seconds,paint,done};paint(seconds)}
     function ready(){
       const x=stepInfo(steps[Math.min(index,steps.length-1)]);
@@ -136,9 +177,9 @@ function viewCoach(options={}){
       root.classList.toggle('is-song',!!song);
       shell(`<div class="coach-hud"><div class="hud-l"><span class="eyebrow">${esc(x.t)}${song?'':' · «'+esc(syl)+'»'}</span><h1 id="phase">${song?'Prepárate':'Escucha'}</h1><span id="round"></span><div class="rbar" aria-hidden="true"><i id="rbar"></i></div></div>
         <div class="vnote" id="vnote" aria-live="polite"><small>Tu nota</small><b id="live-note">—</b><span id="live-dir">${song?'Espera la cuenta':'Escucha primero'}</span></div></div>
-        <div class="hud-tools">${originalBuffer?'':speedHTML(id)}${song&&!originalBuffer?`<button class="chip" data-coach="guide" aria-pressed="${DB.sguide!==false}">Voz guía</button>`:''}${song&&song.recording?.audioStored&&hasOriginalTimings(song)?`<button class="chip" data-coach="orig" aria-pressed="${!!originalBuffer}">Mi grabación</button>`:''}</div>
+        <div class="hud-tools">${originalBuffer?'':speedHTML(id)}${song&&!originalBuffer?`<button class="chip" data-coach="guide" aria-pressed="${DB.sguide!==false}">Voz guía</button>`:''}${song&&song.recording?.audioStored&&hasOriginalTimings(song)?`<button class="chip" data-coach="orig" aria-pressed="${!!originalBuffer}">Mi grabación</button>`:''}${song?'<button class="chip" data-vst="open">Escenario</button>':''}</div>
         <div class="lane-wrap"><canvas class="lane coach-lane" id="coach-lane" aria-label="Notas objetivo y línea de tu voz"></canvas><div class="lane-rest" id="lane-rest" hidden><span class="brdisc"></span><b>Respira</b><span id="rest-n"></span></div></div>
-        ${song?`<div class="lyrics concert" id="lyr">${lyricHTML(song)}</div>`:'<p id="rest-label" class="coach-hint">Las barras claras las canta la app. Las azules te tocan a ti.</p>'}${controls()}`);
+        ${song?`<div class="lyrics concert" id="lyr">${lyricHTML(song)}</div>`:'<p id="rest-label" class="coach-hint">Las barras claras las canta la app. Las azules te tocan a ti.</p>'}${controls()}${song?vsHTML(song,!!originalBuffer):''}`);
       const speed=spdOf(id);
       spec=song?(originalBuffer?timedSongSpec(song,originalBuffer,{volume:DB.originalVolume??.65,side:!!DB.originalSide}):songSpec(song,{shift:daily?songShift(song):(DB['shift:'+song.id]??songShift(song)),speed,guide:DB.sguide!==false,chords:DB.schords!==false})):drillSpec(x,{rounds:x.rounds,bpm:(daily?x.bpm:DB['bpm:'+x.id]||x.bpm)*speed,dir:daily?'up':DB.dir,mode:daily?'eco':DB.mode,rest:daily?sess.rest:2,from:opt.from||0});
       if(carry.length)spec.targets=carry.concat(spec.targets);
@@ -161,20 +202,25 @@ function viewCoach(options={}){
         if(dir&&s.ph==='L')dir.textContent='Escucha primero';
       },onPitch(d,g){
         const n=$('#live-note',root),dir=$('#live-dir',root),card=$('#vnote',root);if(!n)return;
+        const vsNote=()=>{if(!VS.on)return;const b=$('#vsgnote',root);if(!b)return;b.className='vsg-note '+card.className.replace('vnote','').trim();b.innerHTML=`<b>${esc(n.textContent)}</b><small>${esc(dir.textContent)}</small>`};
         const sing=g&&g.ph==='S'&&curPh!=='L';
-        if(d.m==null){n.textContent='—';if(sing){dir.textContent='No te oigo';card.className='vnote quiet'}return}
+        if(d.m==null){n.textContent='—';if(sing){dir.textContent='No te oigo';card.className='vnote quiet'}vsNote();return}
         n.textContent=nnTxt(d.m);
-        if(!sing){card.className='vnote';return}
+        if(!sing){card.className='vnote';vsNote();return}
         const diff=d.m-tgtAt(g,d.t),tol=(DB.tol||50)/100;
         if(Math.abs(diff)<=tol){dir.textContent='¡Ahí!';card.className='vnote hit'}else if(diff<0){dir.textContent='Sube ↑';card.className='vnote low'}else{dir.textContent='Baja ↓';card.className='vnote high'}
+        vsNote();
       },onNote(g){
         if(!song)return;const ly=$('#lyr',root);
-        if(last&&last.n){const el=$(`[data-li="${last.li}"] [data-si="${last.si}"]`,ly);if(el)el.classList.add(last.h/last.n>=.6?'hit':'miss')}
+        if(last&&last.n){const c=last.h/last.n>=.6?'hit':'miss',el=$(`[data-li="${last.li}"] [data-si="${last.si}"]`,ly);if(el)el.classList.add(c);const q=VS.on&&$(`#vsgl [data-li="${last.li}"] [data-si="${last.si}"]`,root);if(q)q.classList.add(c)}
         last=g;if(!g)return;ly.classList.add('live');
         $$('.lyl',ly).forEach(l=>{const k=+l.dataset.li;l.classList.toggle('cur',k===g.li);l.classList.toggle('nxt',k===g.li+1);l.classList.toggle('past',k<g.li)});
         const cur=$(`.lyl[data-li="${g.li}"]`,ly);if(cur&&ly._li!==g.li){ly._li=g.li;ly.scrollTo({top:cur.offsetTop-ly.clientHeight/2+cur.clientHeight/2,behavior:RMOT.matches?'auto':'smooth'})}
-        const el=$(`[data-li="${g.li}"] [data-si="${g.si}"]`,ly);if(el&&g.syl!==''){const end=Math.max(...spec.targets.filter(t=>t.li===g.li&&t.si===g.si).map(t=>t.t1));el.style.setProperty('--sd',(end-g.t0)+'s');el.classList.add('go')}
+        if(g.li!==VS.li){VS.li=g.li;if(VS.on)vsRender(g.li)}
+        const el=$(`[data-li="${g.li}"] [data-si="${g.si}"]`,ly);if(el&&g.syl!==''){const end=Math.max(...spec.targets.filter(t=>t.li===g.li&&t.si===g.si).map(t=>t.t1));el.style.setProperty('--sd',(end-g.t0)+'s');el.classList.add('go');
+          const q=VS.on&&$(`#vsgl [data-li="${g.li}"] [data-si="${g.si}"]`,root);if(q){q.style.setProperty('--sd',(end-g.t0)+'s');q.classList.add('go')}}
       },onEnd(sp){run=null;if(sp&&alive)finish(sp)}});
+      if(song){VS.song=song;VS.sh=originalBuffer?0:(daily?songShift(song):(DB['shift:'+song.id]??songShift(song)));VS.li=0;vsMusic();if(DB.vstage!==false)vsOpen()}
     }
     function breathStep(){
       stage='breath';shell(`<div class="coach-center"><h1>Respiración 4-4-8</h1><div class="brc"><div class="brdisc" id="breath-disc"></div><div class="brin"><b id="breath-count">4</b><span id="breath-phase">Inhala</span></div></div><p id="breath-cycle">Ciclo 1 de 2</p><p class="coach-tip">Suelta el aire parejo, sin subir los hombros.</p></div>${controls()}`);
@@ -228,7 +274,7 @@ function viewCoach(options={}){
       root.classList.toggle('is-paused',value);
       $('.coach-pause',root)?.remove();if(value)root.insertAdjacentHTML('beforeend','<div class="coach-pause"><span>En pausa</span><button class="btn pri" data-coach="resume">Seguir</button></div>');
       const b=$('[data-coach="pause"]',root);if(b)b.innerHTML=(value?IC.play:IC.pause)+'<span>'+(value?'Seguir':'Pausa')+'</span>';
-      pauseBusy=false;
+      vsPaint();pauseBusy=false;
     }
     async function exit(){
       if($('dialog[open]',root))return;
@@ -243,6 +289,15 @@ function viewCoach(options={}){
       const sp=e.target.closest('[data-spd]');
       if(sp){const id=steps[index];DB['spd:'+id]=+sp.dataset.spd;save();$$('[data-spd]',root).forEach(x=>x.setAttribute('aria-pressed',String(x===sp)));
         if(stage==='exercise'){toast('Velocidad: '+sp.textContent);exercise()}else{clock=null;$('#count',root)?.remove()}return}
+      const vs=e.target.closest('[data-vst]');if(vs){const k=vs.dataset.vst;
+        if(k==='open'){DB.vstage=true;save();vsOpen()}else if(k==='close'){vsClose()}
+        else if(k==='opts'){const o=$('#vsgopt',root);if(o)o.hidden=!o.hidden}
+        else if(k==='chords'){DB.vsChords=DB.vsChords===false;save()}
+        else if(k==='lane'){DB.vsLane=DB.vsLane===false;save()}
+        else if(k==='music'){VS.music=!VS.music;vsMusic()}
+        else if(k==='pause'){setPaused(!paused)}
+        else if(k==='off'){DB.lat=Math.max(-200,Math.min(800,(+DB.lat||0)+25*+vs.dataset.d));save()}
+        vsPaint();return}
       const b=e.target.closest('[data-coach]');if(!b)return;const action=b.dataset.coach;
       if(pauseBusy)return;
       if(action==='example'){example();return}
@@ -260,6 +315,6 @@ function viewCoach(options={}){
     },80);
     const visibility=()=>{if(document.hidden&&started&&!paused)setPaused(true);else if(!document.hidden&&paused&&run&&AC)AC.suspend()};document.addEventListener('visibilitychange',visibility);
     ready();if(COACH_AUTOSTART){COACH_AUTOSTART=false;begin()}
-    return()=>{alive=false;audioAbort.abort();clearStep();clearInterval(iv);document.removeEventListener('visibilitychange',visibility);if(COACH===state)COACH=null;micStop();if(AC&&AC.state==='suspended')AC.resume();save()};
+    return()=>{alive=false;audioAbort.abort();clearStep();document.removeEventListener('fullscreenchange',vsOnFs);document.removeEventListener('keydown',vsKey);clearInterval(iv);document.removeEventListener('visibilitychange',visibility);if(COACH===state)COACH=null;micStop();if(AC&&AC.state==='suspended')AC.resume();save()};
   }};
 }

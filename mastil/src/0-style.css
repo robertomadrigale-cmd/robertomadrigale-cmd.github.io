@@ -1228,6 +1228,7 @@ html.welcome-on{overflow:hidden}
 html.kstage-on{overflow:hidden}
 html.kstage-on .tabs,html.kstage-on .topbar{display:none!important}
 html.pulse-on .ksg-lines{padding:0 52px}
+.ksg-off b{min-width:4.2em;text-align:center;font-variant-numeric:tabular-nums;color:#fff}
 .ksg-top{display:flex;align-items:center;gap:12px;min-height:44px}
 .ksg-t{flex:1;min-width:0;font-size:14px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ksg-t b{color:#fff}

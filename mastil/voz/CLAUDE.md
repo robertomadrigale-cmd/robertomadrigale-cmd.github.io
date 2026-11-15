@@ -83,3 +83,6 @@ Funciones comunes en Yousician Sing, Vanido, Singing Carrots, SingSharp, Smule y
 - Grabarse y escucharse (reutilizar la grabadora de Roka Guitar, `5-extra.js`).
 - Cuenta en la nube y modo maestro (`5-cloud.js` de Roka Guitar) si Roberto decide compartir Firebase.
 - Vibrato: medir su velocidad y amplitud en notas largas.
+
+## Modo escenario (canciones)
+- En `viewCoach` (`5-coach.js`, objeto `VS` y funciones `vs*`): al cantar una canción se abre la letra a pantalla completa (`#vstage`, si `DB.vstage!==false`; chip «Escenario» para volver a abrirla): renglón anterior, actual grande (lo cantado en dorado, verde/rojo según la nota), siguientes, acordes transportados al tono (`trCh`), tu nota en vivo y el carril de notas (el mismo `#coach-lane`, que se mueve al escenario y regresa al cerrar). Botones: Acordes (`DB.vsChords`), Notas (`DB.vsLane`), Música (silencia `PRACTICE.bus`, todo lo que suena de la app o tu grabación), pausa, y Opciones: volumen de tu grabación y «Antes / Después» (`DB.lat` ±25 ms). Se cierra con la X, Escape o al salir de pantalla completa.

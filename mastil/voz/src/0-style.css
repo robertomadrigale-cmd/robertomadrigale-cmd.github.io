@@ -1312,3 +1312,48 @@ html.fs .page{max-width:1100px;width:100%;margin:0 auto;padding:0 24px;min-heigh
 .coach.is-song .coach-lane{height:26svh;min-height:130px}
 .coach.is-song .lyrics.concert{flex:1 1 auto;min-height:0;max-height:none}
 .coach.is-song .coach-controls{padding:10px 0}
+/* ---------- modo escenario (canciones): letra a pantalla completa, lo cantado en dorado ---------- */
+.vstage{--sung:#ffcf4a;--unsung:rgba(255,255,255,.42);position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;gap:10px;background:radial-gradient(120% 80% at 50% 0%,color-mix(in srgb,var(--accent) 22%,#07080b) 0%,#07080b 60%),#07080b;color:#fff;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));outline:none}
+.vstage[hidden],.vstage [hidden]{display:none!important}
+html.vstage-on{overflow:hidden}
+html.vstage-on .tabs,html.vstage-on .topbar{display:none!important}
+.vsg-top{display:flex;align-items:center;gap:10px;min-height:44px;flex-shrink:0}
+.vsg-t{flex:1;min-width:0;font-size:14px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vsg-t b{color:#fff}
+.vstage .icon-btn{background:rgba(255,255,255,.1);color:#fff;border-radius:50%}
+.vsg-note{display:flex;flex-direction:column;align-items:center;min-width:76px;padding:4px 10px;border-radius:12px;background:rgba(255,255,255,.1);line-height:1.1}
+.vsg-note b{font-size:20px}.vsg-note small{font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap}
+.vsg-note.hit{background:#134e2c;color:#b8ffd2}.vsg-note.low,.vsg-note.high{background:#4e3413;color:#ffe2b5}
+.vsg-lane{flex-shrink:0}.vsg-lane .lane{height:clamp(90px,20svh,180px);width:100%;border-radius:14px}
+.vstage.no-lane .vsg-lane{display:none}
+.vsg-lines{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,3vh,28px);text-align:center;max-width:1100px;width:100%;margin:0 auto}
+.vsg-r .lyl{margin:0;font-size:inherit;line-height:1.15;color:inherit;transform:none;opacity:1;filter:none}
+.vsg-r.cur{font-size:clamp(28px,6.4vw,62px);font-weight:800;letter-spacing:-.02em}
+.vsg-r.nx{font-size:clamp(19px,3.6vw,34px);font-weight:700;opacity:.62}
+.vsg-r.nx2{font-size:clamp(16px,2.8vw,26px);font-weight:600;opacity:.3}
+.vsg-r.pv{font-size:clamp(15px,2.6vw,24px);font-weight:600;opacity:.28}
+.vsg-r:empty{min-height:1em}
+.vwd{white-space:nowrap}
+.vstage:not(.no-chords) .vsg-r.cur .vwd,.vstage:not(.no-chords) .vsg-r.nx .vwd{display:inline-block;padding-top:.5em}
+.vw{display:inline-flex;flex-direction:column;align-items:flex-start;vertical-align:bottom;position:relative}
+.vw .vch{position:absolute;bottom:100%;left:0}
+.vch{font:800 .45em/1.2 var(--font-body,system-ui);color:#5fe3d6;white-space:nowrap}
+.vsg-r.pv .vch,.vsg-r.nx2 .vch,.vstage.no-chords .vch{display:none}
+.vsg-r .syl{background-image:linear-gradient(90deg,var(--sung) 50%,var(--unsung) 50%);color:transparent;-webkit-text-fill-color:transparent}
+.vsg-r:not(.cur) .syl{background-image:none;color:inherit;-webkit-text-fill-color:currentColor}
+.vsg-r.cur .syl.hit{background-image:linear-gradient(90deg,var(--sung) 50%,var(--sung) 50%)}
+.vsg-r.cur .syl.miss{background-image:linear-gradient(90deg,#ff9b8a 50%,#ff9b8a 50%)}
+.vsg-bot{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+.vsg-prog{width:min(720px,100%);height:4px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}.vsg-prog i{display:block;height:100%;width:0;background:var(--sung);transition:width .3s}
+.vsg-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;width:100%}
+.vstage .kmu{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 14px;border:1px solid rgba(255,255,255,.2);border-radius:24px;background:rgba(255,255,255,.12);color:#fff;font:600 .85rem/1.2 inherit;white-space:nowrap;cursor:pointer}
+.vstage .kmu[aria-pressed="true"]{background:#134e49;border-color:#5fe3d6;color:#b5fff6}
+.vstage .kmu.off{color:rgba(255,255,255,.6);background:rgba(255,255,255,.04);text-decoration:line-through}
+.vstage .kmu svg{width:18px;height:18px}
+.vsg-options{position:absolute;z-index:2;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(440px,calc(100% - 24px));max-height:calc(100% - 220px);overflow-y:auto;padding:14px;border:1px solid rgba(255,255,255,.25);border-radius:18px;background:#151b24;box-shadow:0 10px 40px #0008}
+.vsg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.vsg-options .cap{color:rgba(255,255,255,.72);text-align:center;margin:12px 0 8px;font-size:.8rem}
+.vsg-vol{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:rgba(255,255,255,.85)}
+.vsg-off b{min-width:4.2em;text-align:center;font-variant-numeric:tabular-nums}
+.vstage button:focus-visible{outline:2px solid #ffcf4a;outline-offset:3px}
+@media(max-width:420px){.vstage .kmu{padding:10px;font-size:.8rem}.vsg-note{min-width:64px}}
+@media(max-height:560px){.vsg-lane .lane{height:70px}.vsg-options{bottom:12px;max-height:calc(100% - 24px)}}

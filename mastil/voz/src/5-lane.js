@@ -172,7 +172,7 @@ function practiceRun(cv,spec,o){
   };
   if(MIC.stream)MIC.on=onMic;
   raf=requestAnimationFrame(frame);
-  return PRACTICE={stop:()=>stop(false),pause,resume,st,onMic,spec,get paused(){return paused}};
+  return PRACTICE={stop:()=>stop(false),pause,resume,st,onMic,spec,bus,get paused(){return paused}};
 }
 // calificación: promedio de las notas que cantaste (cada nota = fracción del tiempo dentro de la tolerancia)
 function specScore(spec){const gs=spec.targets.filter(g=>g.ph==='S'&&g.n>0);if(!gs.length)return null;return gs.reduce((a,g)=>a+g.h/g.n,0)/gs.length}

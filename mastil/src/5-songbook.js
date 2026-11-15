@@ -675,6 +675,7 @@ function viewSongPlay(id,slow){
     <div class="ksg-opt-head"><b>Opciones</b><button class="kic" data-stoptions aria-label="Cerrar opciones" aria-controls="ksgoptions" aria-expanded="false">${IC.x||'×'}</button></div>
     <div class="ksg-toggles">${INST.id==='bateria'?'':'<button class="kmu" data-stdiagram>Diagrama</button>'}<button class="kmu" data-t="met">Metrónomo</button><button class="kmu" data-t="voice">Voz guía</button></div>
     <p class="cap" id="ksgmixlabel"></p><div class="kmutes" id="ksgmutes"></div>
+    <p class="cap">¿La letra va adelantada o atrasada?</p><div class="ksg-toggles ksg-off"><button class="kmu" data-stoff="-1" aria-label="Encender la letra antes">‹ Antes</button><b id="ksgoff" aria-live="polite">0.00 s</b><button class="kmu" data-stoff="1" aria-label="Encender la letra después">Después ›</button></div>
    </div>
    <div class="ksg-bot"><div class="kprog"><i id="ksgp"></i></div><div class="ksg-tools"><button class="kmu" data-stchords>Acordes</button><button class="kmu" data-t="band"><span>Música</span></button><button class="kmu" data-stoptions aria-controls="ksgoptions" aria-expanded="false">${KIC.mas}Opciones</button></div><div class="ksg-ctl"><button class="kic" data-step="-1" aria-label="Renglón anterior">${KIC.prev}</button><button class="kplayb" data-stgo aria-label="Empezar">${IC.play}</button><button class="kic" data-step="1" aria-label="Renglón siguiente">${KIC.next}</button></div></div>
   </div>
@@ -796,7 +797,8 @@ function viewSongPlay(id,slow){
     /* ---------- modo escenario: pantalla completa al tocar; lo cantado se pinta en dorado ---------- */
     const stg=$('#kstage',r),stgL=$('#ksgl',r);let stgOn=false,stgFs=false,stgFocus=null;
     const stgOptions=open=>{const box=$('#ksgoptions',r);box.hidden=!open;$$('[data-stoptions]',stg).forEach(b=>b.setAttribute('aria-expanded',String(open)))};
-    const stgControls=()=>{stg.classList.toggle('no-chords',KAR.stageChords===false);$('#ksgch',r).hidden=INST.id==='bateria'||KAR.stageDiagram===false;
+    const stgOffTxt=()=>{const b=$('#ksgoff',r);if(!b)return;const v=recMode()?+(DB.ksyncOff||{})[SK()]||0:(+(INST.id==='bateria'?DB.visualLat:DB.lat)||0)/1000;b.textContent=(v>0?'+':'')+v.toFixed(2)+' s'};
+    const stgControls=()=>{stgOffTxt();stg.classList.toggle('no-chords',KAR.stageChords===false);$('#ksgch',r).hidden=INST.id==='bateria'||KAR.stageDiagram===false;
       for(const [sel,on]of[['[data-stchords]',KAR.stageChords!==false],['[data-stdiagram]',KAR.stageDiagram!==false],['[data-t="band"]',KAR.band],['[data-t="met"]',KAR.met],['[data-t="voice"]',KAR.voice]])$$(sel,stg).forEach(b=>{b.setAttribute('aria-pressed',String(!!on));b.classList.toggle('off',!on)});
       $('[data-t="voice"]',stg).hidden=recMode()||!P.hasMel;$('#ksgmixlabel',r).textContent=recMode()?'Grabación · separación aproximada':'Instrumentos de la banda'};
     const stgRender=li=>{if(!stgOn)return;const g=Math.max(0,lineIdx(li)),rows=[];
@@ -888,6 +890,10 @@ function viewSongPlay(id,slow){
       if(e.target.closest('[data-stopen]')){stgOpen();return}
       if(e.target.closest('[data-stx]')){stgClose();return}
       if(e.target.closest('[data-stgo]')){go();return}
+      const sof=e.target.closest('[data-stoff]');if(sof){const d=+sof.dataset.stoff;
+        if(recMode()){DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+((+DB.ksyncOff[SK()]||0)+d*.05).toFixed(2);save();buildO();O.last=-99}
+        else{const k=INST.id==='bateria'?'visualLat':'lat';DB[k]=Math.max(-200,Math.min(800,(+DB[k]||0)+d*25));save();$$('[data-lat]',r).forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.lat===DB[k])))}
+        stgOffTxt();return}
       if(e.target.closest('[data-stoptions]')){stgOptions($('#ksgoptions',r).hidden);return}
       const so=e.target.closest('[data-stchords],[data-stdiagram]');if(so){const k=so.hasAttribute('data-stchords')?'stageChords':'stageDiagram';KAR[k]=KAR[k]===false;DB.kar=Object.assign({},KAR);save();stgControls();return}
       const sa=e.target.closest('[data-stauto]');if(sa){KAR.stage=KAR.stage===false;DB.kar=Object.assign({},KAR);save();sa.setAttribute('aria-pressed',String(KAR.stage!==false));toast(logo()+`<span>${KAR.stage!==false?'Al tocar se abre la letra en pantalla completa':'La letra se queda en la página al tocar'}</span>`);return}
@@ -934,7 +940,10 @@ function viewSongPlay(id,slow){
     const mediaEl=()=>{if(O.el)return O.el;const v=!!O.forceVideo;const el=document.createElement(v?'video':'audio');el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');
       if(v){el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;left:0';document.body.appendChild(el)}
       el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();stgClose();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
-    const recIDB=()=>{recCloud();return slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null},'orig:'+id)).catch(()=>{})};
+    // grabaciones sincronizadas antes de que existiera vocalOnsets: se calculan en segundo plano una vez y se guardan
+    const vonLater=async()=>{if(O.von||!O.blob||O.busy||!document.body.contains(r))return;try{const{x,xs,sr}=await syncDecode(O.blob);if(O.von||!document.body.contains(r))return;
+      O.von=xs?await vocalOnsets(x,xs,sr):{st:false};recIDB();if(!O.playing&&TL)buildO()}catch(e){}};
+    const recIDB=()=>{recCloud();return slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null,von:O.von||null},'orig:'+id)).catch(()=>{})};
     /* la grabación también va a tu cuenta, para tenerla en tus otros dispositivos (con su sincronización) */
     const recExtra=()=>({rec:JSON.stringify({grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null})});
     const recCloud=()=>cloudWhenReady(()=>{if(!O.blob||O.upl)return;if((DB.kaudio||{})[id]===O.blob.size){cloudAudioMeta(id,recExtra());return}
@@ -982,7 +991,7 @@ function viewSongPlay(id,slow){
     const origUI=()=>{iaUI();muteUI();easyUI();const k=$('#korig',r);if(!k)return;
       if(!O.blob&&O.dl){k.innerHTML=`<p class="cap" style="margin:0">Bajando tu grabación de tu cuenta… ${Math.round(O.dl*100)} %</p>`;return}
       if(!O.blob){k.innerHTML=`${(DB.kaudio||{})[id]?`<div class="row korow"><span class="cap" style="margin:0">Tu grabación de esta canción está en tu cuenta.</span><button class="btn sm pri" data-o="down">Bajarla</button></div>`:''}<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La app la escucha y la letra sigue a la canción real.</span></div>`;
-        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;DB.kuse[id]=true;delete DB.ksync[SK()];save();
+        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.voc=null;O.von=null;O.recK=0;O.ancs=null;O.wv=null;DB.kuse[id]=true;delete DB.ksync[SK()];save();
           recIDB();if(O.el){O.el.remove&&O.el.remove();O.el=null}build();origUI();autoSync()};return}
       const T=synced(),B=O.busy;
       k.innerHTML=`<div class="seg">${[[0,'Banda de la app'],[1,'Mi grabación']].map(([v,l])=>`<button data-ou="${v}" aria-pressed="${O.use===!!v}">${l}</button>`).join('')}</div>
@@ -1026,6 +1035,14 @@ function viewSongPlay(id,slow){
       TL.ev.forEach(e=>{if(e.type==='note')return;const g=lineIdx(e.li);if(g<0||!LA[g])return;let t=mapB(e.b,g);if(t==null)return;
         const sp=SP[g];if(e.type==='lit'&&sp){const za=sp.a-off(),zz=sp.z-off();t=LA[g].length>1?Math.min(t,zz-.08):za+(e.b-sp.s0)/(sp.s1-sp.s0)*(zz-za)}
         t+=off();const n=OLT[g+1];if(n!=null&&e.type!=='line')t=Math.min(t,n-.05);OEV.push({t,e})});OEV.sort((a,b)=>a.t-b.t);
+      // con grabación estéreo: cada sílaba se pega a donde de verdad ENTRA la voz (vocalOnsets/sylAlign en 5-songsync.js)
+      if(O.von&&O.von.st&&O.von.v){const by={};OEV.forEach(o=>{if(o.e.type==='lit')(by[o.e.li]=by[o.e.li]||[]).push(o)});
+        Object.entries(by).forEach(([li,a])=>{const g=lineIdx(+li),t0=lineRaw(g);if(g<0||t0==null)return;a.sort((x,y)=>x.t-y.t);
+          const nx=lineRaw(g+1),zz=Math.min(nx!=null?nx-.05:1e9,a[a.length-1].t-off()+.6),al=sylAlign(a.map(o=>o.t-off()),t0,zz,O.von);
+          // si la voz entra un poco antes de donde quedó marcado el renglón, el renglón se adelanta (hasta 0.5 s)
+          const f0=al[0]+off(),pv=g>0?OLT[g-1]:null;if(OLT[g]!=null&&f0<OLT[g]-.03&&f0>OLT[g]-.5&&(pv==null||f0-.08>pv+.3)){OLT[g]=f0-.08;OEV.forEach(o=>{if(o.e.type==='line'&&o.e.li===+li)o.t=OLT[g]})}
+          a.forEach((o,k)=>{let t=al[k]+off();if(OLT[g]!=null)t=Math.max(t,OLT[g]+.01);const n=OLT[g+1];if(n!=null)t=Math.min(t,n-.05);o.t=t})});
+        OEV.sort((a,b)=>a.t-b.t)}
       const lastL={};for(let i=OEV.length-1;i>=0;i--){const o=OEV[i];if(o.e.type!=='lit')continue;const n=lastL[o.e.li];o.sd=n!=null?Math.max(.12,n-o.t):.6;lastL[o.e.li]=o.t}};
     const curLine=now=>{let g=-1;for(let i=0;i<OLT.length;i++){const t=OLT[i];if(t!=null&&t<=now+.02)g=i}return g};
     const applyUntil=(from,now)=>{OEV.forEach(({t,e,sd})=>{if(t<=from||t>now)return;
@@ -1058,7 +1075,7 @@ function viewSongPlay(id,slow){
       if(O.playing)origStop();if(O.syncing){O.syncing=false;if(O.el)O.el.pause();syncPaint()}
       O.busy=true;O.prog=0;origUI();paint();
       const show=p=>{O.prog=p;const s=$('.koname',r);if(s)s.textContent=`Escuchando la canción… ${Math.round(p*100)} %`};
-      try{const{x,xs,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;O.dur=x.length/sr;if(CHONLY){REC.dur=O.dur;REC.on=true;reloadSong();O.busy=true;origUI()}
+      try{const{x,xs,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;O.dur=x.length/sr;try{O.von=xs?await vocalOnsets(x,xs,sr):{st:false}}catch(e){O.von=null}if(CHONLY){REC.dur=O.dur;REC.on=true;reloadSong();O.busy=true;origUI()}
         const A=await syncAnalyze(x,sr,DB.kbpm[id]||(P.set.bpm?P.bpm:0),show,xs);if(!document.body.contains(r))return;
         const bpm=Math.max(40,Math.min(220,Math.round(A.bpm)));O.grid=A.beats;st.bpm=bpm;DB.kbpm[id]=bpm;build();
         const T0=songTimeline(Object.assign({},P0,{bpm}),st.bars,st.beats),Q=RES();T0.res=Q;{const ch=T0.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b);T0.chAt=[];let j=-1;for(let k=0;k<Math.ceil(T0.total*Q);k++){while(j+1<ch.length&&Math.round(ch[j+1].b*Q)<=k)j++;T0.chAt[k]=j>=0?ch[j].p:null}}
@@ -1112,11 +1129,12 @@ function viewSongPlay(id,slow){
       else if(k==='tk'){st.shift=((O.recK+18)%12)-6;DB.kt[id]=st.shift;save();rerender();origUI()}
       else if(k==='down')recDown();
       else if(k==='del'){if(O.playing)origStop();cloudAudioDel(id);slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
-        O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
+        O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.von=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+(((+DB.ksyncOff[SK()]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[SK()]>0?'+':''}${DB.ksyncOff[SK()]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;O.pch=rec.pch||null;O.lend=rec.lend||null;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;O.pch=rec.pch||null;O.lend=rec.lend||null;O.von=rec.von||null;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();
         if(O.pch&&!ancNow()){const a=[];Object.entries(O.pch).forEach(([li,ts])=>{const ev=TL.ev.filter(e=>e.type==='chord'&&e.li===+li).sort((x,y)=>x.b-y.b);if(ev.length===ts.length)ev.forEach((e,k)=>a.push([+e.b.toFixed(3),ts[k]]))});
           a.sort((x,y)=>x[0]-y[0]);O.ancs=Object.assign({},O.ancs,{[SK()]:{a,sig:sigTL()}});O.pch=null;recIDB()}
+        if(!O.von&&synced())setTimeout(vonLater,1200);
         if((DB.kaudio||{})[id]!==O.blob.size)recCloud()}else if((DB.kaudio||{})[id])recDown();origUI();paint();views(true);
       if(DB.kautosync===id&&O.blob){delete DB.kautosync;save();autoSync()}}).catch(()=>origUI());
     origUI();

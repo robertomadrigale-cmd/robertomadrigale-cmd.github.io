@@ -100,6 +100,58 @@ function vocalOf(R,E){
   const lo=ok[Math.floor(ok.length*.15)],hi=ok[Math.floor(ok.length*.85)];if(hi-lo<.3)return null;
   return R.map((r,j)=>E[j]<eMed*.1?0:Math.max(0,Math.min(1,(r-lo)/(hi-lo))));
 }
+/* ---------- dónde ENTRA la voz (para encender cada sílaba cuando se canta) ----------
+   x = medio (L+R)/2, xs = lados (L−R)/2. La voz va al centro: por cada bin, lo que hay en el medio y no en los
+   lados (|M|−|S|) en 200–3500 Hz; su flujo espectral positivo marca los ataques de sílaba. Sin estéreo se usa el
+   medio solo (menos fiable: también ataques de instrumentos). Salto 128 a 11 kHz ≈ 11.6 ms.
+   Devuelve {fr, v: Uint8Array 0–255} (fuerza de ataque normalizada) — pequeño para guardarlo con la grabación. */
+const VON_N=512,VON_H=128;
+async function vocalOnsets(x,xs,sr){
+  const N=VON_N,H=VON_H,nf=Math.max(1,Math.floor((x.length-N)/H)),w=hannW(N),k0=Math.max(2,Math.round(200*N/sr)),k1=Math.min(N/2-1,Math.round(3500*N/sr));
+  const re=new Float32Array(N),im=new Float32Array(N),re2=new Float32Array(N),im2=new Float32Array(N),prev=new Float32Array(N/2),prv2=new Float32Array(N/2),od=new Float32Array(nf),en=new Float32Array(nf),sf=new Float32Array(nf);
+  for(let f=0;f<nf;f++){const o=f*H;for(let i=0;i<N;i++){re[i]=(x[o+i]||0)*w[i];im[i]=0;if(xs){re2[i]=(xs[o+i]||0)*w[i];im2[i]=0}}fftRI(re,im);if(xs)fftRI(re2,im2);
+    let s=0,s2=0;for(let k=k0;k<=k1;k++){let m=Math.sqrt(re[k]*re[k]+im[k]*im[k]);if(xs){const ms=Math.sqrt(re2[k]*re2[k]+im2[k]*im2[k]),l2=Math.log(1+60*ms),d2=l2-prv2[k];if(d2>0)s2+=d2;prv2[k]=l2;m=Math.max(0,m-1.15*ms)}en[f]+=m;const l=Math.log(1+60*m),d=l-prev[k];if(d>0)s+=d;prev[k]=l}od[f]=s;sf[f]=s2;
+    if(f%2500===0)await syncIdle()}
+  // quitar la media local (≈0.3 s) y normalizar con el percentil 97
+  const ma=13,ps=new Float64Array(nf+1);for(let i=0;i<nf;i++)ps[i+1]=ps[i]+od[i];
+  const on=new Float32Array(nf);for(let i=0;i<nf;i++){const a=Math.max(0,i-ma),b=Math.min(nf,i+ma+1);on[i]=Math.max(0,od[i]-(ps[b]-ps[a])/(b-a))}
+  // la voz SE SOSTIENE: un golpe (bombo, rasgueo, platillo) se apaga en pocos ms. Cada ataque vale según cuánto
+  // sigue sonando 60–120 ms después, comparado con el pico del ataque.
+  for(let i=0;i<nf;i++){if(!on[i])continue;let pk=0;for(let q=i;q<Math.min(nf,i+3);q++)pk=Math.max(pk,en[q]);let su=0,c=0;for(let q=i+5;q<Math.min(nf,i+11);q++){su+=en[q];c++}
+    on[i]*=Math.max(0,Math.min(1,(c?su/c:0)/(pk*.7+1e-9)))**1.5}
+  // lo que también cambia en los lados es instrumento (la voz casi no tiene lados)
+  if(xs)for(let i=0;i<nf;i++){if(!on[i])continue;let a=0,b=0;for(let q=Math.max(0,i-1);q<=Math.min(nf-1,i+2);q++){a+=od[q];b+=sf[q]}on[i]*=(a/(a+1.5*b+1e-9))**2}
+  const srt=Array.from(on).filter(v=>v>0).sort((a,b)=>a-b),p97=srt[Math.floor(srt.length*.97)]||1;
+  const v=new Uint8Array(nf);for(let i=0;i<nf;i++)v[i]=Math.min(255,Math.round(255*on[i]/p97));
+  return{fr:sr/H,v,st:!!xs};
+}
+/* acomoda las sílabas de un renglón a los ataques de voz cercanos.
+   nom = tiempos estimados (s, en orden), [a,z] = ventana del renglón, V = vocalOnsets. Programación dinámica monótona:
+   cada sílaba se pega a un ataque (premio por fuerza, castigo por alejarse de su tiempo estimado) o se queda libre;
+   las libres se interpolan entre las pegadas. Nunca cambia el orden. */
+function sylAlign(nom,a,z,V){
+  const n=nom.length;if(!V||!V.v||n<1)return nom.slice();const fr=V.fr,v=V.v,c0=VON_N/2/(fr*VON_H),f0=Math.max(4,Math.floor((a-.35)*fr)),f1=Math.min(v.length-4,Math.ceil((z+.1)*fr));
+  // ataques = picos locales (±35 ms); el tiempo es el centro de la ventana de análisis
+  const P=[];for(let f=f0;f<=f1;f++){const s=v[f];if(s<38)continue;let ok=true;for(let d=-3;d<=3&&ok;d++)if(d<0?v[f+d]>=s:d>0&&v[f+d]>s)ok=false;if(ok)P.push({t:f/fr+c0,s:s/255})}
+  if(!P.length)return nom.slice();
+  // alineado tipo Needleman-Wunsch: sílaba↔ataque (premio por fuerza, castigo por alejarse del tiempo estimado),
+  // sílaba sin ataque (ligado) o ataque sin sílaba (instrumento / respiración) con su costo
+  const sp=n>1?(nom[n-1]-nom[0])/(n-1):.4,sig=Math.max(.3,Math.min(.8,sp*1.5)),K=P.length,wS=V.st?2.2:1.3,gS=.45,gP=V.st?.9:.5;
+  const m=(i,k)=>{const d=(P[k].t-nom[i])/sig;return Math.abs(d)>3.2?1e9:.5*d*d-wS*P[k].s};
+  const W=K+1,D=new Float64Array((n+1)*W),B=new Uint8Array((n+1)*W);
+  for(let k=1;k<=K;k++){D[k]=D[k-1]+gP*P[k-1].s;B[k]=2}
+  for(let i=1;i<=n;i++){D[i*W]=D[(i-1)*W]+gS;B[i*W]=1;
+    for(let k=1;k<=K;k++){let c=D[(i-1)*W+k-1]+m(i-1,k-1),b=0;const u=D[(i-1)*W+k]+gS,l=D[i*W+k-1]+gP*P[k-1].s;
+      if(u<c){c=u;b=1}if(l<c){c=l;b=2}if(b===0&&k>1&&i>1){}D[i*W+k]=c;B[i*W+k]=b}}
+  const as=new Array(n).fill(null);let i=n,k=K;while(i>0&&k>=0){const b=B[i*W+k];if(k===0||b===1){i--;continue}if(b===2){k--;continue}as[i-1]=P[k-1].t;i--;k--}
+  const out=nom.slice(),idx=as.map((x,q)=>x==null?-1:q).filter(q=>q>=0);if(!idx.length)return out;
+  idx.forEach(q=>out[q]=as[q]);
+  for(let q=0;q<idx[0];q++)out[q]=nom[q]+(as[idx[0]]-nom[idx[0]]);
+  for(let q=0;q+1<idx.length;q++){const i0=idx[q],i1=idx[q+1],n0=nom[i0],n1=nom[i1];for(let r=i0+1;r<i1;r++){const f=n1>n0?(nom[r]-n0)/(n1-n0):(r-i0)/(i1-i0);out[r]=as[i0]+f*(as[i1]-as[i0])}}
+  const L=idx[idx.length-1];for(let q=L+1;q<n;q++)out[q]=Math.min(z,nom[q]+(as[L]-nom[L]));
+  for(let q=1;q<n;q++)if(out[q]<out[q-1]+.05)out[q]=out[q-1]+.05;
+  return out;
+}
 const nrm=v=>{let s=0;for(let i=0;i<v.length;i++)s+=v[i]*v[i];s=Math.sqrt(s)||1;for(let i=0;i<v.length;i++)v[i]/=s;return v};
 // qué tanto suena el acorde en el pulso j: 72 % los medios (tipo de acorde) y 28 % los graves (raíz, algo de quinta)
 function chordMatch(p,k,c,b,wb){

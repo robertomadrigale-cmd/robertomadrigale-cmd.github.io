@@ -1250,6 +1250,7 @@ html.welcome-on{overflow:hidden}
 html.kstage-on{overflow:hidden}
 html.kstage-on .tabs,html.kstage-on .topbar{display:none!important}
 html.pulse-on .ksg-lines{padding:0 52px}
+.ksg-off b{min-width:4.2em;text-align:center;font-variant-numeric:tabular-nums;color:#fff}
 .ksg-top{display:flex;align-items:center;gap:12px;min-height:44px}
 .ksg-t{flex:1;min-width:0;font-size:14px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ksg-t b{color:#fff}
@@ -2499,7 +2500,7 @@ function importOld(){
 }
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261115143857';
+const OM_BETA_VERSION='v20261115145104';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -4830,6 +4831,7 @@ function viewSongPlay(id,slow){
     <div class="ksg-opt-head"><b>Opciones</b><button class="kic" data-stoptions aria-label="Cerrar opciones" aria-controls="ksgoptions" aria-expanded="false">${IC.x||'×'}</button></div>
     <div class="ksg-toggles">${INST.id==='bateria'?'':'<button class="kmu" data-stdiagram>Diagrama</button>'}<button class="kmu" data-t="met">Metrónomo</button><button class="kmu" data-t="voice">Voz guía</button></div>
     <p class="cap" id="ksgmixlabel"></p><div class="kmutes" id="ksgmutes"></div>
+    <p class="cap">¿La letra va adelantada o atrasada?</p><div class="ksg-toggles ksg-off"><button class="kmu" data-stoff="-1" aria-label="Encender la letra antes">‹ Antes</button><b id="ksgoff" aria-live="polite">0.00 s</b><button class="kmu" data-stoff="1" aria-label="Encender la letra después">Después ›</button></div>
    </div>
    <div class="ksg-bot"><div class="kprog"><i id="ksgp"></i></div><div class="ksg-tools"><button class="kmu" data-stchords>Acordes</button><button class="kmu" data-t="band"><span>Música</span></button><button class="kmu" data-stoptions aria-controls="ksgoptions" aria-expanded="false">${KIC.mas}Opciones</button></div><div class="ksg-ctl"><button class="kic" data-step="-1" aria-label="Renglón anterior">${KIC.prev}</button><button class="kplayb" data-stgo aria-label="Empezar">${IC.play}</button><button class="kic" data-step="1" aria-label="Renglón siguiente">${KIC.next}</button></div></div>
   </div>
@@ -4951,7 +4953,8 @@ function viewSongPlay(id,slow){
     /* ---------- modo escenario: pantalla completa al tocar; lo cantado se pinta en dorado ---------- */
     const stg=$('#kstage',r),stgL=$('#ksgl',r);let stgOn=false,stgFs=false,stgFocus=null;
     const stgOptions=open=>{const box=$('#ksgoptions',r);box.hidden=!open;$$('[data-stoptions]',stg).forEach(b=>b.setAttribute('aria-expanded',String(open)))};
-    const stgControls=()=>{stg.classList.toggle('no-chords',KAR.stageChords===false);$('#ksgch',r).hidden=INST.id==='bateria'||KAR.stageDiagram===false;
+    const stgOffTxt=()=>{const b=$('#ksgoff',r);if(!b)return;const v=recMode()?+(DB.ksyncOff||{})[SK()]||0:(+(INST.id==='bateria'?DB.visualLat:DB.lat)||0)/1000;b.textContent=(v>0?'+':'')+v.toFixed(2)+' s'};
+    const stgControls=()=>{stgOffTxt();stg.classList.toggle('no-chords',KAR.stageChords===false);$('#ksgch',r).hidden=INST.id==='bateria'||KAR.stageDiagram===false;
       for(const [sel,on]of[['[data-stchords]',KAR.stageChords!==false],['[data-stdiagram]',KAR.stageDiagram!==false],['[data-t="band"]',KAR.band],['[data-t="met"]',KAR.met],['[data-t="voice"]',KAR.voice]])$$(sel,stg).forEach(b=>{b.setAttribute('aria-pressed',String(!!on));b.classList.toggle('off',!on)});
       $('[data-t="voice"]',stg).hidden=recMode()||!P.hasMel;$('#ksgmixlabel',r).textContent=recMode()?'Grabación · separación aproximada':'Instrumentos de la banda'};
     const stgRender=li=>{if(!stgOn)return;const g=Math.max(0,lineIdx(li)),rows=[];
@@ -5043,6 +5046,10 @@ function viewSongPlay(id,slow){
       if(e.target.closest('[data-stopen]')){stgOpen();return}
       if(e.target.closest('[data-stx]')){stgClose();return}
       if(e.target.closest('[data-stgo]')){go();return}
+      const sof=e.target.closest('[data-stoff]');if(sof){const d=+sof.dataset.stoff;
+        if(recMode()){DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+((+DB.ksyncOff[SK()]||0)+d*.05).toFixed(2);save();buildO();O.last=-99}
+        else{const k=INST.id==='bateria'?'visualLat':'lat';DB[k]=Math.max(-200,Math.min(800,(+DB[k]||0)+d*25));save();$$('[data-lat]',r).forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.lat===DB[k])))}
+        stgOffTxt();return}
       if(e.target.closest('[data-stoptions]')){stgOptions($('#ksgoptions',r).hidden);return}
       const so=e.target.closest('[data-stchords],[data-stdiagram]');if(so){const k=so.hasAttribute('data-stchords')?'stageChords':'stageDiagram';KAR[k]=KAR[k]===false;DB.kar=Object.assign({},KAR);save();stgControls();return}
       const sa=e.target.closest('[data-stauto]');if(sa){KAR.stage=KAR.stage===false;DB.kar=Object.assign({},KAR);save();sa.setAttribute('aria-pressed',String(KAR.stage!==false));toast(logo()+`<span>${KAR.stage!==false?'Al tocar se abre la letra en pantalla completa':'La letra se queda en la página al tocar'}</span>`);return}
@@ -5089,7 +5096,10 @@ function viewSongPlay(id,slow){
     const mediaEl=()=>{if(O.el)return O.el;const v=!!O.forceVideo;const el=document.createElement(v?'video':'audio');el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');
       if(v){el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;left:0';document.body.appendChild(el)}
       el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();stgClose();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
-    const recIDB=()=>{recCloud();return slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null},'orig:'+id)).catch(()=>{})};
+    // grabaciones sincronizadas antes de que existiera vocalOnsets: se calculan en segundo plano una vez y se guardan
+    const vonLater=async()=>{if(O.von||!O.blob||O.busy||!document.body.contains(r))return;try{const{x,xs,sr}=await syncDecode(O.blob);if(O.von||!document.body.contains(r))return;
+      O.von=xs?await vocalOnsets(x,xs,sr):{st:false};recIDB();if(!O.playing&&TL)buildO()}catch(e){}};
+    const recIDB=()=>{recCloud();return slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null,von:O.von||null},'orig:'+id)).catch(()=>{})};
     /* la grabación también va a tu cuenta, para tenerla en tus otros dispositivos (con su sincronización) */
     const recExtra=()=>({rec:JSON.stringify({grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null})});
     const recCloud=()=>cloudWhenReady(()=>{if(!O.blob||O.upl)return;if((DB.kaudio||{})[id]===O.blob.size){cloudAudioMeta(id,recExtra());return}
@@ -5137,7 +5147,7 @@ function viewSongPlay(id,slow){
     const origUI=()=>{iaUI();muteUI();easyUI();const k=$('#korig',r);if(!k)return;
       if(!O.blob&&O.dl){k.innerHTML=`<p class="cap" style="margin:0">Bajando tu grabación de tu cuenta… ${Math.round(O.dl*100)} %</p>`;return}
       if(!O.blob){k.innerHTML=`${(DB.kaudio||{})[id]?`<div class="row korow"><span class="cap" style="margin:0">Tu grabación de esta canción está en tu cuenta.</span><button class="btn sm pri" data-o="down">Bajarla</button></div>`:''}<div class="row"><label class="btn" for="kofile">${IC.down}Usar mi grabación</label><input type="file" id="kofile" accept="audio/*,video/*" hidden><span class="cap" style="margin:0">MP3, M4A o video. La app la escucha y la letra sigue a la canción real.</span></div>`;
-        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;DB.kuse[id]=true;delete DB.ksync[SK()];save();
+        $('#kofile',r).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;O.blob=f;O.fname=f.name;O.name=f.name.replace(/\.[^.]+$/,'');O.type=f.type||'audio/mpeg';O.use=true;O.grid=null;O.voc=null;O.von=null;O.recK=0;O.ancs=null;O.wv=null;DB.kuse[id]=true;delete DB.ksync[SK()];save();
           recIDB();if(O.el){O.el.remove&&O.el.remove();O.el=null}build();origUI();autoSync()};return}
       const T=synced(),B=O.busy;
       k.innerHTML=`<div class="seg">${[[0,'Banda de la app'],[1,'Mi grabación']].map(([v,l])=>`<button data-ou="${v}" aria-pressed="${O.use===!!v}">${l}</button>`).join('')}</div>
@@ -5181,6 +5191,14 @@ function viewSongPlay(id,slow){
       TL.ev.forEach(e=>{if(e.type==='note')return;const g=lineIdx(e.li);if(g<0||!LA[g])return;let t=mapB(e.b,g);if(t==null)return;
         const sp=SP[g];if(e.type==='lit'&&sp){const za=sp.a-off(),zz=sp.z-off();t=LA[g].length>1?Math.min(t,zz-.08):za+(e.b-sp.s0)/(sp.s1-sp.s0)*(zz-za)}
         t+=off();const n=OLT[g+1];if(n!=null&&e.type!=='line')t=Math.min(t,n-.05);OEV.push({t,e})});OEV.sort((a,b)=>a.t-b.t);
+      // con grabación estéreo: cada sílaba se pega a donde de verdad ENTRA la voz (vocalOnsets/sylAlign en 5-songsync.js)
+      if(O.von&&O.von.st&&O.von.v){const by={};OEV.forEach(o=>{if(o.e.type==='lit')(by[o.e.li]=by[o.e.li]||[]).push(o)});
+        Object.entries(by).forEach(([li,a])=>{const g=lineIdx(+li),t0=lineRaw(g);if(g<0||t0==null)return;a.sort((x,y)=>x.t-y.t);
+          const nx=lineRaw(g+1),zz=Math.min(nx!=null?nx-.05:1e9,a[a.length-1].t-off()+.6),al=sylAlign(a.map(o=>o.t-off()),t0,zz,O.von);
+          // si la voz entra un poco antes de donde quedó marcado el renglón, el renglón se adelanta (hasta 0.5 s)
+          const f0=al[0]+off(),pv=g>0?OLT[g-1]:null;if(OLT[g]!=null&&f0<OLT[g]-.03&&f0>OLT[g]-.5&&(pv==null||f0-.08>pv+.3)){OLT[g]=f0-.08;OEV.forEach(o=>{if(o.e.type==='line'&&o.e.li===+li)o.t=OLT[g]})}
+          a.forEach((o,k)=>{let t=al[k]+off();if(OLT[g]!=null)t=Math.max(t,OLT[g]+.01);const n=OLT[g+1];if(n!=null)t=Math.min(t,n-.05);o.t=t})});
+        OEV.sort((a,b)=>a.t-b.t)}
       const lastL={};for(let i=OEV.length-1;i>=0;i--){const o=OEV[i];if(o.e.type!=='lit')continue;const n=lastL[o.e.li];o.sd=n!=null?Math.max(.12,n-o.t):.6;lastL[o.e.li]=o.t}};
     const curLine=now=>{let g=-1;for(let i=0;i<OLT.length;i++){const t=OLT[i];if(t!=null&&t<=now+.02)g=i}return g};
     const applyUntil=(from,now)=>{OEV.forEach(({t,e,sd})=>{if(t<=from||t>now)return;
@@ -5213,7 +5231,7 @@ function viewSongPlay(id,slow){
       if(O.playing)origStop();if(O.syncing){O.syncing=false;if(O.el)O.el.pause();syncPaint()}
       O.busy=true;O.prog=0;origUI();paint();
       const show=p=>{O.prog=p;const s=$('.koname',r);if(s)s.textContent=`Escuchando la canción… ${Math.round(p*100)} %`};
-      try{const{x,xs,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;O.dur=x.length/sr;if(CHONLY){REC.dur=O.dur;REC.on=true;reloadSong();O.busy=true;origUI()}
+      try{const{x,xs,sr}=await syncDecode(O.blob);if(!document.body.contains(r))return;O.dur=x.length/sr;try{O.von=xs?await vocalOnsets(x,xs,sr):{st:false}}catch(e){O.von=null}if(CHONLY){REC.dur=O.dur;REC.on=true;reloadSong();O.busy=true;origUI()}
         const A=await syncAnalyze(x,sr,DB.kbpm[id]||(P.set.bpm?P.bpm:0),show,xs);if(!document.body.contains(r))return;
         const bpm=Math.max(40,Math.min(220,Math.round(A.bpm)));O.grid=A.beats;st.bpm=bpm;DB.kbpm[id]=bpm;build();
         const T0=songTimeline(Object.assign({},P0,{bpm}),st.bars,st.beats),Q=RES();T0.res=Q;{const ch=T0.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b);T0.chAt=[];let j=-1;for(let k=0;k<Math.ceil(T0.total*Q);k++){while(j+1<ch.length&&Math.round(ch[j+1].b*Q)<=k)j++;T0.chAt[k]=j>=0?ch[j].p:null}}
@@ -5267,11 +5285,12 @@ function viewSongPlay(id,slow){
       else if(k==='tk'){st.shift=((O.recK+18)%12)-6;DB.kt[id]=st.shift;save();rerender();origUI()}
       else if(k==='down')recDown();
       else if(k==='del'){if(O.playing)origStop();cloudAudioDel(id);slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
-        O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
+        O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.von=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+(((+DB.ksyncOff[SK()]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[SK()]>0?'+':''}${DB.ksyncOff[SK()]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;O.pch=rec.pch||null;O.lend=rec.lend||null;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;O.pch=rec.pch||null;O.lend=rec.lend||null;O.von=rec.von||null;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();
         if(O.pch&&!ancNow()){const a=[];Object.entries(O.pch).forEach(([li,ts])=>{const ev=TL.ev.filter(e=>e.type==='chord'&&e.li===+li).sort((x,y)=>x.b-y.b);if(ev.length===ts.length)ev.forEach((e,k)=>a.push([+e.b.toFixed(3),ts[k]]))});
           a.sort((x,y)=>x[0]-y[0]);O.ancs=Object.assign({},O.ancs,{[SK()]:{a,sig:sigTL()}});O.pch=null;recIDB()}
+        if(!O.von&&synced())setTimeout(vonLater,1200);
         if((DB.kaudio||{})[id]!==O.blob.size)recCloud()}else if((DB.kaudio||{})[id])recDown();origUI();paint();views(true);
       if(DB.kautosync===id&&O.blob){delete DB.kautosync;save();autoSync()}}).catch(()=>origUI());
     origUI();
@@ -5711,6 +5730,58 @@ function vocalOf(R,E){
   const eMed=E.slice().sort((a,b)=>a-b)[E.length>>1]||1,ok=R.filter((r,j)=>E[j]>eMed*.1).sort((a,b)=>a-b);if(ok.length<16)return null;
   const lo=ok[Math.floor(ok.length*.15)],hi=ok[Math.floor(ok.length*.85)];if(hi-lo<.3)return null;
   return R.map((r,j)=>E[j]<eMed*.1?0:Math.max(0,Math.min(1,(r-lo)/(hi-lo))));
+}
+/* ---------- dónde ENTRA la voz (para encender cada sílaba cuando se canta) ----------
+   x = medio (L+R)/2, xs = lados (L−R)/2. La voz va al centro: por cada bin, lo que hay en el medio y no en los
+   lados (|M|−|S|) en 200–3500 Hz; su flujo espectral positivo marca los ataques de sílaba. Sin estéreo se usa el
+   medio solo (menos fiable: también ataques de instrumentos). Salto 128 a 11 kHz ≈ 11.6 ms.
+   Devuelve {fr, v: Uint8Array 0–255} (fuerza de ataque normalizada) — pequeño para guardarlo con la grabación. */
+const VON_N=512,VON_H=128;
+async function vocalOnsets(x,xs,sr){
+  const N=VON_N,H=VON_H,nf=Math.max(1,Math.floor((x.length-N)/H)),w=hannW(N),k0=Math.max(2,Math.round(200*N/sr)),k1=Math.min(N/2-1,Math.round(3500*N/sr));
+  const re=new Float32Array(N),im=new Float32Array(N),re2=new Float32Array(N),im2=new Float32Array(N),prev=new Float32Array(N/2),prv2=new Float32Array(N/2),od=new Float32Array(nf),en=new Float32Array(nf),sf=new Float32Array(nf);
+  for(let f=0;f<nf;f++){const o=f*H;for(let i=0;i<N;i++){re[i]=(x[o+i]||0)*w[i];im[i]=0;if(xs){re2[i]=(xs[o+i]||0)*w[i];im2[i]=0}}fftRI(re,im);if(xs)fftRI(re2,im2);
+    let s=0,s2=0;for(let k=k0;k<=k1;k++){let m=Math.sqrt(re[k]*re[k]+im[k]*im[k]);if(xs){const ms=Math.sqrt(re2[k]*re2[k]+im2[k]*im2[k]),l2=Math.log(1+60*ms),d2=l2-prv2[k];if(d2>0)s2+=d2;prv2[k]=l2;m=Math.max(0,m-1.15*ms)}en[f]+=m;const l=Math.log(1+60*m),d=l-prev[k];if(d>0)s+=d;prev[k]=l}od[f]=s;sf[f]=s2;
+    if(f%2500===0)await syncIdle()}
+  // quitar la media local (≈0.3 s) y normalizar con el percentil 97
+  const ma=13,ps=new Float64Array(nf+1);for(let i=0;i<nf;i++)ps[i+1]=ps[i]+od[i];
+  const on=new Float32Array(nf);for(let i=0;i<nf;i++){const a=Math.max(0,i-ma),b=Math.min(nf,i+ma+1);on[i]=Math.max(0,od[i]-(ps[b]-ps[a])/(b-a))}
+  // la voz SE SOSTIENE: un golpe (bombo, rasgueo, platillo) se apaga en pocos ms. Cada ataque vale según cuánto
+  // sigue sonando 60–120 ms después, comparado con el pico del ataque.
+  for(let i=0;i<nf;i++){if(!on[i])continue;let pk=0;for(let q=i;q<Math.min(nf,i+3);q++)pk=Math.max(pk,en[q]);let su=0,c=0;for(let q=i+5;q<Math.min(nf,i+11);q++){su+=en[q];c++}
+    on[i]*=Math.max(0,Math.min(1,(c?su/c:0)/(pk*.7+1e-9)))**1.5}
+  // lo que también cambia en los lados es instrumento (la voz casi no tiene lados)
+  if(xs)for(let i=0;i<nf;i++){if(!on[i])continue;let a=0,b=0;for(let q=Math.max(0,i-1);q<=Math.min(nf-1,i+2);q++){a+=od[q];b+=sf[q]}on[i]*=(a/(a+1.5*b+1e-9))**2}
+  const srt=Array.from(on).filter(v=>v>0).sort((a,b)=>a-b),p97=srt[Math.floor(srt.length*.97)]||1;
+  const v=new Uint8Array(nf);for(let i=0;i<nf;i++)v[i]=Math.min(255,Math.round(255*on[i]/p97));
+  return{fr:sr/H,v,st:!!xs};
+}
+/* acomoda las sílabas de un renglón a los ataques de voz cercanos.
+   nom = tiempos estimados (s, en orden), [a,z] = ventana del renglón, V = vocalOnsets. Programación dinámica monótona:
+   cada sílaba se pega a un ataque (premio por fuerza, castigo por alejarse de su tiempo estimado) o se queda libre;
+   las libres se interpolan entre las pegadas. Nunca cambia el orden. */
+function sylAlign(nom,a,z,V){
+  const n=nom.length;if(!V||!V.v||n<1)return nom.slice();const fr=V.fr,v=V.v,c0=VON_N/2/(fr*VON_H),f0=Math.max(4,Math.floor((a-.35)*fr)),f1=Math.min(v.length-4,Math.ceil((z+.1)*fr));
+  // ataques = picos locales (±35 ms); el tiempo es el centro de la ventana de análisis
+  const P=[];for(let f=f0;f<=f1;f++){const s=v[f];if(s<38)continue;let ok=true;for(let d=-3;d<=3&&ok;d++)if(d<0?v[f+d]>=s:d>0&&v[f+d]>s)ok=false;if(ok)P.push({t:f/fr+c0,s:s/255})}
+  if(!P.length)return nom.slice();
+  // alineado tipo Needleman-Wunsch: sílaba↔ataque (premio por fuerza, castigo por alejarse del tiempo estimado),
+  // sílaba sin ataque (ligado) o ataque sin sílaba (instrumento / respiración) con su costo
+  const sp=n>1?(nom[n-1]-nom[0])/(n-1):.4,sig=Math.max(.3,Math.min(.8,sp*1.5)),K=P.length,wS=V.st?2.2:1.3,gS=.45,gP=V.st?.9:.5;
+  const m=(i,k)=>{const d=(P[k].t-nom[i])/sig;return Math.abs(d)>3.2?1e9:.5*d*d-wS*P[k].s};
+  const W=K+1,D=new Float64Array((n+1)*W),B=new Uint8Array((n+1)*W);
+  for(let k=1;k<=K;k++){D[k]=D[k-1]+gP*P[k-1].s;B[k]=2}
+  for(let i=1;i<=n;i++){D[i*W]=D[(i-1)*W]+gS;B[i*W]=1;
+    for(let k=1;k<=K;k++){let c=D[(i-1)*W+k-1]+m(i-1,k-1),b=0;const u=D[(i-1)*W+k]+gS,l=D[i*W+k-1]+gP*P[k-1].s;
+      if(u<c){c=u;b=1}if(l<c){c=l;b=2}if(b===0&&k>1&&i>1){}D[i*W+k]=c;B[i*W+k]=b}}
+  const as=new Array(n).fill(null);let i=n,k=K;while(i>0&&k>=0){const b=B[i*W+k];if(k===0||b===1){i--;continue}if(b===2){k--;continue}as[i-1]=P[k-1].t;i--;k--}
+  const out=nom.slice(),idx=as.map((x,q)=>x==null?-1:q).filter(q=>q>=0);if(!idx.length)return out;
+  idx.forEach(q=>out[q]=as[q]);
+  for(let q=0;q<idx[0];q++)out[q]=nom[q]+(as[idx[0]]-nom[idx[0]]);
+  for(let q=0;q+1<idx.length;q++){const i0=idx[q],i1=idx[q+1],n0=nom[i0],n1=nom[i1];for(let r=i0+1;r<i1;r++){const f=n1>n0?(nom[r]-n0)/(n1-n0):(r-i0)/(i1-i0);out[r]=as[i0]+f*(as[i1]-as[i0])}}
+  const L=idx[idx.length-1];for(let q=L+1;q<n;q++)out[q]=Math.min(z,nom[q]+(as[L]-nom[L]));
+  for(let q=1;q<n;q++)if(out[q]<out[q-1]+.05)out[q]=out[q-1]+.05;
+  return out;
 }
 const nrm=v=>{let s=0;for(let i=0;i<v.length;i++)s+=v[i]*v[i];s=Math.sqrt(s)||1;for(let i=0;i<v.length;i++)v[i]/=s;return v};
 // qué tanto suena el acorde en el pulso j: 72 % los medios (tipo de acorde) y 28 % los graves (raíz, algo de quinta)
