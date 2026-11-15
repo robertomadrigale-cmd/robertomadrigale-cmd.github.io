@@ -1211,3 +1211,5 @@ html.welcome-on{overflow:hidden}
 @media(max-width:480px){.kviews button svg{display:none}.kviews button{padding:8px 11px}}
 @media(max-width:360px){.kviews button{padding:8px 8px;font-size:12px}}
 @media(max-width:480px){.kviews{align-self:stretch}.kviews button{flex:1 1 0;min-width:0;justify-content:center;padding:9px 4px}}
+.keasy{margin:-4px 0 0;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.4;background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.keasy[hidden]{display:none}

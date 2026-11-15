@@ -1243,6 +1243,8 @@ html.welcome-on{overflow:hidden}
 @media(max-width:480px){.kviews button svg{display:none}.kviews button{padding:8px 11px}}
 @media(max-width:360px){.kviews button{padding:8px 8px;font-size:12px}}
 @media(max-width:480px){.kviews{align-self:stretch}.kviews button{flex:1 1 0;min-width:0;justify-content:center;padding:9px 4px}}
+.keasy{margin:-4px 0 0;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.4;background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.keasy[hidden]{display:none}
 
 </style>
 </head>
@@ -2083,7 +2085,7 @@ WID.openchords={
   view:s=>{const c=OC[s.i],{d,m}=ocDots(c),cf=chordFing(c[2]);d.forEach(x=>{x.fg=cf.fg[x.s]});return fretboard({to:5,dots:d,muted:m,barre:cf.barre,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261115180614';
+const OM_BETA_VERSION='v20261115182758';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -3032,6 +3034,7 @@ function iaCfg(){try{return JSON.parse(localStorage.getItem(IA_KEY))||{}}catch(e
 function iaSave(c){try{localStorage.setItem(IA_KEY,JSON.stringify(c))}catch(e){}}
 function iaReady(){const c=iaCfg(),P=IA_PROV[c.prov];return!!(P&&(c.key||P.nokey)&&(c.model||P.m)&&(c.prov!=='otro'||c.url))}
 const iaName=()=>{const c=iaCfg();return IA_PROV[c.prov]?IA_PROV[c.prov].n:''};
+const iaReadsPdf=()=>{const c=iaCfg();return iaReady()&&['gemini','anthropic','openai'].includes(c.prov)};
 const iaHears=()=>{const c=iaCfg();return iaReady()&&!!(IA_PROV[c.prov]||{}).audio};
 // lo que devuelve el modelo: el primer bloque JSON (aunque venga entre ```json … ```)
 function iaJSON(t){const s=String(t||'').replace(/```(?:json)?/gi,'');const a=s.indexOf('{'),b=s.lastIndexOf('}');if(a<0||b<a)throw new Error('La IA no devolvió datos válidos.');return JSON.parse(s.slice(a,b+1))}
@@ -3056,15 +3059,16 @@ async function iaChat(system,user,opt){
     const cand=(j.candidates||[])[0],txt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
     if(!txt){const why=cand?.finishReason||j.promptFeedback?.blockReason||'';throw new Error('Gemini respondió vacío'+(why?' ('+why+')':'')+'. Intenta de nuevo o prueba otro modelo.')}
     return txt}
-  if(c.prov==='anthropic'){const j=await iaFetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model,max_tokens:8000,system,messages:[{role:'user',content:user}]})});
+  if(c.prov==='anthropic'){const content=opt.audio&&/pdf/.test(opt.audio.type)?[{type:'document',source:{type:'base64',media_type:'application/pdf',data:await iaB64(opt.audio)}},{type:'text',text:user}]:user;
+    const j=await iaFetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model,max_tokens:8000,system,messages:[{role:'user',content}]})});
     return(j.content||[]).map(p=>p.text||'').join('')}
   if(c.prov==='ollama'){const base=(c.url||P.url).replace(/\/+$/,'');const j=await iaFetch(base+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model,stream:false,options:{temperature:.2},messages:[{role:'system',content:system},{role:'user',content:user}]})});
     return(j.message&&j.message.content)||''}
-  const base=(c.url||P.url).replace(/\/+$/,'');
+  const base=(c.url||P.url).replace(/\/+$/,''),uc=opt.audio&&/pdf/.test(opt.audio.type)?[{type:'file',file:{filename:'cancion.pdf',file_data:'data:application/pdf;base64,'+await iaB64(opt.audio)}},{type:'text',text:user}]:user;
   const j=await iaFetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},
-    body:JSON.stringify({model,temperature:.2,messages:[{role:'system',content:system},{role:'user',content:user}]})});
+    body:JSON.stringify({model,temperature:.2,messages:[{role:'system',content:system},{role:'user',content:uc}]})});
   return((j.choices||[])[0]?.message?.content)||'';
 }
 // letra de una grabación: Gemini la escucha directo; OpenAI con su transcriptor (whisper-1)
@@ -3087,7 +3091,7 @@ async function iaArrange(src,title){
 }
 // acordes más fáciles para principiante, misma letra
 async function iaSimplify(src,title){
-  const t=await iaChat('Eres maestro de guitarra para principiantes. '+IA_CP+' Reescribe la canción con acordes más fáciles: solo mayores y menores abiertos cuando se pueda (quita 7, 9, sus, add, maj7 y bajos con /), une acordes de paso muy cortos y, si la tonalidad tiene cejillas, cambia a la forma fácil y agrega al inicio {comment:Capo en el traste N}. Conserva la letra y las secciones exactamente. Responde SOLO la canción en ChordPro.',
+  const t=await iaChat('Eres maestro de guitarra para principiantes. '+IA_CP+' Haz la versión fácil, como «Simplify» de Ultimate Guitar: pásala al tono donde casi todo sea acordes abiertos (G C D Em Am, o C F G Am Dm, o D G A Bm Em, o E A B), SIN usar capo; usa solo mayores y menores (quita 7, 9, sus, add, maj7 y bajos con /) y quita acordes de paso muy cortos que no cambian el sentido. Al inicio agrega {key:NUEVO_TONO} y {comment:Original en X. Con capo en el traste N suena igual} (solo si el tono bajó). Conserva la letra y las secciones exactamente. Responde SOLO la canción en ChordPro.',
     `Canción: ${title||''}\n\n${src}`);
   return t.replace(/```[a-z]*\n?/gi,'').trim();
 }
@@ -3131,7 +3135,7 @@ function viewIA(){
    <p class="cap" id="iamsg" role="status" style="margin:0"></p></div>
   <div class="box"><p class="blockh">Qué hace la IA en la app</p><ul>
    <li><b>Ordenar letra:</b> separa en renglones y secciones (Intro, Verso, Coro…) y pone cada acorde sobre la sílaba donde cambia.</li>
-   <li><b>Acordes fáciles:</b> versión para principiante con capo sugerido. También hay un botón «Fácil» que no necesita IA.</li>
+   <li><b>Versión fácil:</b> como «Simplify» de Ultimate Guitar: tono con acordes abiertos y sin acordes raros. También hay un botón «Fácil» que no necesita IA.</li>
    <li><b>Rasgueo real:</b> propone cómo se rasguea cada sección (verso más suave, coro con todo) y la banda lo toca.</li>
    <li><b>Letra desde tu grabación:</b> con Gemini u OpenAI, escucha tu MP3 y escribe la letra con sus acordes.</li></ul>
    <p class="cap">Tu clave se guarda solo en este dispositivo y no se sube a tu cuenta. Cada consulta la cobra tu proveedor de IA según su tarifa. Separar pistas no usa IA: la app lo hace sola.</p></div>`,
@@ -3148,6 +3152,92 @@ function viewIA(){
       try{const t=await iaChat('Responde solo con la palabra: listo','¿Me escuchas?');msg('Conectado con '+iaName()+' en '+((Date.now()-t0)/1000).toFixed(1)+' s. Respondió: «'+String(t).trim().slice(0,40)+'».')}catch(e){msg('No se conectó: '+e.message)}
       IA_MS=old;clearInterval(tk);b.disabled=false};
   }};
+}
+
+/* PDF de canción → ChordPro + datos (título, artista, tono, bpm, capo) + rasgueo leído de las flechas */
+async function iaReadSongPdf(f){
+  if(f.size>19e6)throw new Error('El PDF es muy grande (máximo ~19 MB).');
+  const t=await iaChat(`Eres músico y transcribes hojas de canciones (como las de Ultimate Guitar). Lee TODO el PDF (todas las páginas y ambas columnas, en orden: primero la columna izquierda completa y luego la derecha).
+Responde SOLO JSON: {"title":"","artist":"","key":"tono como C o Am","bpm":número o null,"capo":número o 0,"time":"4/4" o "3/4","strum":"rasgueo o null","chordpro":"…"}.
+«chordpro»: la canción completa en ChordPro: cada acorde entre corchetes JUSTO antes de la sílaba donde está escrito encima, con la letra exacta; secciones en su propio renglón como [Intro], [Verso 1], [Pre-coro], [Coro], [Puente], [Solo], [Final] (traduce Verse=Verso, Chorus=Coro, Bridge=Puente, Outro=Final); partes sin letra como renglones de solo acordes «[C] [G] [C] [G]». No incluyas los diagramas de acordes ni la afinación.
+«strum»: si hay STRUMMING PATTERN con flechas, escríbelo en ${'16'} caracteres para 4/4 (12 para 3/4), uno por dieciseisavo: posiciones 0,2,4,6,8,10,12,14 = «1 & 2 & 3 & 4 &». Flecha abajo = D (o d si es suave), arriba = U (o u), sin flecha = -. Ejemplo «D---D-U---U-D-U-». Si no hay, null.`,'Transcribe esta canción.',{audio:f});
+  const J=iaJSON(t),src=String(J.chordpro||'').replace(/```[a-z]*\n?/gi,'').trim();if(!src)throw new Error('La IA no pudo leer la canción del PDF.');
+  const beats=J.time==='3/4'?3:4,g=typeof J.strum==='string'?J.strum.replace(/\s+/g,''):'';
+  const meta={title:J.title||'',artist:J.artist||'',key:/^[A-G][#b]?m?$/.test(J.key||'')?J.key:'',bpm:+J.bpm>=40&&+J.bpm<=220?Math.round(+J.bpm):0,capo:+J.capo||0,beats};
+  const strum=g.length===beats*4&&/^[DdUux-]+$/.test(g)&&/[DdUu]/.test(g)?g:null;
+  const hd=(meta.title?`{title:${meta.title}}\n`:'')+(meta.artist?`{artist:${meta.artist}}\n`:'')+(meta.key?`{key:${meta.key}}\n`:'')+(meta.bpm?`{bpm:${meta.bpm}}\n`:'')+(beats===3?'{time:3/4}\n':'')+(meta.capo?`{comment:Capo en el traste ${meta.capo}}\n`:'');
+  return{src:hd+'\n'+src.replace(/^\s*\{(title|t|artist|a|key|bpm|time)\s*:[^}]*\}\s*$/gim,'').trim()+'\n',meta,strum,ia:true};
+}
+
+/* ---------- importar canciones desde archivo: PDF de Ultimate Guitar, TXT o ChordPro ----------
+   El PDF se lee con pdf.js (se descarga de cdnjs la primera vez que se usa; el resto de la app sigue sin conexión).
+   Cada texto del PDF trae su posición: se rearma renglón por renglón respetando las columnas (Ultimate Guitar usa dos)
+   y los espacios de la letra monoespaciada, para que los acordes queden encima de su sílaba. Luego se lee el encabezado
+   (título «X by Artista», Key, Capo, bpm) y se convierte a ChordPro. */
+const PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+function loadPdfJs(){
+  if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
+  return new Promise((res,rej)=>{const s=document.createElement('script');s.src=PDFJS_URL+'pdf.min.js';
+    s.onload=()=>{try{window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS_URL+'pdf.worker.min.js';res(window.pdfjsLib)}catch(e){rej(e)}};
+    s.onerror=()=>rej(new Error('Para leer el PDF la app necesita internet la primera vez.'));document.head.appendChild(s)});
+}
+async function pdfLines(file){
+  const lib=await loadPdfJs(),doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise,out=[];
+  for(let n=1;n<=doc.numPages;n++){
+    const pg=await doc.getPage(n),W=pg.getViewport({scale:1}).width,tc=await pg.getTextContent();
+    const it=tc.items.filter(i=>i.str&&i.str.trim()).map(i=>({s:i.str,x:i.transform[4],y:i.transform[5],w:i.width,h:Math.abs(i.transform[3])||10}));
+    if(!it.length)continue;
+    // ancho de letra de la fuente monoespaciada (la de la canción)
+    const cws=it.filter(i=>i.s.length>=4).map(i=>i.w/i.s.length).sort((a,b)=>a-b),cw=cws[cws.length>>1]||5;
+    // dos columnas: hay textos que empiezan pasada la mitad y nada del lado izquierdo cruza la mitad
+    const mid=W*.47,R=it.filter(i=>i.x>=mid),cols=R.length>2&&!it.some(i=>i.x<mid&&i.x+i.w>mid+cw*2)?[it.filter(i=>i.x<mid),R]:[it];
+    cols.forEach(col=>{
+      const x0=Math.min(...col.map(i=>i.x)),L=[];
+      col.sort((a,b)=>b.y-a.y||a.x-b.x).forEach(i=>{let l=L.find(q=>Math.abs(q.y-i.y)<Math.max(2,i.h*.45));if(!l){l={y:i.y,h:i.h,it:[]};L.push(l)}l.it.push(i)});
+      L.sort((a,b)=>b.y-a.y);
+      const gaps=L.slice(1).map((l,k)=>L[k].y-l.y).sort((a,b)=>a-b),gm=gaps[gaps.length>>1]||12;
+      L.forEach((l,k)=>{if(k&&L[k-1].y-l.y>gm*1.55)out.push('');
+        let s='';l.it.sort((a,b)=>a.x-b.x).forEach(i=>{const c=Math.max(0,Math.round((i.x-x0)/cw));if(c>s.length)s+=' '.repeat(c-s.length);else if(s&&!/\s$/.test(s))s+=' ';s+=i.s});
+        out.push(s.replace(/\s+$/,''))});
+      out.push('');
+    });
+  }
+  return out;
+}
+const UG_SEC={intro:'Intro',verse:'Verso','pre-chorus':'Pre-coro',prechorus:'Pre-coro',chorus:'Coro',bridge:'Puente',outro:'Final',interlude:'Interludio',solo:'Solo',instrumental:'Instrumental',hook:'Coro',refrain:'Coro','post-chorus':'Coro',breakdown:'Puente',riff:'Riff'};
+// texto de Ultimate Guitar (de PDF o copiado) → ChordPro con encabezado
+function ugToChordPro(lines){
+  lines=lines.map(l=>l.replace(/ /g,' ')).filter(l=>!/^\s*Page \d+\s*\/\s*\d+\s*$/i.test(l)&&!/^\s*Página \d+/i.test(l));
+  const isSec=l=>/^\s*\[[^\]]{2,30}\]\s*$/.test(l);
+  let first=lines.findIndex(isSec);if(first<0)first=lines.findIndex(l=>/^\s*Tuning:|^\s*Key:/i.test(l))+1||0;
+  const head=lines.slice(0,first).join('\n'),meta={};
+  // título: la primera línea con texto («Laid Official by James»)
+  const t0=lines.slice(0,first).find(l=>l.trim()&&!/^(Tuning|Key|Capo|CHORDS|STRUMMING)/i.test(l.trim()));
+  if(t0){const m=/^(.*?)\s+(?:by|de)\s+(.+)$/i.exec(t0.trim());if(m){meta.title=m[1].replace(/\s+(Official|Chords|Tab|Ver \d+)\s*$/ig,'').trim();meta.artist=m[2].trim()}else meta.title=t0.trim()}
+  let m=/Key:\s*([A-G][#b]?m?)/i.exec(head);if(m)meta.key=m[1];
+  m=/(\d{2,3})\s*bpm/i.exec(head);if(m)meta.bpm=+m[1];
+  m=/Capo:\s*(?:fret\s*)?(\d+)/i.exec(head);if(m&&+m[1])meta.capo=+m[1];
+  const body=lines.slice(first).map(l=>{const s=/^\s*\[([^\]]+)\]\s*$/.exec(l);if(s){const k=s[1].trim(),base=k.toLowerCase().replace(/\s*\d+$/,'').trim(),num=(/\d+$/.exec(k)||[''])[0];return'['+(UG_SEC[base]?UG_SEC[base]+(num?' '+num:''):k)+']'}
+    return l.replace(/_/g,' ')});
+  // quitar renglones vacíos repetidos
+  const clean=[];body.forEach(l=>{if(!l.trim()&&clean.length&&!clean[clean.length-1].trim())return;clean.push(l)});
+  const hd=(meta.title?`{title:${meta.title}}\n`:'')+(meta.artist?`{artist:${meta.artist}}\n`:'')+(meta.key?`{key:${meta.key}}\n`:'')+(meta.bpm?`{bpm:${meta.bpm}}\n`:'')+(meta.capo?`{comment:Capo en el traste ${meta.capo}}\n`:'');
+  return{src:hd+'\n'+clean.join('\n').trim()+'\n',meta};
+}
+// cualquier archivo de canción → ChordPro
+async function importSongFile(f){
+  const name=(f.name||'').toLowerCase();
+  if(/\.pdf$/.test(name)||f.type==='application/pdf'){
+    // con texto (PDF de LaCuerda, Cifra Club, Word…) se lee sin IA; si viene como dibujo (Ultimate Guitar), la lee la IA
+    let lines=null,err=null;try{lines=await pdfLines(f)}catch(e){err=e}
+    const txt=lines?lines.join('\n'):'',chords=txt.split('\n').filter(l=>l.trim()&&isChordLine(l)).length;
+    if(chords>=2&&!iaReadsPdf())return ugToChordPro(lines);
+    if(iaReadsPdf()){try{return await iaReadSongPdf(f)}catch(e){if(chords>=2)return ugToChordPro(lines);throw e}}
+    if(chords>=2)return ugToChordPro(lines);
+    throw new Error(err&&!lines?err.message:'Este PDF trae la canción como dibujo, no como texto. Conecta Gemini, ChatGPT o Claude en Asistente IA y la app lo lee sola.');
+  }
+  const t=await f.text();
+  return /\{\s*(title|t)\s*:/i.test(t)?{src:t,meta:{}}:ugToChordPro(t.split(/\r?\n/));
 }
 
 /* Curso de punteo: ejercicios y frases originales, sin material comercial. */
@@ -4002,7 +4092,7 @@ function viewSongEdit(id){
   return{title:ex&&ex.mine?'Editar canción':isTop?ex.top.t:'Nueva canción',back:'#/cancionero',html:`
   ${isTop?`<div class="card note"><b>Paso 1.</b> Busca la letra con acordes. <b>Paso 2.</b> Copia toda la canción. <b>Paso 3.</b> Regresa y toca «Pegar del portapapeles».<div class="row" style="margin-top:10px"><a class="btn sm pri" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(ex.top.t+' '+ex.top.a+' letra y acordes')}">Buscar letra y acordes</a></div></div>`:''}
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
-   <div class="row"><button class="btn sm" id="sbpaste">Pegar del portapapeles</button>${iaReady()?`<button class="btn sm" id="sbia">Ordenar con IA</button>`:`<a class="btn sm" href="#/ia">Conectar IA</a>`}<span class="cap" style="margin:0">o pega con el teclado dentro del cuadro</span></div>
+   <div class="row"><label class="btn sm pri" for="sbfile">${IC.down}Subir PDF o archivo</label><input type="file" id="sbfile" accept=".pdf,.txt,.pro,.cho,.chopro,.crd,application/pdf,text/plain" hidden><button class="btn sm" id="sbpaste">Pegar del portapapeles</button>${iaReady()?`<button class="btn sm" id="sbia">Ordenar con IA</button>`:`<a class="btn sm" href="#/ia">Conectar IA</a>`}<span class="cap" style="margin:0">o pega con el teclado dentro del cuadro</span></div>
    <textarea id="sbsrc" rows="16" spellcheck="false" placeholder="Pega aquí la canción: acordes arriba y letra abajo, o [Sol]letra con [Re]acordes">${esc(tpl)}</textarea>
    <div id="sbprev" class="cap" style="margin:0"></div>
    <div class="sbopts" id="sbopts"><div><span class="cl">Ritmo de la banda</span><select class="inp" id="sbsty"></select></div>
@@ -4038,8 +4128,15 @@ function viewSongEdit(id){
       if(!P.lines.some(l=>l.pieces&&l.pieces.some(p=>p.text.trim()||p.p))){$('#sbmsg',r).textContent='No encontré letra ni acordes. Revisa lo que pegaste.';return}
       DB.songs=DB.songs||[];const sid=ex&&ex.mine?id:'u'+Date.now().toString(36);
       const i=DB.songs.findIndex(s=>s.id===sid);if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
+      if(E.strum){DB.kai=DB.kai||{};DB.kai[sid]=Object.assign({},DB.kai[sid],{pat:{sub:4,beats:E.beatsPdf||4,tip:'Rasgueo de la hoja de la canción.',secs:{verso:{g:E.strum,b:null,f:1}}},useP:true})}
       save();toast(logo()+'<span>Canción guardada</span>');SBTAB='mine';location.hash='#/cancionero/ver/'+sid;
     };
+    // PDF de Ultimate Guitar (o TXT / ChordPro): título, artista, tono, tempo, secciones y acordes sin copiar y pegar
+    $('#sbfile',r).onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;$('#sbmsg',r).textContent='Leyendo '+f.name+'…';
+      const tk=setInterval(()=>{const m=$('#sbmsg',r);if(m&&/^Leyendo/.test(m.textContent))m.textContent=m.textContent.replace(/( · \d+ s)?$/,' · '+Math.round((Date.now()-t0)/1000)+' s')},1000),t0=Date.now();
+      try{const R=await importSongFile(f);clearInterval(tk);ta.value=(isTop?head:'')+R.src;E.touched={};E.strum=R.strum||null;E.beatsPdf=R.meta.beats||4;prev();
+        $('#sbmsg',r).textContent=`Listo: leí «${R.meta.title||f.name}»${R.meta.artist?' de '+R.meta.artist:''}${R.meta.key?' · tono '+R.meta.key:''}${R.meta.bpm?' · '+R.meta.bpm+' bpm':''}${R.ia?' (con IA)':''}${R.strum?' · con su rasgueo':''}. Revisa y toca «Guardar y abrir».`}
+      catch(err){clearInterval(tk);$('#sbmsg',r).textContent=err.message||'No pude leer ese archivo.'}};
     const ib=$('#sbia',r);if(ib)ib.onclick=async()=>{if(!ta.value.trim()){$('#sbmsg',r).textContent='Primero pega la canción.';return}ib.disabled=true;$('#sbmsg',r).textContent='La IA está ordenando la letra y los acordes…';
       try{const keep=(ta.value.match(/^\s*\{(title|t|artist|a|key|bpm|tempo|time|style)\s*:[^}]*\}\s*$/gim)||[]).join('\n');const t=await iaArrange(ta.value,'');ta.value=(keep&&!/\{\s*title/i.test(t)?keep+'\n\n':'')+t;prev();$('#sbmsg',r).textContent='Listo. Revisa y toca «Guardar y abrir».'}catch(e){$('#sbmsg',r).textContent=e.message}ib.disabled=false};
     const d=$('#sbdel',r);if(d)d.onclick=()=>{$('#sbdw',r).innerHTML='<button class="btn" id="sbdelok" style="border-color:var(--bad);color:var(--bad)">Sí, borrar</button>';$('#sbdelok',r).onclick=()=>{DB.songs=DB.songs.filter(s=>s.id!==id);save();SBTAB='mine';location.hash='#/cancionero'}};
@@ -4095,6 +4192,7 @@ function viewSongPlay(id,slow){
   const mkP=()=>{const Q=fixP(songParse(srcNow()));if(KAR.simple&&INST.id!=='bateria')simplifyP(Q);return Q};
   let P0=fixP(songParse(srcNow())),P=mkP(),secs=lineSections(P);DB.kt=DB.kt||{};DB.kbpm=DB.kbpm||{};DB.kst=DB.kst||{};
   DB.kbeats=DB.kbeats||{};DB.ksp=DB.ksp||{};const st={sp:slow?(DB.ksp[id]&&DB.ksp[id]<1?DB.ksp[id]:.75):1,loop:0,shift:DB.kt[id]||0,bpm:DB.kbpm[id]||P.bpm,bars:0,style:GROOVES[DB.kst[id]]?DB.kst[id]:P.style,beats:DB.kbeats[id]||P.beats};
+  const EASYT=()=>KAR.simple&&INST.id==='guitarra';if(EASYT())st.shift=easyShift(P);
   const gid=()=>grooveFor(st.style,st.beats),RES=()=>GROOVES[gid()].sub;
   const styChips=()=>Object.entries(GROOVES).filter(([k,g])=>g[st.beats===3?3:4]).map(([k,g])=>`<button class="chip" data-sty="${k}" aria-pressed="${gid()===k}">${g.n}</button>`).join('');
   Object.assign(KAR,DB.kar||{});
@@ -4146,6 +4244,7 @@ function viewSongPlay(id,slow){
    <button class="kfb" data-nott title="Cifrado: C D E o Do Re Mi"><b id="kfnot"></b></button>
    ${INST.id!=='bateria'?`<button class="kfb" data-simple aria-pressed="${!!KAR.simple}" title="Acordes fáciles: sin séptimas, sus ni bajos"><b>Fácil</b></button>`:''}
    <button class="kfb" data-z="-1" aria-label="Letra más chica"><b>A−</b></button><button class="kfb" data-z="1" aria-label="Letra más grande"><b>A+</b></button></div>
+  <p class="keasy" id="keasy" hidden></p>
   <div class="kchips" id="kchips">${chips()}</div>
   <div class="kwrap"><div class="kmain">
    <div class="kview" data-v="letras"><div class="karaoke show-${KAR.show}" id="kar" style="--kz:${KAR.size}">${P.lines.map(lineHTML).join('')}</div></div>
@@ -4166,6 +4265,7 @@ function viewSongPlay(id,slow){
     const toolVals=()=>{const set=(k,v)=>{const e=$('#kt-'+k,r);if(e)e.textContent=v};
       set('tono',keyLbl());set('tempo',Math.round(st.bpm*(st.sp||1)));set('son',KAR.band?'Música':'Silencio');set('grab',O.use&&O.blob?'Tuya':'Banda');set('rep',st.loop?st.loop+(st.loop>1?' renglones':' renglón'):'No');set('mas',aiPat()?'IA':BSTYLES[gid()]);set('ia',usingAI()?'Versión IA':iaReady()?'Lista':'Conectar');
       const pb=$('#kpbpm',r);if(pb)pb.textContent=Math.round(st.bpm*(st.sp||1));const pk=$('#kpkey',r);if(pk)pk.textContent=keyLbl();const fn=$('#kfnot',r);if(fn)fn.textContent=es()?'Do':'C';$$('.kmet',r).forEach(x=>x.classList.toggle('on',!!KAR.met));
+      const en=$('#keasy',r);if(en){const on=EASYT()&&st.shift;en.hidden=!on;if(on)en.innerHTML=`<b>Versión fácil en ${esc(keyLbl())}</b> · ${esc(easyCapoTxt(st.shift,chName(P.key,0,P.key,es())+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':''),es()))}`}
       const m=$('#kmeta',r);if(m)m.textContent=`Tono ${keyLbl()} · ${Math.round(st.bpm*(st.sp||1))} bpm · ${BSTYLES[gid()]} · ${st.beats}/4`;
       const t=$('.ktool[data-panel="son"]',r);if(t)t.classList.toggle('on',!!KAR.met)};
     const sumK=toolVals;
@@ -4337,7 +4437,9 @@ function viewSongPlay(id,slow){
     r.addEventListener('click',e=>{
       const vw=e.target.closest('[data-view]');if(vw){KAR.view=vw.dataset.view;DB.kar=Object.assign({},KAR);save();views();if(VIEW()==='acordes'&&pos)kgridAt(r,TL.lines[pos]?TL.lines[pos].start:0);return}
       const nt=e.target.closest('[data-nott]');if(nt){DB.notation=es()?'us':'es';save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.not===DB.notation)));rerender();toolVals();return}
-      const sm=e.target.closest('[data-simple]');if(sm){KAR.simple=!KAR.simple;DB.kar=Object.assign({},KAR);save();sm.setAttribute('aria-pressed',String(KAR.simple));reloadSong();toast(logo()+`<span>${KAR.simple?'Acordes fáciles: sin séptimas, sus ni bajos':'Acordes originales'}</span>`);return}
+      const sm=e.target.closest('[data-simple]');if(sm){KAR.simple=!KAR.simple;DB.kar=Object.assign({},KAR);save();sm.setAttribute('aria-pressed',String(KAR.simple));reloadSong();
+        if(INST.id==='guitarra'){st.shift=KAR.simple?easyShift(P):(DB.kt[id]||0);rerender();toolVals();restart()}
+        toast(logo()+`<span>${KAR.simple?'Versión fácil'+(EASYT()&&st.shift?' en '+esc(keyLbl()):'')+': acordes abiertos, sin séptimas, sus ni bajos':'Acordes originales'}</span>`,3000);return}
       const mx=e.target.closest('[data-mixm],[data-mixs]');if(mx){const k=mx.dataset.mixm||mx.dataset.mixs,f=mx.dataset.mixm?'m':'s',M=mixOf();M[k]=M[k]||{};M[k][f]=!M[k][f];mx.classList.toggle('on',M[k][f]);save();applyMix(true);return}
       const kt=e.target.closest('.kst-t');if(kt&&!e.target.closest('input,button')){const rc=kt.getBoundingClientRect();seekFrac((e.clientX-rc.left)/rc.width);return}
       const io=e.target.closest('[data-iaon]');if(io){DB.kai[id]=Object.assign({},AIo(),{on:io.dataset.iaon==='1'});save();reloadSong();return}
@@ -4383,7 +4485,7 @@ function viewSongPlay(id,slow){
       k.innerHTML=`${A.src?`<div><span class="cl">Versión de la canción</span><div class="seg">${[[0,'Original'],[1,'De la IA']].map(([v,l])=>`<button data-iaon="${v}" aria-pressed="${usingAI()===!!v}">${l}</button>`).join('')}</div></div>`:''}
        ${A.pat?`<div><span class="cl">Rasgueo</span><div class="seg">${[[0,'Del ritmo'],[1,'De la IA']].map(([v,l])=>`<button data-iap="${v}" aria-pressed="${(A.useP!==false)===!!v}">${l}</button>`).join('')}</div></div>`:''}
        <div class="kiab"><button class="btn" data-ia="arr">${KIC.letras}<span>Ordenar letra y acordes</span></button>
-        ${INST.id!=='bateria'?`<button class="btn" data-ia="simp">${KIC.formas}<span>Acordes fáciles con capo</span></button>`:''}
+        ${INST.id!=='bateria'?`<button class="btn" data-ia="simp">${KIC.formas}<span>Versión fácil (IA)</span></button>`:''}
         <button class="btn" data-ia="strum">${KIC.son}<span>Rasgueo real por sección</span></button>
         ${O.blob?`<button class="btn" data-ia="lyr" ${iaHears()?'':'disabled'}>${KIC.grab}<span>Letra de mi grabación</span></button>`:''}</div>
        <p class="cap" id="kiamsg" role="status" style="margin:0">${O.blob&&!iaHears()?'Para sacar la letra del audio conecta Gemini u OpenAI. ':''}Conectada: ${esc(iaName())}.${A.src?' Tu versión original no se borra.':''}</p>
@@ -5132,6 +5234,16 @@ function drawBlocks(cv,segs,total,color){
   const x=cv.getContext('2d');x.clearRect(0,0,W,H);x.fillStyle=color;
   segs.forEach(([a,b,h])=>{const x0=a/total*W,x1=b/total*W;const hh=H*(h||.6);x.globalAlpha=.85;x.fillRect(x0+1,(H-hh)/2,Math.max(1,x1-x0-2),hh)});x.globalAlpha=1;
 }
+/* tono fácil (como «Simplify» de Ultimate Guitar): con los acordes ya simplificados, busca el tono donde casi todo
+   son acordes abiertos (C D E G A Am Dm Em; F y Bm cuestan un poco; las cejillas, más). Cambiar de tono es preferible
+   a usar capo; para sonar igual que la grabación se indica el capo. */
+const EASYCH={'0|':0,'2|':0,'4|':0,'7|':0,'9|':0,'9|m':0,'2|m':0,'4|m':0,'5|':2,'11|m':2,'2|dim':3};
+function chordCost(p,sh){const pc=(p.pc+sh+120)%12,q=p.suf==='m'?'m':p.suf==='dim'?'dim':'';return EASYCH[pc+'|'+q]??3}
+function easyShift(P){if(!P.all.length)return 0;let best=0,bs=1e9;
+  for(let sh=-7;sh<=4;sh++){let c=0;P.all.forEach(p=>c+=chordCost(p,sh));c=c/P.all.length+Math.abs(sh)*.02+(sh>0?.3:0);if(c<bs-1e-9){bs=c;best=sh}}
+  return best}
+// qué capo deja la versión fácil sonando como la original (si se bajó el tono)
+function easyCapoTxt(sh,orig,es){if(!sh)return'';if(sh<0)return`Con capo en el traste ${-sh} suena igual que la original (${orig}).`;return`Suena ${sh===1?'medio tono':sh/2+(sh===2?' tono':' tonos')} más agudo que la original (${orig}).`}
 
 /* ---------- arte por época: portadas abstractas (luz, color y un motivo geométrico), sin dibujos ---------- */
 const W8=800,H14=1400;

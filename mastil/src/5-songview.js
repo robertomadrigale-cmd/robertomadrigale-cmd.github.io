@@ -103,3 +103,13 @@ function drawBlocks(cv,segs,total,color){
   const x=cv.getContext('2d');x.clearRect(0,0,W,H);x.fillStyle=color;
   segs.forEach(([a,b,h])=>{const x0=a/total*W,x1=b/total*W;const hh=H*(h||.6);x.globalAlpha=.85;x.fillRect(x0+1,(H-hh)/2,Math.max(1,x1-x0-2),hh)});x.globalAlpha=1;
 }
+/* tono fácil (como «Simplify» de Ultimate Guitar): con los acordes ya simplificados, busca el tono donde casi todo
+   son acordes abiertos (C D E G A Am Dm Em; F y Bm cuestan un poco; las cejillas, más). Cambiar de tono es preferible
+   a usar capo; para sonar igual que la grabación se indica el capo. */
+const EASYCH={'0|':0,'2|':0,'4|':0,'7|':0,'9|':0,'9|m':0,'2|m':0,'4|m':0,'5|':2,'11|m':2,'2|dim':3};
+function chordCost(p,sh){const pc=(p.pc+sh+120)%12,q=p.suf==='m'?'m':p.suf==='dim'?'dim':'';return EASYCH[pc+'|'+q]??3}
+function easyShift(P){if(!P.all.length)return 0;let best=0,bs=1e9;
+  for(let sh=-7;sh<=4;sh++){let c=0;P.all.forEach(p=>c+=chordCost(p,sh));c=c/P.all.length+Math.abs(sh)*.02+(sh>0?.3:0);if(c<bs-1e-9){bs=c;best=sh}}
+  return best}
+// qué capo deja la versión fácil sonando como la original (si se bajó el tono)
+function easyCapoTxt(sh,orig,es){if(!sh)return'';if(sh<0)return`Con capo en el traste ${-sh} suena igual que la original (${orig}).`;return`Suena ${sh===1?'medio tono':sh/2+(sh===2?' tono':' tonos')} más agudo que la original (${orig}).`}

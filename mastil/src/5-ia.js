@@ -18,6 +18,7 @@ function iaCfg(){try{return JSON.parse(localStorage.getItem(IA_KEY))||{}}catch(e
 function iaSave(c){try{localStorage.setItem(IA_KEY,JSON.stringify(c))}catch(e){}}
 function iaReady(){const c=iaCfg(),P=IA_PROV[c.prov];return!!(P&&(c.key||P.nokey)&&(c.model||P.m)&&(c.prov!=='otro'||c.url))}
 const iaName=()=>{const c=iaCfg();return IA_PROV[c.prov]?IA_PROV[c.prov].n:''};
+const iaReadsPdf=()=>{const c=iaCfg();return iaReady()&&['gemini','anthropic','openai'].includes(c.prov)};
 const iaHears=()=>{const c=iaCfg();return iaReady()&&!!(IA_PROV[c.prov]||{}).audio};
 // lo que devuelve el modelo: el primer bloque JSON (aunque venga entre ```json … ```)
 function iaJSON(t){const s=String(t||'').replace(/```(?:json)?/gi,'');const a=s.indexOf('{'),b=s.lastIndexOf('}');if(a<0||b<a)throw new Error('La IA no devolvió datos válidos.');return JSON.parse(s.slice(a,b+1))}
@@ -42,15 +43,16 @@ async function iaChat(system,user,opt){
     const cand=(j.candidates||[])[0],txt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
     if(!txt){const why=cand?.finishReason||j.promptFeedback?.blockReason||'';throw new Error('Gemini respondió vacío'+(why?' ('+why+')':'')+'. Intenta de nuevo o prueba otro modelo.')}
     return txt}
-  if(c.prov==='anthropic'){const j=await iaFetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model,max_tokens:8000,system,messages:[{role:'user',content:user}]})});
+  if(c.prov==='anthropic'){const content=opt.audio&&/pdf/.test(opt.audio.type)?[{type:'document',source:{type:'base64',media_type:'application/pdf',data:await iaB64(opt.audio)}},{type:'text',text:user}]:user;
+    const j=await iaFetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model,max_tokens:8000,system,messages:[{role:'user',content}]})});
     return(j.content||[]).map(p=>p.text||'').join('')}
   if(c.prov==='ollama'){const base=(c.url||P.url).replace(/\/+$/,'');const j=await iaFetch(base+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model,stream:false,options:{temperature:.2},messages:[{role:'system',content:system},{role:'user',content:user}]})});
     return(j.message&&j.message.content)||''}
-  const base=(c.url||P.url).replace(/\/+$/,'');
+  const base=(c.url||P.url).replace(/\/+$/,''),uc=opt.audio&&/pdf/.test(opt.audio.type)?[{type:'file',file:{filename:'cancion.pdf',file_data:'data:application/pdf;base64,'+await iaB64(opt.audio)}},{type:'text',text:user}]:user;
   const j=await iaFetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},
-    body:JSON.stringify({model,temperature:.2,messages:[{role:'system',content:system},{role:'user',content:user}]})});
+    body:JSON.stringify({model,temperature:.2,messages:[{role:'system',content:system},{role:'user',content:uc}]})});
   return((j.choices||[])[0]?.message?.content)||'';
 }
 // letra de una grabación: Gemini la escucha directo; OpenAI con su transcriptor (whisper-1)
@@ -73,7 +75,7 @@ async function iaArrange(src,title){
 }
 // acordes más fáciles para principiante, misma letra
 async function iaSimplify(src,title){
-  const t=await iaChat('Eres maestro de guitarra para principiantes. '+IA_CP+' Reescribe la canción con acordes más fáciles: solo mayores y menores abiertos cuando se pueda (quita 7, 9, sus, add, maj7 y bajos con /), une acordes de paso muy cortos y, si la tonalidad tiene cejillas, cambia a la forma fácil y agrega al inicio {comment:Capo en el traste N}. Conserva la letra y las secciones exactamente. Responde SOLO la canción en ChordPro.',
+  const t=await iaChat('Eres maestro de guitarra para principiantes. '+IA_CP+' Haz la versión fácil, como «Simplify» de Ultimate Guitar: pásala al tono donde casi todo sea acordes abiertos (G C D Em Am, o C F G Am Dm, o D G A Bm Em, o E A B), SIN usar capo; usa solo mayores y menores (quita 7, 9, sus, add, maj7 y bajos con /) y quita acordes de paso muy cortos que no cambian el sentido. Al inicio agrega {key:NUEVO_TONO} y {comment:Original en X. Con capo en el traste N suena igual} (solo si el tono bajó). Conserva la letra y las secciones exactamente. Responde SOLO la canción en ChordPro.',
     `Canción: ${title||''}\n\n${src}`);
   return t.replace(/```[a-z]*\n?/gi,'').trim();
 }
@@ -117,7 +119,7 @@ function viewIA(){
    <p class="cap" id="iamsg" role="status" style="margin:0"></p></div>
   <div class="box"><p class="blockh">Qué hace la IA en la app</p><ul>
    <li><b>Ordenar letra:</b> separa en renglones y secciones (Intro, Verso, Coro…) y pone cada acorde sobre la sílaba donde cambia.</li>
-   <li><b>Acordes fáciles:</b> versión para principiante con capo sugerido. También hay un botón «Fácil» que no necesita IA.</li>
+   <li><b>Versión fácil:</b> como «Simplify» de Ultimate Guitar: tono con acordes abiertos y sin acordes raros. También hay un botón «Fácil» que no necesita IA.</li>
    <li><b>Rasgueo real:</b> propone cómo se rasguea cada sección (verso más suave, coro con todo) y la banda lo toca.</li>
    <li><b>Letra desde tu grabación:</b> con Gemini u OpenAI, escucha tu MP3 y escribe la letra con sus acordes.</li></ul>
    <p class="cap">Tu clave se guarda solo en este dispositivo y no se sube a tu cuenta. Cada consulta la cobra tu proveedor de IA según su tarifa. Separar pistas no usa IA: la app lo hace sola.</p></div>`,
@@ -134,4 +136,19 @@ function viewIA(){
       try{const t=await iaChat('Responde solo con la palabra: listo','¿Me escuchas?');msg('Conectado con '+iaName()+' en '+((Date.now()-t0)/1000).toFixed(1)+' s. Respondió: «'+String(t).trim().slice(0,40)+'».')}catch(e){msg('No se conectó: '+e.message)}
       IA_MS=old;clearInterval(tk);b.disabled=false};
   }};
+}
+
+/* PDF de canción → ChordPro + datos (título, artista, tono, bpm, capo) + rasgueo leído de las flechas */
+async function iaReadSongPdf(f){
+  if(f.size>19e6)throw new Error('El PDF es muy grande (máximo ~19 MB).');
+  const t=await iaChat(`Eres músico y transcribes hojas de canciones (como las de Ultimate Guitar). Lee TODO el PDF (todas las páginas y ambas columnas, en orden: primero la columna izquierda completa y luego la derecha).
+Responde SOLO JSON: {"title":"","artist":"","key":"tono como C o Am","bpm":número o null,"capo":número o 0,"time":"4/4" o "3/4","strum":"rasgueo o null","chordpro":"…"}.
+«chordpro»: la canción completa en ChordPro: cada acorde entre corchetes JUSTO antes de la sílaba donde está escrito encima, con la letra exacta; secciones en su propio renglón como [Intro], [Verso 1], [Pre-coro], [Coro], [Puente], [Solo], [Final] (traduce Verse=Verso, Chorus=Coro, Bridge=Puente, Outro=Final); partes sin letra como renglones de solo acordes «[C] [G] [C] [G]». No incluyas los diagramas de acordes ni la afinación.
+«strum»: si hay STRUMMING PATTERN con flechas, escríbelo en ${'16'} caracteres para 4/4 (12 para 3/4), uno por dieciseisavo: posiciones 0,2,4,6,8,10,12,14 = «1 & 2 & 3 & 4 &». Flecha abajo = D (o d si es suave), arriba = U (o u), sin flecha = -. Ejemplo «D---D-U---U-D-U-». Si no hay, null.`,'Transcribe esta canción.',{audio:f});
+  const J=iaJSON(t),src=String(J.chordpro||'').replace(/```[a-z]*\n?/gi,'').trim();if(!src)throw new Error('La IA no pudo leer la canción del PDF.');
+  const beats=J.time==='3/4'?3:4,g=typeof J.strum==='string'?J.strum.replace(/\s+/g,''):'';
+  const meta={title:J.title||'',artist:J.artist||'',key:/^[A-G][#b]?m?$/.test(J.key||'')?J.key:'',bpm:+J.bpm>=40&&+J.bpm<=220?Math.round(+J.bpm):0,capo:+J.capo||0,beats};
+  const strum=g.length===beats*4&&/^[DdUux-]+$/.test(g)&&/[DdUu]/.test(g)?g:null;
+  const hd=(meta.title?`{title:${meta.title}}\n`:'')+(meta.artist?`{artist:${meta.artist}}\n`:'')+(meta.key?`{key:${meta.key}}\n`:'')+(meta.bpm?`{bpm:${meta.bpm}}\n`:'')+(beats===3?'{time:3/4}\n':'')+(meta.capo?`{comment:Capo en el traste ${meta.capo}}\n`:'');
+  return{src:hd+'\n'+src.replace(/^\s*\{(title|t|artist|a|key|bpm|time)\s*:[^}]*\}\s*$/gim,'').trim()+'\n',meta,strum,ia:true};
 }

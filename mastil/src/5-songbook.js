@@ -449,7 +449,7 @@ function viewSongEdit(id){
   return{title:ex&&ex.mine?'Editar canción':isTop?ex.top.t:'Nueva canción',back:'#/cancionero',html:`
   ${isTop?`<div class="card note"><b>Paso 1.</b> Busca la letra con acordes. <b>Paso 2.</b> Copia toda la canción. <b>Paso 3.</b> Regresa y toca «Pegar del portapapeles».<div class="row" style="margin-top:10px"><a class="btn sm pri" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(ex.top.t+' '+ex.top.a+' letra y acordes')}">Buscar letra y acordes</a></div></div>`:''}
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
-   <div class="row"><button class="btn sm" id="sbpaste">Pegar del portapapeles</button>${iaReady()?`<button class="btn sm" id="sbia">Ordenar con IA</button>`:`<a class="btn sm" href="#/ia">Conectar IA</a>`}<span class="cap" style="margin:0">o pega con el teclado dentro del cuadro</span></div>
+   <div class="row"><label class="btn sm pri" for="sbfile">${IC.down}Subir PDF o archivo</label><input type="file" id="sbfile" accept=".pdf,.txt,.pro,.cho,.chopro,.crd,application/pdf,text/plain" hidden><button class="btn sm" id="sbpaste">Pegar del portapapeles</button>${iaReady()?`<button class="btn sm" id="sbia">Ordenar con IA</button>`:`<a class="btn sm" href="#/ia">Conectar IA</a>`}<span class="cap" style="margin:0">o pega con el teclado dentro del cuadro</span></div>
    <textarea id="sbsrc" rows="16" spellcheck="false" placeholder="Pega aquí la canción: acordes arriba y letra abajo, o [Sol]letra con [Re]acordes">${esc(tpl)}</textarea>
    <div id="sbprev" class="cap" style="margin:0"></div>
    <div class="sbopts" id="sbopts"><div><span class="cl">Ritmo de la banda</span><select class="inp" id="sbsty"></select></div>
@@ -485,8 +485,15 @@ function viewSongEdit(id){
       if(!P.lines.some(l=>l.pieces&&l.pieces.some(p=>p.text.trim()||p.p))){$('#sbmsg',r).textContent='No encontré letra ni acordes. Revisa lo que pegaste.';return}
       DB.songs=DB.songs||[];const sid=ex&&ex.mine?id:'u'+Date.now().toString(36);
       const i=DB.songs.findIndex(s=>s.id===sid);if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
+      if(E.strum){DB.kai=DB.kai||{};DB.kai[sid]=Object.assign({},DB.kai[sid],{pat:{sub:4,beats:E.beatsPdf||4,tip:'Rasgueo de la hoja de la canción.',secs:{verso:{g:E.strum,b:null,f:1}}},useP:true})}
       save();toast(logo()+'<span>Canción guardada</span>');SBTAB='mine';location.hash='#/cancionero/ver/'+sid;
     };
+    // PDF de Ultimate Guitar (o TXT / ChordPro): título, artista, tono, tempo, secciones y acordes sin copiar y pegar
+    $('#sbfile',r).onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;$('#sbmsg',r).textContent='Leyendo '+f.name+'…';
+      const tk=setInterval(()=>{const m=$('#sbmsg',r);if(m&&/^Leyendo/.test(m.textContent))m.textContent=m.textContent.replace(/( · \d+ s)?$/,' · '+Math.round((Date.now()-t0)/1000)+' s')},1000),t0=Date.now();
+      try{const R=await importSongFile(f);clearInterval(tk);ta.value=(isTop?head:'')+R.src;E.touched={};E.strum=R.strum||null;E.beatsPdf=R.meta.beats||4;prev();
+        $('#sbmsg',r).textContent=`Listo: leí «${R.meta.title||f.name}»${R.meta.artist?' de '+R.meta.artist:''}${R.meta.key?' · tono '+R.meta.key:''}${R.meta.bpm?' · '+R.meta.bpm+' bpm':''}${R.ia?' (con IA)':''}${R.strum?' · con su rasgueo':''}. Revisa y toca «Guardar y abrir».`}
+      catch(err){clearInterval(tk);$('#sbmsg',r).textContent=err.message||'No pude leer ese archivo.'}};
     const ib=$('#sbia',r);if(ib)ib.onclick=async()=>{if(!ta.value.trim()){$('#sbmsg',r).textContent='Primero pega la canción.';return}ib.disabled=true;$('#sbmsg',r).textContent='La IA está ordenando la letra y los acordes…';
       try{const keep=(ta.value.match(/^\s*\{(title|t|artist|a|key|bpm|tempo|time|style)\s*:[^}]*\}\s*$/gim)||[]).join('\n');const t=await iaArrange(ta.value,'');ta.value=(keep&&!/\{\s*title/i.test(t)?keep+'\n\n':'')+t;prev();$('#sbmsg',r).textContent='Listo. Revisa y toca «Guardar y abrir».'}catch(e){$('#sbmsg',r).textContent=e.message}ib.disabled=false};
     const d=$('#sbdel',r);if(d)d.onclick=()=>{$('#sbdw',r).innerHTML='<button class="btn" id="sbdelok" style="border-color:var(--bad);color:var(--bad)">Sí, borrar</button>';$('#sbdelok',r).onclick=()=>{DB.songs=DB.songs.filter(s=>s.id!==id);save();SBTAB='mine';location.hash='#/cancionero'}};
@@ -542,6 +549,7 @@ function viewSongPlay(id,slow){
   const mkP=()=>{const Q=fixP(songParse(srcNow()));if(KAR.simple&&INST.id!=='bateria')simplifyP(Q);return Q};
   let P0=fixP(songParse(srcNow())),P=mkP(),secs=lineSections(P);DB.kt=DB.kt||{};DB.kbpm=DB.kbpm||{};DB.kst=DB.kst||{};
   DB.kbeats=DB.kbeats||{};DB.ksp=DB.ksp||{};const st={sp:slow?(DB.ksp[id]&&DB.ksp[id]<1?DB.ksp[id]:.75):1,loop:0,shift:DB.kt[id]||0,bpm:DB.kbpm[id]||P.bpm,bars:0,style:GROOVES[DB.kst[id]]?DB.kst[id]:P.style,beats:DB.kbeats[id]||P.beats};
+  const EASYT=()=>KAR.simple&&INST.id==='guitarra';if(EASYT())st.shift=easyShift(P);
   const gid=()=>grooveFor(st.style,st.beats),RES=()=>GROOVES[gid()].sub;
   const styChips=()=>Object.entries(GROOVES).filter(([k,g])=>g[st.beats===3?3:4]).map(([k,g])=>`<button class="chip" data-sty="${k}" aria-pressed="${gid()===k}">${g.n}</button>`).join('');
   Object.assign(KAR,DB.kar||{});
@@ -593,6 +601,7 @@ function viewSongPlay(id,slow){
    <button class="kfb" data-nott title="Cifrado: C D E o Do Re Mi"><b id="kfnot"></b></button>
    ${INST.id!=='bateria'?`<button class="kfb" data-simple aria-pressed="${!!KAR.simple}" title="Acordes fáciles: sin séptimas, sus ni bajos"><b>Fácil</b></button>`:''}
    <button class="kfb" data-z="-1" aria-label="Letra más chica"><b>A−</b></button><button class="kfb" data-z="1" aria-label="Letra más grande"><b>A+</b></button></div>
+  <p class="keasy" id="keasy" hidden></p>
   <div class="kchips" id="kchips">${chips()}</div>
   <div class="kwrap"><div class="kmain">
    <div class="kview" data-v="letras"><div class="karaoke show-${KAR.show}" id="kar" style="--kz:${KAR.size}">${P.lines.map(lineHTML).join('')}</div></div>
@@ -613,6 +622,7 @@ function viewSongPlay(id,slow){
     const toolVals=()=>{const set=(k,v)=>{const e=$('#kt-'+k,r);if(e)e.textContent=v};
       set('tono',keyLbl());set('tempo',Math.round(st.bpm*(st.sp||1)));set('son',KAR.band?'Música':'Silencio');set('grab',O.use&&O.blob?'Tuya':'Banda');set('rep',st.loop?st.loop+(st.loop>1?' renglones':' renglón'):'No');set('mas',aiPat()?'IA':BSTYLES[gid()]);set('ia',usingAI()?'Versión IA':iaReady()?'Lista':'Conectar');
       const pb=$('#kpbpm',r);if(pb)pb.textContent=Math.round(st.bpm*(st.sp||1));const pk=$('#kpkey',r);if(pk)pk.textContent=keyLbl();const fn=$('#kfnot',r);if(fn)fn.textContent=es()?'Do':'C';$$('.kmet',r).forEach(x=>x.classList.toggle('on',!!KAR.met));
+      const en=$('#keasy',r);if(en){const on=EASYT()&&st.shift;en.hidden=!on;if(on)en.innerHTML=`<b>Versión fácil en ${esc(keyLbl())}</b> · ${esc(easyCapoTxt(st.shift,chName(P.key,0,P.key,es())+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':''),es()))}`}
       const m=$('#kmeta',r);if(m)m.textContent=`Tono ${keyLbl()} · ${Math.round(st.bpm*(st.sp||1))} bpm · ${BSTYLES[gid()]} · ${st.beats}/4`;
       const t=$('.ktool[data-panel="son"]',r);if(t)t.classList.toggle('on',!!KAR.met)};
     const sumK=toolVals;
@@ -784,7 +794,9 @@ function viewSongPlay(id,slow){
     r.addEventListener('click',e=>{
       const vw=e.target.closest('[data-view]');if(vw){KAR.view=vw.dataset.view;DB.kar=Object.assign({},KAR);save();views();if(VIEW()==='acordes'&&pos)kgridAt(r,TL.lines[pos]?TL.lines[pos].start:0);return}
       const nt=e.target.closest('[data-nott]');if(nt){DB.notation=es()?'us':'es';save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.not===DB.notation)));rerender();toolVals();return}
-      const sm=e.target.closest('[data-simple]');if(sm){KAR.simple=!KAR.simple;DB.kar=Object.assign({},KAR);save();sm.setAttribute('aria-pressed',String(KAR.simple));reloadSong();toast(logo()+`<span>${KAR.simple?'Acordes fáciles: sin séptimas, sus ni bajos':'Acordes originales'}</span>`);return}
+      const sm=e.target.closest('[data-simple]');if(sm){KAR.simple=!KAR.simple;DB.kar=Object.assign({},KAR);save();sm.setAttribute('aria-pressed',String(KAR.simple));reloadSong();
+        if(INST.id==='guitarra'){st.shift=KAR.simple?easyShift(P):(DB.kt[id]||0);rerender();toolVals();restart()}
+        toast(logo()+`<span>${KAR.simple?'Versión fácil'+(EASYT()&&st.shift?' en '+esc(keyLbl()):'')+': acordes abiertos, sin séptimas, sus ni bajos':'Acordes originales'}</span>`,3000);return}
       const mx=e.target.closest('[data-mixm],[data-mixs]');if(mx){const k=mx.dataset.mixm||mx.dataset.mixs,f=mx.dataset.mixm?'m':'s',M=mixOf();M[k]=M[k]||{};M[k][f]=!M[k][f];mx.classList.toggle('on',M[k][f]);save();applyMix(true);return}
       const kt=e.target.closest('.kst-t');if(kt&&!e.target.closest('input,button')){const rc=kt.getBoundingClientRect();seekFrac((e.clientX-rc.left)/rc.width);return}
       const io=e.target.closest('[data-iaon]');if(io){DB.kai[id]=Object.assign({},AIo(),{on:io.dataset.iaon==='1'});save();reloadSong();return}
@@ -830,7 +842,7 @@ function viewSongPlay(id,slow){
       k.innerHTML=`${A.src?`<div><span class="cl">Versión de la canción</span><div class="seg">${[[0,'Original'],[1,'De la IA']].map(([v,l])=>`<button data-iaon="${v}" aria-pressed="${usingAI()===!!v}">${l}</button>`).join('')}</div></div>`:''}
        ${A.pat?`<div><span class="cl">Rasgueo</span><div class="seg">${[[0,'Del ritmo'],[1,'De la IA']].map(([v,l])=>`<button data-iap="${v}" aria-pressed="${(A.useP!==false)===!!v}">${l}</button>`).join('')}</div></div>`:''}
        <div class="kiab"><button class="btn" data-ia="arr">${KIC.letras}<span>Ordenar letra y acordes</span></button>
-        ${INST.id!=='bateria'?`<button class="btn" data-ia="simp">${KIC.formas}<span>Acordes fáciles con capo</span></button>`:''}
+        ${INST.id!=='bateria'?`<button class="btn" data-ia="simp">${KIC.formas}<span>Versión fácil (IA)</span></button>`:''}
         <button class="btn" data-ia="strum">${KIC.son}<span>Rasgueo real por sección</span></button>
         ${O.blob?`<button class="btn" data-ia="lyr" ${iaHears()?'':'disabled'}>${KIC.grab}<span>Letra de mi grabación</span></button>`:''}</div>
        <p class="cap" id="kiamsg" role="status" style="margin:0">${O.blob&&!iaHears()?'Para sacar la letra del audio conecta Gemini u OpenAI. ':''}Conectada: ${esc(iaName())}.${A.src?' Tu versión original no se borra.':''}</p>
