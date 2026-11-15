@@ -178,9 +178,15 @@ async function iaLyricsTimed(blob){
   const c=iaCfg();if(!iaHears())throw new Error('Para sacar la letra del audio conecta Gemini u OpenAI.');
   if(blob.size>19.5e6)throw new Error('La grabación es muy grande para la IA (máximo ~19 MB). Usa un MP3.');
   if(c.prov==='gemini'){
-    const t=await iaChat('Eres un transcriptor profesional de canciones en español e inglés que hace archivos LRC (letra sincronizada).',
-      'Escucha toda la canción y transcribe SOLO lo que se canta, un verso por renglón (frases cortas de 4 a 10 palabras), con el segundo exacto (un decimal) en que empieza cada renglón y su sección. Responde SOLO JSON {"title":"si lo reconoces","artist":"si lo reconoces","key":"tono como A o F#m","chords":["los acordes que usa la canción en el tono de ESTA grabación, cifrado americano, solo mayores y menores, p. ej. A","F#m","D","E"],"lines":[{"t":12.3,"sec":"Verso 1","text":"…"}]}. Si conoces la canción, usa sus acordes reales; si no, escucha con cuidado. Secciones en español: Intro, Verso 1, Verso 2, Pre-coro, Coro, Puente, Solo, Final.',{audio:blob});
-    const J=iaJSON(t);return{title:J.title||'',artist:J.artist||'',key:J.key||'',chords:Array.isArray(J.chords)?J.chords.map(String).slice(0,14):[],lines:(J.lines||[]).map(x=>({t:+x.t,text:String(x.text||'').trim(),sec:x.sec?String(x.sec):null})).filter(x=>x.text&&isFinite(x.t))};
+    const t=await iaChat('Eres un músico que transcribe canciones para cancioneros (como Ultimate Guitar, LaCuerda o Cifra Club) y hace archivos LRC (letra sincronizada).',
+      `Escucha toda la canción y devuelve su hoja completa, en orden, con tiempos de ESTA grabación.
+Responde SOLO JSON {"title":"si la reconoces","artist":"si la reconoces","key":"tono de esta grabación, como A o F#m","chords":["acordes que usa, p. ej. A","F#m","D","E"],"lines":[…]}.
+Cada elemento de "lines": {"t":segundo en que empieza (un decimal),"e":segundo en que termina de cantarse,"sec":"Intro|Verso 1|Pre-coro|Coro|Puente|Solo|Final…","text":"lo que se canta (vacío en partes instrumentales)","cp":"el mismo renglón en ChordPro con cada acorde entre corchetes justo antes de la sílaba donde cambia"}.
+Incluye las partes sin letra (intro, solos, interludios, final) como elementos con "text":"" y "cp" con solo sus acordes, p. ej. "[A] [F#m] [D] [E]".
+Acordes: si conoces la canción, usa los que publican los cancioneros para ella (los de la versión original, sin inventar), escritos en el tono en que suena ESTA grabación; si no la conoces, escúchala con cuidado. Cifrado americano (A Bm C#m D E F#m, 7, sus4, /bajo solo si de verdad está). Renglones de 4 a 10 palabras, como se canta.`,{audio:blob});
+    const J=iaJSON(t),num=v=>v==null||v===''||!isFinite(+v)?null:+v;
+    return{title:J.title||'',artist:J.artist||'',key:J.key||'',chords:Array.isArray(J.chords)?J.chords.map(String).slice(0,16):[],
+      lines:(J.lines||[]).map(x=>({t:num(x.t),e:num(x.e),text:String(x.text||'').trim(),cp:String(x.cp||'').trim(),sec:x.sec?String(x.sec):null})).filter(x=>x.t!=null&&(x.text||/\[/.test(x.cp)))};
   }
   const fd=new FormData();fd.append('file',blob,'cancion.'+((blob.type||'').split('/')[1]||'mp3'));fd.append('model','whisper-1');fd.append('response_format','verbose_json');fd.append('timestamp_granularities[]','segment');
   const j=await iaFetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+c.key.trim()},body:fd});

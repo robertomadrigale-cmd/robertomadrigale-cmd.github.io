@@ -64,8 +64,14 @@ async function syncAnalyze(x,sr,bpm0,prog,xs){
   // 4) croma: ventana 4096, salto 1024 (≈ 93 ms). Medios (180 Hz – 2.2 kHz) para el tipo de acorde y graves (55–180 Hz)
   //    aparte para la raíz: si van juntos, el bajo en la quinta parece el acorde siguiente
   const N2=4096,H2=1024,nc=Math.max(1,Math.floor((x.length-N2)/H2)+1),w2=hannW(N2),pcOf=new Int8Array(N2/2).fill(-1),lowB=new Uint8Array(N2/2);
-  for(let k=1;k<N2/2;k++){const f=k*sr/N2;if(f>=55&&f<=2200){pcOf[k]=((Math.round(12*Math.log2(f/440))+69)%12+12)%12;lowB[k]=f<180?1:0}}
-  re=new Float32Array(N2);im=new Float32Array(N2);const chroma=new Float32Array(nc*12),bassC=new Float32Array(nc*12),en=new Float32Array(nc);
+  re=new Float32Array(N2);im=new Float32Array(N2);
+  // afinación: picos del espectro (interpolados) en 100–1000 Hz → cuánto se aleja la grabación de La 440, en fracción de semitono
+  let tc=0,ts=0;for(let f=0;f<nc;f+=7){const o=f*H2;for(let i=0;i<N2;i++){re[i]=(x[o+i]||0)*w2[i];im[i]=0}fftRI(re,im);const m=new Float32Array(N2/2);for(let k=1;k<N2/2;k++)m[k]=Math.sqrt(re[k]*re[k]+im[k]*im[k]);
+    const kA=Math.round(100*N2/sr),kB=Math.round(1000*N2/sr);let mean=0;for(let k=kA;k<kB;k++)mean+=m[k];mean/=(kB-kA)||1;
+    for(let k=kA;k<kB;k++)if(m[k]>mean*4&&m[k]>m[k-1]&&m[k]>=m[k+1]){const d=(m[k-1]-m[k+1])/(2*(m[k-1]-2*m[k]+m[k+1])||1),fr=(k+d)*sr/N2,dev=12*Math.log2(fr/440),ang=2*Math.PI*(dev-Math.round(dev));tc+=m[k]*Math.cos(ang);ts+=m[k]*Math.sin(ang)}
+    if(f%140===0)await syncIdle()}
+  const tune=Math.atan2(ts,tc)/(2*Math.PI);
+  for(let k=1;k<N2/2;k++){const f=k*sr/N2;if(f>=55&&f<=2200){pcOf[k]=((Math.round(12*Math.log2(f/440)-tune)+69)%12+12)%12;lowB[k]=f<180?1:0}}const chroma=new Float32Array(nc*12),bassC=new Float32Array(nc*12),en=new Float32Array(nc);
   // banda de la voz (300 Hz – 3 kHz) en el centro (vm) y en los lados (vs)
   const k1=Math.round(300*N2/sr),k2=Math.round(3000*N2/sr),vm=new Float32Array(nc),vs=xs?new Float32Array(nc):null;
   for(let f=0;f<nc;f++){const o=f*H2;for(let i=0;i<N2;i++){re[i]=(x[o+i]||0)*w2[i];im[i]=0}fftRI(re,im);
@@ -73,7 +79,7 @@ async function syncAnalyze(x,sr,bpm0,prog,xs){
     if(vs){for(let i=0;i<N2;i++){re[i]=(xs[o+i]||0)*w2[i];im[i]=0}fftRI(re,im);for(let k=k1;k<=k2;k++)vs[f]+=Math.sqrt(re[k]*re[k]+im[k]*im[k])}
     if(f%400===0){prog(.8+.2*f/nc);await syncIdle()}}
   prog(1);
-  return{beats,bpm:60*fr/per,chroma,bassC,en,vm,vs,nc,ct:f=>(f*H2+N2/2)/sr,cq:N2/4/sr};
+  return{beats,bpm:60*fr/per,tune,chroma,bassC,en,vm,vs,nc,ct:f=>(f*H2+N2/2)/sr,cq:N2/4/sr};
 }
 // croma promedio de cada tramo de la rejilla (normalizado), con su energía
 // solo las ventanas que caen casi enteras dentro del tramo, para no «oír» el acorde antes de que suene
@@ -193,14 +199,24 @@ function chordsFromAudio(A,allowed){
   const dia=p=>{const iv=(p.pc-tonic+12)%12;return DIA[iv]===p.suf||(iv===4&&p.suf==='')||(iv===10&&p.suf==='')};// III y bVII mayores también son comunes
   let bonus=()=>0;
   if(al.length>=2){const ok=new Set(al.map(p=>p.pc+'|'+p.suf));TP=TP.filter(p=>ok.has(p.pc+'|'+p.suf))}else bonus=p=>dia(p)?.06:-.07;
-  const K=TP.length+1,SW=.15,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:chordMatch(TP[k],0,C[j],BS[j])+bonus(TP[k]));
-  let D=new Float32Array(K),B=[];for(let k=0;k<K;k++)D[k]=score(0,k);
-  for(let j=1;j<N;j++){let bk=0;for(let k=1;k<K;k++)if(D[k]>D[bk])bk=k;const nd=new Float32Array(K),bb=new Uint8Array(K);
-    for(let k=0;k<K;k++){const stay=D[k],sw=D[bk]-SW;if(stay>=sw){nd[k]=stay;bb[k]=k}else{nd[k]=sw;bb[k]=bk}nd[k]+=score(j,k)}B.push(bb);D=nd}
-  let k=0;for(let q=1;q<K;q++)if(D[q]>D[k])k=q;const path=new Array(N);path[N-1]=k;for(let j=N-1;j>0;j--){k=B[j-1][k];path[j-1]=k}
+  const tplH=p=>{const t=new Float32Array(12),r=p.pc,iv=[0,p.suf==='m'?3:4,7],w=[1.2,1.05,.8];iv.forEach((v,i)=>{const n=(r+v)%12;t[n]+=w[i];t[(n+7)%12]+=w[i]*.3;t[(n+4)%12]+=w[i]*.12});return nrm(t)};
+  const TT=TP.map(tplH),TB=TP.map(p=>{const u=new Float32Array(12);u[p.pc]=1;u[(p.pc+7)%12]=.25;return nrm(u)});
+  const SC=new Float32Array(N*TP.length);for(let j=0;j<N;j++)for(let k=0;k<TP.length;k++){let d=0,e=0;for(let q=0;q<12;q++){d+=TT[k][q]*C[j][q];e+=TB[k][q]*BS[j][q]}SC[j*TP.length+k]=.7*d+.3*e+bonus(TP[k])}
+  const K=TP.length+1,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:SC[j*TP.length+k]);
+  // Viterbi; sw(j) = costo de cambiar de acorde en el pulso j (más barato en el 1 del compás, luego en el 3)
+  const vit=sw=>{let D=new Float32Array(K),B=[];for(let k=0;k<K;k++)D[k]=score(0,k);
+    for(let j=1;j<N;j++){let bk=0;for(let k=1;k<K;k++)if(D[k]>D[bk])bk=k;const nd=new Float32Array(K),bb=new Uint8Array(K),c=sw(j);
+      for(let k=0;k<K;k++){const stay=D[k],sv=D[bk]-c;if(stay>=sv){nd[k]=stay;bb[k]=k}else{nd[k]=sv;bb[k]=bk}nd[k]+=score(j,k)}B.push(bb);D=nd}
+    let k=0;for(let q=1;q<K;q++)if(D[q]>D[k])k=q;const path=new Array(N);path[N-1]=k;for(let j=N-1;j>0;j--){k=B[j-1][k];path[j-1]=k}return path};
+  let path=vit(()=>.15);
+  // dónde cae el 1: en el pulso (módulo 4) donde más cambian los acordes, ayudado por los graves
+  const cnt=[0,0,0,0];for(let j=1;j<N;j++)if(path[j]!==path[j-1])cnt[j%4]+=1;const ph=cnt.indexOf(Math.max(...cnt));
+  path=vit(j=>{const q=((j-ph)%4+4)%4;return q===0?.1:q===2?.2:.34});
   // cambios de un solo pulso entre dos iguales se quitan (suelen ser notas de paso)
   for(let j=1;j+1<N;j++)if(path[j]!==path[j-1]&&path[j-1]===path[j+1])path[j]=path[j-1];
-  return{grid,ch:path.map(q=>q===TP.length?null:TP[q]),bpm:A.bpm,key};
+  // qué tan bien suenan los acordes elegidos (para comparar con otra lista)
+  let fs=0,fn=0;for(let j=0;j<N;j++){const q=path[j];if(q<TP.length){fs+=SC[j*TP.length+q]-bonus(TP[q]);fn++}}
+  return{grid,ch:path.map(q=>q===TP.length?null:TP[q]),bpm:A.bpm,key,ph,fit:fn?fs/fn:0};
 }
 /* la canción completa en ChordPro a partir de los acordes por pulso y (si hay) la letra con tiempos de la IA:
    lyr = [{t: segundo en que empieza, text, sec}] */
@@ -238,4 +254,30 @@ function songFromAudio(R,lyr,meta){
     if(inter){const ins=barsLine(jb+(jb%bt?bt-jb%bt:0),jn);if(ins.length){L.push('');L.push(i+1<lines.length?'{c:Instrumental}':'{c:Final}');ins.forEach(y=>push(...y));sec=null}}
   });
   return{src:L.join('\n'),TM};
+}
+
+/* ¿cuadra esta hoja de acordes con la grabación? → alineación (DTW), tono de la grabación respecto a la hoja y costo.
+   Sirve para elegir entre los acordes que da la IA (los de los cancioneros) y los que se detectan del audio. */
+function chartFit(A,src){
+  const P=songParse(src);P.bpm=Math.max(40,Math.min(220,Math.round(A.bpm)));const TL=songTimeline(P,0,P.beats),Q=4;TL.res=Q;
+  const ch=TL.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b);if(ch.length<2)return null;TL.chAt=[];let j=-1;for(let k=0;k<Math.ceil(TL.total*Q);k++){while(j+1<ch.length&&Math.round(ch[j+1].b*Q)<=k)j++;TL.chAt[k]=j>=0?ch[j].p:null}
+  const R=syncAlign(A,TL,P.beats);if(!R)return null;return{R,TL,P,sig:TL.lines.length+'|'+Math.round(TL.total*4)+'|'+P.beats};
+}
+// sube o baja todos los acordes de una canción en ChordPro
+function transposeSrc(src,k){if(!k)return src;const P=songParse(src),key=P.key;
+  return src.replace(/\[([^\]]+)\]/g,(m,c)=>{const p=chParse(c);return p?'['+chName(p,k,key,false).replace(/♯/g,'#').replace(/♭/g,'b')+']':m})
+    .replace(/\{key:\s*([^}]+)\}/i,(m,c)=>{const p=chParse(c.trim());return p?'{key:'+chName(p,k,p,false).replace(/♯/g,'#').replace(/♭/g,'b')+'}':m})}
+
+// renglones de la IA (con cp = renglón con acordes) → ChordPro; chartLineRef guarda el renglón de la IA de cada renglón de la canción
+let chartLineRef=[];
+function chartFromLines(lines,meta,bpm){
+  const L=[`{title:${meta.title||'Mi canción'}}`];if(meta.artist)L.push(`{artist:${meta.artist}}`);L.push(`{bpm:${Math.round(bpm)}}`);L.push('');chartLineRef=[];let sec=null;
+  const strip=t=>String(t).replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  lines.slice().sort((a,b)=>a.t-b.t).forEach(x=>{
+    if(x.sec&&x.sec!==sec){sec=x.sec;if(L[L.length-1]!=='')L.push('');L.push(`{c:${sec}}`)}
+    // los acordes que no se entienden se quitan; si el renglón con acordes no coincide con la letra, se usa la letra sola
+    let cp=(x.cp||'').replace(/\[([^\]]*)\]/g,(m,c)=>chParse(c.trim())?'['+c.trim()+']':'');
+    if(x.text&&strip(cp).replace(/[^a-z0-9ñáéíóúü ]/g,'')!==x.text.toLowerCase().replace(/\s+/g,' ').trim().replace(/[^a-z0-9ñáéíóúü ]/g,''))cp=/\[/.test(cp)&&strip(cp).length>=x.text.length*.7?cp:x.text;
+    if(!cp.trim())return;L.push(cp);chartLineRef.push(x)});
+  return L.join('\n');
 }

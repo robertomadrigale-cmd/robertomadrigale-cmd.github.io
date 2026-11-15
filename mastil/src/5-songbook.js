@@ -491,7 +491,9 @@ function viewSongEdit(id){
         /* creada desde el audio: ya se sabe en qué segundo empieza cada renglón y cada acorde (no se vuelve a adivinar).
            Si cambiaste renglones en el editor y ya no cuadran, la app la sincroniza sola al abrirla. */
         const PL=P.lines.map((L,li)=>[L,li]).filter(([L])=>L.pieces),S=E.sync;
-        if(S&&S.TM.length===PL.length){DB.ksync=DB.ksync||{};DB.ksync[sid]={};const pch={};PL.forEach(([L,li],k)=>{DB.ksync[sid][li]=+S.TM[k].t.toFixed(3);pch[li]=S.TM[k].ch.map(t=>+t.toFixed(3))});
+        if(S&&S.mode==='chart'&&S.times.length===PL.length){DB.ksync=DB.ksync||{};DB.ksync[sid]={};const lend={};PL.forEach(([L,li],k)=>{if(S.times[k]!=null)DB.ksync[sid][li]=S.times[k];if(S.ends[k]!=null)lend[li]=S.ends[k]});
+          DB.kbpm=DB.kbpm||{};DB.kbpm[sid]=S.bpm;Object.assign(rec,{grid:S.grid,dur:S.dur,lend,ancs:{[sid]:S.anc}})}
+        else if(S&&S.TM&&S.TM.length===PL.length){DB.ksync=DB.ksync||{};DB.ksync[sid]={};const pch={};PL.forEach(([L,li],k)=>{DB.ksync[sid][li]=+S.TM[k].t.toFixed(3);pch[li]=S.TM[k].ch.map(t=>+t.toFixed(3))});
           DB.kbpm=DB.kbpm||{};DB.kbpm[sid]=S.bpm;Object.assign(rec,{grid:S.grid,dur:S.dur,pch})}
         else DB.kautosync=sid;
         save();toast(logo()+'<span>Canción guardada con tu audio</span>');
@@ -508,10 +510,24 @@ function viewSongEdit(id){
         if(iaHears()){const t0=Date.now(),tk=setInterval(()=>msg(`La IA está sacando la letra y los acordes… ${Math.round((Date.now()-t0)/1000)} s`),1000);msg('La IA está sacando la letra y los acordes…');
           try{const L=await iaLyricsTimed(f);lyr=L.lines;allowed=L.chords;if(!isTop){if(L.title)meta.title=L.title;if(L.artist)meta.artist=L.artist}}catch(err){why=err.message}clearInterval(tk)}
         if(!allowed&&isTop)allowed=ex.top.prog.split(' ');
-        const R=chordsFromAudio(A,allowed);if(!R)throw new Error('No encontré el pulso de este audio.');
-        const SF=songFromAudio(R,lyr,meta);ta.value=SF.src;E.touched={};E.audio=f;E.sync={grid:R.grid.map(t=>+t.toFixed(3)),TM:SF.TM,bpm:Math.round(R.bpm),dur:x.length/sr,lines:SF.src.split('\n').length};prev();
-        const n=new Set(R.ch.filter(Boolean).map(c=>c.pc+c.suf)).size;
-        msg(`Listo: ${Math.round(R.bpm)} bpm y ${n} acordes${lyr&&lyr.length?` con ${lyr.length} renglones de letra`:''}.${!lyr?(iaHears()?' No salió la letra: '+why:' Para sacar también la letra conecta Gemini u OpenAI en Asistente IA.'):''} Revisa y toca «Guardar y abrir»: la canción queda con tu audio y sincronizada.`)}
+        // la lista de acordes de la IA solo se usa si suena tan bien como la detección libre (si la IA se equivocó, se ignora)
+        let R=chordsFromAudio(A,allowed);if(allowed&&allowed.length){const Rf=chordsFromAudio(A,null);if(Rf&&(!R||R.fit<Rf.fit-.03))R=Rf}if(!R)throw new Error('No encontré el pulso de este audio.');
+        const SF=songFromAudio(R,lyr&&lyr.filter(x=>x.text),meta);let src=SF.src,how='acordes detectados del audio';
+        E.sync={grid:R.grid.map(t=>+t.toFixed(3)),TM:SF.TM,bpm:Math.round(R.bpm),dur:x.length/sr};
+        /* la hoja de la IA (acordes como en los cancioneros) contra el audio: se usa si cuadra al menos igual que la detectada;
+           si la grabación está en otro tono, se transporta. Los tiempos salen de alinear la hoja con la grabación. */
+        const chart=lyr&&lyr.filter(x=>/\[[^\]]+\]/.test(x.cp)).length>=Math.max(2,lyr.length*.5)?chartFromLines(lyr,meta,R.bpm):null;
+        if(chart){msg('Comparando los acordes de la IA con tu audio…');await syncIdle();
+          const Fc=chartFit(A,chart),Fd=chartFit(A,SF.src);
+          if(Fc&&(!Fd||Fc.R.cost<=Fd.R.cost+.04)){let cs=chart,F=Fc;if(Fc.R.k&&Fc.R.sure){cs=transposeSrc(chart,Fc.R.k);F=chartFit(A,cs)||Fc}
+            src=cs;how=Fc.R.k&&Fc.R.sure?'acordes de cancionero, pasados al tono de tu grabación':'acordes de cancionero comprobados con tu audio';
+            // inicio de cada renglón: el del alineado (exacto al pulso) salvo que la IA lo oiga claramente en otro lado
+            const PL=F.TL.lines,byLi={};lyr.forEach(x=>{});const T=F.R.T,times=[],ends=[];let k=0;
+            F.P.lines.forEach((L,li)=>{if(!L.pieces)return;const ent=chartLineRef[k]||null;k++;let t=T[li];if(ent&&ent.t!=null&&(t==null||Math.abs(t-ent.t)>1.5))t=gridT(F.R.grid,Math.round(gridIdx(F.R.grid,ent.t)));times.push(t==null?null:+(+t).toFixed(3));ends.push(ent&&ent.e!=null?+ent.e.toFixed(2):null)});
+            E.sync={mode:'chart',times,ends,grid:F.R.grid,bpm:Math.round(A.bpm),dur:x.length/sr,anc:{a:F.R.anc||[],sig:F.sig}}}}
+        ta.value=src;E.touched={};E.audio=f;prev();
+        const n=new Set((src.match(/\[[^\]]+\]/g)||[]).filter(c=>chParse(c.slice(1,-1)))).size;
+        msg(`Listo (${how}): ${Math.round(R.bpm)} bpm y ${n} acordes${lyr&&lyr.length?` con ${lyr.filter(x=>x.text).length} renglones de letra`:''}.${!lyr?(iaHears()?' No salió la letra: '+why:' Para sacar también la letra conecta Gemini u OpenAI en Asistente IA.'):''} Revisa y toca «Guardar y abrir»: la canción queda con tu audio y sincronizada.`)}
       catch(err){msg(err.message||'No pude escuchar ese audio.')}};
     $('#sbaud',r).onchange=e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(f)fromAudio(f)};
     // si ya subiste la grabación de esta canción en el reproductor, se puede usar esa
@@ -606,6 +622,7 @@ function viewSongPlay(id,slow){
     ia:KI('<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>'),
     letras:KI('<path d="M4 6h16M4 12h11M4 18h14"/>'),acordes:KI('<rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/>'),
     formas:KI('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 7h14M9.7 7v14M14.3 7v14M5 11.7h14M5 16.3h14"/>'),pistas:KI('<path d="M4 8h3M4 16h6M13 8h7M16 16h4"/><circle cx="10" cy="8" r="2"/><circle cx="13" cy="16" r="2"/>'),
+    full:KI('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
     prev:KI('<path d="M6 5v14"/><path d="M18 6l-9 6 9 6z" fill="currentColor"/>'),next:KI('<path d="M18 5v14"/><path d="M6 6l9 6-9 6z" fill="currentColor"/>'),restart:KI('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),edit:KI('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>')};
   const tool=(k,l)=>`<button class="ktool" data-panel="${k}" aria-pressed="false">${KIC[k]}<b id="kt-${k}"></b><small>${l}</small></button>`;
   const panel=(k,t,h)=>`<div class="kpanel" data-p="${k}" hidden><div class="kph"><b>${t}</b><button class="kic" data-pclose aria-label="Cerrar">${IC.x||'×'}</button></div>${h}</div>`;
@@ -634,7 +651,7 @@ function viewSongPlay(id,slow){
   <div class="kfab" role="toolbar" aria-label="Cómo se ven los acordes">
    <button class="kfb" data-nott title="Cifrado: C D E o Do Re Mi"><b id="kfnot"></b></button>
    ${INST.id!=='bateria'?`<button class="kfb" data-easy="${EZ()?0:INST.id==='guitarra'?2:1}" aria-pressed="${EZ()>0}" title="Acordes fáciles"><b>Fácil</b></button>`:''}
-   <button class="kfb" data-z="-1" aria-label="Letra más chica"><b>A−</b></button><button class="kfb" data-z="1" aria-label="Letra más grande"><b>A+</b></button></div>
+   <button class="kfb" data-stauto aria-pressed="${KAR.stage!==false}" title="Al tocar, abrir la letra en pantalla completa"><b>Escenario</b></button><button class="kfb" data-z="-1" aria-label="Letra más chica"><b>A−</b></button><button class="kfb" data-z="1" aria-label="Letra más grande"><b>A+</b></button></div>
   <div class="kchead">${INST.id!=='bateria'?`<div class="kcg"><span class="cl">Acordes</span><div class="seg" id="kez">${[[0,'Originales'],[1,'Sencillos'],...(INST.id==='guitarra'?[[2,'Fáciles']]:[])].map(([v,l])=>`<button data-easy="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>`:''}
    <div class="kcg"><span class="cl">Escuchar</span><div class="kmutes" id="kmutes"></div></div></div>
   <p class="keasy" id="keasy" hidden></p>
@@ -646,10 +663,15 @@ function viewSongPlay(id,slow){
    <div class="kview" data-v="pistas" hidden><div class="kstems" id="kstems"></div></div></div>
   ${INST.id==='bajo'?`<button class="btn ${DB.bassPlayer!==false?'on':''}" data-t="bassPlayer" aria-pressed="${DB.bassPlayer!==false}">Yo toco el bajo</button>`:''}${INST.id==='bateria'?`<div class="drum-sidebar"><button class="btn ${drumPlayer()?'on':''}" data-t="drumPlayer" aria-pressed="${drumPlayer()}">Yo toco la batería</button>`:''}<aside class="kside" id="kside"></aside>${INST.id==='bateria'?'</div>':''}</div>
   <div class="ksync" id="ksync" hidden></div>
+  <div class="kstage" id="kstage" hidden aria-label="Modo escenario">
+   <div class="ksg-top"><span class="ksg-t"><b>${esc(P.title)}</b>${P.artist?' · '+esc(P.artist):''}</span><span class="ksg-ch" id="ksgch"></span><button class="kic" data-stx aria-label="Salir del modo escenario">${IC.x||'×'}</button></div>
+   <div class="ksg-lines" id="ksgl"></div>
+   <div class="ksg-bot"><div class="kprog"><i id="ksgp"></i></div><div class="ksg-ctl"><button class="kic" data-step="-1" aria-label="Renglón anterior">${KIC.prev}</button><button class="kplayb" data-stgo aria-label="Tocar o pausar">${IC.play}</button><button class="kic" data-step="1" aria-label="Renglón siguiente">${KIC.next}</button></div></div>
+  </div>
   <div class="kdock"><div class="kviews" role="tablist" aria-label="Vista">${[['letras','Letras'],['acordes','Acordes'],['formas','Formas'],['pistas','Pistas']].filter(([v])=>v!=='formas'||INST.id!=='bateria').map(([v,l])=>`<button role="tab" data-view="${v}" aria-selected="false">${KIC[v]}<span>${l}</span></button>`).join('')}</div>
   <div class="kbar"><div class="kprog"><i id="kprogi"></i></div><div class="kbrow"><span class="bd" id="kbd"></span><span class="tm" id="kpos">${st.beats}/4 · ${BSTYLES[gid()]} · listo</span>
    <div class="ktrans"><button class="kic" data-step="-1" aria-label="Renglón anterior">${KIC.prev}</button><button class="kplayb" id="kgo" aria-label="Empezar">${IC.play}</button><button class="kic" data-step="1" aria-label="Renglón siguiente">${KIC.next}</button></div>
-   <div class="kbr"><button class="kpill" data-panel="tempo" aria-label="Tempo y tono"><b id="kpbpm"></b><small> bpm · </small><b id="kpkey"></b></button><button class="kic kmet ${KAR.met?'on':''}" data-t="met" aria-label="Metrónomo">${KIC.tempo}</button><button class="kic" id="kreset" aria-label="Desde el inicio">${KIC.restart}</button></div></div></div></div>
+   <div class="kbr"><button class="kpill" data-panel="tempo" aria-label="Tempo y tono"><b id="kpbpm"></b><small> bpm · </small><b id="kpkey"></b></button><button class="kic kmet ${KAR.met?'on':''}" data-t="met" aria-label="Metrónomo">${KIC.tempo}</button><button class="kic" data-stopen aria-label="Modo escenario, pantalla completa">${KIC.full}</button><button class="kic" id="kreset" aria-label="Desde el inicio">${KIC.restart}</button></div></div></div></div>
   </div>`,
   mount(r){
     const kr=$('#kretoplay',r);if(kr)kr.onclick=()=>{RETO_PICK='song:'+id+':'+st.shift;location.hash='#/practicar/reto'};
@@ -756,11 +778,27 @@ function viewSongPlay(id,slow){
       const b=f*TL.total;let g=0;TL.lines.forEach((L,i)=>{if(L.start<=b+1e-3)g=i});const was=running();if(was){seqStop();bandStop()}pos=g;clearHL();setLine(TL.lines[g].li);if(was)go();else stemHead(TL.lines[g].start,null);paint()};
     const onRz=()=>{if(VIEW()==='pistas')stemsPaint()};window.addEventListener('resize',onRz);
     const running=()=>SEQ.id==='kar'||O.playing;
-    const paint=()=>{const g=$('#kgo',r),t=running()?'Pausa':pos?'Continuar':'Empezar';g.innerHTML=(running()?IC.pause:IC.play)+`<span>${t}</span>`;kar.classList.toggle('live',running());g.setAttribute('aria-label',t);toolVals()};
+    const paint=()=>{const sg=$('[data-stgo]',r);if(sg)sg.innerHTML=running()?IC.pause:IC.play;const g=$('#kgo',r),t=running()?'Pausa':pos?'Continuar':'Empezar';g.innerHTML=(running()?IC.pause:IC.play)+`<span>${t}</span>`;kar.classList.toggle('live',running());g.setAttribute('aria-label',t);toolVals()};
     const prog=g=>{const i=$('#kprogi',r);if(i)i.style.width=(TL&&TL.lines.length?Math.max(0,Math.min(1,g/TL.lines.length))*100:0)+'%'};
     const clearHL=()=>{$$('.kl',kar).forEach(x=>x.classList.remove('cur','past','nxt'));$$('.pc',kar).forEach(x=>x.classList.remove('lit','now'));prog(0);kgridClear(r);FS.i=0;FS.li=-1;if(VIEW()==='formas')formsPaint();stemHead(0,0)};
+    /* ---------- modo escenario: pantalla completa al tocar; lo cantado se pinta en dorado ---------- */
+    const stg=$('#kstage',r),stgL=$('#ksgl',r);let stgOn=false,stgFs=false;
+    const stgRender=li=>{if(!stgOn)return;const g=Math.max(0,lineIdx(li)),rows=[];
+      for(let k=g-1;k<=g+2;k++){const L=TL.lines[k];if(!L){rows.push('<div class="ksg-row ghost"></div>');continue}const sc=secs[L.li],pv=k>0&&secs[TL.lines[k-1].li];
+        const lab=k===g&&sc&&sc.l&&(!pv||pv.l!==sc.l)?`<div class="ksg-sec">${esc(sc.l)}</div>`:'';rows.push(`<div class="ksg-row ${k<g?'pv':k===g?'cur':k===g+1?'nx':'nx2'}">${lab}${lineHTML(P.lines[L.li],L.li)}</div>`)}
+      stgL.innerHTML=rows.join('');
+      // lo que ya se encendió en la letra de la página (por ejemplo la primera sílaba, que cae junto con el renglón)
+      for(let k=g-1;k<=g;k++){const L=TL.lines[k];if(!L)continue;$$(`.kl[data-li="${L.li}"] .pc.lit`,kar).forEach(x=>{const q=$(`.kl[data-li="${L.li}"] .pc[data-pi="${x.dataset.pi}"]`,stgL);if(q){q.style.setProperty('--sd','0s');q.classList.add('lit')}});
+        const nw=$(`.kl[data-li="${L.li}"] .pc.now`,kar);if(nw){const q=$(`.kl[data-li="${L.li}"] .pc[data-pi="${nw.dataset.pi}"]`,stgL);if(q)q.classList.add('now')}}
+      const pi=$('#ksgp',r);if(pi)pi.style.width=((g+1)/Math.max(1,TL.lines.length)*100)+'%';const c=$('#ksgch',r);if(c)c.innerHTML=chNow()};
+    const stgMark=(type,e,sd)=>{if(!stgOn)return;const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,stgL);
+      if(type==='lit'){if(p){p.style.setProperty('--sd',sd||'0s');p.classList.add('lit')}}else{$$('.pc.now',stgL).forEach(x=>x.classList.remove('now'));if(p)p.classList.add('now');const c=$('#ksgch',r);if(c)c.innerHTML=chNow()}};
+    const stgOpen=()=>{if(stgOn)return;stgOn=true;stg.hidden=false;document.documentElement.classList.add('kstage-on');const g=Math.max(0,Math.min(pos,TL.lines.length-1));if(TL.lines[g])stgRender(TL.lines[g].li);
+      try{const fe=stg.requestFullscreen||stg.webkitRequestFullscreen;if(fe&&!document.fullscreenElement){const q=fe.call(stg);if(q&&q.catch)q.catch(()=>{})}}catch(e){}};
+    const stgClose=()=>{if(!stgOn)return;stgOn=false;stg.hidden=true;document.documentElement.classList.remove('kstage-on');try{if(document.fullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}};
+    const onFs=()=>{if(document.fullscreenElement===stg)stgFs=true;else if(stgFs){stgFs=false;stgClose()}};document.addEventListener('fullscreenchange',onFs);
     const setLine=li=>{
-      prog(lineIdx(li)+1);
+      stgRender(li);prog(lineIdx(li)+1);
       $$('.kl.cur',kar).forEach(x=>{x.classList.remove('cur');x.classList.add('past')});
       const el=$(`.kl[data-li="${li}"]`,kar);if(!el)return;el.classList.remove('past');el.classList.add('cur');
       $$('.kl.nxt',kar).forEach(x=>x.classList.remove('nxt'));const g=lineIdx(li),nx=TL.lines[g+1]&&$(`.kl[data-li="${TL.lines[g+1].li}"]`,kar);if(nx)nx.classList.add('nxt');
@@ -807,27 +845,32 @@ function viewSongPlay(id,slow){
         if(k<0){if(s%Q===0){$('#kpos',r).textContent=(LP?'Repitiendo · ':'')+'Cuenta: '+(s/Q+1);const bd=$('#kbd',r);if(bd){bd.classList.add('on');setTimeout(()=>bd.classList.remove('on'),100)}}return}
         const a=absA(k);
         if(LP&&k>0&&a===LP.s){for(let g=LP.g0;g<LP.g1;g++){const e=$(`.kl[data-li="${TL.lines[g].li}"]`,kar);if(e){e.classList.remove('cur','past');$$('.pc',e).forEach(x=>x.classList.remove('lit','now'))}}}
-        if(a>=N){seqStop();pos=0;$('#kpos',r).textContent='Fin · '+P.title;paint();markDay();return}
+        if(a>=N){seqStop();stgClose();pos=0;$('#kpos',r).textContent='Fin · '+P.title;paint();markDay();return}
         if(INST.id==='bajo')bassLight(r,cell(k));
         if(INST.id==='bateria')drumLight(r,cell(k));
         if(a%stp===0){const rel2=a-Math.round(P.pickup*Q),L2=bt*Q,sl=((rel2%L2)+L2)%L2/stp;$$('.kpat .sl.on',r).forEach(x=>x.classList.remove('on'));const q=$(`.kpat [data-sl="${sl}"]`,r);if(q)q.classList.add('on')}
         if(a%Q===0){viewBeat(a/Q,null);const rl=a-Math.round(P.pickup*Q);beatPulse(r,((rl%(bt*Q))+bt*Q)%(bt*Q)===0);const bd=$('#kbd',r);if(bd){const rel=a-Math.round(P.pickup*Q);bd.classList.add('on');bd.classList.toggle('acc',((rel%(bt*Q))+bt*Q)%(bt*Q)===0);setTimeout(()=>bd.classList.remove('on'),100)}}
         (BK[a]||[]).forEach(e=>{
           if(e.type==='line'){setLine(e.li);pos=Math.max(0,lineIdx(e.li));$('#kpos',r).textContent=(LP?'Repitiendo · ':'')+`Renglón ${pos+1} de ${TL.lines.length}`;formsLine(e.li);secLine(e.li)}
-          else if(e.type==='lit'){const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p){p.style.setProperty('--sd',Math.min(1.4,(e.sd||1)*60/(st.bpm*st.sp)*.92).toFixed(3)+'s');p.classList.add('lit')}}
-          else if(e.type==='chord'){if(e.p!==curCh){curCh=e.p;const k=$('#ksch',r);if(k)k.innerHTML=chNow()}$$('.pc.now',kar).forEach(x=>x.classList.remove('now'));const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p)p.classList.add('now');formsChord(e)}
+          else if(e.type==='lit'){const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p){p.style.setProperty('--sd',Math.min(1.4,(e.sd||1)*60/(st.bpm*st.sp)*.92).toFixed(3)+'s');p.classList.add('lit')}stgMark('lit',e,p&&p.style.getPropertyValue('--sd'))}
+          else if(e.type==='chord'){if(e.p!==curCh){curCh=e.p;const k=$('#ksch',r);if(k)k.innerHTML=chNow()}$$('.pc.now',kar).forEach(x=>x.classList.remove('now'));const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p)p.classList.add('now');formsChord(e);stgMark('chord',e)}
         });
       });
       T0=SEQ.next-SEQ.step*cd;if(first)bandPlay(first,T0+countK*cd);want(1);
       paint();
     };
-    $('#kgo',r).onclick=go;
+    // al dar play se abre el modo escenario (si está activado); con grabación, solo si ya está sincronizada
+    $('#kgo',r).onclick=()=>{if(!running()&&KAR.stage!==false&&(!(O.use&&O.blob)||synced()))stgOpen();go()};
     $('#kreset',r).onclick=()=>{if(running())seqStop();bandStop();pos=0;clearHL();window.scrollTo({top:0,behavior:'smooth'});paint()};
     [kar,$('#kgrid',r)].forEach(box=>box.addEventListener('click',e=>{const l=e.target.closest('.kl,.kgrow,.kgly');if(!l)return;const g=lineIdx(+l.dataset.li);if(g<0)return;if(O.playing){const t=lineT(g);if(t!=null){O.el.currentTime=Math.max(0,t-.8);loopFrom.g=g;pos=g}return}const was=running();if(was){seqStop();bandStop()}pos=g;clearHL();setLine(+l.dataset.li);if(was)go();paint()}));
     const rerender=()=>{kar.innerHTML=P.lines.map(lineHTML).join('');requestAnimationFrame(()=>fitKar(kar));$('#kchips',r).innerHTML=chips();$('#kkey',r).textContent=keyLbl();$('#kcapo',r).textContent=capoHint(P.key,st.shift);side();views(true)};
     // cambia la versión (original / IA) o los acordes fáciles: se vuelve a leer la canción
     const reloadSong=()=>{const was=running();if(was){seqStop();bandStop()}if(O.playing)origStop();P0=fixP(songParse(srcNow()));P=mkP();secs=lineSections(P);curCh=P.chords[0]||null;curLi=-1;curG=gid();pos=0;build();rerender();clearHL();if(O.blob)buildO();origUI();paint();iaUI()};
     r.addEventListener('click',e=>{
+      if(e.target.closest('[data-stopen]')){stgOpen();return}
+      if(e.target.closest('[data-stx]')){stgClose();return}
+      if(e.target.closest('[data-stgo]')){go();return}
+      const sa=e.target.closest('[data-stauto]');if(sa){KAR.stage=KAR.stage===false;DB.kar=Object.assign({},KAR);save();sa.setAttribute('aria-pressed',String(KAR.stage!==false));toast(logo()+`<span>${KAR.stage!==false?'Al tocar se abre la letra en pantalla completa':'La letra se queda en la página al tocar'}</span>`);return}
       const vw=e.target.closest('[data-view]');if(vw){KAR.view=vw.dataset.view;DB.kar=Object.assign({},KAR);save();views();if(VIEW()==='acordes'&&pos)kgridAt(r,TL.lines[pos]?TL.lines[pos].start:0);return}
       const nt=e.target.closest('[data-nott]');if(nt){DB.notation=es()?'us':'es';save();$$('[data-not]',r).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.not===DB.notation)));rerender();toolVals();return}
       const sm=e.target.closest('[data-easy]');if(sm){KAR.easy=+sm.dataset.easy;KAR.simple=KAR.easy>0;DB.kar=Object.assign({},KAR);save();reloadSong();
@@ -870,10 +913,10 @@ function viewSongPlay(id,slow){
     const synced=()=>{const T=DB.ksync[SK()],n=T?Object.keys(T).length:0;return n>0&&n>=Math.min(O.grid?1:2,TL.lines.length)};
     const mediaEl=()=>{if(O.el)return O.el;const v=!!O.forceVideo;const el=document.createElement(v?'video':'audio');el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');
       if(v){el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;left:0';document.body.appendChild(el)}
-      el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
-    const recIDB=()=>{recCloud();return slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0},'orig:'+id)).catch(()=>{})};
+      el.preservesPitch=true;el.mozPreservesPitch=true;el.webkitPreservesPitch=true;O.url=URL.createObjectURL(O.blob);el.src=O.url;el.addEventListener('error',()=>{if(!v&&/^video/.test(O.type)&&!O.forceVideo){O.forceVideo=true;O.el=null;toast('Probando el video de otra forma; toca Empezar otra vez.')}});el.addEventListener('ended',()=>{if(O.syncing)syncEnd(true);else{origStop();stgClose();pos=0;$('#kpos',r).textContent='Fin · '+P.title}});return O.el=el};
+    const recIDB=()=>{recCloud();return slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null},'orig:'+id)).catch(()=>{})};
     /* la grabación también va a tu cuenta, para tenerla en tus otros dispositivos (con su sincronización) */
-    const recExtra=()=>({rec:JSON.stringify({grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0})});
+    const recExtra=()=>({rec:JSON.stringify({grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs||null,dur:O.dur||0,lend:O.lend||null})});
     const recCloud=()=>cloudWhenReady(()=>{if(!O.blob||O.upl)return;if((DB.kaudio||{})[id]===O.blob.size){cloudAudioMeta(id,recExtra());return}
       O.upl=0.01;origUI();cloudAudioPut(id,O.blob,recExtra(),p=>{O.upl=Math.max(.01,p);const s=$('.kocloud',r);if(s)s.textContent=` · subiendo a tu cuenta ${Math.round(p*100)} %`})
         .then(ok=>{O.upl=0;origUI();if(ok)toast(logo()+'<span>Tu grabación quedó en tu cuenta: ya está en tus otros dispositivos</span>',3500)})
@@ -882,7 +925,7 @@ function viewSongPlay(id,slow){
       try{const R=await cloudAudioGet(id,p=>{O.dl=Math.max(.01,p);origUI()});if(!document.body.contains(r))return;
         if(!R){if(DB.kaudio){delete DB.kaudio[id];save()}O.dl=0;origUI();return}
         const x=(()=>{try{return JSON.parse(R.meta.rec||'{}')}catch(e){return{}}})();
-        O.blob=R.blob;O.fname=R.meta.name||'grabacion';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=R.meta.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=x.grid||null;O.voc=x.voc||null;O.recK=x.k||0;O.ancs=x.ancs||null;O.dur=x.dur||0;
+        O.blob=R.blob;O.fname=R.meta.name||'grabacion';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=R.meta.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=x.grid||null;O.voc=x.voc||null;O.recK=x.k||0;O.ancs=x.ancs||null;O.dur=x.dur||0;O.lend=x.lend||null;
         slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').put({blob:O.blob,name:O.fname,type:O.type,grid:O.grid,voc:O.voc,k:O.recK,ancs:O.ancs,dur:O.dur},'orig:'+id)).catch(()=>{});
         if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();O.dl=0;origUI();paint();views(true);toast(logo()+'<span>Tu grabación llegó de tu cuenta</span>',3000)}
       catch(e){O.dl=0;origUI();toast('No se pudo bajar la grabación de tu cuenta. Revisa tu internet.',4000)}});
@@ -939,6 +982,8 @@ function viewSongPlay(id,slow){
     // siguiente renglón), para que se iluminen todas una por una aunque el renglón dure distinto de lo estimado
     const sylSpan=g=>{const L=TL.lines[g],t0=lineRaw(g);if(t0==null)return null;const b=TL.ev.filter(e=>e.type==='lit'&&e.li===L.li).map(e=>e.b);if(!b.length)return null;
       const s0=Math.min(...b),s1=Math.max(...b)+1,a=beatT(t0,s0-L.start)+off(),nat=beatT(t0,s1-L.start)+off(),nx=OLT[g+1]!=null?OLT[g+1]-.25:1e9;let z=Math.min(nat,nx);
+      // fin del canto que oyó la IA al crear la canción
+      if(O.lend&&O.lend[L.li]!=null){const ve=O.lend[L.li]+off();if(ve>a+.5)return{s0,s1,a,z:Math.min(ve,nx)}}
       if(O.voc&&O.grid){const j0=Math.max(0,Math.ceil(gridIdx(O.grid,a-off()))),j1=Math.min(O.voc.length-1,Math.floor(gridIdx(O.grid,Math.min(nx,a+60)-off())));let last=-1;
         for(let j=j0;j<=j1;j++)if(O.voc[j]>=.5)last=j;if(last>=j0){const ve=gridT(O.grid,last+1)+off();if(ve>a+.6)z=Math.min(ve,nx)}}
       return z>a+.3?{s0,s1,a,z}:null};
@@ -963,8 +1008,8 @@ function viewSongPlay(id,slow){
     const curLine=now=>{let g=-1;for(let i=0;i<OLT.length;i++){const t=OLT[i];if(t!=null&&t<=now+.02)g=i}return g};
     const applyUntil=(from,now)=>{OEV.forEach(({t,e,sd})=>{if(t<=from||t>now)return;
       if(e.type==='line'){setLine(e.li);pos=Math.max(0,lineIdx(e.li));$('#kpos',r).textContent=(st.loop?'Repitiendo · ':'')+`Renglón ${pos+1} de ${TL.lines.length}`;formsLine(e.li);secLine(e.li)}
-      else if(e.type==='lit'){const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p){p.style.setProperty('--sd',(now-t>.3?0:Math.min(1.4,(sd||.4)/(st.sp||1)*.92)).toFixed(3)+'s');p.classList.add('lit')}}
-      else if(e.type==='chord'){if(e.p!==curCh){curCh=e.p;const k=$('#ksch',r);if(k)k.innerHTML=chNow()}$$('.pc.now',kar).forEach(x=>x.classList.remove('now'));const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p)p.classList.add('now');formsChord(e)}})};
+      else if(e.type==='lit'){const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p){p.style.setProperty('--sd',(now-t>.3?0:Math.min(1.4,(sd||.4)/(st.sp||1)*.92)).toFixed(3)+'s');p.classList.add('lit')}stgMark('lit',e,p&&p.style.getPropertyValue('--sd'))}
+      else if(e.type==='chord'){if(e.p!==curCh){curCh=e.p;const k=$('#ksch',r);if(k)k.innerHTML=chNow()}$$('.pc.now',kar).forEach(x=>x.classList.remove('now'));const p=$(`.kl[data-li="${e.li}"] .pc[data-pi="${e.pi}"]`,kar);if(p)p.classList.add('now');formsChord(e);stgMark('chord',e)}})};
     const repaintTo=now=>{clearHL();const g=curLine(now);for(let i=0;i<g;i++){const e=$(`.kl[data-li="${TL.lines[i].li}"]`,kar);if(e)e.classList.add('past')}applyUntil(-1e9,now)};
     const loopFrom={g:0};
     // reloj suave: currentTime avanza a saltos en varios navegadores; entre saltos se estima con el reloj del sistema
@@ -1046,7 +1091,7 @@ function viewSongPlay(id,slow){
       else if(k==='del'){if(O.playing)origStop();cloudAudioDel(id);slowIDB().then(db=>db.transaction('f','readwrite').objectStore('f').delete('orig:'+id)).catch(()=>{});if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url);
         O.blob=null;O.el=null;O.use=false;O.grid=null;O.voc=null;O.recK=0;O.ancs=null;O.wv=null;delete DB.ksync[SK()];DB.kuse[id]=false;save();build();origUI();paint()}
       else{DB.ksyncOff=DB.ksyncOff||{};DB.ksyncOff[SK()]=+(((+DB.ksyncOff[SK()]||0)+(k==='+'?.1:-.1)).toFixed(2));save();buildO();toast(`Ajuste: ${DB.ksyncOff[SK()]>0?'+':''}${DB.ksyncOff[SK()]} s`,1400)}});
-    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;O.pch=rec.pch||null;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();
+    slowIDB().then(db=>new Promise(res=>{const q=db.transaction('f').objectStore('f').get('orig:'+id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).then(rec=>{if(rec&&rec.blob){O.blob=rec.blob;O.fname=rec.name||'';O.name=O.fname.replace(/\.[^.]+$/,'');O.type=rec.type||rec.blob.type||'audio/mpeg';O.use=DB.kuse[id]!==false;O.grid=rec.grid||null;O.voc=rec.voc||null;O.recK=rec.k||0;O.ancs=rec.ancs||null;O.dur=rec.dur||0;O.pch=rec.pch||null;O.lend=rec.lend||null;if(CHONLY&&O.dur){REC.dur=O.dur;REC.on=O.use;reloadSong()}build();
         if(O.pch&&!ancNow()){const a=[];Object.entries(O.pch).forEach(([li,ts])=>{const ev=TL.ev.filter(e=>e.type==='chord'&&e.li===+li).sort((x,y)=>x.b-y.b);if(ev.length===ts.length)ev.forEach((e,k)=>a.push([+e.b.toFixed(3),ts[k]]))});
           a.sort((x,y)=>x[0]-y[0]);O.ancs=Object.assign({},O.ancs,{[SK()]:{a,sig:sigTL()}});O.pch=null;recIDB()}
         if((DB.kaudio||{})[id]!==O.blob.size)recCloud()}else if((DB.kaudio||{})[id])recDown();origUI();paint();views(true);
@@ -1063,6 +1108,6 @@ function viewSongPlay(id,slow){
       setTimeout(toolVals,0)});
     if(slow)openP('tempo');
     side();paint();spdTxt();if(!recMode())applyMix(false);views();
-    return()=>{document.removeEventListener('playstate',onState);window.removeEventListener('resize',onRz);BMIX={g:1,b:1,d:1};BDYN=1;if(SEQ.id==='kar')seqStop();bandStop();origStop();O.syncing=false;if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url)};
+    return()=>{document.removeEventListener('playstate',onState);window.removeEventListener('resize',onRz);document.removeEventListener('fullscreenchange',onFs);stgClose();BMIX={g:1,b:1,d:1};BDYN=1;if(SEQ.id==='kar')seqStop();bandStop();origStop();O.syncing=false;if(O.el){O.el.pause();O.el.remove&&O.el.remove()}if(O.url)URL.revokeObjectURL(O.url)};
   }};
 }

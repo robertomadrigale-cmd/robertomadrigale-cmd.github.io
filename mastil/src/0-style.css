@@ -1222,3 +1222,38 @@ html.welcome-on{overflow:hidden}
 /* los botones C/Do y tamaño van en fila arriba (el «Fácil» ya está en la barra de Acordes) */
 @media(min-width:1180px){.kfab,html.pulse-on .kfab{position:static;transform:none;flex-direction:row;margin:-4px 0 -6px;right:auto;top:auto}.kfb{width:auto;min-width:44px;padding:0 12px}}
 .kfab [data-easy]{display:none}
+/* ===================== modo escenario: la letra a pantalla completa ===================== */
+.kstage{--sung:#ffcf4a;--unsung:rgba(255,255,255,.42);position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;background:radial-gradient(120% 80% at 50% 0%,color-mix(in srgb,var(--accent) 22%,#07080b) 0%,#07080b 60%),#07080b;color:#fff;padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.kstage[hidden]{display:none}
+html.kstage-on{overflow:hidden}
+.ksg-top{display:flex;align-items:center;gap:12px;min-height:44px}
+.ksg-t{flex:1;min-width:0;font-size:14px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ksg-t b{color:#fff}
+.ksg-ch .ks-chord{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.92);color:#111;border-radius:12px;padding:4px 10px}
+.ksg-ch .ks-chord b{font-size:20px}.ksg-ch .mch{width:34px;height:36px}
+.kstage .kic{background:rgba(255,255,255,.1);color:#fff}
+.ksg-lines{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(14px,3vh,30px);max-width:1100px;width:100%;margin:0 auto;overflow:hidden}
+.ksg-row{transition:opacity .35s,transform .35s;text-align:center}
+.ksg-row .kl{padding:0;background:none!important;box-shadow:none!important;cursor:default;opacity:1;filter:none}
+.ksg-row .wd{margin-bottom:.12em}
+.ksg-row .pc .kc{font:800 .5em/1.25 var(--font-body);color:#5fe3d6;letter-spacing:0}
+.ksg-row .pc.now .kc{background:#5fe3d6;color:#062a26;border-radius:6px;padding:0 .25em}
+.ksg-row.cur{font-size:clamp(30px,6.4vw,66px);font-weight:800;letter-spacing:-.02em;line-height:1.12;animation:ksgIn .35s ease}
+.ksg-row.cur .pc i{color:transparent;background:linear-gradient(90deg,var(--sung) 0 50%,var(--unsung) 50% 100%);background-size:200% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;transition:background-position var(--sd,.25s) linear}
+.ksg-row.cur .pc.lit i{background-position:0 0;text-shadow:none}
+.ksg-row.cur .pc.lit:last-of-type i{filter:drop-shadow(0 0 18px rgba(255,207,74,.35))}
+.ksg-row.nx{font-size:clamp(20px,3.6vw,36px);font-weight:700;opacity:.62}
+.ksg-row.nx2{font-size:clamp(17px,2.8vw,28px);font-weight:600;opacity:.3}
+.ksg-row.pv{font-size:clamp(16px,2.6vw,26px);font-weight:600;opacity:.28}
+.ksg-row.pv .kc,.ksg-row.nx2 .kc{display:none}
+.ksg-row.ghost{min-height:1em}
+.ksg-sec{font:700 12px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--sung);margin-bottom:.6em}
+.ksg-bot{display:flex;flex-direction:column;gap:10px;align-items:center}
+.ksg-bot .kprog{width:min(720px,100%);border-radius:3px;background:rgba(255,255,255,.14)}
+.ksg-bot .kprog i{background:var(--sung)}
+.ksg-ctl{display:flex;align-items:center;gap:14px}
+@keyframes ksgIn{from{transform:translateY(18px);opacity:.6}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.ksg-row.cur{animation:none}}
+.ksg-row .kl:not(.inst) .pc i:empty{display:block;min-height:1.12em}
+.ksg-row .pc .kc{align-self:flex-start}
+.ksg-row .wd:has(> .pc.hc:only-child > i:empty){margin-left:.15em}
