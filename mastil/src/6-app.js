@@ -66,6 +66,7 @@ function applyTheme(){
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(DB.theme==='auto')applyTheme()});
 applyTheme();
 const ICPAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.2" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg>';
+const ICIA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
 const ICOK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const themeName=()=>DB.theme==='auto'||!themeById(DB.theme)?'Automático':themeById(DB.theme)[1];
 // portada de cada tema: su arte (o su luz de fondo) con una tarjetita que muestra cómo se ve la app
@@ -199,6 +200,7 @@ function viewHome(){
   ${cloudCard()}
   <div><p class="eyebrow" style="margin-bottom:10px">Herramientas</p><div class="grid2">${toolCards()}</div></div>
   <a class="card tool look" href="#/apariencia"><span class="ic">${ICPAL}</span><span><b>Apariencia</b><span>Tema: ${themeName()}</span></span></a>
+  <a class="card tool look" href="#/ia"><span class="ic">${ICIA}</span><span><b>Asistente IA</b><span>${iaReady()?'Conectado: '+esc(iaName()):'Conecta Gemini, ChatGPT, Claude u Ollama'}</span></span></a>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Mano</span><div class="seg">${[[0,'Diestro'],[1,'Zurdo']].map(([v,l])=>`<button data-lefty="${v}" aria-pressed="${!!DB.lefty===!!v}">${l}</button>`).join('')}</div></div>
     <div class="row" style="justify-content:space-between"><span class="cl" style="margin:0">Respaldo · llévate tu progreso a otro teléfono</span><span class="row"><button class="btn sm" data-h="bk-copy">${IC.down}Copiar código</button><button class="btn sm" data-h="bk-paste">Pegar código</button></span></div>
@@ -337,6 +339,7 @@ function route(){
   else if(p[0]==='leccion')v=viewLesson(+p[1],p[2]);
   else if(p[0]==='cuenta')v=viewAccount();
   else if(p[0]==='apariencia')v=viewLook();
+  else if(p[0]==='ia')v=viewIA();
   else if(p[0]==='practicar')v=({metronomo:viewMetronome,afinador:viewTuner,juego:viewGame,pistas:viewTracks,rutina:viewRoutine,reto:viewReto,grabar:viewRecorder,lento:viewSlow}[p[1]]||viewPractice)();
   else if(p[0]==='logros')v=viewAch();
   else if(p[0]==='cancionero')v=p[1]==='ver'?viewSongPlay(p[2]||'',p[3]==='lento'):p[1]==='editar'?viewSongEdit(p[2]||'nueva'):viewSongbook();

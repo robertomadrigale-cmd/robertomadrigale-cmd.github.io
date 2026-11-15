@@ -1,4 +1,4 @@
-function drumLinks(){return`<div class="drum-links"><a class="btn" href="#/sesion">Sesión diaria</a><a class="btn" href="#/grooves">Grooves</a><a class="btn" href="#/progreso">Progreso</a><a class="btn" href="#/ajustes">Ajustes</a><a class="btn" href="#/cuenta">Mi cuenta</a><a class="btn" href="#/logros">Logros</a><a class="btn" href="#/apariencia">Apariencia</a></div>`}
+function drumLinks(){return`<div class="drum-links"><a class="btn" href="#/sesion">Sesión diaria</a><a class="btn" href="#/grooves">Grooves</a><a class="btn" href="#/progreso">Progreso</a><a class="btn" href="#/ajustes">Ajustes</a><a class="btn" href="#/cuenta">Mi cuenta</a><a class="btn" href="#/logros">Logros</a><a class="btn" href="#/apariencia">Apariencia</a><a class="btn" href="#/ia">Asistente IA</a></div>`}
 function drumRoute(raw){
  const [path,qs]=raw.split('?'),p=path.split('/'),q=new URLSearchParams(qs||'');
  if(!path)return viewDrumHome();

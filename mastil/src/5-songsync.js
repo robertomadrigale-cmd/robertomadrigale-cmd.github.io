@@ -7,6 +7,8 @@
    en lo que de verdad se canta. En grabaciones mono no hay pista y se usa solo lo demás.
    Resultado: el tiempo real donde empieza cada renglón, la rejilla de pulsos y la voz por pulso. */
 const SR_AN=11025,SYNC_OFS=.018;
+// ajuste fino: ventana (pulsos) a cada lado del cambio, castigo por moverse y mejora mínima para moverse (renglones / acordes)
+const SYN={lw:2,lp:.02,lm:.01,cw:2,cp:.04,cm:.05,v:1};
 function fftRI(re,im){
   const n=re.length;
   for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
@@ -152,15 +154,22 @@ function syncAlign(A,TL,bt){
   TL.lines.forEach((L,g)=>{const ce=TL.ev.find(e=>e.type==='chord'&&e.li===L.li);if(!ce)return;const bc=Math.round(ce.b),pv=X[bc-1];if(bc<1||bc>=M||!pv||same(pv,ce.p))return;
     // un compás después contra un compás antes (con arpegios, un solo pulso es muy ruidoso); solo se mueve si mejora claro
     // contraste: después del inicio suena más el acorde nuevo que el anterior, y antes al revés
-    const jc=F[bc],w=bt,df=(j,a,b)=>{let s=0;for(let i=a;i<b;i++)s+=mt(j+i,ce.p)-mt(j+i,pv);return s/(b-a)};
-    let bd=0,bs=df(jc,0,w)-df(jc,-w,0);for(let d=-4;d<=4;d++){const s=df(jc+d,0,w)-df(jc+d,-w,0)-.03*Math.abs(d);if(s>bs+.05){bs=s;bd=d}}
+    const jc=F[bc],w=SYN.lw||bt,df=(j,a,b)=>{let s=0;for(let i=a;i<b;i++)s+=mt(j+i,ce.p)-mt(j+i,pv);return s/(b-a)};
+    let bd=0,bs=df(jc,0,w)-df(jc,-w,0);for(let d=-4;d<=4;d++){const s=df(jc+d,0,w)-df(jc+d,-w,0)-SYN.lp*Math.abs(d);if(s>bs+SYN.lm){bs=s;bd=d}}
     if(!bd)return;const nt=+gridT(grid,gridIdx(grid,T[L.li])+bd).toFixed(3),pr=g?T[TL.lines[g-1].li]:-1e9,nx=TL.lines[g+1]?T[TL.lines[g+1].li]:1e9;
     if(nt>pr+.2&&nt<nx-.2)T[L.li]=nt});
   // con voz: el primer renglón con letra empieza donde entra la voz (si la intro toca el mismo acorde, los acordes no lo dicen)
   const L0=TL.lines.find(L=>TL.ev.some(e=>e.type==='lit'&&e.li===L.li));
-  if(V&&L0){const j0=Math.round(gridIdx(grid,T[L0.li]));let bj=-1;for(let d=0;d<=12&&bj<0;d++)for(const j of d?[j0-d,j0+d]:[j0])if(bj<0&&j>=0&&j+1<V.length&&V[j]>=.5&&V[j+1]>=.5&&((V[j-1]??0)+(V[j-2]??0)+(V[j-3]??0))/3<.4)bj=j; // antes, ~3 pulsos sin voz (no una pausa entre sílabas)
+  if(V&&L0&&SYN.v){const j0=Math.round(gridIdx(grid,T[L0.li]));let bj=-1;for(let d=0;d<=12&&bj<0;d++)for(const j of d?[j0-d,j0+d]:[j0])if(bj<0&&j>=0&&j+1<V.length&&V[j]>=.5&&V[j+1]>=.5&&((V[j-1]??0)+(V[j-2]??0)+(V[j-3]??0))/3<.4)bj=j; // antes, ~3 pulsos sin voz (no una pausa entre sílabas)
     const g=TL.lines.indexOf(L0),nx=TL.lines[g+1]?T[TL.lines[g+1].li]:1e9;if(bj>=0&&grid[bj]<nx-.2)T[L0.li]=+grid[bj].toFixed(3)}
-  return{T,grid:grid.map(t=>+t.toFixed(3)),voc:V?V.map(v=>+v.toFixed(2)):null,bpm:Math.round(A.bpm),k:best.k,sure,cost:best.cost};
+  // anclas por acorde: cada cambio de acorde dentro de un renglón, donde de verdad suena (±2 pulsos de lo que dijo el DTW).
+  // Con ellas la letra y los acordes siguen a la grabación aunque el renglón dure distinto de lo estimado.
+  const anc=[],starts=new Set(TL.lines.map(L=>Math.round(L.start*4)));let pv=null;
+  TL.ev.filter(e=>e.type==='chord').sort((a,b)=>a.b-b.b).forEach(e=>{const prev=pv;pv=e.p;if(!prev||same(prev,e.p)||starts.has(Math.round(e.b*4)))return;
+    const bc=Math.round(e.b);if(bc<1||bc>=M)return;const jc=F[bc],df=(j,a,b)=>{let s=0;for(let i=a;i<b;i++)s+=mt(j+i,e.p)-mt(j+i,prev);return s/(b-a)};
+    const cw=SYN.cw;let bd=0,bs=df(jc,0,cw)-df(jc,-cw,0);for(let d=-2;d<=2;d++){if(!d)continue;const s=df(jc+d,0,cw)-df(jc+d,-cw,0)-SYN.cp*Math.abs(d);if(s>bs+SYN.cm){bs=s;bd=d}}
+    anc.push([+e.b.toFixed(3),+gridT(grid,jc+bd+(e.b-bc)).toFixed(3)])});
+  return{T,anc,grid:grid.map(t=>+t.toFixed(3)),voc:V?V.map(v=>+v.toFixed(2)):null,bpm:Math.round(A.bpm),k:best.k,sure,cost:best.cost};
 }
 // posición (en pulsos, con fracción) de un tiempo dentro de la rejilla, y su inversa
 function gridIdx(g,t){const n=g.length;if(n<2)return 0;if(t<=g[0])return(t-g[0])/(g[1]-g[0]);if(t>=g[n-1])return n-1+(t-g[n-1])/(g[n-1]-g[n-2]);
