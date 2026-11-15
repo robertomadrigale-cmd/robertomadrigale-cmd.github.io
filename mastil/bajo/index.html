@@ -2088,7 +2088,7 @@ function bassAdaptView(v){
 }
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261115171214';
+const OM_BETA_VERSION='v20261115180614';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -3041,7 +3041,13 @@ const iaHears=()=>{const c=iaCfg();return iaReady()&&!!(IA_PROV[c.prov]||{}).aud
 // lo que devuelve el modelo: el primer bloque JSON (aunque venga entre ```json … ```)
 function iaJSON(t){const s=String(t||'').replace(/```(?:json)?/gi,'');const a=s.indexOf('{'),b=s.lastIndexOf('}');if(a<0||b<a)throw new Error('La IA no devolvió datos válidos.');return JSON.parse(s.slice(a,b+1))}
 const iaB64=blob=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(blob)});
-async function iaFetch(url,opt){let r;try{r=await fetch(url,opt)}catch(e){throw new Error('No hubo conexión con la IA. Revisa tu internet'+(iaCfg().prov==='ollama'?' y que Ollama esté abierto con OLLAMA_ORIGINS=*.':'.'))}
+// con tiempo máximo: si la IA no contesta, se avisa en vez de quedarse esperando para siempre
+let IA_MS=90000;
+async function iaFetch(url,opt){let r;const ac=typeof AbortController!=='undefined'?new AbortController():null,ms=IA_MS,tm=ac?setTimeout(()=>ac.abort(),ms):0;
+  try{r=await fetch(url,Object.assign({},opt,ac?{signal:ac.signal}:{}))}catch(e){clearTimeout(tm);
+    if(ac&&ac.signal.aborted)throw new Error(`La IA no respondió en ${Math.round(ms/1000)} segundos. Revisa que el nombre del modelo exista (por ejemplo ${(IA_PROV[iaCfg().prov]||{}).m||'el sugerido'}) e intenta de nuevo.`);
+    throw new Error('No hubo conexión con la IA. Revisa tu internet'+(iaCfg().prov==='ollama'?' y que Ollama esté abierto con OLLAMA_ORIGINS=*.':'.'))}
+  clearTimeout(tm);
   if(!r.ok){let m='';try{const j=await r.json();m=(j.error&&(j.error.message||j.error))||j.message||''}catch(e){}
     throw new Error(r.status===401||r.status===403?'La clave no es válida o no tiene permiso.':r.status===404?'No encontré ese modelo. Revisa el nombre.':r.status===429?'Se acabó el saldo o el límite de tu cuenta de IA.':('La IA respondió con error '+r.status+(m?': '+String(m).slice(0,140):'')))}
   return r.json()}
@@ -3052,7 +3058,9 @@ async function iaChat(system,user,opt){
   if(c.prov==='gemini'){const parts=[{text:user}];if(opt.audio)parts.push({inline_data:{mime_type:opt.audio.type||'audio/mpeg',data:await iaB64(opt.audio)}});
     const j=await iaFetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},
       body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:[{role:'user',parts}],generationConfig:{temperature:.2}})});
-    return((j.candidates||[])[0]?.content?.parts||[]).map(p=>p.text||'').join('')}
+    const cand=(j.candidates||[])[0],txt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
+    if(!txt){const why=cand?.finishReason||j.promptFeedback?.blockReason||'';throw new Error('Gemini respondió vacío'+(why?' ('+why+')':'')+'. Intenta de nuevo o prueba otro modelo.')}
+    return txt}
   if(c.prov==='anthropic'){const j=await iaFetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model,max_tokens:8000,system,messages:[{role:'user',content:user}]})});
     return(j.content||[]).map(p=>p.text||'').join('')}
@@ -3140,8 +3148,10 @@ function viewIA(){
     const msg=t=>$('#iamsg',r).textContent=t;
     $('#iasave',r).onclick=()=>{iaSave(read());msg(iaReady()?'Guardado. Ya puedes usar la IA en el cancionero.':'Guardado, pero falta la clave o el modelo.')};
     $('#iadel',r).onclick=()=>{iaSave({});$('#iaprov',r).value='';$('#iakey',r).value='';$('#iamodel',r).value='';$('#iaurl',r).value='';paint();msg('Listo: la app ya no usa IA.')};
-    $('#iatest',r).onclick=async()=>{iaSave(read());if(!iaReady()){msg('Falta elegir la compañía, la clave o el modelo.');return}msg('Probando…');
-      try{const t=await iaChat('Responde solo con la palabra: listo','¿Me escuchas?');msg('Conectado con '+iaName()+'. Respondió: «'+String(t).trim().slice(0,40)+'».')}catch(e){msg(e.message)}};
+    $('#iatest',r).onclick=async()=>{iaSave(read());if(!iaReady()){msg('Falta elegir la compañía, la clave o el modelo.');return}
+      const b=$('#iatest',r),t0=Date.now(),tk=setInterval(()=>msg(`Probando… ${Math.round((Date.now()-t0)/1000)} s`),1000);b.disabled=true;msg('Probando…');const old=IA_MS;IA_MS=30000;
+      try{const t=await iaChat('Responde solo con la palabra: listo','¿Me escuchas?');msg('Conectado con '+iaName()+' en '+((Date.now()-t0)/1000).toFixed(1)+' s. Respondió: «'+String(t).trim().slice(0,40)+'».')}catch(e){msg('No se conectó: '+e.message)}
+      IA_MS=old;clearInterval(tk);b.disabled=false};
   }};
 }
 
