@@ -11,7 +11,8 @@ function simpleChord(p){
 }
 function simplifyP(P){
   let prev=null;const seen={};P.chords=[];P.all=[];
-  P.lines.forEach(L=>{if(L.label!=null)prev=null;if(!L.pieces)return;L.pieces.forEach(pc=>{if(!pc.p)return;pc.p=simpleChord(pc.p);
+  // el primer acorde de cada renglón siempre se escribe (como en los cancioneros); solo se ocultan los repetidos dentro del renglón
+  P.lines.forEach(L=>{prev=null;if(!L.pieces)return;L.pieces.forEach(pc=>{if(!pc.p)return;pc.p=simpleChord(pc.p);
     const k=pc.p.pc+pc.p.suf;pc.hide=prev===k;prev=k;P.all.push(pc.p);if(!seen[k]){seen[k]=1;P.chords.push(pc.p)}})});
   P.simple=true;return P;
 }
