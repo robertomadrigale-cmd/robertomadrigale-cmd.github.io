@@ -218,14 +218,14 @@
   {
     "width": 400,
     "route": "cancionero/ver/pd0",
-    "equal": true,
-    "sha256": "85580542c617c3c2f5c0269b8cdf43fa0036ea178897446da1f16a91419090f0"
+    "equal": false,
+    "sha256": "762115bc3249af59be7e96af7848575ca2300a7f680dcbd46395a4715da03283"
   },
   {
     "width": 400,
     "route": "cancionero/ver/pd0/lento",
-    "equal": true,
-    "sha256": "085e18a8aa1c41306dd3410a952c5690954748aaf2568d79cc21a1aebe5e2f79"
+    "equal": false,
+    "sha256": "d756124138dd5312b63ad871024c9152c345ab51e2add668258d0f1dc36bafc1"
   },
   {
     "width": 400,
@@ -488,14 +488,14 @@
   {
     "width": 1280,
     "route": "cancionero/ver/pd0",
-    "equal": true,
-    "sha256": "85580542c617c3c2f5c0269b8cdf43fa0036ea178897446da1f16a91419090f0"
+    "equal": false,
+    "sha256": "762115bc3249af59be7e96af7848575ca2300a7f680dcbd46395a4715da03283"
   },
   {
     "width": 1280,
     "route": "cancionero/ver/pd0/lento",
-    "equal": true,
-    "sha256": "085e18a8aa1c41306dd3410a952c5690954748aaf2568d79cc21a1aebe5e2f79"
+    "equal": false,
+    "sha256": "d756124138dd5312b63ad871024c9152c345ab51e2add668258d0f1dc36bafc1"
   },
   {
     "width": 1280,

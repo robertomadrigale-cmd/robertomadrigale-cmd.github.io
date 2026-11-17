@@ -409,7 +409,8 @@ textarea{width:100%;font:500 13px var(--font-mono);padding:10px;border-radius:10
 .kl.cur .pc.lit i,.kl.past .pc i{color:var(--fg)}
 .kl.cur .pc.lit i{color:var(--accent-text);text-shadow:0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
 .pc.now .kc{color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:0 .3em;margin-right:.15em}
-.kl.inst .wd.hid{display:none}.kl.inst .wd.rep .kc{opacity:.45}
+.kl.inst .wd.hid{display:none}
+.kkeys{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 6px}.kkeys .kkc{white-space:nowrap}.kkeys .kkc small{opacity:.7;font-weight:500}.kl.inst .wd.rep .kc{opacity:.45}
 .kl.inst .pc{margin-right:.6em}.kl.inst .kc{font-size:1em}
 .karaoke.show-lyrics .kc{display:none}
 .karaoke.show-chords .pc i{display:none}
@@ -2152,7 +2153,7 @@ WID.openchords={
   view:s=>{const c=OC[s.i],{d,m}=ocDots(c),cf=chordFing(c[2]);d.forEach(x=>{x.fg=cf.fg[x.s]});return fretboard({to:5,dots:d,muted:m,barre:cf.barre,label:'Acorde '+c[0]})+`<p class="cap"><b>${c[0]}</b>: ${c[2].map(f=>f==null?'x':f).join(' ')} (cuerdas 6 a 1). Raíz en rojo; × = no se toca.</p><div class="row-act">${playBtn(ocMidi(c),'chord','Escuchar')}</div>`}};
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261116202554';
+const OM_BETA_VERSION='v20261116203237';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -4403,6 +4404,10 @@ function viewSongPlay(id,slow){
   if(INST.id==='bateria')KAR.drumPlayer=DB.drumPlayer!==false;
   const es=()=>DB.notation==='es';
   const keyLbl=()=>chName(P.key,st.shift,P.key,es())+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':'');
+  const keyAt=sh=>chName(P.key,sh,P.key,es())+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':'');
+  const relAt=sh=>{const q={pc:(P.key.pc+3)%12,suf:'',bass:null,minor:false};return chName(q,sh,q,es())};
+  const keysHTML=()=>{const o=[];for(let sh=-6;sh<=5;sh++)o.push(sh);o.sort((a,b)=>((P.key.pc+a+12)%12)-((P.key.pc+b+12)%12));
+    return o.map(sh=>`<button class="chip kkc" data-kto="${sh}" aria-pressed="${st.shift===sh}">${esc(keyAt(sh))}${P.key.minor?`<small> = ${esc(relAt(sh))}</small>`:''}${sh===0?'<small> · original</small>':''}</button>`).join('')};
   const lineHTML=(l,i)=>{
     if(l.gap)return'<div class="kgap"></div>';
     if(l.label!=null)return`<div class="klab">${esc(l.label)}</div>`;
@@ -4431,6 +4436,7 @@ function viewSongPlay(id,slow){
   <div class="ktools" role="toolbar" aria-label="Ajustes de la canción">${tool('tono','Tono')}${tool('tempo','Tempo')}${tool('son','Sonido')}${tool('grab','Grabación')}${tool('rep','Repetir')}${tool('mas','Ritmo')}</div>
   <div class="kpanels card kctl" hidden>
    ${panel('tono','Tono',`<div class="row"><button class="btn sm" data-k="-1" aria-label="Bajar medio tono">${IC.minus}</button><b class="kkey" id="kkey">${esc(keyLbl())}</b><button class="btn sm" data-k="1" aria-label="Subir medio tono">${IC.plus}</button><button class="btn sm" data-k="0">Original</button></div>
+    <div class="kkeys" id="kkeys">${keysHTML()}</div>
     <p class="cap" id="kcapo" style="margin:0">${capoHint(P.key,st.shift)}</p>`)}
    ${panel('tempo','Tempo y velocidad',`<div class="row"><button class="btn sm" data-b="-4" aria-label="Más lento">${IC.minus}</button><b class="kkey" id="kbpm">${st.bpm}</b><button class="btn sm" data-b="4" aria-label="Más rápido">${IC.plus}</button><button class="btn sm" id="ktap" title="Toca 4 veces al ritmo de la canción">Marcar</button></div>
     <div class="kslow${slow?' hl':''}"><div><span class="cl">Velocidad${slow?' · cámara lenta':''}</span><div class="chips">${[.5,.6,.75,.9,1].map(v=>`<button class="chip" data-sp="${v}" aria-pressed="${st.sp===v}">${Math.round(v*100)} %</button>`).join('')}</div></div><p class="cap" id="kspd" style="margin:0"></p></div>`)}
@@ -4483,7 +4489,7 @@ function viewSongPlay(id,slow){
     const toolVals=()=>{const set=(k,v)=>{const e=$('#kt-'+k,r);if(e)e.textContent=v};
       set('tono',keyLbl());set('tempo',Math.round(st.bpm*(st.sp||1)));set('son',KAR.band?'Música':'Silencio');set('grab',O.use&&O.blob?'Tuya':'Banda');set('rep',st.loop?st.loop+(st.loop>1?' renglones':' renglón'):'No');set('mas',aiPat()?'IA':BSTYLES[gid()]);set('ia',usingAI()?'Versión IA':iaReady()?'Lista':'Conectar');
       const pb=$('#kpbpm',r);if(pb)pb.textContent=Math.round(st.bpm*(st.sp||1));const pk=$('#kpkey',r);if(pk)pk.textContent=keyLbl();const fn=$('#kfnot',r);if(fn)fn.textContent=es()?'Do':'C';$$('.kmet',r).forEach(x=>x.classList.toggle('on',!!KAR.met));
-      const en=$('#keasy',r);if(en){const on=EASYT()&&st.shift;en.hidden=!on;if(on)en.innerHTML=`<b>Versión fácil en ${esc(keyLbl())}</b> · ${esc(easyCapoTxt(st.shift,chName(P.key,0,P.key,es())+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':''),es()))}`}
+      const en=$('#keasy',r);if(en){const on=EASYT()&&st.shift&&st.shift===easyShift(P);en.hidden=!on;if(on)en.innerHTML=`<b>Versión fácil en ${esc(keyLbl())}</b> · ${esc(easyCapoTxt(st.shift,chName(P.key,0,P.key,es())+(P.key.minor&&!/m/.test(P.key.suf||'')?'m':''),es()))}`}
       const m=$('#kmeta',r);if(m)m.textContent=`Tono ${keyLbl()} · ${Math.round(st.bpm*(st.sp||1))} bpm · ${BSTYLES[gid()]} · ${st.beats}/4`;
       const t=$('.ktool[data-panel="son"]',r);if(t)t.classList.toggle('on',!!KAR.met)};
     const sumK=toolVals;
@@ -4675,7 +4681,7 @@ function viewSongPlay(id,slow){
     $('#kgo',r).onclick=()=>{if(!running()&&KAR.stage!==false&&(!(O.use&&O.blob)||synced()))stgOpen();go()};
     $('#kreset',r).onclick=()=>{if(running())seqStop();bandStop();pos=0;clearHL();window.scrollTo({top:0,behavior:'smooth'});paint()};
     [kar,$('#kgrid',r)].forEach(box=>box.addEventListener('click',e=>{const l=e.target.closest('.kl,.kgrow,.kgly');if(!l)return;const g=lineIdx(+l.dataset.li);if(g<0)return;if(O.playing){const t=lineT(g);if(t!=null){O.el.currentTime=Math.max(0,t-.8);loopFrom.g=g;pos=g}return}const was=running();if(was){seqStop();bandStop()}pos=g;clearHL();setLine(+l.dataset.li);if(was)go();paint()}));
-    const rerender=()=>{kar.innerHTML=P.lines.map(lineHTML).join('');requestAnimationFrame(()=>fitKar(kar));$('#kchips',r).innerHTML=chips();$('#kkey',r).textContent=keyLbl();$('#kcapo',r).textContent=capoHint(P.key,st.shift);side();views(true)};
+    const rerender=()=>{kar.innerHTML=P.lines.map(lineHTML).join('');requestAnimationFrame(()=>fitKar(kar));$('#kchips',r).innerHTML=chips();$('#kkey',r).textContent=keyLbl();const kk=$('#kkeys',r);if(kk)kk.innerHTML=keysHTML();$('#kcapo',r).textContent=capoHint(P.key,st.shift);side();views(true)};
     // cambia la versión (original / IA) o los acordes fáciles: se vuelve a leer la canción
     const reloadSong=()=>{const was=running();if(was){seqStop();bandStop()}if(O.playing)origStop();P0=fixP(songParse(srcNow()));P=mkP();secs=lineSections(P);curCh=P.chords[0]||null;curLi=-1;curG=gid();pos=0;build();rerender();clearHL();if(O.blob)buildO();origUI();paint();iaUI()};
     r.addEventListener('click',e=>{
@@ -4700,6 +4706,7 @@ function viewSongPlay(id,slow){
       const io=e.target.closest('[data-iaon]');if(io){DB.kai[id]=Object.assign({},AIo(),{on:io.dataset.iaon==='1'});save();reloadSong();return}
       const ip=e.target.closest('[data-iap]');if(ip){DB.kai[id]=Object.assign({},AIo(),{useP:ip.dataset.iap==='1'});save();curLi=-1;curG=gid();side();restart();iaUI();toolVals();return}
       const ib=e.target.closest('[data-ia]');if(ib){iaRun(ib.dataset.ia);return}
+      const kto=e.target.closest('[data-kto]');if(kto){st.shift=+kto.dataset.kto;DB.kt[id]=st.shift;save();rerender();restart();toolVals();return}
       const k=e.target.closest('[data-k]');if(k){const v=+k.dataset.k;st.shift=v?((st.shift+v+18)%12)-6:0;DB.kt[id]=st.shift;save();rerender();restart();return}
       const b=e.target.closest('[data-b]');if(b){st.bpm=Math.max(40,Math.min(220,st.bpm+ +b.dataset.b));DB.kbpm[id]=st.bpm;save();$('#kbpm',r).textContent=st.bpm;side();spdTxt();restart();return}
       const sh=e.target.closest('[data-show]');if(sh){KAR.show=sh.dataset.show;kar.className='karaoke show-'+KAR.show;$$('[data-show]',r).forEach(x=>x.setAttribute('aria-pressed',String(x===sh)));DB.kar=Object.assign({},KAR);save();return}
