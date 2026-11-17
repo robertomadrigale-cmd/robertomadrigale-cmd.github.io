@@ -1,0 +1,542 @@
+[
+  {
+    "width": 400,
+    "route": "",
+    "equal": true,
+    "sha256": "c93a88450a751e58c252ce2c5fbd7668e1237524d22e95c8c99d48bc3409a61b"
+  },
+  {
+    "width": 400,
+    "route": "lecciones",
+    "equal": true,
+    "sha256": "9bb0ddcccf69b7de5129e5e0aed4e40942f2568fd9b5e5e8ea2f4dbca6fbfb3f"
+  },
+  {
+    "width": 400,
+    "route": "leccion/1",
+    "equal": true,
+    "sha256": "3a7b7f623808080d5ff29f648e3b26cea43a39a9d01aadc567a047ce1edb350b"
+  },
+  {
+    "width": 400,
+    "route": "leccion/2",
+    "equal": true,
+    "sha256": "adc86f4a8f310da6c31cb48a6aaa3e2a3c104067c238b3d3c0f354c8e2995dc4"
+  },
+  {
+    "width": 400,
+    "route": "leccion/3",
+    "equal": true,
+    "sha256": "63df1eadb8feb34762b8f0a82bd53f8085917a6a8d5a5326c9017c36c7441d27"
+  },
+  {
+    "width": 400,
+    "route": "leccion/4",
+    "equal": true,
+    "sha256": "610030bc37bf96d9d4c98f7408719dc2bff9021ec1e7e7ef9dafdfe27e784eb1"
+  },
+  {
+    "width": 400,
+    "route": "leccion/5",
+    "equal": true,
+    "sha256": "1a9945965a7e2053e7877426e69aab5266983a9c65331da9fe4321ddfa2fbd61"
+  },
+  {
+    "width": 400,
+    "route": "leccion/6",
+    "equal": true,
+    "sha256": "452bbb3575f7a72cea0c8a32ca4efc4494028ea605b13f05d449086c8032a798"
+  },
+  {
+    "width": 400,
+    "route": "leccion/7",
+    "equal": true,
+    "sha256": "c0bc4398eaf599d03213625b072addd0ca780ceaab015db947e846ebbf4e489a"
+  },
+  {
+    "width": 400,
+    "route": "leccion/8",
+    "equal": true,
+    "sha256": "7ddcbc6081bf21af9a874a950bedc4eaedccc65523b0be2120a759b3f42687ac"
+  },
+  {
+    "width": 400,
+    "route": "leccion/9",
+    "equal": true,
+    "sha256": "e371ec7a7a2982598239ceb771164629c8530e690b403e4fbdbfcca9b2686240"
+  },
+  {
+    "width": 400,
+    "route": "leccion/10",
+    "equal": true,
+    "sha256": "1716f8e93372a9cf4efaaa685ab46db1707a053d32cad89c4cc321a527be6508"
+  },
+  {
+    "width": 400,
+    "route": "leccion/11",
+    "equal": true,
+    "sha256": "b9028cd3b3911bbb99f6b8948dfefb3f6c35cee946ed861e0912708b097276bc"
+  },
+  {
+    "width": 400,
+    "route": "acordes",
+    "equal": true,
+    "sha256": "4d74f0ef691c9a2a768a252fba8d0e797c0fa8e79b2df6b04e9e0cd038b0c443"
+  },
+  {
+    "width": 400,
+    "route": "punteo",
+    "equal": true,
+    "sha256": "e1218153a277d95e35d6b2df8ed1e9e0b9b26e2c1d0cbfcfb4b33e57037dc722"
+  },
+  {
+    "width": 400,
+    "route": "punteo/1",
+    "equal": true,
+    "sha256": "28c7fed86bf2f4830f0d9864b9e1b9c26e6633c82ab618524fbf10e54737f15c"
+  },
+  {
+    "width": 400,
+    "route": "punteo/2",
+    "equal": true,
+    "sha256": "041fe35415942e911f620ef874d95dd4f97455b1de1e2a93af5223036cebe532"
+  },
+  {
+    "width": 400,
+    "route": "punteo/3",
+    "equal": true,
+    "sha256": "13b08077ad1d0ef8c9fe06e43473e80e15796dc70357c845e91154e4fa4a2546"
+  },
+  {
+    "width": 400,
+    "route": "punteo/4",
+    "equal": true,
+    "sha256": "f118012c4d4b7be83539731149073e48d46b72104e951e26b513df75bfa173cd"
+  },
+  {
+    "width": 400,
+    "route": "punteo/5",
+    "equal": true,
+    "sha256": "185c87f7d69e1f86aac8c619d0358d187c24b18c24e3db1ceaccfb2866854904"
+  },
+  {
+    "width": 400,
+    "route": "punteo/6",
+    "equal": true,
+    "sha256": "6ba781aa68f5d15c5f70147da31d2051a57860c72df50002a11449f4f1226ad9"
+  },
+  {
+    "width": 400,
+    "route": "punteo/7",
+    "equal": true,
+    "sha256": "baa4114a46424b9f91e35e2db43d4ece3afd73a0809fc850a5b0decdf4fac428"
+  },
+  {
+    "width": 400,
+    "route": "punteo/8",
+    "equal": true,
+    "sha256": "768e33992bd44411ab34e35cdd58c9b294a53490d7249e6abb5c24a877ce8f5f"
+  },
+  {
+    "width": 400,
+    "route": "cuenta",
+    "equal": true,
+    "sha256": "7d6291b168258db1a356bc9a2d039d47d1525081d22f55aa056b2caa9d242c16"
+  },
+  {
+    "width": 400,
+    "route": "apariencia",
+    "equal": true,
+    "sha256": "edb19bb800f23d5d2103765fdd95a43ab0f82305c2563d2b0e3ba7c7a4d0df77"
+  },
+  {
+    "width": 400,
+    "route": "practicar",
+    "equal": true,
+    "sha256": "f1ccf37b7faf5e3624241fee6523c8bddf6dc1e47544a042c4946687bf7e3b51"
+  },
+  {
+    "width": 400,
+    "route": "practicar/metronomo",
+    "equal": true,
+    "sha256": "a87f71a65028701ac10521818060d12488c16846a850db2ee9d0e58dfd081532"
+  },
+  {
+    "width": 400,
+    "route": "practicar/afinador",
+    "equal": true,
+    "sha256": "1094d08ce8d07e2461969b5fdc0d1405852ddbad7f0ae8af17c6e0355bc22316"
+  },
+  {
+    "width": 400,
+    "route": "practicar/juego",
+    "equal": true,
+    "sha256": "c825ad26a239d604bb217414b16a7d26c3badaa7538e8611cf2dfee6097a2708"
+  },
+  {
+    "width": 400,
+    "route": "practicar/pistas",
+    "equal": true,
+    "sha256": "d904ac77134dbeffff53860cf1c19d3cf4b269e75bb2b845328f72dcea12ce0d"
+  },
+  {
+    "width": 400,
+    "route": "practicar/rutina",
+    "equal": true,
+    "sha256": "c9062cac56f77f9d36b22dbf36d3bd0a6e8eb36a1fcc6fd113294aca75a182a8"
+  },
+  {
+    "width": 400,
+    "route": "practicar/reto",
+    "equal": true,
+    "sha256": "58102df7d17debe226c72496f31a8810ace1b113ca18b6ac6c00db01ad0c91cd"
+  },
+  {
+    "width": 400,
+    "route": "practicar/grabar",
+    "equal": true,
+    "sha256": "ffaf4088b6df7bbee4e6aa1182e26d8eba2ae305502da755f1d51f2c2adf40aa"
+  },
+  {
+    "width": 400,
+    "route": "practicar/lento",
+    "equal": true,
+    "sha256": "ff512bd111148855b29f2c45b7bd6515c35e7e49fc88a59a33f02c3686b60944"
+  },
+  {
+    "width": 400,
+    "route": "logros",
+    "equal": true,
+    "sha256": "aab9b15a3d33b52c16500026a511cbe1b6b72f8016ddcfd83d4099ccc286db6a"
+  },
+  {
+    "width": 400,
+    "route": "cancionero",
+    "equal": true,
+    "sha256": "59fa39eef04a9fb98f5f50ce50e2d71e45abd6e67d5a81752d7de2c12e0bd2ca"
+  },
+  {
+    "width": 400,
+    "route": "cancionero/ver/pd0",
+    "equal": true,
+    "sha256": "85580542c617c3c2f5c0269b8cdf43fa0036ea178897446da1f16a91419090f0"
+  },
+  {
+    "width": 400,
+    "route": "cancionero/ver/pd0/lento",
+    "equal": true,
+    "sha256": "085e18a8aa1c41306dd3410a952c5690954748aaf2568d79cc21a1aebe5e2f79"
+  },
+  {
+    "width": 400,
+    "route": "cancionero/editar/nueva",
+    "equal": true,
+    "sha256": "0e3e7172d6f769b32bfa2a5a3532f27d148cf66439399634bb27dda3e3c602ee"
+  },
+  {
+    "width": 400,
+    "route": "referencia",
+    "equal": true,
+    "sha256": "48604e06f178869ec2fdeb6d0f69879657f7fac2e01b62737835cc881533bafe"
+  },
+  {
+    "width": 400,
+    "route": "referencia/canciones",
+    "equal": true,
+    "sha256": "e140f46ad26e499a0f8e54bacd384f06eb533c404a25e5b5a9e5cb74734f41a9"
+  },
+  {
+    "width": 400,
+    "route": "referencia/notas",
+    "equal": true,
+    "sha256": "efaac3a5b6904bba776fd346d7335bb09dc803c6332a72852f8738fc30fafa1c"
+  },
+  {
+    "width": 400,
+    "route": "referencia/acordes",
+    "equal": true,
+    "sha256": "a3be7286307fc62cc1b91d07f872e0687e7b9aca6815060523067ac44ac7fac9"
+  },
+  {
+    "width": 400,
+    "route": "referencia/explorar",
+    "equal": true,
+    "sha256": "947c38bdd0a695907bf3118f07c6eaf47455576c2a9424992907cbfd9f23a5c9"
+  },
+  {
+    "width": 400,
+    "route": "referencia/glosario",
+    "equal": true,
+    "sha256": "af14f3dab4de2b4d092242b04e1e8be5336539c90d371522e47dde380685f853"
+  },
+  {
+    "width": 1280,
+    "route": "",
+    "equal": true,
+    "sha256": "c93a88450a751e58c252ce2c5fbd7668e1237524d22e95c8c99d48bc3409a61b"
+  },
+  {
+    "width": 1280,
+    "route": "lecciones",
+    "equal": true,
+    "sha256": "9bb0ddcccf69b7de5129e5e0aed4e40942f2568fd9b5e5e8ea2f4dbca6fbfb3f"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/1",
+    "equal": true,
+    "sha256": "3a7b7f623808080d5ff29f648e3b26cea43a39a9d01aadc567a047ce1edb350b"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/2",
+    "equal": true,
+    "sha256": "adc86f4a8f310da6c31cb48a6aaa3e2a3c104067c238b3d3c0f354c8e2995dc4"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/3",
+    "equal": true,
+    "sha256": "63df1eadb8feb34762b8f0a82bd53f8085917a6a8d5a5326c9017c36c7441d27"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/4",
+    "equal": true,
+    "sha256": "610030bc37bf96d9d4c98f7408719dc2bff9021ec1e7e7ef9dafdfe27e784eb1"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/5",
+    "equal": true,
+    "sha256": "1a9945965a7e2053e7877426e69aab5266983a9c65331da9fe4321ddfa2fbd61"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/6",
+    "equal": true,
+    "sha256": "452bbb3575f7a72cea0c8a32ca4efc4494028ea605b13f05d449086c8032a798"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/7",
+    "equal": true,
+    "sha256": "c0bc4398eaf599d03213625b072addd0ca780ceaab015db947e846ebbf4e489a"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/8",
+    "equal": true,
+    "sha256": "7ddcbc6081bf21af9a874a950bedc4eaedccc65523b0be2120a759b3f42687ac"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/9",
+    "equal": true,
+    "sha256": "e371ec7a7a2982598239ceb771164629c8530e690b403e4fbdbfcca9b2686240"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/10",
+    "equal": true,
+    "sha256": "1716f8e93372a9cf4efaaa685ab46db1707a053d32cad89c4cc321a527be6508"
+  },
+  {
+    "width": 1280,
+    "route": "leccion/11",
+    "equal": true,
+    "sha256": "b9028cd3b3911bbb99f6b8948dfefb3f6c35cee946ed861e0912708b097276bc"
+  },
+  {
+    "width": 1280,
+    "route": "acordes",
+    "equal": true,
+    "sha256": "4d74f0ef691c9a2a768a252fba8d0e797c0fa8e79b2df6b04e9e0cd038b0c443"
+  },
+  {
+    "width": 1280,
+    "route": "punteo",
+    "equal": true,
+    "sha256": "e1218153a277d95e35d6b2df8ed1e9e0b9b26e2c1d0cbfcfb4b33e57037dc722"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/1",
+    "equal": true,
+    "sha256": "28c7fed86bf2f4830f0d9864b9e1b9c26e6633c82ab618524fbf10e54737f15c"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/2",
+    "equal": true,
+    "sha256": "041fe35415942e911f620ef874d95dd4f97455b1de1e2a93af5223036cebe532"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/3",
+    "equal": true,
+    "sha256": "13b08077ad1d0ef8c9fe06e43473e80e15796dc70357c845e91154e4fa4a2546"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/4",
+    "equal": true,
+    "sha256": "f118012c4d4b7be83539731149073e48d46b72104e951e26b513df75bfa173cd"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/5",
+    "equal": true,
+    "sha256": "185c87f7d69e1f86aac8c619d0358d187c24b18c24e3db1ceaccfb2866854904"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/6",
+    "equal": true,
+    "sha256": "6ba781aa68f5d15c5f70147da31d2051a57860c72df50002a11449f4f1226ad9"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/7",
+    "equal": true,
+    "sha256": "baa4114a46424b9f91e35e2db43d4ece3afd73a0809fc850a5b0decdf4fac428"
+  },
+  {
+    "width": 1280,
+    "route": "punteo/8",
+    "equal": true,
+    "sha256": "768e33992bd44411ab34e35cdd58c9b294a53490d7249e6abb5c24a877ce8f5f"
+  },
+  {
+    "width": 1280,
+    "route": "cuenta",
+    "equal": true,
+    "sha256": "7d6291b168258db1a356bc9a2d039d47d1525081d22f55aa056b2caa9d242c16"
+  },
+  {
+    "width": 1280,
+    "route": "apariencia",
+    "equal": true,
+    "sha256": "edb19bb800f23d5d2103765fdd95a43ab0f82305c2563d2b0e3ba7c7a4d0df77"
+  },
+  {
+    "width": 1280,
+    "route": "practicar",
+    "equal": true,
+    "sha256": "f1ccf37b7faf5e3624241fee6523c8bddf6dc1e47544a042c4946687bf7e3b51"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/metronomo",
+    "equal": true,
+    "sha256": "a87f71a65028701ac10521818060d12488c16846a850db2ee9d0e58dfd081532"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/afinador",
+    "equal": true,
+    "sha256": "1094d08ce8d07e2461969b5fdc0d1405852ddbad7f0ae8af17c6e0355bc22316"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/juego",
+    "equal": true,
+    "sha256": "c825ad26a239d604bb217414b16a7d26c3badaa7538e8611cf2dfee6097a2708"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/pistas",
+    "equal": true,
+    "sha256": "d904ac77134dbeffff53860cf1c19d3cf4b269e75bb2b845328f72dcea12ce0d"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/rutina",
+    "equal": true,
+    "sha256": "c9062cac56f77f9d36b22dbf36d3bd0a6e8eb36a1fcc6fd113294aca75a182a8"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/reto",
+    "equal": true,
+    "sha256": "58102df7d17debe226c72496f31a8810ace1b113ca18b6ac6c00db01ad0c91cd"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/grabar",
+    "equal": true,
+    "sha256": "ffaf4088b6df7bbee4e6aa1182e26d8eba2ae305502da755f1d51f2c2adf40aa"
+  },
+  {
+    "width": 1280,
+    "route": "practicar/lento",
+    "equal": true,
+    "sha256": "ff512bd111148855b29f2c45b7bd6515c35e7e49fc88a59a33f02c3686b60944"
+  },
+  {
+    "width": 1280,
+    "route": "logros",
+    "equal": true,
+    "sha256": "aab9b15a3d33b52c16500026a511cbe1b6b72f8016ddcfd83d4099ccc286db6a"
+  },
+  {
+    "width": 1280,
+    "route": "cancionero",
+    "equal": true,
+    "sha256": "59fa39eef04a9fb98f5f50ce50e2d71e45abd6e67d5a81752d7de2c12e0bd2ca"
+  },
+  {
+    "width": 1280,
+    "route": "cancionero/ver/pd0",
+    "equal": true,
+    "sha256": "85580542c617c3c2f5c0269b8cdf43fa0036ea178897446da1f16a91419090f0"
+  },
+  {
+    "width": 1280,
+    "route": "cancionero/ver/pd0/lento",
+    "equal": true,
+    "sha256": "085e18a8aa1c41306dd3410a952c5690954748aaf2568d79cc21a1aebe5e2f79"
+  },
+  {
+    "width": 1280,
+    "route": "cancionero/editar/nueva",
+    "equal": true,
+    "sha256": "0e3e7172d6f769b32bfa2a5a3532f27d148cf66439399634bb27dda3e3c602ee"
+  },
+  {
+    "width": 1280,
+    "route": "referencia",
+    "equal": true,
+    "sha256": "48604e06f178869ec2fdeb6d0f69879657f7fac2e01b62737835cc881533bafe"
+  },
+  {
+    "width": 1280,
+    "route": "referencia/canciones",
+    "equal": true,
+    "sha256": "e140f46ad26e499a0f8e54bacd384f06eb533c404a25e5b5a9e5cb74734f41a9"
+  },
+  {
+    "width": 1280,
+    "route": "referencia/notas",
+    "equal": true,
+    "sha256": "efaac3a5b6904bba776fd346d7335bb09dc803c6332a72852f8738fc30fafa1c"
+  },
+  {
+    "width": 1280,
+    "route": "referencia/acordes",
+    "equal": true,
+    "sha256": "a3be7286307fc62cc1b91d07f872e0687e7b9aca6815060523067ac44ac7fac9"
+  },
+  {
+    "width": 1280,
+    "route": "referencia/explorar",
+    "equal": true,
+    "sha256": "947c38bdd0a695907bf3118f07c6eaf47455576c2a9424992907cbfd9f23a5c9"
+  },
+  {
+    "width": 1280,
+    "route": "referencia/glosario",
+    "equal": true,
+    "sha256": "af14f3dab4de2b4d092242b04e1e8be5336539c90d371522e47dde380685f853"
+  }
+]

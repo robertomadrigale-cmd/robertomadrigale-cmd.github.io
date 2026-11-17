@@ -255,7 +255,7 @@ function chordsFromAudio(A,allowed){
   const tplH=p=>{const t=new Float32Array(12),r=p.pc,iv=[0,p.suf==='m'?3:4,7],w=[1.2,1.05,.8];iv.forEach((v,i)=>{const n=(r+v)%12;t[n]+=w[i];t[(n+7)%12]+=w[i]*.3;t[(n+4)%12]+=w[i]*.12});return nrm(t)};
   const TT=TP.map(tplH),TB=TP.map(p=>{const u=new Float32Array(12);u[p.pc]=1;u[(p.pc+7)%12]=.25;return nrm(u)});
   const SC=new Float32Array(N*TP.length);for(let j=0;j<N;j++)for(let k=0;k<TP.length;k++){let d=0,e=0;for(let q=0;q<12;q++){d+=TT[k][q]*C[j][q];e+=TB[k][q]*BS[j][q]}SC[j*TP.length+k]=.7*d+.3*e}
-  const K=TP.length+1,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:SC[j*TP.length+k]);
+  const BI=new Float32Array(TP.length),K=TP.length+1,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:SC[j*TP.length+k]-BI[k]);
   // Viterbi; sw(j) = costo de cambiar de acorde en el pulso j (más barato en el 1 del compás, luego en el 3)
   const vit=sw=>{let D=new Float32Array(K),B=[];for(let k=0;k<K;k++)D[k]=score(0,k);
     for(let j=1;j<N;j++){let bk=0;for(let k=1;k<K;k++)if(D[k]>D[bk])bk=k;const nd=new Float32Array(K),bb=new Uint8Array(K),c=sw(j);
@@ -264,7 +264,15 @@ function chordsFromAudio(A,allowed){
   let path=vit(()=>.15);
   // dónde cae el 1: en el pulso (módulo 4) donde más cambian los acordes, ayudado por los graves
   const cnt=[0,0,0,0];for(let j=1;j<N;j++)if(path[j]!==path[j-1])cnt[j%4]+=1;const ph=cnt.indexOf(Math.max(...cnt));
-  path=vit(j=>{const q=((j-ph)%4+4)%4;return q===0?.1:q===2?.2:.34});
+  const swp=j=>{const q=((j-ph)%4+4)%4;return q===0?.1:q===2?.2:.34};path=vit(swp);
+  /* sin lista de la IA: los acordes deben ser del mismo tono. Los que no son del tono cuestan más
+     (solo quedan si de verdad se oyen) y los que casi no suenan se quitan: así no salen F, A o D#m sueltos en una canción en Em */
+  if(al.length<2){const h0=path.filter(q=>q<TP.length).map(q=>TP[q]);
+    if(h0.length>=8){const k0=detectKey(h0),DM=k0.minor?{0:'m',3:'',5:'m',7:'m',8:'',10:''}:{0:'',2:'m',4:'m',5:'',7:'',9:'m'};
+      TP.forEach((p,k)=>{const d=(p.pc-k0.pc+12)%12;BI[k]=DM[d]===p.suf?0:(k0.minor&&d===7&&!p.suf)||(!k0.minor&&d===10&&!p.suf)?.02:.07});
+      path=vit(swp);
+      const cn=new Map;let vo=0;path.forEach(q=>{if(q<TP.length){cn.set(q,(cn.get(q)||0)+1);vo++}});
+      const mn=Math.max(4,vo*.03);let cut=0;cn.forEach((c,q)=>{if(c<mn){BI[q]+=.6;cut++}});if(cut)path=vit(swp)}}
   // cambios de un solo pulso entre dos iguales se quitan (suelen ser notas de paso)
   for(let j=1;j+1<N;j++)if(path[j]!==path[j-1]&&path[j-1]===path[j+1])path[j]=path[j-1];
   // qué tan bien suenan los acordes elegidos (para comparar con otra lista)

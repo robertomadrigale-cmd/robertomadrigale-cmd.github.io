@@ -377,6 +377,7 @@ textarea{width:100%;font:500 13px var(--font-mono);padding:10px;border-radius:10
 .kl.cur .pc.lit i,.kl.past .pc i{color:var(--fg)}
 .kl.cur .pc.lit i{color:var(--accent-text);text-shadow:0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
 .pc.now .kc{color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:0 .3em;margin-right:.15em}
+.kl.inst .wd.hid{display:none}.kl.inst .wd.rep .kc{opacity:.45}
 .kl.inst .pc{margin-right:.6em}.kl.inst .kc{font-size:1em}
 .karaoke.show-lyrics .kc{display:none}
 .karaoke.show-chords .pc i{display:none}

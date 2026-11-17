@@ -617,7 +617,8 @@ function viewSongPlay(id,slow){
     if(l.label!=null)return`<div class="klab">${esc(l.label)}</div>`;
     const words=[];l.pieces.forEach((pc,pi)=>{if(pc.sp||!words.length)words.push([]);words[words.length-1].push([pc,pi])});
     const onlyCh=!l.pieces.some(p=>p.text.trim());
-    return`<div class="kl${onlyCh?' inst':''}" data-li="${i}">${words.map(w=>`<span class="wd">${w.map(([pc,pi],wi)=>{const nm=pc.p&&!pc.hide?chName(pc.p,st.shift,P.key,es()):'';return`<span class="pc${pc.p?' hc':''}${wi<w.length-1&&pc.text?' mid':''}" data-pi="${pi}"><b class="kc">${nm?esc(nm):''}</b><i>${esc(pc.text)||''}</i></span>`}).join('')}</span>`).join(' ')}</div>`;
+    let pv=null;const rp=onlyCh?l.pieces.map(pc=>{if(!pc.p)return false;const k=pc.p.pc+'|'+pc.p.suf+'|'+(pc.p.bass==null?'':pc.p.bass),r=k===pv;pv=k;return r}):[];
+    return`<div class="kl${onlyCh?' inst':''}" data-li="${i}">${words.map(w=>`<span class="wd${onlyCh&&w.every(([pc])=>pc.hide&&!pc.text.trim())&&!(w[0][1]===0)?' hid':''}${onlyCh&&w.every(([pc,pi])=>rp[pi])?' rep':''}">${w.map(([pc,pi],wi)=>{const nm=pc.p&&(!pc.hide||onlyCh&&pi===0)?chName(pc.p,st.shift,P.key,es()):'';return`<span class="pc${pc.p?' hc':''}${wi<w.length-1&&pc.text?' mid':''}" data-pi="${pi}"><b class="kc">${nm?esc(nm):''}</b><i>${esc(pc.text)||''}</i></span>`}).join('')}</span>`).join(' ')}</div>`;
   };
   const chips=()=>P.chords.map(p=>{const v=voicing(p,st.shift),n=chName(p,st.shift,P.key,es());return`<button class="kchip" data-kc="${esc(chName(p,st.shift,P.key,false))}">${chordSVG(v)}<b>${esc(n)}</b></button>`}).join('');
   // íconos del reproductor

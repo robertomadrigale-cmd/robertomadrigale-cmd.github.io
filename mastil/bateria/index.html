@@ -399,6 +399,7 @@ textarea{width:100%;font:500 13px var(--font-mono);padding:10px;border-radius:10
 .kl.cur .pc.lit i,.kl.past .pc i{color:var(--fg)}
 .kl.cur .pc.lit i{color:var(--accent-text);text-shadow:0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
 .pc.now .kc{color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:0 .3em;margin-right:.15em}
+.kl.inst .wd.hid{display:none}.kl.inst .wd.rep .kc{opacity:.45}
 .kl.inst .pc{margin-right:.6em}.kl.inst .kc{font-size:1em}
 .karaoke.show-lyrics .kc{display:none}
 .karaoke.show-chords .pc i{display:none}
@@ -2500,7 +2501,7 @@ function importOld(){
 }
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261115145104';
+const OM_BETA_VERSION='v20261116201457';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -3571,7 +3572,20 @@ Acordes: si conoces la canción, usa los que publican los cancioneros para ella 
   }
   const fd=new FormData();fd.append('file',blob,'cancion.'+((blob.type||'').split('/')[1]||'mp3'));fd.append('model','whisper-1');fd.append('response_format','verbose_json');fd.append('timestamp_granularities[]','segment');
   const j=await iaFetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+c.key.trim()},body:fd});
-  return{title:'',artist:'',lines:(j.segments||[]).map(s=>({t:+s.start,text:String(s.text||'').trim(),sec:null})).filter(x=>x.text)};
+  const lines=(j.segments||[]).map(s=>({t:+s.start,e:+s.end,text:String(s.text||'').trim(),cp:'',sec:null})).filter(x=>x.text);
+  let out={title:'',artist:'',key:'',chords:[],lines};
+  // whisper solo oye la letra: con ella, el modelo de texto elegido escribe los acordes como en los cancioneros (si conoce la canción)
+  if(lines.length>=3)try{
+    const t=await iaChat('Eres un músico que escribe hojas de acordes como las de Ultimate Guitar, LaCuerda o Cifra Club. Nunca inventas acordes.',
+      `Esta es la letra transcrita de una grabación, renglón por renglón (i = número de renglón):
+${JSON.stringify(lines.map((x,i)=>({i,text:x.text})))}
+Si reconoces la canción, responde SOLO JSON {"title":"","artist":"","key":"tono, p. ej. G o Em","chords":["los acordes que usa"],"lines":[{"i":número,"sec":"Intro|Verso 1|Coro|Puente…","cp":"el MISMO texto del renglón, sin cambiar ni una letra, con cada acorde entre corchetes justo antes de la sílaba donde cambia, p. ej. [G]Hoy te [D]vi"}]}.
+Usa los acordes de la versión original publicados en los cancioneros, cifrado americano (G Em C D, 7, sus4; /bajo solo si de verdad está), todos del mismo tono y coherentes entre sí.
+Si NO reconoces la canción con seguridad, responde {"chords":[],"lines":[]}: la app sacará los acordes del audio.`);
+    const J=iaJSON(t);if(Array.isArray(J.chords)&&J.chords.length){out.title=J.title||'';out.artist=J.artist||'';out.key=J.key||'';out.chords=J.chords.map(String).slice(0,16);
+      (J.lines||[]).forEach(x=>{const L=lines[+x.i];if(L){L.cp=String(x.cp||'').trim();if(x.sec)L.sec=String(x.sec)}})}
+  }catch(e){}
+  return out;
 }
 
 /* ---------- importar canciones desde archivo: PDF de Ultimate Guitar, TXT o ChordPro ----------
@@ -4773,7 +4787,8 @@ function viewSongPlay(id,slow){
     if(l.label!=null)return`<div class="klab">${esc(l.label)}</div>`;
     const words=[];l.pieces.forEach((pc,pi)=>{if(pc.sp||!words.length)words.push([]);words[words.length-1].push([pc,pi])});
     const onlyCh=!l.pieces.some(p=>p.text.trim());
-    return`<div class="kl${onlyCh?' inst':''}" data-li="${i}">${words.map(w=>`<span class="wd">${w.map(([pc,pi],wi)=>{const nm=pc.p&&!pc.hide?chName(pc.p,st.shift,P.key,es()):'';return`<span class="pc${pc.p?' hc':''}${wi<w.length-1&&pc.text?' mid':''}" data-pi="${pi}"><b class="kc">${nm?esc(nm):''}</b><i>${esc(pc.text)||''}</i></span>`}).join('')}</span>`).join(' ')}</div>`;
+    let pv=null;const rp=onlyCh?l.pieces.map(pc=>{if(!pc.p)return false;const k=pc.p.pc+'|'+pc.p.suf+'|'+(pc.p.bass==null?'':pc.p.bass),r=k===pv;pv=k;return r}):[];
+    return`<div class="kl${onlyCh?' inst':''}" data-li="${i}">${words.map(w=>`<span class="wd${onlyCh&&w.every(([pc])=>pc.hide&&!pc.text.trim())&&!(w[0][1]===0)?' hid':''}${onlyCh&&w.every(([pc,pi])=>rp[pi])?' rep':''}">${w.map(([pc,pi],wi)=>{const nm=pc.p&&(!pc.hide||onlyCh&&pi===0)?chName(pc.p,st.shift,P.key,es()):'';return`<span class="pc${pc.p?' hc':''}${wi<w.length-1&&pc.text?' mid':''}" data-pi="${pi}"><b class="kc">${nm?esc(nm):''}</b><i>${esc(pc.text)||''}</i></span>`}).join('')}</span>`).join(' ')}</div>`;
   };
   const chips=()=>P.chords.map(p=>{const v=voicing(p,st.shift),n=chName(p,st.shift,P.key,es());return`<button class="kchip" data-kc="${esc(chName(p,st.shift,P.key,false))}">${chordSVG(v)}<b>${esc(n)}</b></button>`}).join('');
   // íconos del reproductor
@@ -5886,7 +5901,7 @@ function chordsFromAudio(A,allowed){
   const tplH=p=>{const t=new Float32Array(12),r=p.pc,iv=[0,p.suf==='m'?3:4,7],w=[1.2,1.05,.8];iv.forEach((v,i)=>{const n=(r+v)%12;t[n]+=w[i];t[(n+7)%12]+=w[i]*.3;t[(n+4)%12]+=w[i]*.12});return nrm(t)};
   const TT=TP.map(tplH),TB=TP.map(p=>{const u=new Float32Array(12);u[p.pc]=1;u[(p.pc+7)%12]=.25;return nrm(u)});
   const SC=new Float32Array(N*TP.length);for(let j=0;j<N;j++)for(let k=0;k<TP.length;k++){let d=0,e=0;for(let q=0;q<12;q++){d+=TT[k][q]*C[j][q];e+=TB[k][q]*BS[j][q]}SC[j*TP.length+k]=.7*d+.3*e}
-  const K=TP.length+1,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:SC[j*TP.length+k]);
+  const BI=new Float32Array(TP.length),K=TP.length+1,score=(j,k)=>k===TP.length?(E[j]<eMed*.08?.9:.2):(E[j]<eMed*.08?0:SC[j*TP.length+k]-BI[k]);
   // Viterbi; sw(j) = costo de cambiar de acorde en el pulso j (más barato en el 1 del compás, luego en el 3)
   const vit=sw=>{let D=new Float32Array(K),B=[];for(let k=0;k<K;k++)D[k]=score(0,k);
     for(let j=1;j<N;j++){let bk=0;for(let k=1;k<K;k++)if(D[k]>D[bk])bk=k;const nd=new Float32Array(K),bb=new Uint8Array(K),c=sw(j);
@@ -5895,7 +5910,15 @@ function chordsFromAudio(A,allowed){
   let path=vit(()=>.15);
   // dónde cae el 1: en el pulso (módulo 4) donde más cambian los acordes, ayudado por los graves
   const cnt=[0,0,0,0];for(let j=1;j<N;j++)if(path[j]!==path[j-1])cnt[j%4]+=1;const ph=cnt.indexOf(Math.max(...cnt));
-  path=vit(j=>{const q=((j-ph)%4+4)%4;return q===0?.1:q===2?.2:.34});
+  const swp=j=>{const q=((j-ph)%4+4)%4;return q===0?.1:q===2?.2:.34};path=vit(swp);
+  /* sin lista de la IA: los acordes deben ser del mismo tono. Los que no son del tono cuestan más
+     (solo quedan si de verdad se oyen) y los que casi no suenan se quitan: así no salen F, A o D#m sueltos en una canción en Em */
+  if(al.length<2){const h0=path.filter(q=>q<TP.length).map(q=>TP[q]);
+    if(h0.length>=8){const k0=detectKey(h0),DM=k0.minor?{0:'m',3:'',5:'m',7:'m',8:'',10:''}:{0:'',2:'m',4:'m',5:'',7:'',9:'m'};
+      TP.forEach((p,k)=>{const d=(p.pc-k0.pc+12)%12;BI[k]=DM[d]===p.suf?0:(k0.minor&&d===7&&!p.suf)||(!k0.minor&&d===10&&!p.suf)?.02:.07});
+      path=vit(swp);
+      const cn=new Map;let vo=0;path.forEach(q=>{if(q<TP.length){cn.set(q,(cn.get(q)||0)+1);vo++}});
+      const mn=Math.max(4,vo*.03);let cut=0;cn.forEach((c,q)=>{if(c<mn){BI[q]+=.6;cut++}});if(cut)path=vit(swp)}}
   // cambios de un solo pulso entre dos iguales se quitan (suelen ser notas de paso)
   for(let j=1;j+1<N;j++)if(path[j]!==path[j-1]&&path[j-1]===path[j+1])path[j]=path[j-1];
   // qué tan bien suenan los acordes elegidos (para comparar con otra lista)

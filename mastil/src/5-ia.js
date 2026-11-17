@@ -190,5 +190,18 @@ Acordes: si conoces la canción, usa los que publican los cancioneros para ella 
   }
   const fd=new FormData();fd.append('file',blob,'cancion.'+((blob.type||'').split('/')[1]||'mp3'));fd.append('model','whisper-1');fd.append('response_format','verbose_json');fd.append('timestamp_granularities[]','segment');
   const j=await iaFetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+c.key.trim()},body:fd});
-  return{title:'',artist:'',lines:(j.segments||[]).map(s=>({t:+s.start,text:String(s.text||'').trim(),sec:null})).filter(x=>x.text)};
+  const lines=(j.segments||[]).map(s=>({t:+s.start,e:+s.end,text:String(s.text||'').trim(),cp:'',sec:null})).filter(x=>x.text);
+  let out={title:'',artist:'',key:'',chords:[],lines};
+  // whisper solo oye la letra: con ella, el modelo de texto elegido escribe los acordes como en los cancioneros (si conoce la canción)
+  if(lines.length>=3)try{
+    const t=await iaChat('Eres un músico que escribe hojas de acordes como las de Ultimate Guitar, LaCuerda o Cifra Club. Nunca inventas acordes.',
+      `Esta es la letra transcrita de una grabación, renglón por renglón (i = número de renglón):
+${JSON.stringify(lines.map((x,i)=>({i,text:x.text})))}
+Si reconoces la canción, responde SOLO JSON {"title":"","artist":"","key":"tono, p. ej. G o Em","chords":["los acordes que usa"],"lines":[{"i":número,"sec":"Intro|Verso 1|Coro|Puente…","cp":"el MISMO texto del renglón, sin cambiar ni una letra, con cada acorde entre corchetes justo antes de la sílaba donde cambia, p. ej. [G]Hoy te [D]vi"}]}.
+Usa los acordes de la versión original publicados en los cancioneros, cifrado americano (G Em C D, 7, sus4; /bajo solo si de verdad está), todos del mismo tono y coherentes entre sí.
+Si NO reconoces la canción con seguridad, responde {"chords":[],"lines":[]}: la app sacará los acordes del audio.`);
+    const J=iaJSON(t);if(Array.isArray(J.chords)&&J.chords.length){out.title=J.title||'';out.artist=J.artist||'';out.key=J.key||'';out.chords=J.chords.map(String).slice(0,16);
+      (J.lines||[]).forEach(x=>{const L=lines[+x.i];if(L){L.cp=String(x.cp||'').trim();if(x.sec)L.sec=String(x.sec)}})}
+  }catch(e){}
+  return out;
 }
