@@ -2158,7 +2158,7 @@ function bassAdaptView(v){
 }
 
 /* ---------- información de la beta y reporte sin datos personales ---------- */
-const OM_BETA_VERSION='v20261116203237';
+const OM_BETA_VERSION='v20261116220811';
 let OM_LAST_ERROR='';
 const OM_PREVIOUS_ONERROR=typeof window!=='undefined'?window.onerror:null;
 if(typeof window!=='undefined')window.onerror=function(message,source,line,column,error){
@@ -4218,6 +4218,7 @@ function viewSongEdit(id){
    <p class="cap" id="sbmsg" style="margin:0"></p></div>
   <div class="box"><p class="blockh">Formatos que entiende</p><ul>
    <li><b>Acordes arriba y letra abajo</b>, como en LaCuerda, Cifra Club o Ultimate Guitar. Pégala tal cual.</li>
+   <li><b>¿Ya tienes los acordes y tu audio?</b> Sube primero el PDF (o pega la canción) y luego toca «Crear desde audio» o «Usar mi grabación»: la app deja tus acordes tal cual y solo los acomoda con tu audio.</li>
    <li><b>Acordes entre corchetes</b>: <code>[Sol]Hoy me desperté [Re7]pensando</code>.</li>
    <li>Acordes en <b>Do Re Mi</b> o en <b>C D E</b>, con séptimas, menores, sus, add9 y bajos (<code>G/B</code>).</li>
    <li>Títulos como <code>[Coro]</code>, <code>Verso 1</code> o <code>Intro: G D Em C</code> se marcan solos; las tablaturas se ignoran.</li>
@@ -4243,7 +4244,7 @@ function viewSongEdit(id){
       const src=`{bpm:${E.bpm}}{time:${E.beats}/4}{style:${E.style}}\n`+ta.value.replace(/\{\s*(style|time|bpm|tempo)\s*:[^}]*\}[ \t]*\n?/gi,'');const P=songParse(src);
       if(!P.lines.some(l=>l.pieces&&l.pieces.some(p=>p.text.trim()||p.p))){$('#sbmsg',r).textContent='No encontré letra ni acordes. Revisa lo que pegaste.';return}
       DB.songs=DB.songs||[];const sid=ex&&ex.mine?id:'u'+Date.now().toString(36);
-      const i=DB.songs.findIndex(s=>s.id===sid);if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
+      const i=DB.songs.findIndex(s=>s.id===sid),old=i>=0?DB.songs[i].src:null;if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
       if(E.strum){DB.kai=DB.kai||{};DB.kai[sid]=Object.assign({},DB.kai[sid],{pat:{sub:4,beats:E.beatsPdf||4,tip:'Rasgueo de la hoja de la canción.',secs:{verso:{g:E.strum,b:null,f:1}}},useP:true})}
       const open=()=>{SBTAB='mine';location.hash='#/cancionero/ver/'+sid};
       if(E.audio){DB.kuse=DB.kuse||{};DB.kuse[sid]=true;const rec={blob:E.audio,name:E.audio.name||'grabacion.mp3',type:E.audio.type||'audio/mpeg'};
@@ -4257,6 +4258,13 @@ function viewSongEdit(id){
         else DB.kautosync=sid;
         save();toast(logo()+'<span>Canción guardada con tu audio</span>');
         slowIDB().then(db=>new Promise(res=>{const tx=db.transaction('f','readwrite');tx.objectStore('f').put(rec,'orig:'+sid);tx.oncomplete=res;tx.onerror=res})).catch(()=>{}).then(open);return}
+      /* cambiaste acordes o renglones (p. ej. subiste el PDF) de una canción que ya tiene tu grabación:
+         la sincronización vieja ya no cuadra; se borra y al abrirla se alinean tus acordes nuevos con la grabación */
+      const shape=x=>{const Q=songParse(x);return Q.lines.filter(l=>l.pieces).map(l=>l.pieces.map(pc=>pc.p?pc.p.pc+pc.p.suf:'').join(',')).join(';')};
+      if(old!=null&&shape(old)!==shape(src)){if(DB.ksync)delete DB.ksync[sid];if(DB.ksyncOff)delete DB.ksyncOff[sid];
+        save();slowIDB().then(db=>new Promise(res=>{const tx=db.transaction('f','readwrite'),st=tx.objectStore('f'),q=st.get('orig:'+sid);
+          q.onsuccess=()=>{const rec=q.result;if(rec&&rec.blob){delete rec.pch;delete rec.lend;if(rec.ancs)delete rec.ancs[sid];st.put(rec,'orig:'+sid);DB.kautosync=sid;save()}};tx.oncomplete=res;tx.onerror=res})).catch(()=>{})
+          .then(()=>{toast(logo()+`<span>Canción guardada${DB.kautosync===sid?': la acomodo con tu grabación':''}</span>`);open()});return}
       save();toast(logo()+'<span>Canción guardada</span>');open();
     };
     /* como Moises: de un audio salen el pulso y los acordes (la app sola) y la letra con sus tiempos (la IA);
@@ -4264,6 +4272,12 @@ function viewSongEdit(id){
     const fromAudio=async f=>{const msg=t=>{const m=$('#sbmsg',r);if(m)m.textContent=t};
       try{msg('Escuchando el audio: pulso y acordes…');const{x,xs,sr}=await syncDecode(f);
         const A=await syncAnalyze(x,sr,0,p=>msg(`Escuchando el audio: pulso y acordes… ${Math.round(p*100)} %`),xs);if(!A||A.beats.length<8)throw new Error('No encontré el pulso de este audio.');
+        {const P0=songParse(ta.value),nl=P0.lines.filter(l=>l.pieces&&l.pieces.some(p=>p.text.trim())).length,nc=P0.lines.reduce((a,l)=>a+(l.pieces||[]).filter(p=>p.p).length,0);
+          if(nl>=4&&nc>=6){msg('Acomodando tus acordes con el audio…');await syncIdle();const F=chartFit(A,ta.value);
+            if(F){const times=[];F.P.lines.forEach((L,li)=>{if(L.pieces)times.push(F.R.T[li]==null?null:+(+F.R.T[li]).toFixed(3))});
+              E.sync={mode:'chart',times,ends:times.map(()=>null),grid:F.R.grid,bpm:Math.round(A.bpm),dur:x.length/sr,anc:{a:F.R.anc||[],sig:F.sig}};
+              E.touched={};E.audio=f;prev();E.bpm=Math.round(A.bpm);E.touched.bpm=1;paintOpts();
+              msg(`Listo: usé tus acordes tal cual y los acomodé con tu audio (${Math.round(A.bpm)} bpm). Toca «Guardar y abrir».`);return}}}
         const meta=isTop?{title:ex.top.t,artist:ex.top.a}:{title:(f.name||'Mi canción').replace(/\.[^.]+$/,'')};let lyr=null,why='',allowed=null;
         // primero la IA: letra con tiempos y los acordes que usa la canción; luego el audio elige entre esos acordes
         if(iaHears()){const t0=Date.now(),tk=setInterval(()=>msg(`La IA está sacando la letra y los acordes… ${Math.round((Date.now()-t0)/1000)} s`),1000);msg('La IA está sacando la letra y los acordes…');
@@ -5461,6 +5475,16 @@ function syncAlign(A,TL,bt){
   const L0=TL.lines.find(L=>TL.ev.some(e=>e.type==='lit'&&e.li===L.li));
   if(V&&L0&&SYN.v){const j0=Math.round(gridIdx(grid,T[L0.li]));let bj=-1;for(let d=0;d<=12&&bj<0;d++)for(const j of d?[j0-d,j0+d]:[j0])if(bj<0&&j>=0&&j+1<V.length&&V[j]>=.5&&V[j+1]>=.5&&((V[j-1]??0)+(V[j-2]??0)+(V[j-3]??0))/3<.4)bj=j; // antes, ~3 pulsos sin voz (no una pausa entre sílabas)
     const g=TL.lines.indexOf(L0),nx=TL.lines[g+1]?T[TL.lines[g+1].li]:1e9;if(bj>=0&&grid[bj]<nx-.2)T[L0.li]=+grid[bj].toFixed(3)}
+  /* renglones aplastados: cuando dos renglones seguidos llevan los mismos acordes (Am D | Am D), el DTW puede comerse uno
+     y dejarlo en menos de un segundo. Si un renglón dura menos de la mitad de lo esperado, el tiempo de esa zona
+     (el renglón y sus vecinos con holgura) se reparte en proporción a lo que dura cada renglón en la canción */
+  {const LS=TL.lines,n=LS.length,spb=60/A.bpm,ex0=g=>Math.max(.5,(LS[g+1].start-LS[g].start)*spb),du=g=>T[LS[g+1].li]-T[LS[g].li];
+    // lo esperado se mide contra lo que de verdad duran los renglones en esta grabación (mediana), no en segundos fijos
+    const rs=[];for(let g=0;g+1<n;g++)rs.push(du(g)/ex0(g));rs.sort((a,b)=>a-b);const sc=rs.length?Math.max(.2,rs[rs.length>>1]):1,ex=g=>ex0(g)*sc;
+    for(let g=0;g+1<n;g++){const e=ex(g);if(du(g)>=e*.45)continue;let a=g,b=g+1;const sd=()=>{let d=0,q=0;for(let i=a;i<b;i++){d+=du(i);q+=ex(i)}return[d,q]};
+      while(b-a<8){const[d,q]=sd();if(d>=q*.8)break;const ra=a>0?du(a-1)/ex(a-1):-1,rb=b+1<n?du(b)/ex(b):-1;if(ra<0&&rb<0)break;if(ra>=rb)a--;else b++}
+      const[d,q]=sd();if(d<q*.6)continue;const t0=T[LS[a].li];let acc=0;
+      for(let i=a+1;i<b;i++){acc+=ex(i-1);const t=t0+d*acc/q;T[LS[i].li]=+gridT(grid,Math.round(gridIdx(grid,t))).toFixed(3)}g=b-1}}
   // anclas por acorde: cada cambio de acorde dentro de un renglón, donde de verdad suena (±2 pulsos de lo que dijo el DTW).
   // Con ellas la letra y los acordes siguen a la grabación aunque el renglón dure distinto de lo estimado.
   const anc=[],starts=new Set(TL.lines.map(L=>Math.round(L.start*4)));let pv=null;
@@ -5468,6 +5492,9 @@ function syncAlign(A,TL,bt){
     const bc=Math.round(e.b);if(bc<1||bc>=M)return;const jc=F[bc],df=(j,a,b)=>{let s=0;for(let i=a;i<b;i++)s+=mt(j+i,e.p)-mt(j+i,prev);return s/(b-a)};
     const cw=SYN.cw;let bd=0,bs=df(jc,0,cw)-df(jc,-cw,0);for(let d=-2;d<=2;d++){if(!d)continue;const s=df(jc+d,0,cw)-df(jc+d,-cw,0)-SYN.cp*Math.abs(d);if(s>bs+SYN.cm){bs=s;bd=d}}
     anc.push([+e.b.toFixed(3),+gridT(grid,jc+bd+(e.b-bc)).toFixed(3)])});
+  // un ancla que quedó fuera de su renglón (porque se movió el renglón) ya no sirve
+  {const st=TL.lines.map(L=>[L.start,T[L.li]]);for(let q=anc.length-1;q>=0;q--){const[b,t]=anc[q];let g=-1;for(let i=0;i<st.length;i++)if(st[i][0]<=b+1e-6)g=i;
+    if(g<0)continue;const lo=st[g][1],hi=g+1<st.length?st[g+1][1]:1e9;if(!(t>lo&&t<hi))anc.splice(q,1)}}
   return{T,anc,grid:grid.map(t=>+t.toFixed(3)),voc:V?V.map(v=>+v.toFixed(2)):null,bpm:Math.round(A.bpm),k:best.k,sure,cost:best.cost};
 }
 // posición (en pulsos, con fracción) de un tiempo dentro de la rejilla, y su inversa

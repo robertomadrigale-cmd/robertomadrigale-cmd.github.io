@@ -220,6 +220,16 @@ function syncAlign(A,TL,bt){
   const L0=TL.lines.find(L=>TL.ev.some(e=>e.type==='lit'&&e.li===L.li));
   if(V&&L0&&SYN.v){const j0=Math.round(gridIdx(grid,T[L0.li]));let bj=-1;for(let d=0;d<=12&&bj<0;d++)for(const j of d?[j0-d,j0+d]:[j0])if(bj<0&&j>=0&&j+1<V.length&&V[j]>=.5&&V[j+1]>=.5&&((V[j-1]??0)+(V[j-2]??0)+(V[j-3]??0))/3<.4)bj=j; // antes, ~3 pulsos sin voz (no una pausa entre sílabas)
     const g=TL.lines.indexOf(L0),nx=TL.lines[g+1]?T[TL.lines[g+1].li]:1e9;if(bj>=0&&grid[bj]<nx-.2)T[L0.li]=+grid[bj].toFixed(3)}
+  /* renglones aplastados: cuando dos renglones seguidos llevan los mismos acordes (Am D | Am D), el DTW puede comerse uno
+     y dejarlo en menos de un segundo. Si un renglón dura menos de la mitad de lo esperado, el tiempo de esa zona
+     (el renglón y sus vecinos con holgura) se reparte en proporción a lo que dura cada renglón en la canción */
+  {const LS=TL.lines,n=LS.length,spb=60/A.bpm,ex0=g=>Math.max(.5,(LS[g+1].start-LS[g].start)*spb),du=g=>T[LS[g+1].li]-T[LS[g].li];
+    // lo esperado se mide contra lo que de verdad duran los renglones en esta grabación (mediana), no en segundos fijos
+    const rs=[];for(let g=0;g+1<n;g++)rs.push(du(g)/ex0(g));rs.sort((a,b)=>a-b);const sc=rs.length?Math.max(.2,rs[rs.length>>1]):1,ex=g=>ex0(g)*sc;
+    for(let g=0;g+1<n;g++){const e=ex(g);if(du(g)>=e*.45)continue;let a=g,b=g+1;const sd=()=>{let d=0,q=0;for(let i=a;i<b;i++){d+=du(i);q+=ex(i)}return[d,q]};
+      while(b-a<8){const[d,q]=sd();if(d>=q*.8)break;const ra=a>0?du(a-1)/ex(a-1):-1,rb=b+1<n?du(b)/ex(b):-1;if(ra<0&&rb<0)break;if(ra>=rb)a--;else b++}
+      const[d,q]=sd();if(d<q*.6)continue;const t0=T[LS[a].li];let acc=0;
+      for(let i=a+1;i<b;i++){acc+=ex(i-1);const t=t0+d*acc/q;T[LS[i].li]=+gridT(grid,Math.round(gridIdx(grid,t))).toFixed(3)}g=b-1}}
   // anclas por acorde: cada cambio de acorde dentro de un renglón, donde de verdad suena (±2 pulsos de lo que dijo el DTW).
   // Con ellas la letra y los acordes siguen a la grabación aunque el renglón dure distinto de lo estimado.
   const anc=[],starts=new Set(TL.lines.map(L=>Math.round(L.start*4)));let pv=null;
@@ -227,6 +237,9 @@ function syncAlign(A,TL,bt){
     const bc=Math.round(e.b);if(bc<1||bc>=M)return;const jc=F[bc],df=(j,a,b)=>{let s=0;for(let i=a;i<b;i++)s+=mt(j+i,e.p)-mt(j+i,prev);return s/(b-a)};
     const cw=SYN.cw;let bd=0,bs=df(jc,0,cw)-df(jc,-cw,0);for(let d=-2;d<=2;d++){if(!d)continue;const s=df(jc+d,0,cw)-df(jc+d,-cw,0)-SYN.cp*Math.abs(d);if(s>bs+SYN.cm){bs=s;bd=d}}
     anc.push([+e.b.toFixed(3),+gridT(grid,jc+bd+(e.b-bc)).toFixed(3)])});
+  // un ancla que quedó fuera de su renglón (porque se movió el renglón) ya no sirve
+  {const st=TL.lines.map(L=>[L.start,T[L.li]]);for(let q=anc.length-1;q>=0;q--){const[b,t]=anc[q];let g=-1;for(let i=0;i<st.length;i++)if(st[i][0]<=b+1e-6)g=i;
+    if(g<0)continue;const lo=st[g][1],hi=g+1<st.length?st[g+1][1]:1e9;if(!(t>lo&&t<hi))anc.splice(q,1)}}
   return{T,anc,grid:grid.map(t=>+t.toFixed(3)),voc:V?V.map(v=>+v.toFixed(2)):null,bpm:Math.round(A.bpm),k:best.k,sure,cost:best.cost};
 }
 // posición (en pulsos, con fracción) de un tiempo dentro de la rejilla, y su inversa

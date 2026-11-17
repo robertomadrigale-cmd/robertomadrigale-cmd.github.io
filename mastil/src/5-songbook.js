@@ -459,6 +459,7 @@ function viewSongEdit(id){
    <p class="cap" id="sbmsg" style="margin:0"></p></div>
   <div class="box"><p class="blockh">Formatos que entiende</p><ul>
    <li><b>Acordes arriba y letra abajo</b>, como en LaCuerda, Cifra Club o Ultimate Guitar. Pégala tal cual.</li>
+   <li><b>¿Ya tienes los acordes y tu audio?</b> Sube primero el PDF (o pega la canción) y luego toca «Crear desde audio» o «Usar mi grabación»: la app deja tus acordes tal cual y solo los acomoda con tu audio.</li>
    <li><b>Acordes entre corchetes</b>: <code>[Sol]Hoy me desperté [Re7]pensando</code>.</li>
    <li>Acordes en <b>Do Re Mi</b> o en <b>C D E</b>, con séptimas, menores, sus, add9 y bajos (<code>G/B</code>).</li>
    <li>Títulos como <code>[Coro]</code>, <code>Verso 1</code> o <code>Intro: G D Em C</code> se marcan solos; las tablaturas se ignoran.</li>
@@ -484,7 +485,7 @@ function viewSongEdit(id){
       const src=`{bpm:${E.bpm}}{time:${E.beats}/4}{style:${E.style}}\n`+ta.value.replace(/\{\s*(style|time|bpm|tempo)\s*:[^}]*\}[ \t]*\n?/gi,'');const P=songParse(src);
       if(!P.lines.some(l=>l.pieces&&l.pieces.some(p=>p.text.trim()||p.p))){$('#sbmsg',r).textContent='No encontré letra ni acordes. Revisa lo que pegaste.';return}
       DB.songs=DB.songs||[];const sid=ex&&ex.mine?id:'u'+Date.now().toString(36);
-      const i=DB.songs.findIndex(s=>s.id===sid);if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
+      const i=DB.songs.findIndex(s=>s.id===sid),old=i>=0?DB.songs[i].src:null;if(i>=0)DB.songs[i].src=src;else DB.songs.unshift(Object.assign({id:sid,src},isTop?{top:id}:{}));
       if(E.strum){DB.kai=DB.kai||{};DB.kai[sid]=Object.assign({},DB.kai[sid],{pat:{sub:4,beats:E.beatsPdf||4,tip:'Rasgueo de la hoja de la canción.',secs:{verso:{g:E.strum,b:null,f:1}}},useP:true})}
       const open=()=>{SBTAB='mine';location.hash='#/cancionero/ver/'+sid};
       if(E.audio){DB.kuse=DB.kuse||{};DB.kuse[sid]=true;const rec={blob:E.audio,name:E.audio.name||'grabacion.mp3',type:E.audio.type||'audio/mpeg'};
@@ -498,6 +499,13 @@ function viewSongEdit(id){
         else DB.kautosync=sid;
         save();toast(logo()+'<span>Canción guardada con tu audio</span>');
         slowIDB().then(db=>new Promise(res=>{const tx=db.transaction('f','readwrite');tx.objectStore('f').put(rec,'orig:'+sid);tx.oncomplete=res;tx.onerror=res})).catch(()=>{}).then(open);return}
+      /* cambiaste acordes o renglones (p. ej. subiste el PDF) de una canción que ya tiene tu grabación:
+         la sincronización vieja ya no cuadra; se borra y al abrirla se alinean tus acordes nuevos con la grabación */
+      const shape=x=>{const Q=songParse(x);return Q.lines.filter(l=>l.pieces).map(l=>l.pieces.map(pc=>pc.p?pc.p.pc+pc.p.suf:'').join(',')).join(';')};
+      if(old!=null&&shape(old)!==shape(src)){if(DB.ksync)delete DB.ksync[sid];if(DB.ksyncOff)delete DB.ksyncOff[sid];
+        save();slowIDB().then(db=>new Promise(res=>{const tx=db.transaction('f','readwrite'),st=tx.objectStore('f'),q=st.get('orig:'+sid);
+          q.onsuccess=()=>{const rec=q.result;if(rec&&rec.blob){delete rec.pch;delete rec.lend;if(rec.ancs)delete rec.ancs[sid];st.put(rec,'orig:'+sid);DB.kautosync=sid;save()}};tx.oncomplete=res;tx.onerror=res})).catch(()=>{})
+          .then(()=>{toast(logo()+`<span>Canción guardada${DB.kautosync===sid?': la acomodo con tu grabación':''}</span>`);open()});return}
       save();toast(logo()+'<span>Canción guardada</span>');open();
     };
     /* como Moises: de un audio salen el pulso y los acordes (la app sola) y la letra con sus tiempos (la IA);
@@ -505,6 +513,12 @@ function viewSongEdit(id){
     const fromAudio=async f=>{const msg=t=>{const m=$('#sbmsg',r);if(m)m.textContent=t};
       try{msg('Escuchando el audio: pulso y acordes…');const{x,xs,sr}=await syncDecode(f);
         const A=await syncAnalyze(x,sr,0,p=>msg(`Escuchando el audio: pulso y acordes… ${Math.round(p*100)} %`),xs);if(!A||A.beats.length<8)throw new Error('No encontré el pulso de este audio.');
+        {const P0=songParse(ta.value),nl=P0.lines.filter(l=>l.pieces&&l.pieces.some(p=>p.text.trim())).length,nc=P0.lines.reduce((a,l)=>a+(l.pieces||[]).filter(p=>p.p).length,0);
+          if(nl>=4&&nc>=6){msg('Acomodando tus acordes con el audio…');await syncIdle();const F=chartFit(A,ta.value);
+            if(F){const times=[];F.P.lines.forEach((L,li)=>{if(L.pieces)times.push(F.R.T[li]==null?null:+(+F.R.T[li]).toFixed(3))});
+              E.sync={mode:'chart',times,ends:times.map(()=>null),grid:F.R.grid,bpm:Math.round(A.bpm),dur:x.length/sr,anc:{a:F.R.anc||[],sig:F.sig}};
+              E.touched={};E.audio=f;prev();E.bpm=Math.round(A.bpm);E.touched.bpm=1;paintOpts();
+              msg(`Listo: usé tus acordes tal cual y los acomodé con tu audio (${Math.round(A.bpm)} bpm). Toca «Guardar y abrir».`);return}}}
         const meta=isTop?{title:ex.top.t,artist:ex.top.a}:{title:(f.name||'Mi canción').replace(/\.[^.]+$/,'')};let lyr=null,why='',allowed=null;
         // primero la IA: letra con tiempos y los acordes que usa la canción; luego el audio elige entre esos acordes
         if(iaHears()){const t0=Date.now(),tk=setInterval(()=>msg(`La IA está sacando la letra y los acordes… ${Math.round((Date.now()-t0)/1000)} s`),1000);msg('La IA está sacando la letra y los acordes…');
